@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
-from GeoMultiSens_dev.processing.process_controller import process_controller
+from GeoMultiSens.processing.process_controller import process_controller
 
 
 

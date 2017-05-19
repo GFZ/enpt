@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from GeoMultiSens_dev.misc.logging import GMS_logger
+from GeoMultiSens.misc.logging import GMS_logger
 
 
 # modify the GeoMultiSens logger fit the needs of EnPT
