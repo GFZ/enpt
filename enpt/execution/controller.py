@@ -2,7 +2,7 @@
 
 from ..model.images import EnMAP_L1B
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
-from GeoMultiSens.processing.process_controller import process_controller
+from geomultisens.processing.process_controller import process_controller
 
 
 

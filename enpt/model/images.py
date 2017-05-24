@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from GeoMultiSens.model.dataset import Dataset
-from GeoMultiSens.algorithms.METADATA import METADATA
+from geomultisens.model.dataset import Dataset
+from geomultisens.algorithms.METADATA import METADATA
 
 
 class _EnMAP_Image(Dataset):
