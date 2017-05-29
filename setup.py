@@ -19,7 +19,7 @@ test_requirements = [
 
 setup(
     name='enpt',
-    version='0.1.0',
+    version='0.1.1',
     description="EnMAP PT",
     long_description=readme + '\n\n' + history,
     author="Karl Segl",

@@ -2,7 +2,7 @@
 
 __author__ = """Karl Segl"""
 __email__ = 'segl@gfz-potsdam.de'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 from .enpt import test
 from .enpt import enpt

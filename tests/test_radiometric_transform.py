@@ -19,4 +19,12 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
 
 
     def test_transform_TOARad2TOARef(self):
-        self.RT.transform(self.EIm) # for now only test if its runnable without error
+        # input assertions
+        self.assertIsInstance(self.EIm, EnMAP_L1B)
+
+        # run
+        output = self.RT.transform(self.EIm) # for now only test if its runnable without error
+
+        # output assertions
+        self.assertIsInstance(output, EnMAP_L1B)
+
