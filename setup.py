@@ -24,7 +24,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
     author_email='segl@gfz-potsdam.de',
-    url='https://github.com/audreyr/enpt',
+    url='https://gitext.gfz-potsdam.de/segl/EnPT',
     packages=[
         'enpt',
     ],
