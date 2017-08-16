@@ -52,7 +52,6 @@ lint: ## check style with flake8
 	pycodestyle enpt --exclude="*.ipynb,*.ipynb*" --max-line-length=120 > ./tests/linting/pycodestyle.log
 	pydocstyle enpt > ./tests/linting/pydocstyle.log
 
-	flake8 enpt tests
 
 test: ## run tests quickly with the default Python
 	
