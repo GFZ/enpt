@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
+"""EnPT base module."""
 
 
-class enpt(object):
+class EnPT(object):
+    """EnPT base class; used for all processing related tasks.
+
+    Attributes:
+        None for now, check aggin soon
+
     """
-    enpt base class
-    :param product
-    """    
-    def __init__(product):
-        pass
-    
-    
-    def klaus(self,name):
+
+    def __init__(self, product: str):
+        """Load and hold data needed for processing EnMAP Level-1B data to Level-2A.
+
+        :param product: Path to EnMAP Level-1C product
         """
-        :param name wrer
-        """
         pass
-
-def test(name="klaus"):
-    """
-    :param name string
-    """
-    return name

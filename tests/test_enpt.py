@@ -8,12 +8,8 @@ test_enpt
 Tests for `enpt` module.
 """
 
-
-import sys
 import unittest
-
-from enpt import enpt
-
+# from enpt import enpt
 
 
 class TestEnpt(unittest.TestCase):
