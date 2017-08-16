@@ -1,6 +1,6 @@
 before_script:
   - ls /usr/bin/git*
-  - git lfs pull
+  #- git lfs pull
 
 test_enpt:
   script:
