@@ -16,6 +16,18 @@ test_enpt:
     - tests/linting
 
 
+test_enpt_install:
+  script:
+    - source /root/anaconda3/bin/activate
+    - conda create -y -q --name enpt python=3.5
+    - source activate enpt
+    - make install
+    - cd ..
+    - pwd
+    - ls
+    - python -c "import enpt; print(enpt)"
+
+
 pages:
   stage: deploy
   dependencies:

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -25,9 +26,7 @@ setup(
     author="Karl Segl",
     author_email='segl@gfz-potsdam.de',
     url='https://github.com/audreyr/enpt',
-    packages=[
-        'enpt',
-    ],
+    packages=find_packages(exclude=['tests*']),
     package_dir={'enpt':
                  'enpt'},
     include_package_data=True,
