@@ -26,6 +26,7 @@ test_enpt_install:
     - pwd
     - ls
     - python -c "import enpt; print(enpt)"
+    - python -c "from enpt.io import EnMAPL1BProduct"
 
 
 pages:
