@@ -12,9 +12,12 @@ Contents:
    readme
    installation
    usage
+   modules
    scripts
    contributing
-   authorshistory
+   development
+   authors
+   history
 
 Indices and tables
 ==================

@@ -8,9 +8,7 @@ Please check the documentation_ for usage and in depth information.
 
 Licence
 -------
-* Free software: GNU General Public License v3
-.. * Documentation: https://enpt.readthedocs.io.
-
+Free software: GNU General Public License v3
 
 Features
 --------
