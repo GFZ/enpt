@@ -13,7 +13,7 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
     conda install --yes -c conda-forge gdal ; \
     conda install --yes -c conda-forge 'icu=58.*' lxml ; \
     conda install --yes -c conda-forge glymur ; \
-    pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle; \
+    pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle; "
 
 
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
