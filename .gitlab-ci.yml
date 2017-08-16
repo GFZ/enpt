@@ -1,0 +1,33 @@
+before_script:
+  - git lfs pull
+
+test_enpt:
+  script:
+    - source /root/anaconda3/bin/activate
+    - export GDAL_DATA=/root/anaconda3/share/gdal
+    - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
+    - make lint
+    - make coverage  # test are called here
+    - make docs
+  artifacts:
+    paths:
+    - htmlcov/
+    - docs/_build/html/
+    - tests/linting
+
+
+pages:
+  stage: deploy
+  dependencies:
+    - test_enpt
+  script:
+    - mkdir -p public/coverage
+    - cp -r htmlcov/* public/coverage/
+    - mkdir -p public/doc
+    - cp -r docs/_build/html/* public/doc/
+    - mkdir -p public/linting
+    - cp tests/linting/*.log public/linting
+  artifacts:
+    paths:
+      - public
+    expire_in: 600 days
