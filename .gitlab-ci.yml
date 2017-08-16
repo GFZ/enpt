@@ -21,6 +21,7 @@ test_enpt_install:
     - source /root/anaconda3/bin/activate
     - conda create -y -q --name enpt python=3.5
     - source activate enpt
+    - conda install -c conda-forge git-lfs 
     - make install
     - cd ..
     - pwd
