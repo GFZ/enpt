@@ -1,4 +1,5 @@
 before_script:
+  - ls /usr/bin/git*
   - git lfs pull
 
 test_enpt:
