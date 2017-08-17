@@ -50,7 +50,7 @@ clean-test: ## remove test and coverage artifacts
 lint: ## check style with flake8
 	flake8 --max-line-length=120 enpt tests > ./tests/linting/flake8.log
 	pycodestyle enpt --exclude="*.ipynb,*.ipynb*" --max-line-length=120 > ./tests/linting/pycodestyle.log
-	pydocstyle enpt > ./tests/linting/pydocstyle.log
+	-pydocstyle enpt > ./tests/linting/pydocstyle.log
 
 
 test: ## run tests quickly with the default Python

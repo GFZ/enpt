@@ -1,0 +1,76 @@
+enpt/model/images.py:1 at module level:
+        D100: Missing docstring in public module
+enpt/model/images.py:9 in private method `__init__`:
+        D202: No blank lines allowed after function docstring (found 1)
+enpt/model/images.py:9 in private method `__init__`:
+        D401: First line should be in imperative mood; try rephrasing (found 'This')
+enpt/model/images.py:41 in private method `from_disk`:
+        D401: First line should be in imperative mood ('Fill', not 'Fills')
+enpt/model/images.py:49 in public class `EnMAP_L1B`:
+        D209: Multi-line docstring closing quotes should be on a separate line
+enpt/model/images.py:58 in public class `EnMAP_L2A`:
+        D209: Multi-line docstring closing quotes should be on a separate line
+enpt/model/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/utils/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/utils/logging.py:1 at module level:
+        D100: Missing docstring in public module
+enpt/utils/logging.py:7 in public class `EnPT_logger`:
+        D101: Missing docstring in public class
+enpt/utils/logging.py:9 in public method `__init__`:
+        D202: No blank lines allowed after function docstring (found 1)
+enpt/utils/logging.py:9 in public method `__init__`:
+        D205: 1 blank line required between summary line and description (found 0)
+enpt/utils/logging.py:9 in public method `__init__`:
+        D401: First line should be in imperative mood ('Return', not 'Returns')
+enpt/processors/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/spatial_module/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/spatial_module/spatial_module.py:1 at module level:
+        D205: 1 blank line required between summary line and description (found 0)
+enpt/processors/spatial_transform/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/spatial_transform/spatial_transform.py:1 at module level:
+        D200: One-line docstring should fit on one line with quotes (found 3)
+enpt/processors/cloud_screening/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/spatial_optimization/spatial_optimization.py:1 at module level:
+        D205: 1 blank line required between summary line and description (found 0)
+enpt/processors/spatial_optimization/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/image_correction/image_correction.py:1 at module level:
+        D400: First line should end with a period (not 'n')
+enpt/processors/image_correction/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/radiometric_transform/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/radiometric_transform/radiometric_transform.py:1 at module level:
+        D200: One-line docstring should fit on one line with quotes (found 3)
+enpt/processors/radiometric_transform/radiometric_transform.py:1 at module level:
+        D400: First line should end with a period (not 'e')
+enpt/processors/radiometric_transform/radiometric_transform.py:11 in public class `TOARad2TOARef_Transformer`:
+        D101: Missing docstring in public class
+enpt/processors/radiometric_transform/radiometric_transform.py:13 in public method `__init__`:
+        D202: No blank lines allowed after function docstring (found 1)
+enpt/processors/radiometric_transform/radiometric_transform.py:24 in public method `transform`:
+        D202: No blank lines allowed after function docstring (found 1)
+enpt/processors/dead_pixel_correction/dead_pixel_correction.py:1 at module level:
+        D200: One-line docstring should fit on one line with quotes (found 3)
+enpt/processors/dead_pixel_correction/dead_pixel_correction.py:1 at module level:
+        D400: First line should end with a period (not 'n')
+enpt/processors/dead_pixel_correction/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/processors/atmospheric_correction/atmospheric_correction.py:1 at module level:
+        D200: One-line docstring should fit on one line with quotes (found 3)
+enpt/processors/atmospheric_correction/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/execution/__init__.py:1 at module level:
+        D104: Missing docstring in public package
+enpt/execution/controller.py:9 in public class `EnPT_controller`:
+        D211: No blank lines allowed before class docstring (found 1)
+enpt/execution/controller.py:9 in public class `EnPT_controller`:
+        D400: First line should end with a period (not 'r')
+enpt/execution/controller.py:13 in public method `__init__`:
+        D400: First line should end with a period (not 'r')

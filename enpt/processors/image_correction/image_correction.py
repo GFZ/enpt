@@ -3,7 +3,7 @@
 """
 Image Correction
 
-improves the image quality in case of image striping 
+improves the image quality in case of image striping
 
 
 Input

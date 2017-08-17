@@ -19,10 +19,9 @@ class EnPT_logger(GMS_logger):
         """
 
         super(EnPT_logger, self).__init__(name_logfile,
-                                          fmt_suffix = fmt_suffix,
-                                          path_logfile = path_logfile,
-                                          log_level = log_level,
-                                          append = append)
-
+                                          fmt_suffix=fmt_suffix,
+                                          path_logfile=path_logfile,
+                                          log_level=log_level,
+                                          append=append)
 
     # TODO add origin of errors module.module.submodule to logging format
