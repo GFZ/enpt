@@ -14,11 +14,12 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
     conda install --yes -c conda-forge glymur ; \
     pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 nose-htmloutput coverage rednose; "
 
-# install some libs required for sicor
+# install some libs required for sicor and geomultisens (psycopg2 is pip-installable but pip-setup leads to issues under centos)
 RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
     conda install -y -q -c anaconda hdf5 pytables; \
     conda install -y -q -c conda-forge gdal pygrib h5py; \
-    conda install -y -q -c numba llvmlite; "
+    conda install -y -q -c numba llvmlite; \
+    conda install -y -q -c conda-forge psycopg2 "
 
 # copy sicor and geomultisens code to /tmp
 COPY sicor /tmp/sicor
