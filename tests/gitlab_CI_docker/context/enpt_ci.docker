@@ -9,11 +9,11 @@ RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/archive/$anaconda_
 
 # 'conda install --yes -c conda-forge 'icu=58.*' lxml' fixing a bug for conda-forge gdal build, as of 06/2017
 RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
-    conda install --yes -c anaconda coverage; \
+    conda install --yes -c anaconda; \
     conda install --yes -c conda-forge gdal ; \
     conda install --yes -c conda-forge 'icu=58.*' lxml ; \
     conda install --yes -c conda-forge glymur ; \
-    pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle; "
+    pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 nose-htmloutput coverage rednose; "
 
 # install some libs required for sicor
 RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
