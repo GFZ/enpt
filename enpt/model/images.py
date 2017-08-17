@@ -6,7 +6,7 @@ from geomultisens.model.METADATA import METADATA
 
 class _EnMAP_Image(Dataset):
 
-    def __init__(self, path_image=''):
+    def __init__(self, pathImage=''):
         """This is the base class for all kinds of EnMAP images."""
 
         # get all attributes of base class "Dataset"
@@ -16,9 +16,9 @@ class _EnMAP_Image(Dataset):
         # self.example_attr = 1
 
         # handle initialization arguments
-        if path_image:
+        if pathImage:
             # run the setter for 'arr' of the base class 'Dataset' which creates an Instance of GeoArray
-            self.arr = path_image
+            self.arr = pathImage
 
     @property
     def MetaObj(self):
