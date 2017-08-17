@@ -21,6 +21,10 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
     conda install -y -q -c conda-forge gdal pygrib h5py; \
     conda install -y -q -c numba llvmlite; "
 
+# copy sicor and geomultisens code to /tmp
+COPY sicor /tmp/sicor
+COPY geomultisens /tmp/geomultisens
+
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'
 RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
