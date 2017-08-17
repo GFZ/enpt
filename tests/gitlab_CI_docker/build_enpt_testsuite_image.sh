@@ -5,6 +5,13 @@ dockerfile="enpt_ci.docker"
 tag="enpt_ci:latest"
 gitlab_runner="enpt_gitlab_CI_runner"
 
+# get sicor project # TODO move this to setup.py as soon as package is public
+rm -rf context/sicor
+git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+
+# get GeoMultiSens project # TODO move this to setup.py as soon as package is public
+rm -rf context/geomultisens
+git clone https://gitext.gfz-potsdam.de/danschef/GeoMultiSens.git ./context/geomultisens
 
 echo "#### Build runner docker image"
 sudo docker rmi ${tag}
