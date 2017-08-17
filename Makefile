@@ -101,4 +101,4 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 gitlab_CI_docker:  ## Build a docker image for CI use within gitlab
-	cd ./tests/CI_docker/; bash ./build_enpt_testsuite_image.sh
+	cd ./tests/gitlab_CI_docker/; bash ./build_enpt_testsuite_image.sh
