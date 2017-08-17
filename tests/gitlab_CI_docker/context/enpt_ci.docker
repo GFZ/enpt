@@ -9,7 +9,6 @@ RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/archive/$anaconda_
 
 # 'conda install --yes -c conda-forge 'icu=58.*' lxml' fixing a bug for conda-forge gdal build, as of 06/2017
 RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
-    conda install --yes -c anaconda; \
     conda install --yes -c conda-forge gdal ; \
     conda install --yes -c conda-forge 'icu=58.*' lxml ; \
     conda install --yes -c conda-forge glymur ; \
@@ -23,7 +22,7 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
 
 # copy sicor and geomultisens code to /tmp
 COPY sicor /tmp/sicor
-COPY GeoMultiSens /tmp/GeoMultiSens
+COPY geomultisens /tmp/geomultisens
 
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'
@@ -41,5 +40,5 @@ RUN bash -i -c 'source /root/anaconda3/bin/activate; \
 # install SICOR and GeoMultiSens
 RUN bash -i -c "source /root/anaconda3/bin/activate; \
     cd /tmp/sicor/; make install; \
-    cd /tmp/GeoMultiSens/; python setup.py install; \
+    cd /tmp/geomultisens/; python setup.py install; \
     " # TODO move this to setup.py as soon as the packages are public
