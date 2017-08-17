@@ -17,15 +17,6 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
 
 
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
-# this might work too:
-RUN /bin/bash -i -c "\
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash; \
-yum install -y git-lfs"
-
-# install git lfs
-RUN /bin/bash -i -c "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash"
-
-# installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'
 RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
     tar -zxvf git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
