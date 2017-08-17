@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.0 (2017-03-29)
+0.1.0 (2017-05)
 ------------------
 
-* Package creation.
+* Initial development started.

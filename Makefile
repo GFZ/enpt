@@ -48,7 +48,10 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 enpt tests
+	flake8 --max-line-length=120 enpt tests > ./tests/linting/flake8.log
+	pycodestyle enpt --exclude="*.ipynb,*.ipynb*" --max-line-length=120 > ./tests/linting/pycodestyle.log
+	pydocstyle enpt > ./tests/linting/pydocstyle.log
+
 
 test: ## run tests quickly with the default Python
 	
@@ -71,9 +74,9 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	sphinx-apidoc -o docs/ enpt
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
-	$(MAKE) -C docs latex
-	$(MAKE) -C docs latexpdf
-	$(BROWSER) docs/_build/html/index.html
+	#$(MAKE) -C docs latex
+	#$(MAKE) -C docs latexpdf
+	#$(BROWSER) docs/_build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
@@ -88,4 +91,5 @@ dist: clean ## builds source and wheel package
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
+	pip install -r requirements.txt
 	python setup.py install

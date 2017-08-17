@@ -2,34 +2,27 @@
 EnPT - EnMAP Processing Tools
 ===============================
 
-
-.. #image:: https://img.shields.io/pypi/v/enpt.svg
-        :target: https://pypi.python.org/pypi/enpt
-
-.. #image:: https://img.shields.io/travis/audreyr/enpt.svg
-        :target: https://travis-ci.org/audreyr/enpt
-
-.. #image:: https://readthedocs.org/projects/enpt/badge/?version=latest
-        :target: https://enpt.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-.. #image:: https://pyup.io/repos/github/audreyr/enpt/shield.svg
-     :target: https://pyup.io/repos/github/audreyr/enpt/
-     :alt: Updates
-
 * Project Description (TODO)
 
+Please check the documentation_ for usage and in depth information.
 
 Licence
 -------
-* Free software: GNU General Public License v3
-.. * Documentation: https://enpt.readthedocs.io.
-
+Free software: GNU General Public License v3
 
 Features
 --------
 
 * TODO
+
+Status
+------
+
+.. figure:: https://gitext.gfz-potsdam.de/segl/EnPT/badges/master/build.svg
+.. figure:: https://gitext.gfz-potsdam.de/segl/EnPT/badges/master/coverage.svg
+
+See also the latest coverage_ report.
+
 
 Credits
 ---------
@@ -40,4 +33,5 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-
+.. _documentation: http://segl.gitext.gfz-potsdam.de/EnPT/doc/
+.. _coverage: http://segl.gitext.gfz-potsdam.de/EnPT/coverage/
