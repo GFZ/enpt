@@ -23,7 +23,7 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
 
 # copy sicor and geomultisens code to /tmp
 COPY sicor /tmp/sicor
-COPY geomultisens /tmp/geomultisens
+COPY GeoMultiSens /tmp/GeoMultiSens
 
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'
@@ -41,5 +41,5 @@ RUN bash -i -c 'source /root/anaconda3/bin/activate; \
 # install SICOR and GeoMultiSens
 RUN bash -i -c "source /root/anaconda3/bin/activate; \
     cd /tmp/sicor/; make install; \
-    cd /tmp/geomultisens/; python setup.py install; \
+    cd /tmp/GeoMultiSens/; python setup.py install; \
     " # TODO move this to setup.py as soon as the packages are public
