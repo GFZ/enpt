@@ -7,6 +7,7 @@ from os import path
 import numpy as np
 import spectral
 from scipy.interpolate import interp2d
+import logging
 
 
 class EnMAPL1BProduct(object):
@@ -21,14 +22,16 @@ class EnMAPL1BProduct(object):
 
     """
 
-    def __init__(self, header_fn: str, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def __init__(self, header_fn: str, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4, logger=None):
         """Level-1B product object for EnMAP data.
 
         :param header_fn: Filename of EnMAP Level-1B product XML file
         :param observation_time: datetime of observation time (currently missing in metadata)
         :param lon_lat_smpl: number if sampling points in lon, lat fields fields
         :param nsmile_coef: number of polynomial coefficients for smile
+        :param logger: None or logging instance
         """
+        self.logger = logger or logging.getLogger(__name__)
         self.vnir = SimpleNamespace()
         self.swir = SimpleNamespace()
         self.header_fn = header_fn
@@ -37,6 +40,7 @@ class EnMAPL1BProduct(object):
         xml = ElementTree.parse(self.header_fn).getroot()
 
         for detector, detector_label in zip((self.vnir, self.swir), ("detector1", "detector2")):
+            self.logger.info("Load data for: %s" % detector_label)
             detector.fwhm = np.array(xml.findall("%s/fwhm" % detector_label)[0].text.replace("\n", "").split(),
                                      dtype=np.float)
             detector.wvl_center = np.array(
@@ -80,9 +84,23 @@ class EnMAPL1BProduct(object):
             detector.lats = self.interpolate_corners(*detector.lat_UL_UR_LL_LR, *lon_lat_smpl)
             detector.lons = self.interpolate_corners(*detector.lon_UL_UR_LL_LR, *lon_lat_smpl)
 
-            detector.data_fn = xml.findall("%s/filename" % detector_label)[0].text.split()[0]
-            detector.data = spectral.open_image(path.join(
-                self.root_dir, detector.data_fn.replace(".bsq", ".hdr")))[:, :, :]  # unit of [dn]
+            detector.data_fn = path.join(
+                self.root_dir,  # basedir
+                xml.findall("%s/filename" % detector_label)[0].text.split()[0].replace(".bsq", ".hdr"))  # filename
+
+            detector.data = (detector.l_min + (detector.l_max - detector.l_min) / (2**16-1) *
+                             spectral.open_image(detector.data_fn)[:, :, :])  # radiance
+            detector.snr = self.snr(detector_label, detector.data)
+
+    def snr(self, detector_name: str, data: np.ndarray):
+        """Compute EnMAP snr from radiance data.
+
+        :param data: Numpy array with radiance for scene
+        :param detector_name: Name of the detector
+        """
+        self.logger.info("Compute snr for: %s" % detector_name)
+        self.logger.warning("SNR model missing -> const. value of 500 is returned")
+        return 500 * np.ones(data.shape, dtype=np.float)
 
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
