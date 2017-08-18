@@ -88,6 +88,7 @@ class EnMAPL1BProduct(object):
                 self.root_dir,  # basedir
                 xml.findall("%s/filename" % detector_label)[0].text.split()[0].replace(".bsq", ".hdr"))  # filename
 
+            detector.unit = " ".join(xml.findall("%s/radiance_unit" % detector_label)[0].text.split())
             detector.data = (detector.l_min + (detector.l_max - detector.l_min) / (2**16-1) *
                              spectral.open_image(detector.data_fn)[:, :, :])  # radiance
             detector.snr = self.snr(detector_label, detector.data)
