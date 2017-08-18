@@ -43,7 +43,8 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	coverage erase
+	## don't include coverage lib here because clean-test is also executed during package setup and coverage is only a
+	## test requirement
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
@@ -62,6 +63,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
+	coverage erase
 	coverage run --source enpt setup.py test
 	coverage report -m
 	coverage html
