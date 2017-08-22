@@ -10,7 +10,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy', 'scipy',  # TODO: put package requirements here
+    'numpy', 'scipy', 'spectral'  # put package requirements here
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
@@ -30,8 +30,8 @@ setup(
     install_requires=requirements,
     license="GNU General Public License v3",
     zip_safe=False,
-    scripts = [], # TODO
-    data = [], # TODO
+    scripts=[],  # TODO
+    data=[],  # TODO
     keywords='enpt',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

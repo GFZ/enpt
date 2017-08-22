@@ -7,12 +7,14 @@ test_enpt:
     - export GDAL_DATA=/root/anaconda3/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
     - make lint
-    - make coverage  # test are called here
+    - make nosetests  # test are called here
     - make docs
   artifacts:
     paths:
     - htmlcov/
     - docs/_build/html/
+    - nosetests.html
+    - nosetests.xml
     - tests/linting
 
 
@@ -26,7 +28,7 @@ test_enpt_install:
     - pwd
     - ls
     - python -c "import enpt; print(enpt)"
-    - python -c "from enpt.io import EnMAPL1BProduct"
+    - python -c "from enpt.io import EnMAPL1Product_ImGeo"
 
 
 pages:

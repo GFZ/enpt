@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """EnPT process controller module."""
 
-from ..model.images import EnMAP_L1B
+from ..model.images import EnMAPL1Product_ImGeo
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
 from geomultisens.processing.process_controller import process_controller
 
@@ -18,7 +18,7 @@ class EnPT_controller(process_controller):
         """
         raise NotImplementedError('The process controller is not yet working.')
 
-        self.Images = [EnMAP_L1B, ]
+        self.Images = [EnMAPL1Product_ImGeo, ]
 
     def run_all_processors(self):
         """Run all processors at once."""

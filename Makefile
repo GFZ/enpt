@@ -48,8 +48,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
-	# rm -fr nosetests.html
-	# rm -fr nosetests.xml
+	rm -fr nosetests.html
+	rm -fr nosetests.xml
 
 lint: ## check style with flake8
 	flake8 --max-line-length=120 enpt tests > ./tests/linting/flake8.log
