@@ -10,7 +10,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy', 'scipy', 'spectral'  # put package requirements here
+    'numpy', 'scipy', 'spectral', 'geoarray'  # put package requirements here
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']

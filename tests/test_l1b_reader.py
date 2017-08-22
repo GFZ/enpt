@@ -40,7 +40,6 @@ class Test_L1B_Reader(unittest.TestCase):
                     root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
                     L1_obj = L1B_Reader(**self.user_config)\
                         .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
-                    L1_obj.vnir.arr.show()
 
             self.assertIsInstance(L1_obj, EnMAPL1Product_ImGeo)
 

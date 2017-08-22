@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+import logging
 
 from ..model.images import EnMAPL1Product_ImGeo
 from ..model.metadata import EnMAP_Metadata_ImGeo
@@ -9,7 +10,8 @@ from ..model.metadata import EnMAP_Metadata_ImGeo
 class L1B_Reader(object):
     """Reader for EnMAP Level-1B products."""
 
-    def __init__(self, **user_inputs):
+    def __init__(self, logger=None, **user_inputs):
+        self.logger = logger or logging.getLogger(__name__)
         self.cfg = user_inputs
 
     @staticmethod
@@ -33,14 +35,14 @@ class L1B_Reader(object):
         # call L1_obj.vnir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
         L1_obj.vnir.arr = L1_obj.paths.vnir.imagedata
         L1_obj.vnir.mask_clouds = L1_obj.paths.vnir.mask_clouds
-        L1_obj.vnir.mask_nodata = L1_obj.paths.vnir.deadpixelmap
+        L1_obj.vnir.deadpixelmap = L1_obj.paths.vnir.deadpixelmap
         L1_obj.vnir.meta = L1_obj.meta.vnir
 
         # read SWIR data
         # call L1_obj.swir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
         L1_obj.swir.arr = L1_obj.paths.swir.imagedata
         L1_obj.swir.mask_clouds = L1_obj.paths.swir.mask_clouds
-        L1_obj.swir.mask_nodata = L1_obj.paths.swir.deadpixelmap
+        L1_obj.swir.deadpixelmap = L1_obj.paths.swir.deadpixelmap
         L1_obj.swir.meta = L1_obj.meta.swir
 
         # compute radiance and calculate snr
