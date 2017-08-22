@@ -27,7 +27,7 @@ class EnMAPL1BProduct(object):
 
         :param header_fn: Filename of EnMAP Level-1B product XML file
         :param observation_time: datetime of observation time (currently missing in metadata)
-        :param lon_lat_smpl: number if sampling points in lon, lat fields fields
+        :param lon_lat_smpl: number if sampling points in lon, lat fields
         :param nsmile_coef: number of polynomial coefficients for smile
         :param logger: None or logging instance
         """
