@@ -20,7 +20,8 @@ class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class.."""
 
     def setUp(self):
-        pass
+        self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
+        self.user_config = dict()
 
     def tearDown(self):
         pass
@@ -29,21 +30,19 @@ class Test_L1B_Reader(unittest.TestCase):
         from enpt.io.l1b_reader import L1B_Reader
         from enpt.model.images import EnMAPL1Product_ImGeo
 
-        user_config = dict()
-
         print("Test reading EnMAP Level-1B products")
-        for l1b_file in glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip")):
+        for l1b_file in self.pathList_testimages:
             with tempfile.TemporaryDirectory() as tmpdir:
                 print("Tmp dir: %s" % tmpdir)
                 with zipfile.ZipFile(l1b_file, "r") as zf:
                     zf.extractall(tmpdir)
 
                     root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
-                    L1B_obj = L1B_Reader(**user_config)\
+                    L1_obj = L1B_Reader(**self.user_config)\
                         .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
-                    L1B_obj.vnir.arr.show()
+                    L1_obj.vnir.arr.show()
 
-            self.assertIsInstance(L1B_obj, EnMAPL1Product_ImGeo)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_ImGeo)
 
 
 if __name__ == "__main__":

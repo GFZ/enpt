@@ -23,7 +23,7 @@ class L1B_Reader(object):
         :return: instance of EnMAPL1Product_MapGeo
         """
         # get a new instance of EnMAPL1Product_MapGeo
-        L1_obj = EnMAPL1Product_ImGeo(root_dir, observation_time)
+        L1_obj = EnMAPL1Product_ImGeo(root_dir)
 
         # read metadata
         L1_obj.meta = EnMAP_Metadata_ImGeo(L1_obj.paths.metaxml)
@@ -44,7 +44,7 @@ class L1B_Reader(object):
         L1_obj.swir.meta = L1_obj.meta.swir
 
         # compute radiance and calculate snr
-        L1_obj.DN2Radiance()
+        L1_obj.DN2TOARadiance()
         L1_obj.vnir.meta.calc_snr(data=L1_obj.vnir.arr)
         L1_obj.swir.meta.calc_snr(data=L1_obj.swir.arr)
 

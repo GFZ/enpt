@@ -88,7 +88,8 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
              for corner in ("UL", "UR", "LL", "LR")]
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
-        self.unit = 'digital numbers'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
+        self.unit = 'none'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
+        self.unitcode = 'DN'
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.

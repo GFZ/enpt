@@ -57,10 +57,12 @@ class _EnMAP_Detector_ImGeo(_EnMAP_Image):
 
         return paths
 
-    def DN2Radiance(self):
+    def DN2TOARadiance(self):
+        # TODO move to processors.radiometric_transform?
         self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
         self.arr = (self.meta.l_min + (self.meta.l_max - self.meta.l_min) / (2 ** 16 - 1) * self.arr[:])
-        self.meta.unit = "radiance"
+        self.meta.unit = "mW m^-2 sr^-1 nm^-1"
+        self.meta.unitcode = "TOARad"
 
 
 class _EnMAP_Detector_MapGeo(_EnMAP_Image):
@@ -138,9 +140,9 @@ class EnMAPL1Product_ImGeo(object):
 
         return paths
 
-    def DN2Radiance(self):
-        self.vnir.DN2Radiance()
-        self.swir.DN2Radiance()
+    def DN2TOARadiance(self):
+        self.vnir.DN2TOARadiance()
+        self.swir.DN2TOARadiance()
 
 
 ####################################
@@ -149,33 +151,20 @@ class EnMAPL1Product_ImGeo(object):
 
 
 class EnMAP_VNIR_MapGeo(_EnMAP_Detector_MapGeo):
+    """This class represents an EnPT EnMAP VNIR image in map geometry including all metadata and associated aux-data
+    (masks, DEM, etc.).
+
+    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
+    All VNIR_MapGeo specific modifications are to be implemented here."""
     def __init__(self, logger=None):
         super(EnMAP_VNIR_MapGeo, self).__init__('VNIR', logger=logger)
 
 
 class EnMAP_SWIR_MapGeo(_EnMAP_Detector_MapGeo):
+    """This class represents an EnPT EnMAP SWIR image in map geometry including all metadata and associated aux-data
+    (masks, DEM, etc.).
+
+    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
+    All SWIR_MapGeo specific modifications are to be implemented here."""
     def __init__(self, logger=None):
         super(EnMAP_SWIR_MapGeo, self).__init__('SWIR', logger=logger)
-
-
-####################
-# DEPRECATED CLASSES
-####################
-
-
-class EnMAP_L1B(_EnMAP_Image):
-    """This class represents an EnMAP L1B image including all metadata and associated aux-data (masks, DEM, etc.).
-
-    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Image class.
-    L1B specific modifications are to be implemented here."""
-
-    pass
-
-
-class EnMAP_L2A(_EnMAP_Image):
-    """This class represents an EnMAP L2A image including all metadata and associated aux-data (masks, DEM, etc.).
-
-    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Image class.
-    L2A specific modifications are to be implemented here."""
-
-    pass
