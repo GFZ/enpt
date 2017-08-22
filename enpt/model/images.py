@@ -15,7 +15,6 @@ from ..model.metadata import EnMAP_Metadata_ImGeo, EnMAP_Metadata_VNIR_ImGeo, En
 
 
 class _EnMAP_Image(Dataset):
-
     def __init__(self):
         """This is the base class for all kinds of EnMAP images."""
 

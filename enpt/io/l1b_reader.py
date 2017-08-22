@@ -27,7 +27,7 @@ class L1B_Reader(object):
 
         # read metadata
         L1_obj.meta = EnMAP_Metadata_ImGeo(L1_obj.paths.metaxml)
-        L1_obj.meta.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
+        L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
         # read VNIR data
         # call L1_obj.vnir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class

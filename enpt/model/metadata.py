@@ -5,17 +5,14 @@ from xml.etree import ElementTree
 import logging
 import numpy as np
 from scipy.interpolate import interp2d
-from types import GeneratorType
 
 L1B_product_props = dict(
     xml_detector_label=dict(
         VNIR='detector1',
-        SWIR='detector2'
-    ),
+        SWIR='detector2'),
     fn_detector_suffix=dict(
         VNIR='D1',
-        SWIR='D2'
-)
+        SWIR='D2')
 )
 
 
@@ -50,8 +47,8 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
         self.mu_sun = None  # type: float  # earth-sun distance # TODO doc correct?
-        self.lat_UL_UR_LL_LR = None  # type:  GeneratorType  # latitude coordinates for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR = None  # type:  GeneratorType  # longitude coordinates for UL, UR, LL, LR
+        self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
         self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
         self.unit = ''  # type: str  # radiometric unit of pixel values
@@ -77,18 +74,18 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
         self.geom_view_zenith = np.float(
             xml.findall("%s/observation_geometry/zenith_angle" % lbl)[0].text.split()[0])
         self.geom_view_azimuth = np.float(
-            xml.findall("%s/observation_geometry/zenith_angle" % lbl)[0].text.split()[0])
+            xml.findall("%s/observation_geometry/azimuth_angle" % lbl)[0].text.split()[0])
         self.geom_sun_zenith = np.float(
             xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
-        self.geom_sun_zenith = np.float(
-            xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
+        self.geom_sun_azimuth = np.float(
+            xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
         self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.lat_UL_UR_LL_LR = \
-            (float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
-             for corner in ("UL", "UR", "LL", "LR"))
+            [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
+             for corner in ("UL", "UR", "LL", "LR")]
         self.lon_UL_UR_LL_LR = \
-            (float(xml.findall("%s/geometry/bounding_box/%s_easting" % (lbl, corner))[0].text.split()[0])
-             for corner in ("UL", "UR", "LL", "LR"))
+            [float(xml.findall("%s/geometry/bounding_box/%s_easting" % (lbl, corner))[0].text.split()[0])
+             for corner in ("UL", "UR", "LL", "LR")]
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
         self.unit = 'digital numbers'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
@@ -137,21 +134,21 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
 class EnMAP_Metadata_ImGeo(object):
     def __init__(self, path_metaxml, logger=None):
         self.logger = logger or logging.getLogger()
-        self.path_xml = path_metaxml
+        self._path_xml = path_metaxml
 
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
         self.vnir = None  # type: EnMAP_Metadata_VNIR_ImGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_SWIR_ImGeo # metadata of SWIR only
 
-    def read_common_meta(self, observation_time:datetime=None):
+    def read_common_meta(self, observation_time: datetime=None):
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
 
-    def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
-        self.read_common_meta()
-        self.vnir = EnMAP_Metadata_VNIR_ImGeo(self.path_xml)
+    def read_metadata(self, observation_time: datetime=None, lon_lat_smpl=(15, 15), nsmile_coef=4):
+        self.read_common_meta(observation_time)
+        self.vnir = EnMAP_Metadata_VNIR_ImGeo(self._path_xml)
         self.vnir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-        self.swir = EnMAP_Metadata_SWIR_ImGeo(self.path_xml)
+        self.swir = EnMAP_Metadata_SWIR_ImGeo(self._path_xml)
         self.swir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
@@ -159,32 +156,21 @@ class EnMAP_Metadata_VNIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
         super(EnMAP_Metadata_VNIR_ImGeo, self).__init__('VNIR', logger=logger)
-        self.path_xml = path_metaxml
+        self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['VNIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
         super(EnMAP_Metadata_VNIR_ImGeo, self)\
-            ._read_metadata(self.path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
+            ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
 class EnMAP_Metadata_SWIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
-        super(EnMAP_Metadata_SWIR_ImGeo, self).__init__('VNIR', logger=logger)
-        self.path_xml = path_metaxml
+        super(EnMAP_Metadata_SWIR_ImGeo, self).__init__('SWIR', logger=logger)
+        self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['SWIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
         super(EnMAP_Metadata_SWIR_ImGeo, self)\
-            ._read_metadata(self.path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-
-
-
-
-
-
-
-
-
-
-
+            ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
