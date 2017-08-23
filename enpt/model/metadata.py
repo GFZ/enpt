@@ -22,7 +22,14 @@ L1B_product_props = dict(
 
 
 class _EnMAP_Metadata_Detector_ImGeo(object):
-    def __init__(self, detector_name: str, logger=None):
+    """Base class for all EnMAP metadata associated with a single EnMAP detector in image geometry.
+
+    NOTE:
+        - All metadata that have VNIR and SWIR detector in image geometry in common should be included here.
+        - All classes representing VNIR or SWIR specific metadata should inherit from _EnMAP_Metadata_Detector_ImGeo.
+
+    """
+    def __init__(self, detector_name: str, logger: logging.Logger=None):
         """
 
         :param detector_name: Name of the detector (VNIR or SWIR)
@@ -55,6 +62,13 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
         self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
 
     def _read_metadata(self, path_xml, detector_label_xml, lon_lat_smpl=(15, 15), nsmile_coef=4):
+        """Read the metadata of a specific EnMAP detector in image geometry.
+
+        :param path_xml:  file path of the metadata XML file
+        :param detector_label_xml:
+        :param lon_lat_smpl:  number if sampling points in lon, lat fields
+        :param nsmile_coef:  number of polynomial coefficients for smile
+        """
         xml = ElementTree.parse(path_xml).getroot()
         lbl = detector_label_xml
         self.logger.info("Load data for: %s" % lbl)
@@ -133,10 +147,20 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
 
 
 class EnMAP_Metadata_ImGeo(object):
+    """EnMAP Metadata class holding the metadata of the complete EnMAP product in image geometry
+    including VNIR and SWIR detector.
+
+    Attributes:
+        - logger(logging.Logger):  None or logging instance
+        - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
+        - vnir(EnMAP_Metadata_VNIR_ImGeo)
+        - swir(EnMAP_Metadata_SWIR_ImGeo)
+    """
     def __init__(self, path_metaxml, logger=None):
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
 
+        # defaults
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
         self.vnir = None  # type: EnMAP_Metadata_VNIR_ImGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_SWIR_ImGeo # metadata of SWIR only
@@ -154,6 +178,11 @@ class EnMAP_Metadata_ImGeo(object):
 
 
 class EnMAP_Metadata_VNIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
+    """EnMAP Metadata class holding the metadata of the VNIR detector in image geometry.
+
+    NOTE:
+        - inherits all attributes from base class _EnMAP_Metadata_Detector_ImGeo.
+    """
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
         super(EnMAP_Metadata_VNIR_ImGeo, self).__init__('VNIR', logger=logger)
@@ -166,6 +195,11 @@ class EnMAP_Metadata_VNIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
 
 
 class EnMAP_Metadata_SWIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
+    """EnMAP Metadata class holding the metadata of the SWIR detector in image geometry.
+
+    NOTE:
+        - inherits all attributes from base class _EnMAP_Metadata_Detector_ImGeo.
+    """
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
         super(EnMAP_Metadata_SWIR_ImGeo, self).__init__('SWIR', logger=logger)
@@ -173,5 +207,11 @@ class EnMAP_Metadata_SWIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
         self.detector_label = L1B_product_props['xml_detector_label']['SWIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
+        """Read the metadata of the SWIR detector in image geometry.
+
+        :param lon_lat_smpl: number if sampling points in lon, lat fields
+        :param nsmile_coef: number of polynomial coefficients for smile
+        :return:
+        """
         super(EnMAP_Metadata_SWIR_ImGeo, self)\
             ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)

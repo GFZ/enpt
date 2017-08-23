@@ -25,11 +25,11 @@ class EnMAPL1BProduct(object):
     def __init__(self, header_fn: str, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4, logger=None):
         """Level-1B product object for EnMAP data.
 
-        :param header_fn: Filename of EnMAP Level-1B product XML file
-        :param observation_time: datetime of observation time (currently missing in metadata)
-        :param lon_lat_smpl: number if sampling points in lon, lat fields
-        :param nsmile_coef: number of polynomial coefficients for smile
-        :param logger: None or logging instance
+        :param header_fn:  Filename of EnMAP Level-1B product XML file
+        :param observation_time:  datetime of observation time (currently missing in metadata)
+        :param lon_lat_smpl:  number if sampling points in lon, lat fields
+        :param nsmile_coef:  number of polynomial coefficients for smile
+        :param logger:  None or logging instance
         """
         self.logger = logger or logging.getLogger(__name__)
         self.vnir = SimpleNamespace()
