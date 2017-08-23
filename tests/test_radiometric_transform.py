@@ -20,7 +20,7 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
         self.RT = TOARad2TOARef_Transformer(None, None)
 
     def test_transform_TOARad2TOARef(self):
-        from enpt.io.l1b_reader import L1B_Reader
+        from enpt.io.reader import L1B_Reader
         from enpt.model.images import EnMAPL1Product_SensorGeo
 
         for l1b_file in self.pathList_testimages:

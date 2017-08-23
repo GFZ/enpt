@@ -27,7 +27,7 @@ class Test_L1B_Reader(unittest.TestCase):
         pass
 
     def test_read_inputdata(self):
-        from enpt.io.l1b_reader import L1B_Reader
+        from enpt.io.reader import L1B_Reader
         from enpt.model.images import EnMAPL1Product_SensorGeo
 
         print("Test reading EnMAP Level-1B products")

@@ -1,12 +1,12 @@
-enpt/io/l1b_reader.py:1 at module level:
+enpt/io/reader.py:1 at module level:
         D100: Missing docstring in public module
-enpt/io/l1b_reader.py:13 in public method `__init__`:
+enpt/io/reader.py:13 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/io/l1b_reader.py:18 in public method `read_inputdata`:
+enpt/io/reader.py:18 in public method `read_inputdata`:
         D400: First line should end with a period (not 'a')
-enpt/io/l1b_reader.py:56 in public method `validate_input`:
+enpt/io/reader.py:56 in public method `validate_input`:
         D102: Missing docstring in public method
-enpt/io/l1b_reader.py:59 in public method `validate_output`:
+enpt/io/reader.py:59 in public method `validate_output`:
         D102: Missing docstring in public method
 enpt/model/images.py:1 at module level:
         D100: Missing docstring in public module
@@ -62,9 +62,9 @@ enpt/model/images.py:365 in private method `calc_mask_nodata`:
         D400: First line should end with a period (not ')')
 enpt/model/images.py:365 in private method `calc_mask_nodata`:
         D401: First line should be in imperative mood ('Calculate', not 'Calculates')
-enpt/model/images.py:381 in private class `_EnMAP_Detector_ImGeo`:
+enpt/model/images.py:381 in private class `_EnMAP_Detector_SensorGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:381 in private class `_EnMAP_Detector_ImGeo`:
+enpt/model/images.py:381 in private class `_EnMAP_Detector_SensorGeo`:
         D400: First line should end with a period (not 'm')
 enpt/model/images.py:395 in private method `__init__`:
         D400: First line should end with a period (not 'o')
@@ -80,75 +80,75 @@ enpt/model/images.py:450 in private class `_EnMAP_Detector_MapGeo`:
         D400: First line should end with a period (not 'm')
 enpt/model/images.py:463 in private method `__init__`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:481 in public class `EnMAP_VNIR_ImGeo`:
+enpt/model/images.py:481 in public class `EnMAP_VNIR_SensorGeo`:
         D101: Missing docstring in public class
-enpt/model/images.py:491 in public class `EnMAP_SWIR_ImGeo`:
+enpt/model/images.py:491 in public class `EnMAP_SWIR_SensorGeo`:
         D101: Missing docstring in public class
-enpt/model/images.py:501 in public class `EnMAPL1Product_ImGeo`:
+enpt/model/images.py:501 in public class `EnMAPL1Product_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:501 in public class `EnMAPL1Product_ImGeo`:
+enpt/model/images.py:501 in public class `EnMAPL1Product_SensorGeo`:
         D400: First line should end with a period (not 'y')
-enpt/model/images.py:537 in public method `DN2TOARadiance`:
+enpt/model/images.py:538 in public method `DN2TOARadiance`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:537 in public method `DN2TOARadiance`:
+enpt/model/images.py:538 in public method `DN2TOARadiance`:
         D400: First line should end with a period (not 'e')
-enpt/model/images.py:552 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:552 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:552 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
         D209: Multi-line docstring closing quotes should be on a separate line
-enpt/model/images.py:552 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
         D400: First line should end with a period (not 'a')
-enpt/model/images.py:558 in public method `__init__`:
+enpt/model/images.py:559 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/model/images.py:562 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:562 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:562 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
         D209: Multi-line docstring closing quotes should be on a separate line
-enpt/model/images.py:562 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
         D400: First line should end with a period (not 'a')
-enpt/model/images.py:568 in public method `__init__`:
+enpt/model/images.py:569 in public method `__init__`:
         D102: Missing docstring in public method
 enpt/model/__init__.py:1 at module level:
         D104: Missing docstring in public package
 enpt/model/metadata.py:1 at module level:
         D100: Missing docstring in public module
-enpt/model/metadata.py:24 in private class `_EnMAP_Metadata_Detector_ImGeo`:
+enpt/model/metadata.py:24 in private class `_EnMAP_Metadata_Detector_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/metadata.py:32 in private method `__init__`:
+enpt/model/metadata.py:33 in private method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:32 in private method `__init__`:
+enpt/model/metadata.py:33 in private method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:32 in private method `__init__`:
+enpt/model/metadata.py:33 in private method `__init__`:
         D400: First line should end with a period (not ')')
-enpt/model/metadata.py:108 in private method `calc_smile`:
+enpt/model/metadata.py:109 in private method `calc_smile`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:149 in public class `EnMAP_Metadata_ImGeo`:
+enpt/model/metadata.py:150 in public class `EnMAP_Metadata_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/metadata.py:149 in public class `EnMAP_Metadata_ImGeo`:
+enpt/model/metadata.py:150 in public class `EnMAP_Metadata_SensorGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:149 in public class `EnMAP_Metadata_ImGeo`:
+enpt/model/metadata.py:150 in public class `EnMAP_Metadata_SensorGeo`:
         D400: First line should end with a period (not 'y')
-enpt/model/metadata.py:149 in public class `EnMAP_Metadata_ImGeo`:
+enpt/model/metadata.py:150 in public class `EnMAP_Metadata_SensorGeo`:
         D413: Missing blank line after last section ('Attributes')
-enpt/model/metadata.py:159 in public method `__init__`:
+enpt/model/metadata.py:160 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:168 in public method `read_common_meta`:
+enpt/model/metadata.py:170 in public method `read_common_meta`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:172 in public method `read_metadata`:
+enpt/model/metadata.py:174 in public method `read_metadata`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:180 in public class `EnMAP_Metadata_VNIR_ImGeo`:
+enpt/model/metadata.py:182 in public class `EnMAP_Metadata_VNIR_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/metadata.py:186 in public method `__init__`:
+enpt/model/metadata.py:188 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:192 in public method `read_metadata`:
+enpt/model/metadata.py:194 in public method `read_metadata`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:197 in public class `EnMAP_Metadata_SWIR_ImGeo`:
+enpt/model/metadata.py:199 in public class `EnMAP_Metadata_SWIR_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/metadata.py:203 in public method `__init__`:
+enpt/model/metadata.py:205 in public method `__init__`:
         D102: Missing docstring in public method
 enpt/utils/path_generator.py:1 at module level:
         D100: Missing docstring in public module
