@@ -14,17 +14,6 @@ RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
     conda install --yes -c conda-forge glymur ; \
     pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 nose-htmloutput coverage rednose; "
 
-# install some libs required for sicor and geomultisens (psycopg2 is pip-installable but pip-setup leads to issues under centos)
-RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
-    conda install -y -q -c anaconda hdf5 pytables; \
-    conda install -y -q -c conda-forge gdal pygrib h5py; \
-    conda install -y -q -c numba llvmlite; \
-    conda install -y -q -c conda-forge psycopg2 "
-
-# copy sicor and geomultisens code to /tmp
-COPY sicor /tmp/sicor
-COPY geomultisens /tmp/geomultisens
-
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'
 RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
@@ -37,9 +26,3 @@ RUN bash -i -c 'source /root/anaconda3/bin/activate; \
     sed -i "/backend      : tkagg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())"); \
     sed -i "/backend      : Qt4Agg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())"); \
     sed -i "/backend      : qt5agg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())")'
-
-# install SICOR and GeoMultiSens
-RUN bash -i -c "source /root/anaconda3/bin/activate; \
-    cd /tmp/sicor/; make install; \
-    cd /tmp/geomultisens/; python setup.py install; \
-    " # TODO move this to setup.py as soon as the packages are public

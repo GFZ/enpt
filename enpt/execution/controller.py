@@ -3,10 +3,9 @@
 
 from ..model.images import EnMAPL1Product_ImGeo
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
-from geomultisens.processing.process_controller import process_controller
 
 
-class EnPT_controller(process_controller):
+class EnPT_controller(object):
 
     """Class of EnPT process controller"""
 
