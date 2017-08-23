@@ -7,6 +7,7 @@ import numpy as np
 from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.path_generator import PathGenL1BProduct
+from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_ImGeo, EnMAP_Metadata_VNIR_ImGeo, EnMAP_Metadata_SWIR_ImGeo
 
 
@@ -16,9 +17,28 @@ from ..model.metadata import EnMAP_Metadata_ImGeo, EnMAP_Metadata_VNIR_ImGeo, En
 
 
 class _EnMAP_Image(object):
-    def __init__(self):
-        """This is the base class for all kinds of EnMAP images."""
+    """EnPT base class for all kinds of EnMAP images.
 
+    NOTE:
+        - Basic functionality that all EnMAP image objects have in common is to be implemented here.
+        - All EnMAP image classes should (directly or indirectly) inherit from _EnMAP_image.
+
+    Attributes:
+        - to be listed here. Check help(_EnMAP_image) in the meanwhile!
+
+    """
+
+    def __init__(self):
+        """Load and hold data needed for processing EnMAP Level-1B data to Level-2A.
+
+        Intended usage:
+            - only to be used as a base class to be inherited from!
+            - Example:
+                class EnMAP_Image_Subclass(_EnMAP_Image):
+                    def __init__(self):
+                        super(EnMAP_Image_Subclass, self).__init__()
+
+        """
         # get all attributes of base class "Dataset"
         super(_EnMAP_Image, self).__init__()
 
@@ -43,18 +63,34 @@ class _EnMAP_Image(object):
 
     @property
     def logger(self):
+        """Get a an instance of enpt.utils.logging.EnPT_Logger!
+
+        NOTE:
+            - The logging level will be set according to the user inputs of EnPT.
+            - The path of the log file is directly derived from the attributes of the _EnMAP_Image instance.
+
+        Usage:
+            - get the logger:
+                logger = self.logger
+            - set the logger
+                self.logger = logging.getLogger()  # NOTE: only instances of logging.Logger are allowed here
+            - delete the logger:
+                del self.logger  # or "self.logger = None"
+
+        :return: EnPT_Logger instance
+        """
         if self._logger and self._logger.handlers[:]:
             return self._logger
         else:
-            self._logger = logging.getLogger()
-            # DatasetLogger('log__' + self.baseN, fmt_suffix=self.scene_ID, path_logfile=self.path_logfile,
-            #                          log_level='INFO', append=True)
+            self._logger = EnPT_Logger('log__' + self.basename, fmt_suffix=None, path_logfile='',
+                                       log_level='INFO', append=True)  # TODO revise the logger
+
             return self._logger
 
     @logger.setter
-    def logger(self, logger):
+    def logger(self, logger: logging.Logger):
         assert isinstance(logger, logging.Logger) or logger in ['not set', None], \
-            "GMS_obj.logger can not be set to %s." % logger
+            "_EnMAP_Image.logger can not be set to %s." % logger
 
         # save prior logs
         # if logger is None and self._logger is not None:
@@ -63,7 +99,9 @@ class _EnMAP_Image(object):
 
     @property  # FIXME does not work yet
     def log(self):
-        """Returns a string of all logged messages until now."""
+        """Returns a string of all logged messages until now.
+
+        NOTE: self.log can also be set to a string."""
 
         return self._log
 
@@ -73,12 +111,54 @@ class _EnMAP_Image(object):
         self._log = string
 
     @property
-    def arr(self):
+    def data(self):
+        """Returns an instance of geoarray.GeoArray representing the actual EnMAP image data, bundled with all the
+        corresponding metadata:
+
+        Attributes and functions (most important; for a full list check help(self.data)!):
+            - ALL attributes of numpy.ndarray!
+            - is_inmem(bool):
+                True if the image data are completely loaded into memory; False if GeoArray only holds a link to a file
+                on disk.
+            - arr: np.ndarray holding the pixel values (if is_mem is True)
+            - rows(int)
+            - cols(int)
+            - bands(int)
+            - shape(tuple)
+            - gt(list):  GDAL geotransform: contains the geocoding
+            - prj(str): WKT projection string
+            - show(*args, **kwargs):  plot the image
+            - show_map(*args, **kwargs):  plot a map of the image (based on Basemap library)
+            - reproject_to_new_grid(*args, **kwargs)
+
+        Usage (there will soon be detailed instructions on usage at https://gitext.gfz-potsdam.de/danschef/geoarray):
+
+            - Use self.data like a normal numpy.ndarray!
+                - NOTE: Operators like *, /, + , - will soon be implemented. In the meanwhile use:
+                    result = self.data[:] *10
+
+            - How to set self.data?
+                - Link an image file to self.data -> all raster data is read into memory ON DEMAND:
+                    self.data = '/path/to/image.tif'  # sets self.data to GeoArray('/path/to/image.tif')
+
+                - Link a numpy.ndarray instance with self.data (remaining attributes like geocoding, projection, etc.
+                    are copied from the previous self.data attribute.
+                    self.data = numpy.array([[1,2,3],[4,5,6]])
+
+                - Set self.data to an existing instance of GeoArray
+                    (allows to set specific attributes of GeoArray by yourself)
+                    self.data = GeoArray('/path/to/image.tif', geotransform=[...], projection='WKTString')
+
+            - Delete self.data:
+                del self.data or 'self.data = None'
+
+        :return:    instance of geoarray.GeoArray
+        """
         # TODO this must return a subset if self.subset is not None
         return self._arr
 
-    @arr.setter
-    def arr(self, *geoArr_initArgs):
+    @data.setter
+    def data(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             # TODO this must be able to handle subset inputs in tiled processing
             if self._arr and len(geoArr_initArgs[0]) and isinstance(geoArr_initArgs[0], np.ndarray):
@@ -86,17 +166,25 @@ class _EnMAP_Image(object):
             else:
                 self._arr = GeoArray(*geoArr_initArgs)
         else:
-            del self.arr
+            del self.data
 
-    @arr.deleter
-    def arr(self):
+    @data.deleter
+    def data(self):
         self._arr = None
 
     @property
     def mask_nodata(self):
-        if self._mask_nodata is None and isinstance(self.arr, GeoArray):
+        """Returns an instance of geoarray.NoDataMask representing the no data mask, bundled with all the
+        corresponding metadata.
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_nodata works in the same way.
+
+        :return: instance of geoarray.NoDataMask
+        """
+        if self._mask_nodata is None and isinstance(self.data, GeoArray):
             self.logger.info('Calculating nodata mask...')
-            self._mask_nodata = self.arr.mask_nodata  # calculates mask nodata if not already present
+            self._mask_nodata = self.data.mask_nodata  # calculates mask nodata if not already present
 
         return self._mask_nodata
 
@@ -104,12 +192,12 @@ class _EnMAP_Image(object):
     def mask_nodata(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             nd = NoDataMask(*geoArr_initArgs)
-            if nd.shape[:2] != self.arr.shape[:2]:
+            if nd.shape[:2] != self.data.shape[:2]:
                 raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
                                  "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
             nd.nodata = False
-            nd.gt = self.arr.gt
-            nd.prj = self.arr.prj
+            nd.gt = self.data.gt
+            nd.prj = self.data.prj
             self._mask_nodata.prj = nd
         else:
             del self.mask_nodata
@@ -120,18 +208,26 @@ class _EnMAP_Image(object):
 
     @property
     def mask_clouds(self):
+        """Returns an instance of geoarray.CloudMask representing the cloud mask, bundled with all the
+        corresponding metadata.
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_clouds works in the same way.
+
+        :return: instance of geoarray.CloudMask
+        """
         return self._mask_clouds
 
     @mask_clouds.setter
     def mask_clouds(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             cm = CloudMask(*geoArr_initArgs)
-            if cm.shape[:2] != self.arr.shape[:2]:
+            if cm.shape[:2] != self.data.shape[:2]:
                 raise ValueError("The 'mask_clouds' GeoArray can only be instanced with an array of the "
                                  "same dimensions like _EnMAP_Image.arr. Got %s." % str(cm.shape))
             cm.nodata = 0
-            cm.gt = self.arr.gt
-            cm.prj = self.arr.prj
+            cm.gt = self.data.gt
+            cm.prj = self.data.prj
             self._mask_clouds = cm
         else:
             del self.mask_clouds
@@ -142,6 +238,14 @@ class _EnMAP_Image(object):
 
     @property
     def mask_clouds_confidence(self):
+        """Returns an instance of geoarray.GeoArray representing pixelwise information on the cloud mask confidence,
+         bundled with all the corresponding metadata.
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_clouds_confidence works in the same way.
+
+        :return: instance of geoarray.GeoArray
+        """
         return self._mask_clouds_confidence
 
     @mask_clouds_confidence.setter
@@ -149,14 +253,14 @@ class _EnMAP_Image(object):
         if geoArr_initArgs[0] is not None:
             cnfArr = GeoArray(*geoArr_initArgs)
 
-            if not cnfArr.shape == self.arr.shape[:2]:
+            if not cnfArr.shape == self.data.shape[:2]:
                 raise ValueError("The 'mask_clouds_confidence' GeoArray can only be instanced with an array of the "
                                  "same dimensions like _EnMAP_Image.arr. Got %s." % str(cnfArr.shape))
 
             if cnfArr._nodata is None:
                 cnfArr.nodata = 0  # DEF_D.get_outFillZeroSaturated(cnfArr.dtype)[0] # TODO
-            cnfArr.gt = self.arr.gt
-            cnfArr.prj = self.arr.prj
+            cnfArr.gt = self.data.gt
+            cnfArr.prj = self.data.prj
 
             self._mask_clouds_confidence = cnfArr
         else:
@@ -168,8 +272,9 @@ class _EnMAP_Image(object):
 
     @property
     def dem(self):
-        """
-        Returns an SRTM DEM in the exact dimension an pixel grid of self.arr as an instance of GeoArray.
+        """Returns an SRTM DEM in the exact dimension an pixel grid of self.arr as an instance of GeoArray.
+
+        :return: geoarray.GeoArray
         """
 
         if self._dem is None:
@@ -180,15 +285,15 @@ class _EnMAP_Image(object):
     def dem(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             dem = GeoArray(*geoArr_initArgs)
-            assert self._dem.shape[:2] == self.arr.shape[:2]
+            assert self._dem.shape[:2] == self.data.shape[:2]
 
             self._dem = dem
-            if not dem.shape == self.arr.shape[:2]:
+            if not dem.shape == self.data.shape[:2]:
                 raise ValueError("The 'dem' GeoArray can only be instanced with an array of the "
                                  "same dimensions like _EnMAP_Image.arr. Got %s." % str(dem.shape))
             self._dem.nodata = 0  # FIXME
-            self._dem.gt = self.arr.gt
-            self._dem.prj = self.arr.prj
+            self._dem.gt = self.data.gt
+            self._dem.prj = self.data.prj
         else:
             del self.dem
 
@@ -200,7 +305,7 @@ class _EnMAP_Image(object):
     def ac_errors(self):
         """Returns an instance of GeoArray containing error information calculated by the atmospheric correction.
 
-        :return:
+        :return: geoarray.GeoArray
         """
 
         return self._ac_errors  # FIXME should give a warning if None
@@ -210,14 +315,14 @@ class _EnMAP_Image(object):
         if geoArr_initArgs[0] is not None:
             errArr = GeoArray(*geoArr_initArgs)
 
-            if errArr.shape != self.arr.shape:
+            if errArr.shape != self.data.shape:
                 raise ValueError("The 'ac_errors' GeoArray can only be instanced with an array of "
                                  "the same dimensions like _EnMAP_Image.arr. Got %s." % str(errArr.shape))
 
             if errArr._nodata is None:
                 errArr.nodata = 0  # DEF_D.get_outFillZeroSaturated(errArr.dtype)[0] # TODO
-            errArr.gt = self.arr.gt
-            errArr.prj = self.arr.prj
+            errArr.gt = self.data.gt
+            errArr.prj = self.data.prj
             # errArr.bandnames = self.LBA2bandnames(self.LayerBandsAssignment)
 
             self._ac_errors = errArr
@@ -230,6 +335,14 @@ class _EnMAP_Image(object):
 
     @property
     def deadpixelmap(self):
+        """Returns an instance of geoarray.GeoArray representing dead pixel map of the _EnMAP_Image instance,
+         bundled with all the corresponding metadata. Dimensions: (bands x columns).
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_clouds_confidence works in the same way.
+
+        :return: instance of geoarray.GeoArray
+        """
         return self._deadpixelmap
 
     @deadpixelmap.setter
@@ -237,7 +350,7 @@ class _EnMAP_Image(object):
         if geoArr_initArgs[0] is not None:
             dpm = GeoArray(*geoArr_initArgs)
 
-            if dpm.shape != (self.arr.bands, self.arr.cols):
+            if dpm.shape != (self.data.bands, self.data.cols):
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with an array with the size "
                                  "'bands x columns' of the GeoArray _EnMAP_Image.arr. Got %s." % str(dpm.shape))
 
@@ -260,19 +373,35 @@ class _EnMAP_Image(object):
         self.logger.info('Calculating nodata mask...')
 
         if self._mask_nodata is None or overwrite:
-            self.arr.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
-            self.mask_nodata = self.arr.mask_nodata
+            self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
+            self.mask_nodata = self.data.mask_nodata
             return self.mask_nodata
 
 
 class _EnMAP_Detector_ImGeo(_EnMAP_Image):
-    def __init__(self, detector_name: str, root_dir: str, logger=None):
-        """
+    """Base class representing a single detector of an EnMAP image (as image geometry). Inherits all attributes from
+     _EnMAP_Image class.
 
-        :param detector_name:   VNIR or SWIR
+    NOTE:
+        - All functionality that VNIR and SWIR detectors (image geometry) have in common is to be implemented here.
+        - All EnMAP image subclasses representing a specific EnMAP detector (image geometry) should inherit from
+          _EnMAP_Detector_ImGeo.
+
+    Attributes:
+        - to be listed here. Check help(_EnMAP_Detector_ImGeo) in the meanwhile!
+
+    """
+
+    def __init__(self, detector_name: str, root_dir: str, logger=None):
+        """Get an instance of _EnMAP_Detector_ImGeo
+
+        :param detector_name:   'VNIR' or 'SWIR'
         :param root_dir:
         :param logger:
         """
+        if detector_name not in ['VNIR', 'SWIR']:
+            raise ValueError("'detector_name' must be 'VNIR' or 'SWIR'. Received %s!" % detector_name)
+
         self._root_dir = root_dir
         self.detector_name = detector_name
         self.logger = logger or logging.getLogger()
@@ -286,6 +415,10 @@ class _EnMAP_Detector_ImGeo(_EnMAP_Image):
             EnMAP_Metadata_SWIR_ImGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
+        """Get all file paths associated with the current instance of _EnMAP_Detector_ImGeo.
+
+        :return: types.SimpleNamespace
+        """
         pathGen = PathGenL1BProduct(self._root_dir, self.detector_name)
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
@@ -298,18 +431,39 @@ class _EnMAP_Detector_ImGeo(_EnMAP_Image):
         return paths
 
     def DN2TOARadiance(self):
+        """Convert the radiometric unit of _EnMAP_Detector_ImGeo.data from digital numbers to top-of-atmosphere
+        radiance."
+
+        :return: None
+        """
         # TODO move to processors.radiometric_transform?
+        if self.meta.unitcode != 'DN':
+            raise RuntimeError("'DN2TOARadiance' is intended to convert digital numbers into TOA radiance. The current "
+                               "unitcode must be 'DN'! Found %s." % self.meta.unitcode)
+
         self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
-        self.arr = (self.meta.l_min + (self.meta.l_max - self.meta.l_min) / (2 ** 16 - 1) * self.arr[:])
+        self.data = (self.meta.l_min + (self.meta.l_max - self.meta.l_min) / (2 ** 16 - 1) * self.data[:])
         self.meta.unit = "mW m^-2 sr^-1 nm^-1"
         self.meta.unitcode = "TOARad"
 
 
 class _EnMAP_Detector_MapGeo(_EnMAP_Image):
-    def __init__(self, detector_name: str, logger=None):
-        """
+    """Base class representing a single detector of an EnMAP image (as map geometry). Inherits all attributes from
+     _EnMAP_Image class.
 
-        :param detector_name:   VNIR or SWIR
+    NOTE:
+        - All functionality that VNIR and SWIR detectors (map geometry) have in common is to be implemented here.
+        - All EnMAP image subclasses representing a specific EnMAP detector (image geometry) should inherit from
+          _EnMAP_Detector_ImGeo.
+
+    Attributes:
+        - to be listed here. Check help(_EnMAP_Detector_ImGeo) in the meanwhile!
+
+    """
+    def __init__(self, detector_name: str, logger=None):
+        """Get an instance of _EnMAP_Detector_MapGeo
+
+        :param detector_name:   'VNIR' or 'SWIR'
         :param logger:
         """
         self.detector_name = detector_name
@@ -368,9 +522,9 @@ class EnMAPL1Product_ImGeo(object):
         self.meta = EnMAP_Metadata_ImGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
-        """Get all the paths belonging to the EnMAP L1B product
+        """Get all file paths associated with the current instance of EnMAPL1Product_ImGeo.
 
-        :return:
+        :return: types.SimpleNamespace()
         """
         paths = SimpleNamespace()
         paths.vnir = self.vnir.get_paths()
@@ -381,6 +535,11 @@ class EnMAPL1Product_ImGeo(object):
         return paths
 
     def DN2TOARadiance(self):
+        """Convert the radiometric unit of self.vnir.data and self.swir.data from digital numbers to top-of-atmosphere
+        radiance."
+
+        :return: None
+        """
         self.vnir.DN2TOARadiance()
         self.swir.DN2TOARadiance()
 

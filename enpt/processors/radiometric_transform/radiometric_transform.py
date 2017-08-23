@@ -31,9 +31,9 @@ class TOARad2TOARef_Transformer(object):
         enmap_ImageL1.logger.info('I am the TOARef transformer and I am logging something! \n')
 
         # get original data for VNIR
-        rows, cols, _ = enmap_ImageL1.vnir.arr.shape
-        original_data = enmap_ImageL1.vnir.arr[int(rows / 2):int((rows / 2) + 5),
-                                               int(cols / 2):int((cols / 2) + 5), 0]
+        rows, cols, _ = enmap_ImageL1.vnir.data.shape
+        original_data = enmap_ImageL1.vnir.data[int(rows / 2):int((rows / 2) + 5),
+                        int(cols / 2):int((cols / 2) + 5), 0]
 
         # do something
         result = original_data * 2
@@ -43,6 +43,6 @@ class TOARad2TOARef_Transformer(object):
         enmap_ImageL1.logger.info('This is what comes out after multiplying it with 2: \n%s \n' % repr(result))
 
         # merge the results into the EnMAP image
-        enmap_ImageL1.vnir.arr = result
+        enmap_ImageL1.vnir.data = result
 
         return enmap_ImageL1

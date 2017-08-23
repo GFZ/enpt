@@ -6,7 +6,7 @@ import warnings
 import sys
 
 
-class EnPT_logger(logging.Logger):
+class EnPT_Logger(logging.Logger):
     def __init__(self, name_logfile, fmt_suffix=None, path_logfile=None, log_level='INFO', append=True):
         # type: (str, any, str, any, bool) -> None
         """Returns a logging.logger instance pointing to the given logfile path.
@@ -22,7 +22,7 @@ class EnPT_logger(logging.Logger):
         # private attributes
         self._captured_stream = ''
 
-        super(EnPT_logger, self).__init__(name_logfile)
+        super(EnPT_Logger, self).__init__(name_logfile)
 
         self.path_logfile = path_logfile
         self.formatter_fileH = logging.Formatter('%(asctime)s' + (' [%s]' % fmt_suffix if fmt_suffix else '') +
