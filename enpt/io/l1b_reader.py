@@ -16,6 +16,7 @@ class L1B_Reader(object):
 
     @staticmethod
     def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4):
+        # TODO move to init?
         """Read L1B, DEM and spatial reference data
 
         :param root_dir: Root directory of EnMAP Level-1B product
