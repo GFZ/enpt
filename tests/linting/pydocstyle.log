@@ -124,14 +124,30 @@ enpt/utils/__init__.py:1 at module level:
         D104: Missing docstring in public package
 enpt/utils/logging.py:1 at module level:
         D100: Missing docstring in public module
-enpt/utils/logging.py:7 in public class `EnPT_logger`:
+enpt/utils/logging.py:9 in public class `EnPT_logger`:
         D101: Missing docstring in public class
-enpt/utils/logging.py:9 in public method `__init__`:
+enpt/utils/logging.py:10 in public method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/utils/logging.py:9 in public method `__init__`:
+enpt/utils/logging.py:10 in public method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/utils/logging.py:9 in public method `__init__`:
+enpt/utils/logging.py:10 in public method `__init__`:
         D401: First line should be in imperative mood ('Return', not 'Returns')
+enpt/utils/logging.py:98 in public method `captured_stream`:
+        D102: Missing docstring in public method
+enpt/utils/logging.py:109 in public method `close`:
+        D102: Missing docstring in public method
+enpt/utils/logging.py:134 in public method `view_logfile`:
+        D102: Missing docstring in public method
+enpt/utils/logging.py:139 in public function `close_logger`:
+        D103: Missing docstring in public function
+enpt/utils/logging.py:152 in public function `shutdown_loggers`:
+        D103: Missing docstring in public function
+enpt/utils/logging.py:156 in public class `LessThanFilter`:
+        D101: Missing docstring in public class
+enpt/utils/logging.py:158 in public method `__init__`:
+        D102: Missing docstring in public method
+enpt/utils/logging.py:162 in public method `filter`:
+        D102: Missing docstring in public method
 enpt/processors/__init__.py:1 at module level:
         D104: Missing docstring in public package
 enpt/processors/spatial_module/__init__.py:1 at module level:
@@ -174,9 +190,9 @@ enpt/processors/atmospheric_correction/__init__.py:1 at module level:
         D104: Missing docstring in public package
 enpt/execution/__init__.py:1 at module level:
         D104: Missing docstring in public package
-enpt/execution/controller.py:9 in public class `EnPT_controller`:
+enpt/execution/controller.py:8 in public class `EnPT_controller`:
         D211: No blank lines allowed before class docstring (found 1)
-enpt/execution/controller.py:9 in public class `EnPT_controller`:
+enpt/execution/controller.py:8 in public class `EnPT_controller`:
         D400: First line should end with a period (not 'r')
-enpt/execution/controller.py:13 in public method `__init__`:
+enpt/execution/controller.py:12 in public method `__init__`:
         D400: First line should end with a period (not 'r')

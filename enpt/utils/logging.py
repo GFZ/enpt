@@ -55,7 +55,7 @@ class EnPT_logger(logging.Logger):
         # self.streamHandler.set_name('StringIO handler')
 
         # create ConsoleHandler for logging levels DEGUG and INFO -> logging to sys.stdout
-        consoleHandler_out = logging.StreamHandler(stream=sys.stdout) # by default it would go to sys.stderr
+        consoleHandler_out = logging.StreamHandler(stream=sys.stdout)  # by default it would go to sys.stderr
         consoleHandler_out.setFormatter(self.formatter_ConsoleH)
         consoleHandler_out.set_name('console handler stdout')
         consoleHandler_out.setLevel(log_level)
@@ -103,7 +103,7 @@ class EnPT_logger(logging.Logger):
 
     @captured_stream.setter
     def captured_stream(self, string):
-        assert isinstance(string, str), "'captured_stream' can only be set to a string. Got %s." %type(string)
+        assert isinstance(string, str), "'captured_stream' can only be set to a string. Got %s." % type(string)
         self._captured_stream = string
 
     def close(self):
@@ -122,7 +122,7 @@ class EnPT_logger(logging.Logger):
                 #     self.streamHandler.flush()
 
                 handler.close()
-                self.removeHandler(handler) # if not called with '[:]' the StreamHandlers are left open
+                self.removeHandler(handler)  # if not called with '[:]' the StreamHandlers are left open
             except PermissionError:
                 warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
 
@@ -143,7 +143,7 @@ def close_logger(logger):
                 handler.close()
                 logger.removeHandler(handler)
             except PermissionError:
-                warnings.warn('Could not properly close logfile due to a PermissionError: %s' %sys.exc_info()[1])
+                warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
 
         if logger.handlers[:]:
             warnings.warn('Not all logging handlers could be closed. Remaining handlers: %s' % logger.handlers[:])
