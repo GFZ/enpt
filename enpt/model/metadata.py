@@ -165,6 +165,7 @@ class EnMAP_Metadata_SensorGeo(object):
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
         self.vnir = None  # type: EnMAP_Metadata_VNIR_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_SWIR_SensorGeo # metadata of SWIR only
+        self.detector_attrNames = ['vnir', 'swir']
 
     def read_common_meta(self, observation_time: datetime=None):
         # FIXME observation time is currently missing in the XML

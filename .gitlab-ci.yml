@@ -41,6 +41,8 @@ pages:
   script:
     - mkdir -p public/coverage
     - cp -r htmlcov/* public/coverage/
+    - mkdir -p public/nosetests_reports
+    - cp nosetests.* public/nosetests_reports/
     - mkdir -p public/doc
     - cp -r docs/_build/html/* public/doc/
     - mkdir -p public/linting

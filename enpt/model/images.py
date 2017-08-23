@@ -520,6 +520,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.swir = EnMAP_SWIR_SensorGeo(root_dir)
         self.paths = self.get_paths()
         self.meta = EnMAP_Metadata_SensorGeo(self.paths.metaxml, logger=logger)
+        self.detector_attrNames = ['vnir', 'swir']
 
     def get_paths(self):
         """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
