@@ -23,6 +23,9 @@ test_enpt_install:
     - source /root/anaconda3/bin/activate
     - conda create -y -q --name enpt python=3.5
     - source activate enpt
+    # install some dependencies that cause trouble when installed via pip
+    - conda install -y -q -c conda-forge gdal scikit-image matplotlib
+    # install enpt
     - make install
     - cd ..
     - pwd

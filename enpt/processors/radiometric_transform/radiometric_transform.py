@@ -33,7 +33,7 @@ class TOARad2TOARef_Transformer(object):
         # get original data for VNIR
         rows, cols, _ = enmap_ImageL1.vnir.data.shape
         original_data = enmap_ImageL1.vnir.data[int(rows / 2):int((rows / 2) + 5),
-                        int(cols / 2):int((cols / 2) + 5), 0]
+                                                int(cols / 2):int((cols / 2) + 5), 0]
 
         # do something
         result = original_data * 2
