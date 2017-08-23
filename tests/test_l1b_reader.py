@@ -28,7 +28,7 @@ class Test_L1B_Reader(unittest.TestCase):
 
     def test_read_inputdata(self):
         from enpt.io.l1b_reader import L1B_Reader
-        from enpt.model.images import EnMAPL1Product_ImGeo
+        from enpt.model.images import EnMAPL1Product_SensorGeo
 
         print("Test reading EnMAP Level-1B products")
         for l1b_file in self.pathList_testimages:
@@ -41,7 +41,7 @@ class Test_L1B_Reader(unittest.TestCase):
                     L1_obj = L1B_Reader(**self.user_config)\
                         .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
 
-            self.assertIsInstance(L1_obj, EnMAPL1Product_ImGeo)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
 
 if __name__ == "__main__":

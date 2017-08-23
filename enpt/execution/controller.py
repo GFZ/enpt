@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """EnPT process controller module."""
 
-from ..model.images import EnMAPL1Product_ImGeo
+from ..model.images import EnMAPL1Product_SensorGeo
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
 
 
@@ -17,7 +17,7 @@ class EnPT_controller(object):
         """
         raise NotImplementedError('The process controller is not yet working.')
 
-        self.Images = [EnMAPL1Product_ImGeo, ]
+        self.Images = [EnMAPL1Product_SensorGeo, ]
 
     def run_all_processors(self):
         """Run all processors at once."""

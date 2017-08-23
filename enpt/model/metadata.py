@@ -21,12 +21,13 @@ L1B_product_props = dict(
 ##############
 
 
-class _EnMAP_Metadata_Detector_ImGeo(object):
-    """Base class for all EnMAP metadata associated with a single EnMAP detector in image geometry.
+class _EnMAP_Metadata_Detector_SensorGeo(object):
+    """Base class for all EnMAP metadata associated with a single EnMAP detector in sensor geometry.
 
     NOTE:
-        - All metadata that have VNIR and SWIR detector in image geometry in common should be included here.
-        - All classes representing VNIR or SWIR specific metadata should inherit from _EnMAP_Metadata_Detector_ImGeo.
+        - All metadata that have VNIR and SWIR detector in sensor geometry in common should be included here.
+        - All classes representing VNIR or SWIR specific metadata should inherit from
+          _EnMAP_Metadata_Detector_SensorGeo.
 
     """
     def __init__(self, detector_name: str, logger: logging.Logger=None):
@@ -62,7 +63,7 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
         self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
 
     def _read_metadata(self, path_xml, detector_label_xml, lon_lat_smpl=(15, 15), nsmile_coef=4):
-        """Read the metadata of a specific EnMAP detector in image geometry.
+        """Read the metadata of a specific EnMAP detector in sensor geometry.
 
         :param path_xml:  file path of the metadata XML file
         :param detector_label_xml:
@@ -141,20 +142,20 @@ class _EnMAP_Metadata_Detector_ImGeo(object):
         return rr
 
 
-########################################################
-# EnPT metadata objects for EnMAP data in image geometry
-########################################################
+#########################################################
+# EnPT metadata objects for EnMAP data in sensor geometry
+#########################################################
 
 
-class EnMAP_Metadata_ImGeo(object):
-    """EnMAP Metadata class holding the metadata of the complete EnMAP product in image geometry
+class EnMAP_Metadata_SensorGeo(object):
+    """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry
     including VNIR and SWIR detector.
 
     Attributes:
         - logger(logging.Logger):  None or logging instance
         - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
-        - vnir(EnMAP_Metadata_VNIR_ImGeo)
-        - swir(EnMAP_Metadata_SWIR_ImGeo)
+        - vnir(EnMAP_Metadata_VNIR_SensorGeo)
+        - swir(EnMAP_Metadata_SWIR_SensorGeo)
     """
     def __init__(self, path_metaxml, logger=None):
         self.logger = logger or logging.getLogger()
@@ -162,8 +163,8 @@ class EnMAP_Metadata_ImGeo(object):
 
         # defaults
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
-        self.vnir = None  # type: EnMAP_Metadata_VNIR_ImGeo # metadata of VNIR only
-        self.swir = None  # type: EnMAP_Metadata_SWIR_ImGeo # metadata of SWIR only
+        self.vnir = None  # type: EnMAP_Metadata_VNIR_SensorGeo # metadata of VNIR only
+        self.swir = None  # type: EnMAP_Metadata_SWIR_SensorGeo # metadata of SWIR only
 
     def read_common_meta(self, observation_time: datetime=None):
         # FIXME observation time is currently missing in the XML
@@ -171,47 +172,47 @@ class EnMAP_Metadata_ImGeo(object):
 
     def read_metadata(self, observation_time: datetime=None, lon_lat_smpl=(15, 15), nsmile_coef=4):
         self.read_common_meta(observation_time)
-        self.vnir = EnMAP_Metadata_VNIR_ImGeo(self._path_xml)
+        self.vnir = EnMAP_Metadata_VNIR_SensorGeo(self._path_xml)
         self.vnir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-        self.swir = EnMAP_Metadata_SWIR_ImGeo(self._path_xml)
+        self.swir = EnMAP_Metadata_SWIR_SensorGeo(self._path_xml)
         self.swir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
-class EnMAP_Metadata_VNIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
-    """EnMAP Metadata class holding the metadata of the VNIR detector in image geometry.
+class EnMAP_Metadata_VNIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
+    """EnMAP Metadata class holding the metadata of the VNIR detector in sensor geometry.
 
     NOTE:
-        - inherits all attributes from base class _EnMAP_Metadata_Detector_ImGeo.
+        - inherits all attributes from base class _EnMAP_Metadata_Detector_SensorGeo.
     """
     def __init__(self, path_metaxml, logger=None):
-        # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
-        super(EnMAP_Metadata_VNIR_ImGeo, self).__init__('VNIR', logger=logger)
+        # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
+        super(EnMAP_Metadata_VNIR_SensorGeo, self).__init__('VNIR', logger=logger)
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['VNIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
-        super(EnMAP_Metadata_VNIR_ImGeo, self)\
+        super(EnMAP_Metadata_VNIR_SensorGeo, self)\
             ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
-class EnMAP_Metadata_SWIR_ImGeo(_EnMAP_Metadata_Detector_ImGeo):
-    """EnMAP Metadata class holding the metadata of the SWIR detector in image geometry.
+class EnMAP_Metadata_SWIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
+    """EnMAP Metadata class holding the metadata of the SWIR detector in sensor geometry.
 
     NOTE:
-        - inherits all attributes from base class _EnMAP_Metadata_Detector_ImGeo.
+        - inherits all attributes from base class _EnMAP_Metadata_Detector_SensorGeo.
     """
     def __init__(self, path_metaxml, logger=None):
-        # get all attributes from base class '_EnMAP_Metadata_Detector_ImGeo'
-        super(EnMAP_Metadata_SWIR_ImGeo, self).__init__('SWIR', logger=logger)
+        # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
+        super(EnMAP_Metadata_SWIR_SensorGeo, self).__init__('SWIR', logger=logger)
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['SWIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
-        """Read the metadata of the SWIR detector in image geometry.
+        """Read the metadata of the SWIR detector in sensor geometry.
 
         :param lon_lat_smpl: number if sampling points in lon, lat fields
         :param nsmile_coef: number of polynomial coefficients for smile
         :return:
         """
-        super(EnMAP_Metadata_SWIR_ImGeo, self)\
+        super(EnMAP_Metadata_SWIR_SensorGeo, self)\
             ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)

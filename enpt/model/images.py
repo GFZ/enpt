@@ -8,7 +8,7 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import EnMAP_Metadata_ImGeo, EnMAP_Metadata_VNIR_ImGeo, EnMAP_Metadata_SWIR_ImGeo
+from ..model.metadata import EnMAP_Metadata_SensorGeo, EnMAP_Metadata_VNIR_SensorGeo, EnMAP_Metadata_SWIR_SensorGeo
 
 
 ##############
@@ -378,13 +378,13 @@ class _EnMAP_Image(object):
             return self.mask_nodata
 
 
-class _EnMAP_Detector_ImGeo(_EnMAP_Image):
-    """Base class representing a single detector of an EnMAP image (as image geometry). Inherits all attributes from
+class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
+    """Base class representing a single detector of an EnMAP image (as sensor geometry). Inherits all attributes from
      _EnMAP_Image class.
 
     NOTE:
-        - All functionality that VNIR and SWIR detectors (image geometry) have in common is to be implemented here.
-        - All EnMAP image subclasses representing a specific EnMAP detector (image geometry) should inherit from
+        - All functionality that VNIR and SWIR detectors (sensor geometry) have in common is to be implemented here.
+        - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
           _EnMAP_Detector_ImGeo.
 
     Attributes:
@@ -407,12 +407,12 @@ class _EnMAP_Detector_ImGeo(_EnMAP_Image):
         self.logger = logger or logging.getLogger()
 
         # get all attributes of base class "_EnMAP_Image"
-        super(_EnMAP_Detector_ImGeo, self).__init__()
+        super(_EnMAP_Detector_SensorGeo, self).__init__()
         self.paths = self.get_paths()
         # instance an empty metadata object
         self.meta = \
-            EnMAP_Metadata_VNIR_ImGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
-            EnMAP_Metadata_SWIR_ImGeo(self.paths.metaxml, logger=logger)
+            EnMAP_Metadata_VNIR_SensorGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
+            EnMAP_Metadata_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
         """Get all file paths associated with the current instance of _EnMAP_Detector_ImGeo.
@@ -453,11 +453,11 @@ class _EnMAP_Detector_MapGeo(_EnMAP_Image):
 
     NOTE:
         - All functionality that VNIR and SWIR detectors (map geometry) have in common is to be implemented here.
-        - All EnMAP image subclasses representing a specific EnMAP detector (image geometry) should inherit from
-          _EnMAP_Detector_ImGeo.
+        - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
+          _EnMAP_Detector_SensorGeo.
 
     Attributes:
-        - to be listed here. Check help(_EnMAP_Detector_ImGeo) in the meanwhile!
+        - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
 
     """
     def __init__(self, detector_name: str, logger=None):
@@ -473,33 +473,33 @@ class _EnMAP_Detector_MapGeo(_EnMAP_Image):
         super(_EnMAP_Detector_MapGeo, self).__init__()
 
 
-######################################
-# EnPT EnMAP objects in image geometry
-######################################
+#######################################
+# EnPT EnMAP objects in sensor geometry
+#######################################
 
 
-class EnMAP_VNIR_ImGeo(_EnMAP_Detector_ImGeo):
+class EnMAP_VNIR_SensorGeo(_EnMAP_Detector_SensorGeo):
     def __init__(self, root_dir: str):
         """Get an instance of the VNIR of an EnMAP data Level-1B product.
 
         :param root_dir: Root directory of EnMAP Level-1B product
         """
         # get all attributes of base class "_EnMAP_Detector"
-        super(EnMAP_VNIR_ImGeo, self).__init__('VNIR', root_dir)
+        super(EnMAP_VNIR_SensorGeo, self).__init__('VNIR', root_dir)
 
 
-class EnMAP_SWIR_ImGeo(_EnMAP_Detector_ImGeo):
+class EnMAP_SWIR_SensorGeo(_EnMAP_Detector_SensorGeo):
     def __init__(self, root_dir: str):
         """Get an instance of the SWIR of an EnMAP data Level-1B product.
 
         :param root_dir: Root directory of EnMAP Level-1B product
         """
         # get all attributes of base class "_EnMAP_Detector"
-        super(EnMAP_SWIR_ImGeo, self).__init__('SWIR', root_dir)
+        super(EnMAP_SWIR_SensorGeo, self).__init__('SWIR', root_dir)
 
 
-class EnMAPL1Product_ImGeo(object):
-    """Class for EnPT EnMAP object in image geometry
+class EnMAPL1Product_SensorGeo(object):
+    """Class for EnPT EnMAP object in sensor geometry
 
     Attributes:
         - vnir
@@ -510,19 +510,19 @@ class EnMAPL1Product_ImGeo(object):
 
     """
     def __init__(self, root_dir: str, logger=None):
-        """Get instance of EnPT EnMAP object in image geometry.
+        """Get instance of EnPT EnMAP object in sensor geometry.
 
         :param root_dir: Root directory of EnMAP Level-1B product
         :param logger: None or logging instance
         """
         self.logger = logger or logging.getLogger(__name__)
-        self.vnir = EnMAP_VNIR_ImGeo(root_dir)
-        self.swir = EnMAP_SWIR_ImGeo(root_dir)
+        self.vnir = EnMAP_VNIR_SensorGeo(root_dir)
+        self.swir = EnMAP_SWIR_SensorGeo(root_dir)
         self.paths = self.get_paths()
-        self.meta = EnMAP_Metadata_ImGeo(self.paths.metaxml, logger=logger)
+        self.meta = EnMAP_Metadata_SensorGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
-        """Get all file paths associated with the current instance of EnMAPL1Product_ImGeo.
+        """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
 
         :return: types.SimpleNamespace()
         """

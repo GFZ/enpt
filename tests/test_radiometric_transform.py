@@ -21,7 +21,7 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
 
     def test_transform_TOARad2TOARef(self):
         from enpt.io.l1b_reader import L1B_Reader
-        from enpt.model.images import EnMAPL1Product_ImGeo
+        from enpt.model.images import EnMAPL1Product_SensorGeo
 
         for l1b_file in self.pathList_testimages:
             with tempfile.TemporaryDirectory() as tmpdir:
@@ -36,10 +36,10 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
                         .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
 
                     # input assertions
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_ImGeo)
+                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
                     # # run
                     output = self.RT.transform(L1_obj)  # for now only test if its runnable without error
 
             # output assertions
-            self.assertIsInstance(output, EnMAPL1Product_ImGeo)
+            self.assertIsInstance(output, EnMAPL1Product_SensorGeo)

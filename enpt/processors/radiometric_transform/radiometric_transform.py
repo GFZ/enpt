@@ -5,7 +5,7 @@ transforms TOA radiance to TOA reflectance
 """
 
 
-from enpt.model.images import EnMAPL1Product_ImGeo
+from enpt.model.images import EnMAPL1Product_SensorGeo
 
 
 class TOARad2TOARef_Transformer(object):
@@ -21,7 +21,7 @@ class TOARad2TOARef_Transformer(object):
         self.solarIrr = solarIrr
         self.sunEarthDist = sunEarthDist
 
-    def transform(self, enmap_ImageL1: EnMAPL1Product_ImGeo):
+    def transform(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
 
         :param enmap_ImageL1: instance of the class 'EnMAPL1Product_ImGeo'

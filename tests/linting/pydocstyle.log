@@ -4,9 +4,9 @@ enpt/io/l1b_reader.py:13 in public method `__init__`:
         D102: Missing docstring in public method
 enpt/io/l1b_reader.py:18 in public method `read_inputdata`:
         D400: First line should end with a period (not 'a')
-enpt/io/l1b_reader.py:55 in public method `validate_input`:
+enpt/io/l1b_reader.py:56 in public method `validate_input`:
         D102: Missing docstring in public method
-enpt/io/l1b_reader.py:58 in public method `validate_output`:
+enpt/io/l1b_reader.py:59 in public method `validate_output`:
         D102: Missing docstring in public method
 enpt/model/images.py:1 at module level:
         D100: Missing docstring in public module
