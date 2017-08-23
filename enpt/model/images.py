@@ -385,15 +385,15 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
     NOTE:
         - All functionality that VNIR and SWIR detectors (sensor geometry) have in common is to be implemented here.
         - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
-          _EnMAP_Detector_ImGeo.
+          _EnMAP_Detector_SensorGeo.
 
     Attributes:
-        - to be listed here. Check help(_EnMAP_Detector_ImGeo) in the meanwhile!
+        - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
 
     """
 
     def __init__(self, detector_name: str, root_dir: str, logger=None):
-        """Get an instance of _EnMAP_Detector_ImGeo
+        """Get an instance of _EnMAP_Detector_SensorGeo
 
         :param detector_name:   'VNIR' or 'SWIR'
         :param root_dir:
@@ -415,7 +415,7 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
             EnMAP_Metadata_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
-        """Get all file paths associated with the current instance of _EnMAP_Detector_ImGeo.
+        """Get all file paths associated with the current instance of _EnMAP_Detector_SensorGeo.
 
         :return: types.SimpleNamespace
         """
@@ -431,7 +431,7 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         return paths
 
     def DN2TOARadiance(self):
-        """Convert the radiometric unit of _EnMAP_Detector_ImGeo.data from digital numbers to top-of-atmosphere
+        """Convert the radiometric unit of _EnMAP_Detector_SensorGeo.data from digital numbers to top-of-atmosphere
         radiance."
 
         :return: None
