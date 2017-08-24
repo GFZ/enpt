@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT images module. All EnMAP image objects are defined here."""
 
 import logging
 from types import SimpleNamespace
@@ -63,7 +64,7 @@ class _EnMAP_Image(object):
 
     @property
     def logger(self):
-        """Get a an instance of enpt.utils.logging.EnPT_Logger!
+        """Get a an instance of enpt.utils.logging.EnPT_Logger.
 
         NOTE:
             - The logging level will be set according to the user inputs of EnPT.
@@ -99,10 +100,10 @@ class _EnMAP_Image(object):
 
     @property  # FIXME does not work yet
     def log(self):
-        """Returns a string of all logged messages until now.
+        """Return a string of all logged messages until now.
 
-        NOTE: self.log can also be set to a string."""
-
+        NOTE: self.log can also be set to a string.
+        """
         return self._log
 
     @log.setter
@@ -112,8 +113,9 @@ class _EnMAP_Image(object):
 
     @property
     def data(self):
-        """Returns an instance of geoarray.GeoArray representing the actual EnMAP image data, bundled with all the
-        corresponding metadata:
+        """Return the actual EnMAP image data.
+
+        Bundled with all the corresponding metadata.
 
         Attributes and functions (most important; for a full list check help(self.data)!):
             - ALL attributes of numpy.ndarray!
@@ -174,8 +176,9 @@ class _EnMAP_Image(object):
 
     @property
     def mask_nodata(self):
-        """Returns an instance of geoarray.NoDataMask representing the no data mask, bundled with all the
-        corresponding metadata.
+        """Return the no data mask.
+
+        Bundled with all the corresponding metadata.
 
         For usage instructions and a list of attributes refer to help(self.data).
         self.mask_nodata works in the same way.
@@ -208,8 +211,9 @@ class _EnMAP_Image(object):
 
     @property
     def mask_clouds(self):
-        """Returns an instance of geoarray.CloudMask representing the cloud mask, bundled with all the
-        corresponding metadata.
+        """Return the cloud mask.
+
+        Bundled with all the corresponding metadata.
 
         For usage instructions and a list of attributes refer to help(self.data).
         self.mask_clouds works in the same way.
@@ -238,8 +242,9 @@ class _EnMAP_Image(object):
 
     @property
     def mask_clouds_confidence(self):
-        """Returns an instance of geoarray.GeoArray representing pixelwise information on the cloud mask confidence,
-         bundled with all the corresponding metadata.
+        """Return pixelwise information on the cloud mask confidence.
+
+        Bundled with all the corresponding metadata.
 
         For usage instructions and a list of attributes refer to help(self.data).
         self.mask_clouds_confidence works in the same way.
@@ -272,11 +277,10 @@ class _EnMAP_Image(object):
 
     @property
     def dem(self):
-        """Returns an SRTM DEM in the exact dimension an pixel grid of self.arr as an instance of GeoArray.
+        """Return an SRTM DEM in the exact dimension an pixel grid of self.arr.
 
         :return: geoarray.GeoArray
         """
-
         if self._dem is None:
             raise NotImplementedError('An automatic DEM getter is not yet implemented.')
         return self._dem
@@ -303,11 +307,10 @@ class _EnMAP_Image(object):
 
     @property
     def ac_errors(self):
-        """Returns an instance of GeoArray containing error information calculated by the atmospheric correction.
+        """Return error information calculated by the atmospheric correction.
 
         :return: geoarray.GeoArray
         """
-
         return self._ac_errors  # FIXME should give a warning if None
 
     @ac_errors.setter
@@ -335,8 +338,9 @@ class _EnMAP_Image(object):
 
     @property
     def deadpixelmap(self):
-        """Returns an instance of geoarray.GeoArray representing dead pixel map of the _EnMAP_Image instance,
-         bundled with all the corresponding metadata. Dimensions: (bands x columns).
+        """Return the dead pixel map.
+
+        Bundled with all the corresponding metadata. Dimensions: (bands x columns).
 
         For usage instructions and a list of attributes refer to help(self.data).
         self.mask_clouds_confidence works in the same way.
@@ -363,13 +367,12 @@ class _EnMAP_Image(object):
         self._deadpixelmap = None
 
     def calc_mask_nodata(self, fromBand=None, overwrite=False):
-        """Calculates a no data mask with (values: 0=nodata; 1=data)
+        """Calculate a no data mask with (values: 0=nodata; 1=data).
 
         :param fromBand:  <int> index of the band to be used (if None, all bands are used)
         :param overwrite: <bool> whether to overwrite existing nodata mask that has already been calculated
         :return:
         """
-
         self.logger.info('Calculating nodata mask...')
 
         if self._mask_nodata is None or overwrite:
@@ -379,10 +382,10 @@ class _EnMAP_Image(object):
 
 
 class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
-    """Base class representing a single detector of an EnMAP image (as sensor geometry). Inherits all attributes from
-     _EnMAP_Image class.
+    """Base class representing a single detector of an EnMAP image (as sensor geometry).
 
     NOTE:
+        - Inherits all attributes from _EnMAP_Image class.
         - All functionality that VNIR and SWIR detectors (sensor geometry) have in common is to be implemented here.
         - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
           _EnMAP_Detector_SensorGeo.
@@ -393,7 +396,7 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
     """
 
     def __init__(self, detector_name: str, root_dir: str, logger=None):
-        """Get an instance of _EnMAP_Detector_SensorGeo
+        """Get an instance of _EnMAP_Detector_SensorGeo.
 
         :param detector_name:   'VNIR' or 'SWIR'
         :param root_dir:
@@ -431,8 +434,10 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         return paths
 
     def DN2TOARadiance(self):
-        """Convert the radiometric unit of _EnMAP_Detector_SensorGeo.data from digital numbers to top-of-atmosphere
-        radiance."
+        """Convert DNs to TOA radiance.
+
+        Convert the radiometric unit of _EnMAP_Detector_SensorGeo.data from digital numbers to top-of-atmosphere
+        radiance.
 
         :return: None
         """
@@ -449,10 +454,10 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
 
 class _EnMAP_Detector_MapGeo(_EnMAP_Image):
-    """Base class representing a single detector of an EnMAP image (as map geometry). Inherits all attributes from
-     _EnMAP_Image class.
+    """Base class representing a single detector of an EnMAP image (as map geometry).
 
     NOTE:
+        - Inherits all attributes from _EnMAP_Image class.
         - All functionality that VNIR and SWIR detectors (map geometry) have in common is to be implemented here.
         - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
           _EnMAP_Detector_SensorGeo.
@@ -461,8 +466,9 @@ class _EnMAP_Detector_MapGeo(_EnMAP_Image):
         - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
 
     """
+
     def __init__(self, detector_name: str, logger=None):
-        """Get an instance of _EnMAP_Detector_MapGeo
+        """Get an instance of _EnMAP_Detector_MapGeo.
 
         :param detector_name:   'VNIR' or 'SWIR'
         :param logger:
@@ -480,6 +486,8 @@ class _EnMAP_Detector_MapGeo(_EnMAP_Image):
 
 
 class EnMAP_VNIR_SensorGeo(_EnMAP_Detector_SensorGeo):
+    """Class for EnPT EnMAP VNIR object in sensor geometry."""
+
     def __init__(self, root_dir: str):
         """Get an instance of the VNIR of an EnMAP data Level-1B product.
 
@@ -490,6 +498,8 @@ class EnMAP_VNIR_SensorGeo(_EnMAP_Detector_SensorGeo):
 
 
 class EnMAP_SWIR_SensorGeo(_EnMAP_Detector_SensorGeo):
+    """Class for EnPT EnMAP SWIR object in sensor geometry."""
+
     def __init__(self, root_dir: str):
         """Get an instance of the SWIR of an EnMAP data Level-1B product.
 
@@ -500,7 +510,7 @@ class EnMAP_SWIR_SensorGeo(_EnMAP_Detector_SensorGeo):
 
 
 class EnMAPL1Product_SensorGeo(object):
-    """Class for EnPT EnMAP object in sensor geometry
+    """Class for EnPT EnMAP object in sensor geometry.
 
     Attributes:
         - logger:
@@ -514,8 +524,10 @@ class EnMAPL1Product_SensorGeo(object):
         - meta:
             - instance of EnMAP_Metadata_SensorGeo class
         - detector_attrNames:
-            - list of attribute names for VNIR and SWIR detectors
+            - list of attribute names for VNIR and SWIR detectors,
+
     """
+
     def __init__(self, root_dir: str, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.
 
@@ -543,8 +555,7 @@ class EnMAPL1Product_SensorGeo(object):
         return paths
 
     def DN2TOARadiance(self):
-        """Convert the radiometric unit of self.vnir.data and self.swir.data from digital numbers to top-of-atmosphere
-        radiance."
+        """Convert self.vnir.data and self.swir.data from digital numbers to top-of-atmosphere radiance.
 
         :return: None
         """
@@ -558,20 +569,24 @@ class EnMAPL1Product_SensorGeo(object):
 
 
 class EnMAP_VNIR_MapGeo(_EnMAP_Detector_MapGeo):
-    """This class represents an EnPT EnMAP VNIR image in map geometry including all metadata and associated aux-data
-    (masks, DEM, etc.).
+    """Class for EnMAP VNIR image in map geometry including all metadata and associated aux-data (masks, DEM, etc.).
 
     All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
-    All VNIR_MapGeo specific modifications are to be implemented here."""
+    All VNIR_MapGeo specific modifications are to be implemented here.
+    """
+
     def __init__(self, logger=None):
+        """Get an instance of the VNIR of an EnMAP data Level-1B product (map geometry)."""
         super(EnMAP_VNIR_MapGeo, self).__init__('VNIR', logger=logger)
 
 
 class EnMAP_SWIR_MapGeo(_EnMAP_Detector_MapGeo):
-    """This class represents an EnPT EnMAP SWIR image in map geometry including all metadata and associated aux-data
-    (masks, DEM, etc.).
+    """Class for EnMAP SWIR image in map geometry including all metadata and associated aux-data (masks, DEM, etc.).
 
     All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
-    All SWIR_MapGeo specific modifications are to be implemented here."""
+    All SWIR_MapGeo specific modifications are to be implemented here.
+    """
+
     def __init__(self, logger=None):
+        """Get an instance of the SWIR of an EnMAP data Level-1B product (map geometry)."""
         super(EnMAP_SWIR_MapGeo, self).__init__('SWIR', logger=logger)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT 'atmospheric correction module.
 
-"""
-performs the atmospheric correction of EnMAP L1B data.
+Performs the atmospheric correction of EnMAP L1B data.
 """

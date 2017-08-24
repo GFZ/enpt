@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Reader module for reading all kinds of EnMAP images."""
 
 from datetime import datetime
 import logging
@@ -11,13 +12,14 @@ class L1B_Reader(object):
     """Reader for EnMAP Level-1B products."""
 
     def __init__(self, logger=None, **user_inputs):
+        """Get an instance of L1B_Reader."""
         self.logger = logger or logging.getLogger(__name__)
         self.cfg = user_inputs
 
     @staticmethod
     def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4):
         # TODO move to init?
-        """Read L1B, DEM and spatial reference data
+        """Read L1B, DEM and spatial reference data.
 
         :param root_dir: Root directory of EnMAP Level-1B product
         :param observation_time: datetime of observation time (currently missing in metadata)
@@ -54,7 +56,9 @@ class L1B_Reader(object):
         return L1_obj
 
     def validate_input(self):
+        """Validate user inputs."""
         pass
 
     def validate_output(self):
+        """Validate outputs of L1B_Reader."""
         pass

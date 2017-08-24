@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
 """
-Image Correction
+EnPT image correction module.
 
 improves the image quality in case of image striping
 

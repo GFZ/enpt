@@ -6,12 +6,11 @@ from ..processors.radiometric_transform import TOARad2TOARef_Transformer
 
 
 class EnPT_controller(object):
-
-    """Class of EnPT process controller"""
+    """Class of EnPT process controller."""
 
     def __init__(self, entity_ID):
         # type: (str) -> None
-        """Initialize the Process Controller
+        """Initialize the Process Controller.
 
         :param entity_ID:   ID of the scene to be processed, e.g. 'EM_20170515_12345'
         """

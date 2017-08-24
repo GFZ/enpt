@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT logging module containing logging related classes and functions."""
 
 import logging
 import os
@@ -7,9 +8,12 @@ import sys
 
 
 class EnPT_Logger(logging.Logger):
+    """Class for the EnPT logger."""
+
     def __init__(self, name_logfile, fmt_suffix=None, path_logfile=None, log_level='INFO', append=True):
         # type: (str, any, str, any, bool) -> None
-        """Returns a logging.logger instance pointing to the given logfile path.
+        """Return a logging.logger instance pointing to the given logfile path.
+
         :param name_logfile:
         :param fmt_suffix:      if given, it will be included into log formatter
         :param path_logfile:    if no path is given, only a StreamHandler is created
@@ -18,7 +22,6 @@ class EnPT_Logger(logging.Logger):
         :param append:          <bool> whether to append the log message to an existing logfile (1)
                                 or to create a new logfile (0); default=1
         """
-
         # private attributes
         self._captured_stream = ''
 

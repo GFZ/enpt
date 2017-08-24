@@ -13,7 +13,6 @@ Contents:
    installation
    usage
    modules
-   scripts
    contributing
    development
    authors

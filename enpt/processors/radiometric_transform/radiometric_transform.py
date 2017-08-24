@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+"""EnPT 'radiometric transform' module.
 
-"""
-transforms TOA radiance to TOA reflectance
+Contained Transformations:
+    - TOA radiance to TOA reflectance
 """
 
 
@@ -9,6 +10,7 @@ from enpt.model.images import EnMAPL1Product_SensorGeo
 
 
 class TOARad2TOARef_Transformer(object):
+    """Class for transforming top-of-atmosphere radiance EnMAP images to top-of-atmosphere reflectance."""
 
     def __init__(self, solarIrr, sunEarthDist):
         # type: (dict, dict) -> None
@@ -17,7 +19,6 @@ class TOARad2TOARef_Transformer(object):
         :param solarIrr:        model for solar irradiance
         :param sunEarthDist:    model for sun earth distance
         """
-
         self.solarIrr = solarIrr
         self.sunEarthDist = sunEarthDist
 

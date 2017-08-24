@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT 'dead pixel correction' module.
 
-"""
-performs the Dead Pixel Correction using a linear interpolation in spectral dimension
+Performs the Dead Pixel Correction using a linear interpolation in spectral dimension.
 """

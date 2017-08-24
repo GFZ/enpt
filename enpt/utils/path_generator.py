@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT path generator module for generating file paths for all kinds of EnMAP images."""
 
 from glob import glob
 import os
@@ -9,6 +10,7 @@ from ..model.metadata import L1B_product_props
 
 class PathGenL1BProduct(object):
     """Path generator class for generating file pathes corresponding to the EnMAP L1B product."""
+
     def __init__(self, root_dir: str, detector_name: str):
         """Get an instance of the EnPT L1B image path generator.
 

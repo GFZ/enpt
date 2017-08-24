@@ -30,13 +30,13 @@ class _EnMAP_Metadata_Detector_SensorGeo(object):
           _EnMAP_Metadata_Detector_SensorGeo.
 
     """
+
     def __init__(self, detector_name: str, logger: logging.Logger=None):
-        """
+        """Get a metadata object containing the metadata of a single EnMAP detector in sensor geometry.
 
         :param detector_name: Name of the detector (VNIR or SWIR)
         :param logger:
         """
-
         self.detector_name = detector_name  # type: str
         self.logger = logger or logging.getLogger()
 
@@ -108,6 +108,7 @@ class _EnMAP_Metadata_Detector_SensorGeo(object):
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
+
         The sum in (1) is expressed as inner product of two arrays with inner dimension as the polynomial smile
         coefficients shape = (ncols, nsmile_coef) of polynomial x
 
@@ -120,7 +121,7 @@ class _EnMAP_Metadata_Detector_SensorGeo(object):
         )  # shape = (ncols, nwvl)
 
     def calc_snr(self, data: np.ndarray):
-        """Compute EnMAP snr from radiance data.
+        """Compute EnMAP SNR from radiance data.
 
         :param data: Numpy array with radiance for scene
         """
@@ -148,15 +149,16 @@ class _EnMAP_Metadata_Detector_SensorGeo(object):
 
 
 class EnMAP_Metadata_SensorGeo(object):
-    """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry
-    including VNIR and SWIR detector.
+    """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
 
     Attributes:
         - logger(logging.Logger):  None or logging instance
         - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
+
     """
+
     def __init__(self, path_metaxml, logger=None):
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
@@ -185,6 +187,7 @@ class EnMAP_Metadata_VNIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
     NOTE:
         - inherits all attributes from base class _EnMAP_Metadata_Detector_SensorGeo.
     """
+
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
         super(EnMAP_Metadata_VNIR_SensorGeo, self).__init__('VNIR', logger=logger)
@@ -202,6 +205,7 @@ class EnMAP_Metadata_SWIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
     NOTE:
         - inherits all attributes from base class _EnMAP_Metadata_Detector_SensorGeo.
     """
+
     def __init__(self, path_metaxml, logger=None):
         # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
         super(EnMAP_Metadata_SWIR_SensorGeo, self).__init__('SWIR', logger=logger)
