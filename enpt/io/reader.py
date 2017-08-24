@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 
 from ..model.images import EnMAPL1Product_SensorGeo
-from ..model.metadata import EnMAP_Metadata_SensorGeo
+from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo
 
 
 class L1B_Reader(object):
@@ -31,7 +31,7 @@ class L1B_Reader(object):
         L1_obj = EnMAPL1Product_SensorGeo(root_dir)
 
         # read metadata
-        L1_obj.meta = EnMAP_Metadata_SensorGeo(L1_obj.paths.metaxml)
+        L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml)
         L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
         # read VNIR data

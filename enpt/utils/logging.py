@@ -99,6 +99,14 @@ class EnPT_Logger(logging.Logger):
 
     @property
     def captured_stream(self):
+        """Return the already captured logging stream.
+
+        NOTE:
+            - set self.captured_stream:
+                self.captured_stream = 'any string'
+
+        :return: str
+        """
         if not self._captured_stream:
             self._captured_stream = self.streamObj.getvalue()
 
@@ -110,6 +118,7 @@ class EnPT_Logger(logging.Logger):
         self._captured_stream = string
 
     def close(self):
+        """Close all logging handlers."""
         # update captured_stream and flush stream
         # self.captured_stream += self.streamObj.getvalue()
         # print(self.handlers[:])
@@ -135,11 +144,16 @@ class EnPT_Logger(logging.Logger):
         # print('sh', self.streamHandler)
 
     def view_logfile(self):
+        """View the log file written to disk."""
         with open(self.path_logfile) as inF:
             print(inF.read())
 
 
 def close_logger(logger):
+    """Close the handlers of the given logging.Logger instance.
+
+    :param logger:  logging.Logger instance or subclass instance
+    """
     if logger and hasattr(logger, 'handlers'):
         for handler in logger.handlers[:]:  # if not called with '[:]' the StreamHandlers are left open
             try:
@@ -153,15 +167,33 @@ def close_logger(logger):
 
 
 def shutdown_loggers():
+    """Shutdown any currently active loggers."""
     logging.shutdown()
 
 
 class LessThanFilter(logging.Filter):
-    # http://stackoverflow.com/questions/2302315/how-can-info-and-debug-logging-message-be-sent-to-stdout-and-higher-level-messag
+    """Filter class to filter log messages by a maximum log level.
+
+    Based on http://stackoverflow.com/questions/2302315/
+        how-can-info-and-debug-logging-message-be-sent-to-stdout-and-higher-level-messag
+    """
+
     def __init__(self, exclusive_maximum, name=""):
+        """Get an instance of LessThanFilter.
+
+        :param exclusive_maximum:  maximum log level, e.g., logger.WARNING
+        :param name:
+        """
         super(LessThanFilter, self).__init__(name)
         self.max_level = exclusive_maximum
 
     def filter(self, record):
+        """Filter funtion.
+
+        NOTE: Returns True if logging level of the given record is below the maximum log level.
+
+        :param record:
+        :return: bool
+        """
         # non-zero return means we log this message
         return True if record.levelno < self.max_level else False

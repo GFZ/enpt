@@ -9,7 +9,8 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import EnMAP_Metadata_SensorGeo, EnMAP_Metadata_VNIR_SensorGeo, EnMAP_Metadata_SWIR_SensorGeo
+from ..model.metadata import \
+    EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_VNIR_SensorGeo, EnMAP_Metadata_L1B_SWIR_SensorGeo
 
 
 ##############
@@ -414,8 +415,8 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.paths = self.get_paths()
         # instance an empty metadata object
         self.detector_meta = \
-            EnMAP_Metadata_VNIR_SensorGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
-            EnMAP_Metadata_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
+            EnMAP_Metadata_L1B_VNIR_SensorGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
+            EnMAP_Metadata_L1B_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
 
     def get_paths(self):
         """Get all file paths associated with the current instance of _EnMAP_Detector_SensorGeo.
@@ -538,7 +539,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir = EnMAP_VNIR_SensorGeo(root_dir)
         self.swir = EnMAP_SWIR_SensorGeo(root_dir)
         self.paths = self.get_paths()
-        self.meta = EnMAP_Metadata_SensorGeo(self.paths.metaxml, logger=logger)
+        self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, logger=logger)
         self.detector_attrNames = ['vnir', 'swir']
 
     def get_paths(self):

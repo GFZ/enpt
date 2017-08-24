@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""EnPT metadata modules. All object and functions regarding EnMAP metadata are implemented here."""
 
 from datetime import datetime
 from xml.etree import ElementTree
@@ -21,7 +22,7 @@ L1B_product_props = dict(
 ##############
 
 
-class _EnMAP_Metadata_Detector_SensorGeo(object):
+class _EnMAP_Metadata_L1B_Detector_SensorGeo(object):
     """Base class for all EnMAP metadata associated with a single EnMAP detector in sensor geometry.
 
     NOTE:
@@ -148,7 +149,7 @@ class _EnMAP_Metadata_Detector_SensorGeo(object):
 #########################################################
 
 
-class EnMAP_Metadata_SensorGeo(object):
+class EnMAP_Metadata_L1B_SensorGeo(object):
     """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
 
     Attributes:
@@ -160,28 +161,43 @@ class EnMAP_Metadata_SensorGeo(object):
     """
 
     def __init__(self, path_metaxml, logger=None):
+        """Get a metadata object instance for the given EnMAP L1B product in sensor geometry.
+
+        :param path_metaxml:  file path of the EnMAP L1B metadata XML file
+        :param logger:  instance of logging.logger or subclassed
+        """
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
 
         # defaults
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
-        self.vnir = None  # type: EnMAP_Metadata_VNIR_SensorGeo # metadata of VNIR only
-        self.swir = None  # type: EnMAP_Metadata_SWIR_SensorGeo # metadata of SWIR only
+        self.vnir = None  # type: EnMAP_Metadata_L1B_VNIR_SensorGeo # metadata of VNIR only
+        self.swir = None  # type: EnMAP_Metadata_L1B_SWIR_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']
 
     def read_common_meta(self, observation_time: datetime=None):
+        """Read the metadata belonging to both, the VNIR and SWIR detector of the EnMAP L1B product in sensor geometry.
+
+        :param observation_time:  date and time of image observation (datetime.datetime)
+        """
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
 
     def read_metadata(self, observation_time: datetime=None, lon_lat_smpl=(15, 15), nsmile_coef=4):
+        """Read the metadata of the whole EnMAP L1B product in sensor geometry.
+
+        :param observation_time:  date and time of image observation (datetime.datetime)
+        :param lon_lat_smpl:  number if sampling points in lon, lat fields
+        :param nsmile_coef:  number of polynomial coefficients for smile
+        """
         self.read_common_meta(observation_time)
-        self.vnir = EnMAP_Metadata_VNIR_SensorGeo(self._path_xml)
+        self.vnir = EnMAP_Metadata_L1B_VNIR_SensorGeo(self._path_xml)
         self.vnir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-        self.swir = EnMAP_Metadata_SWIR_SensorGeo(self._path_xml)
+        self.swir = EnMAP_Metadata_L1B_SWIR_SensorGeo(self._path_xml)
         self.swir.read_metadata(lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
-class EnMAP_Metadata_VNIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
+class EnMAP_Metadata_L1B_VNIR_SensorGeo(_EnMAP_Metadata_L1B_Detector_SensorGeo):
     """EnMAP Metadata class holding the metadata of the VNIR detector in sensor geometry.
 
     NOTE:
@@ -189,17 +205,27 @@ class EnMAP_Metadata_VNIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
     """
 
     def __init__(self, path_metaxml, logger=None):
+        """Get a metadata object instance for the VNIR detector of the given EnMAP L1B product in sensor geometry.
+
+        :param path_metaxml:  file path of the EnMAP L1B metadata XML file
+        :param logger:  instance of logging.logger or subclassed
+        """
         # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
-        super(EnMAP_Metadata_VNIR_SensorGeo, self).__init__('VNIR', logger=logger)
+        super(EnMAP_Metadata_L1B_VNIR_SensorGeo, self).__init__('VNIR', logger=logger)
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['VNIR']
 
     def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
-        super(EnMAP_Metadata_VNIR_SensorGeo, self)\
+        """Read the metadata of the VNIR detector in sensor geometry.
+
+        :param lon_lat_smpl:  number if sampling points in lon, lat fields
+        :param nsmile_coef:  number of polynomial coefficients for smile
+        """
+        super(EnMAP_Metadata_L1B_VNIR_SensorGeo, self)\
             ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
 
-class EnMAP_Metadata_SWIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
+class EnMAP_Metadata_L1B_SWIR_SensorGeo(_EnMAP_Metadata_L1B_Detector_SensorGeo):
     """EnMAP Metadata class holding the metadata of the SWIR detector in sensor geometry.
 
     NOTE:
@@ -207,8 +233,13 @@ class EnMAP_Metadata_SWIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
     """
 
     def __init__(self, path_metaxml, logger=None):
+        """Get a metadata object instance for the SWIR detector of the given EnMAP L1B product in sensor geometry.
+
+        :param path_metaxml:  file path of the EnMAP L1B metadata XML file
+        :param logger:  instance of logging.logger or subclassed
+        """
         # get all attributes from base class '_EnMAP_Metadata_Detector_SensorGeo'
-        super(EnMAP_Metadata_SWIR_SensorGeo, self).__init__('SWIR', logger=logger)
+        super(EnMAP_Metadata_L1B_SWIR_SensorGeo, self).__init__('SWIR', logger=logger)
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['SWIR']
 
@@ -217,7 +248,6 @@ class EnMAP_Metadata_SWIR_SensorGeo(_EnMAP_Metadata_Detector_SensorGeo):
 
         :param lon_lat_smpl: number if sampling points in lon, lat fields
         :param nsmile_coef: number of polynomial coefficients for smile
-        :return:
         """
-        super(EnMAP_Metadata_SWIR_SensorGeo, self)\
+        super(EnMAP_Metadata_L1B_SWIR_SensorGeo, self)\
             ._read_metadata(self._path_xml, self.detector_label, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
