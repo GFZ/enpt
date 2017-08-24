@@ -79,7 +79,7 @@ nosetests: clean-test ## Runs nosetests with coverage, xUnit and nose-html-outpu
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/enpt.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ enpt
+	sphinx-apidoc -o docs/ enpt --private
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	#$(MAKE) -C docs latex

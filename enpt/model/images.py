@@ -410,7 +410,7 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         super(_EnMAP_Detector_SensorGeo, self).__init__()
         self.paths = self.get_paths()
         # instance an empty metadata object
-        self.meta = \
+        self.detector_meta = \
             EnMAP_Metadata_VNIR_SensorGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
             EnMAP_Metadata_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
 
@@ -437,14 +437,15 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :return: None
         """
         # TODO move to processors.radiometric_transform?
-        if self.meta.unitcode != 'DN':
+        if self.detector_meta.unitcode != 'DN':
             raise RuntimeError("'DN2TOARadiance' is intended to convert digital numbers into TOA radiance. The current "
-                               "unitcode must be 'DN'! Found %s." % self.meta.unitcode)
+                               "unitcode must be 'DN'! Found %s." % self.detector_meta.unitcode)
 
         self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
-        self.data = (self.meta.l_min + (self.meta.l_max - self.meta.l_min) / (2 ** 16 - 1) * self.data[:])
-        self.meta.unit = "mW m^-2 sr^-1 nm^-1"
-        self.meta.unitcode = "TOARad"
+        self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
+                     (2 ** 16 - 1) * self.data[:])
+        self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
+        self.detector_meta.unitcode = "TOARad"
 
 
 class _EnMAP_Detector_MapGeo(_EnMAP_Image):
@@ -502,12 +503,18 @@ class EnMAPL1Product_SensorGeo(object):
     """Class for EnPT EnMAP object in sensor geometry
 
     Attributes:
+        - logger:
+            - logging.Logger instance or subclassed
         - vnir
-            - ...
+            - instance of EnMAP_VNIR_SensorGeo class
         - swir
-            - same as vor [vnir]
-        - paths: paths belonging to the EnMAP product
-
+            - instance of EnMAP_SWIR_SensorGeo class
+        - paths:
+            - paths belonging to the EnMAP product
+        - meta:
+            - instance of EnMAP_Metadata_SensorGeo class
+        - detector_attrNames:
+            - list of attribute names for VNIR and SWIR detectors
     """
     def __init__(self, root_dir: str, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.

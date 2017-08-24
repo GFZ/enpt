@@ -72,45 +72,47 @@ enpt/model/images.py:433 in private method `DN2TOARadiance`:
         D205: 1 blank line required between summary line and description (found 0)
 enpt/model/images.py:433 in private method `DN2TOARadiance`:
         D400: First line should end with a period (not 'e')
-enpt/model/images.py:450 in private class `_EnMAP_Detector_MapGeo`:
+enpt/model/images.py:451 in private class `_EnMAP_Detector_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:450 in private class `_EnMAP_Detector_MapGeo`:
+enpt/model/images.py:451 in private class `_EnMAP_Detector_MapGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:450 in private class `_EnMAP_Detector_MapGeo`:
+enpt/model/images.py:451 in private class `_EnMAP_Detector_MapGeo`:
         D400: First line should end with a period (not 'm')
-enpt/model/images.py:463 in private method `__init__`:
+enpt/model/images.py:464 in private method `__init__`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:481 in public class `EnMAP_VNIR_SensorGeo`:
+enpt/model/images.py:482 in public class `EnMAP_VNIR_SensorGeo`:
         D101: Missing docstring in public class
-enpt/model/images.py:491 in public class `EnMAP_SWIR_SensorGeo`:
+enpt/model/images.py:492 in public class `EnMAP_SWIR_SensorGeo`:
         D101: Missing docstring in public class
-enpt/model/images.py:501 in public class `EnMAPL1Product_SensorGeo`:
+enpt/model/images.py:502 in public class `EnMAPL1Product_SensorGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:501 in public class `EnMAPL1Product_SensorGeo`:
+enpt/model/images.py:502 in public class `EnMAPL1Product_SensorGeo`:
         D400: First line should end with a period (not 'y')
-enpt/model/images.py:538 in public method `DN2TOARadiance`:
+enpt/model/images.py:502 in public class `EnMAPL1Product_SensorGeo`:
+        D413: Missing blank line after last section ('Attributes')
+enpt/model/images.py:545 in public method `DN2TOARadiance`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:538 in public method `DN2TOARadiance`:
+enpt/model/images.py:545 in public method `DN2TOARadiance`:
         D400: First line should end with a period (not 'e')
-enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:560 in public class `EnMAP_VNIR_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:560 in public class `EnMAP_VNIR_MapGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:560 in public class `EnMAP_VNIR_MapGeo`:
         D209: Multi-line docstring closing quotes should be on a separate line
-enpt/model/images.py:553 in public class `EnMAP_VNIR_MapGeo`:
+enpt/model/images.py:560 in public class `EnMAP_VNIR_MapGeo`:
         D400: First line should end with a period (not 'a')
-enpt/model/images.py:559 in public method `__init__`:
+enpt/model/images.py:566 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:570 in public class `EnMAP_SWIR_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:570 in public class `EnMAP_SWIR_MapGeo`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:570 in public class `EnMAP_SWIR_MapGeo`:
         D209: Multi-line docstring closing quotes should be on a separate line
-enpt/model/images.py:563 in public class `EnMAP_SWIR_MapGeo`:
+enpt/model/images.py:570 in public class `EnMAP_SWIR_MapGeo`:
         D400: First line should end with a period (not 'a')
-enpt/model/images.py:569 in public method `__init__`:
+enpt/model/images.py:576 in public method `__init__`:
         D102: Missing docstring in public method
 enpt/model/__init__.py:1 at module level:
         D104: Missing docstring in public package
