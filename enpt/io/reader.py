@@ -37,19 +37,19 @@ class L1B_Reader(object):
         L1_obj.vnir.data = L1_obj.paths.vnir.imagedata
         L1_obj.vnir.mask_clouds = L1_obj.paths.vnir.mask_clouds
         L1_obj.vnir.deadpixelmap = L1_obj.paths.vnir.deadpixelmap
-        L1_obj.vnir.meta = L1_obj.meta.vnir
+        L1_obj.vnir.detector_meta = L1_obj.meta.vnir
 
         # read SWIR data
         # call L1_obj.swir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
         L1_obj.swir.data = L1_obj.paths.swir.imagedata
         L1_obj.swir.mask_clouds = L1_obj.paths.swir.mask_clouds
         L1_obj.swir.deadpixelmap = L1_obj.paths.swir.deadpixelmap
-        L1_obj.swir.meta = L1_obj.meta.swir
+        L1_obj.swir.detector_meta = L1_obj.meta.swir
 
         # compute radiance and calculate snr
         L1_obj.DN2TOARadiance()
-        L1_obj.vnir.meta.calc_snr(data=L1_obj.vnir.data)
-        L1_obj.swir.meta.calc_snr(data=L1_obj.swir.data)
+        L1_obj.vnir.detector_meta.calc_snr(data=L1_obj.vnir.data)
+        L1_obj.swir.detector_meta.calc_snr(data=L1_obj.swir.data)
 
         return L1_obj
 
