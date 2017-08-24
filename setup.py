@@ -17,7 +17,7 @@ test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 
 setup(
     name='enpt',
-    version='0.2.1',
+    version='0.2.2',
     description="EnMAP PT",
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
