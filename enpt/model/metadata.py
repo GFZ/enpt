@@ -177,7 +177,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
 
-    def read_metadata(self, observation_time: datetime=None, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def read_metadata(self, observation_time: datetime=None, lon_lat_smpl=(15, 15), nsmile_coef=5):
         """Read the metadata of the whole EnMAP L1B product in sensor geometry.
 
         :param observation_time:  date and time of image observation (datetime.datetime)
