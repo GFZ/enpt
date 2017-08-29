@@ -175,41 +175,6 @@ class _EnMAP_Image(object):
         self._arr = None
 
     @property
-    def mask_nodata(self):
-        """Return the no data mask.
-
-        Bundled with all the corresponding metadata.
-
-        For usage instructions and a list of attributes refer to help(self.data).
-        self.mask_nodata works in the same way.
-
-        :return: instance of geoarray.NoDataMask
-        """
-        if self._mask_nodata is None and isinstance(self.data, GeoArray):
-            self.logger.info('Calculating nodata mask...')
-            self._mask_nodata = self.data.mask_nodata  # calculates mask nodata if not already present
-
-        return self._mask_nodata
-
-    @mask_nodata.setter
-    def mask_nodata(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            nd = NoDataMask(*geoArr_initArgs)
-            if nd.shape[:2] != self.data.shape[:2]:
-                raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
-            nd.nodata = False
-            nd.gt = self.data.gt
-            nd.prj = self.data.prj
-            self._mask_nodata.prj = nd
-        else:
-            del self.mask_nodata
-
-    @mask_nodata.deleter
-    def mask_nodata(self):
-        self._mask_nodata = None
-
-    @property
     def mask_clouds(self):
         """Return the cloud mask.
 
@@ -365,20 +330,6 @@ class _EnMAP_Image(object):
     @deadpixelmap.deleter
     def deadpixelmap(self):
         self._deadpixelmap = None
-
-    def calc_mask_nodata(self, fromBand=None, overwrite=False):
-        """Calculate a no data mask with (values: 0=nodata; 1=data).
-
-        :param fromBand:  <int> index of the band to be used (if None, all bands are used)
-        :param overwrite: <bool> whether to overwrite existing nodata mask that has already been calculated
-        :return:
-        """
-        self.logger.info('Calculating nodata mask...')
-
-        if self._mask_nodata is None or overwrite:
-            self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
-            self.mask_nodata = self.data.mask_nodata
-            return self.mask_nodata
 
 
 #######################################
@@ -538,3 +489,52 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
 
         # get all attributes of base class "_EnMAP_Image"
         super(EnMAP_Detector_MapGeo, self).__init__()
+
+    @property
+    def mask_nodata(self):
+        """Return the no data mask.
+
+        Bundled with all the corresponding metadata.
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_nodata works in the same way.
+
+        :return: instance of geoarray.NoDataMask
+        """
+        if self._mask_nodata is None and isinstance(self.data, GeoArray):
+            self.logger.info('Calculating nodata mask...')
+            self._mask_nodata = self.data.mask_nodata  # calculates mask nodata if not already present
+
+        return self._mask_nodata
+
+    @mask_nodata.setter
+    def mask_nodata(self, *geoArr_initArgs):
+        if geoArr_initArgs[0] is not None:
+            nd = NoDataMask(*geoArr_initArgs)
+            if nd.shape[:2] != self.data.shape[:2]:
+                raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
+                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
+            nd.nodata = False
+            nd.gt = self.data.gt
+            nd.prj = self.data.prj
+            self._mask_nodata.prj = nd
+        else:
+            del self.mask_nodata
+
+    @mask_nodata.deleter
+    def mask_nodata(self):
+        self._mask_nodata = None
+
+    def calc_mask_nodata(self, fromBand=None, overwrite=False):
+        """Calculate a no data mask with (values: 0=nodata; 1=data).
+
+        :param fromBand:  <int> index of the band to be used (if None, all bands are used)
+        :param overwrite: <bool> whether to overwrite existing nodata mask that has already been calculated
+        :return:
+        """
+        self.logger.info('Calculating nodata mask...')
+
+        if self._mask_nodata is None or overwrite:
+            self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
+            self.mask_nodata = self.data.mask_nodata
+            return self.mask_nodata
