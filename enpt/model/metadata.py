@@ -63,7 +63,7 @@ class _EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.unit = ''  # type: str  # radiometric unit of pixel values
         self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
 
-    def _read_metadata(self, path_xml, detector_label_xml, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def _read_metadata(self, path_xml, detector_label_xml, lon_lat_smpl=(15, 15), nsmile_coef=5):
         """Read the metadata of a specific EnMAP detector in sensor geometry.
 
         :param path_xml:  file path of the metadata XML file
@@ -215,7 +215,7 @@ class EnMAP_Metadata_L1B_VNIR_SensorGeo(_EnMAP_Metadata_L1B_Detector_SensorGeo):
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['VNIR']
 
-    def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=5):
         """Read the metadata of the VNIR detector in sensor geometry.
 
         :param lon_lat_smpl:  number if sampling points in lon, lat fields
@@ -243,7 +243,7 @@ class EnMAP_Metadata_L1B_SWIR_SensorGeo(_EnMAP_Metadata_L1B_Detector_SensorGeo):
         self._path_xml = path_metaxml
         self.detector_label = L1B_product_props['xml_detector_label']['SWIR']
 
-    def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def read_metadata(self, lon_lat_smpl=(15, 15), nsmile_coef=5):
         """Read the metadata of the SWIR detector in sensor geometry.
 
         :param lon_lat_smpl: number if sampling points in lon, lat fields

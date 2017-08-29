@@ -17,7 +17,7 @@ class L1B_Reader(object):
         self.cfg = user_inputs
 
     @staticmethod
-    def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=4):
+    def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=5):
         # TODO move to init?
         """Read L1B, DEM and spatial reference data.
 
