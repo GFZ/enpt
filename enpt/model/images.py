@@ -9,8 +9,7 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import \
-    EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_VNIR_SensorGeo, EnMAP_Metadata_L1B_SWIR_SensorGeo
+from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 
 
 ##############
@@ -176,41 +175,6 @@ class _EnMAP_Image(object):
         self._arr = None
 
     @property
-    def mask_nodata(self):
-        """Return the no data mask.
-
-        Bundled with all the corresponding metadata.
-
-        For usage instructions and a list of attributes refer to help(self.data).
-        self.mask_nodata works in the same way.
-
-        :return: instance of geoarray.NoDataMask
-        """
-        if self._mask_nodata is None and isinstance(self.data, GeoArray):
-            self.logger.info('Calculating nodata mask...')
-            self._mask_nodata = self.data.mask_nodata  # calculates mask nodata if not already present
-
-        return self._mask_nodata
-
-    @mask_nodata.setter
-    def mask_nodata(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            nd = NoDataMask(*geoArr_initArgs)
-            if nd.shape[:2] != self.data.shape[:2]:
-                raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
-            nd.nodata = False
-            nd.gt = self.data.gt
-            nd.prj = self.data.prj
-            self._mask_nodata.prj = nd
-        else:
-            del self.mask_nodata
-
-    @mask_nodata.deleter
-    def mask_nodata(self):
-        self._mask_nodata = None
-
-    @property
     def mask_clouds(self):
         """Return the cloud mask.
 
@@ -367,29 +331,18 @@ class _EnMAP_Image(object):
     def deadpixelmap(self):
         self._deadpixelmap = None
 
-    def calc_mask_nodata(self, fromBand=None, overwrite=False):
-        """Calculate a no data mask with (values: 0=nodata; 1=data).
 
-        :param fromBand:  <int> index of the band to be used (if None, all bands are used)
-        :param overwrite: <bool> whether to overwrite existing nodata mask that has already been calculated
-        :return:
-        """
-        self.logger.info('Calculating nodata mask...')
-
-        if self._mask_nodata is None or overwrite:
-            self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
-            self.mask_nodata = self.data.mask_nodata
-            return self.mask_nodata
+#######################################
+# EnPT EnMAP objects in sensor geometry
+#######################################
 
 
-class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
-    """Base class representing a single detector of an EnMAP image (as sensor geometry).
+class EnMAP_Detector_SensorGeo(_EnMAP_Image):
+    """Class representing a single detector of an EnMAP image (as sensor geometry).
 
     NOTE:
         - Inherits all attributes from _EnMAP_Image class.
         - All functionality that VNIR and SWIR detectors (sensor geometry) have in common is to be implemented here.
-        - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
-          _EnMAP_Detector_SensorGeo.
 
     Attributes:
         - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
@@ -411,12 +364,10 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.logger = logger or logging.getLogger()
 
         # get all attributes of base class "_EnMAP_Image"
-        super(_EnMAP_Detector_SensorGeo, self).__init__()
+        super(EnMAP_Detector_SensorGeo, self).__init__()
         self.paths = self.get_paths()
         # instance an empty metadata object
-        self.detector_meta = \
-            EnMAP_Metadata_L1B_VNIR_SensorGeo(self.paths.metaxml, logger=logger) if self.detector_name == 'VNIR' else \
-            EnMAP_Metadata_L1B_SWIR_SensorGeo(self.paths.metaxml, logger=logger)
+        self.detector_meta = EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, logger=logger)
 
     def get_paths(self):
         """Get all file paths associated with the current instance of _EnMAP_Detector_SensorGeo.
@@ -454,62 +405,6 @@ class _EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.detector_meta.unitcode = "TOARad"
 
 
-class _EnMAP_Detector_MapGeo(_EnMAP_Image):
-    """Base class representing a single detector of an EnMAP image (as map geometry).
-
-    NOTE:
-        - Inherits all attributes from _EnMAP_Image class.
-        - All functionality that VNIR and SWIR detectors (map geometry) have in common is to be implemented here.
-        - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
-          _EnMAP_Detector_SensorGeo.
-
-    Attributes:
-        - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
-
-    """
-
-    def __init__(self, detector_name: str, logger=None):
-        """Get an instance of _EnMAP_Detector_MapGeo.
-
-        :param detector_name:   'VNIR' or 'SWIR'
-        :param logger:
-        """
-        self.detector_name = detector_name
-        self.logger = logger or logging.getLogger()
-
-        # get all attributes of base class "_EnMAP_Image"
-        super(_EnMAP_Detector_MapGeo, self).__init__()
-
-
-#######################################
-# EnPT EnMAP objects in sensor geometry
-#######################################
-
-
-class EnMAP_VNIR_SensorGeo(_EnMAP_Detector_SensorGeo):
-    """Class for EnPT EnMAP VNIR object in sensor geometry."""
-
-    def __init__(self, root_dir: str):
-        """Get an instance of the VNIR of an EnMAP data Level-1B product.
-
-        :param root_dir: Root directory of EnMAP Level-1B product
-        """
-        # get all attributes of base class "_EnMAP_Detector"
-        super(EnMAP_VNIR_SensorGeo, self).__init__('VNIR', root_dir)
-
-
-class EnMAP_SWIR_SensorGeo(_EnMAP_Detector_SensorGeo):
-    """Class for EnPT EnMAP SWIR object in sensor geometry."""
-
-    def __init__(self, root_dir: str):
-        """Get an instance of the SWIR of an EnMAP data Level-1B product.
-
-        :param root_dir: Root directory of EnMAP Level-1B product
-        """
-        # get all attributes of base class "_EnMAP_Detector"
-        super(EnMAP_SWIR_SensorGeo, self).__init__('SWIR', root_dir)
-
-
 class EnMAPL1Product_SensorGeo(object):
     """Class for EnPT EnMAP object in sensor geometry.
 
@@ -536,8 +431,8 @@ class EnMAPL1Product_SensorGeo(object):
         :param logger: None or logging instance
         """
         self.logger = logger or logging.getLogger(__name__)
-        self.vnir = EnMAP_VNIR_SensorGeo(root_dir)
-        self.swir = EnMAP_SWIR_SensorGeo(root_dir)
+        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, logger=logger)
+        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, logger=logger)
         self.paths = self.get_paths()
         self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, logger=logger)
         self.detector_attrNames = ['vnir', 'swir']
@@ -569,25 +464,77 @@ class EnMAPL1Product_SensorGeo(object):
 ####################################
 
 
-class EnMAP_VNIR_MapGeo(_EnMAP_Detector_MapGeo):
-    """Class for EnMAP VNIR image in map geometry including all metadata and associated aux-data (masks, DEM, etc.).
+class EnMAP_Detector_MapGeo(_EnMAP_Image):
+    """Base class representing a single detector of an EnMAP image (as map geometry).
 
-    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
-    All VNIR_MapGeo specific modifications are to be implemented here.
+    NOTE:
+        - Inherits all attributes from _EnMAP_Image class.
+        - All functionality that VNIR and SWIR detectors (map geometry) have in common is to be implemented here.
+        - All EnMAP image subclasses representing a specific EnMAP detector (sensor geometry) should inherit from
+          _EnMAP_Detector_SensorGeo.
+
+    Attributes:
+        - to be listed here. Check help(_EnMAP_Detector_SensorGeo) in the meanwhile!
+
     """
 
-    def __init__(self, logger=None):
-        """Get an instance of the VNIR of an EnMAP data Level-1B product (map geometry)."""
-        super(EnMAP_VNIR_MapGeo, self).__init__('VNIR', logger=logger)
+    def __init__(self, detector_name: str, logger=None):
+        """Get an instance of _EnMAP_Detector_MapGeo.
 
+        :param detector_name:   'VNIR' or 'SWIR'
+        :param logger:
+        """
+        self.detector_name = detector_name
+        self.logger = logger or logging.getLogger()
 
-class EnMAP_SWIR_MapGeo(_EnMAP_Detector_MapGeo):
-    """Class for EnMAP SWIR image in map geometry including all metadata and associated aux-data (masks, DEM, etc.).
+        # get all attributes of base class "_EnMAP_Image"
+        super(EnMAP_Detector_MapGeo, self).__init__()
 
-    All attributes commonly used among different EnMAP images are inherited from the _EnMAP_Detector_MapGeo class.
-    All SWIR_MapGeo specific modifications are to be implemented here.
-    """
+    @property
+    def mask_nodata(self):
+        """Return the no data mask.
 
-    def __init__(self, logger=None):
-        """Get an instance of the SWIR of an EnMAP data Level-1B product (map geometry)."""
-        super(EnMAP_SWIR_MapGeo, self).__init__('SWIR', logger=logger)
+        Bundled with all the corresponding metadata.
+
+        For usage instructions and a list of attributes refer to help(self.data).
+        self.mask_nodata works in the same way.
+
+        :return: instance of geoarray.NoDataMask
+        """
+        if self._mask_nodata is None and isinstance(self.data, GeoArray):
+            self.logger.info('Calculating nodata mask...')
+            self._mask_nodata = self.data.mask_nodata  # calculates mask nodata if not already present
+
+        return self._mask_nodata
+
+    @mask_nodata.setter
+    def mask_nodata(self, *geoArr_initArgs):
+        if geoArr_initArgs[0] is not None:
+            nd = NoDataMask(*geoArr_initArgs)
+            if nd.shape[:2] != self.data.shape[:2]:
+                raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
+                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
+            nd.nodata = False
+            nd.gt = self.data.gt
+            nd.prj = self.data.prj
+            self._mask_nodata.prj = nd
+        else:
+            del self.mask_nodata
+
+    @mask_nodata.deleter
+    def mask_nodata(self):
+        self._mask_nodata = None
+
+    def calc_mask_nodata(self, fromBand=None, overwrite=False):
+        """Calculate a no data mask with (values: 0=nodata; 1=data).
+
+        :param fromBand:  <int> index of the band to be used (if None, all bands are used)
+        :param overwrite: <bool> whether to overwrite existing nodata mask that has already been calculated
+        :return:
+        """
+        self.logger.info('Calculating nodata mask...')
+
+        if self._mask_nodata is None or overwrite:
+            self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
+            self.mask_nodata = self.data.mask_nodata
+            return self.mask_nodata
