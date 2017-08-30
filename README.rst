@@ -18,8 +18,8 @@ Features
 Status
 ------
 
-.. figure:: https://gitext.gfz-potsdam.de/segl/EnPT/badges/master/build.svg
-.. figure:: https://gitext.gfz-potsdam.de/segl/EnPT/badges/master/coverage.svg
+.. figure:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/build.svg
+.. figure:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 

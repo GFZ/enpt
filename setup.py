@@ -22,7 +22,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
     author_email='segl@gfz-potsdam.de',
-    url='https://gitext.gfz-potsdam.de/segl/EnPT',
+    url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     packages=find_packages(exclude=['tests*']),
     package_dir={'enpt':
                  'enpt'},

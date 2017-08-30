@@ -15,7 +15,7 @@ sudo docker rm ${gitlab_runner}
 sudo docker run -d --name ${gitlab_runner} --restart always \
 -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
 
-echo "#### Register container at gitlab, get token here https://gitext.gfz-potsdam.de/segl/EnPT/settings/ci_cd"
+echo "#### Register container at gitlab, get token here https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/settings/ci_cd"
 read -p "Please enter gitlab token: " token
 echo ""
 read -p "Please enter gitlab runner name: " runner_name
