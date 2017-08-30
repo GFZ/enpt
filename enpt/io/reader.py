@@ -17,7 +17,8 @@ class L1B_Reader(object):
         self.cfg = user_inputs
 
     @staticmethod
-    def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=5):
+    def read_inputdata(root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=5,
+                       snr_vnir=None, snr_swir=None):
         # TODO move to init?
         """Read L1B, DEM and spatial reference data.
 
@@ -50,8 +51,10 @@ class L1B_Reader(object):
 
         # compute radiance and calculate snr
         L1_obj.DN2TOARadiance()
-        L1_obj.vnir.detector_meta.calc_snr(data=L1_obj.vnir.data)
-        L1_obj.swir.detector_meta.calc_snr(data=L1_obj.swir.data)
+        if snr_swir is not None:
+            L1_obj.vnir.detector_meta.calc_snr_vnir(data=L1_obj.vnir, snr_data_fn=snr_vnir)
+        if snr_swir is not None:
+            L1_obj.swir.detector_meta.calc_snr_swir(data=L1_obj.swir, snr_data_fn=snr_swir)
 
         return L1_obj
 

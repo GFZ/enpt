@@ -6,6 +6,9 @@ from xml.etree import ElementTree
 import logging
 import numpy as np
 from scipy.interpolate import interp2d
+import spectral as sp
+
+from ..model.images import EnMAP_Detector_SensorGeo
 
 L1B_product_props = dict(
     xml_detector_label=dict(
@@ -105,6 +108,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
         self.unit = 'none'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
         self.unitcode = 'DN'
+        self.snr = None
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -120,7 +124,21 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.smile_coef  # shape = (nwvl, nsmile_coef)
         )  # shape = (ncols, nwvl)
 
-    def calc_snr(self, data: np.ndarray):
+    def calc_snr_vnir(self, data: EnMAP_Detector_SensorGeo, snr_data_fn: str):
+        """Compute EnMAP SNR from radiance data.
+
+        :param data: Numpy array with radiance for scene
+        """
+        self.logger.info("Compute snr for: %s" % self.detector_name)
+        ds = sp.open_image(snr_data_fn)
+        p_hg = ds[0:3, :, :]
+        p_lg = ds[0:3, :, :]
+        l_th = ds[6, :, :]
+
+
+        return 500 * np.ones(data.shape, dtype=np.float)
+
+    def calc_snr_swir(self, data):
         """Compute EnMAP SNR from radiance data.
 
         :param data: Numpy array with radiance for scene
