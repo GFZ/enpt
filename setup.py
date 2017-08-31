@@ -9,8 +9,8 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'numpy', 'scipy', 'geoarray'  # put package requirements here
+requirements = [  # put package requirements here
+    'numpy', 'scipy', 'geoarray', 'spectral'
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
