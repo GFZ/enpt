@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 import logging
 import numpy as np
 from scipy.interpolate import interp2d
+import spectral as sp
 
 L1B_product_props = dict(
     xml_detector_label=dict(
@@ -105,6 +106,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
         self.unit = 'none'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
         self.unitcode = 'DN'
+        self.snr = None
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -120,14 +122,39 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.smile_coef  # shape = (nwvl, nsmile_coef)
         )  # shape = (ncols, nwvl)
 
-    def calc_snr(self, data: np.ndarray):
+    def calc_snr_vnir(self, detector, snr_data_fn: str) -> None:
+        """Compute EnMAP-VNIR SNR from radiance data.
+
+        :param snr_data_fn: filename to SNR file
+        :param detector: vnir instance of EnMAP_Detector_SensorGeo
+        """
+        assert self.unit == 'mW m^-2 sr^-1 nm^-1'
+        self.logger.info("Compute snr for: %s using: %s" % (self.detector_name, snr_data_fn))
+        ds = sp.open_image(snr_data_fn)
+        p_hg = ds[0:3, :, :]
+        p_lg = ds[0:3, :, :]
+        l_th = np.squeeze(ds[6, :, :])
+
+        self.snr = np.zeros(detector.data.shape)
+        for irow in range(self.nrows):
+            hg = detector.data[irow, :, :] < l_th
+            l_hg = detector.data[irow, hg]
+            self.snr[irow, :, :][hg] = p_hg[0, hg] + p_hg[1, hg] * l_hg + p_hg[2, hg] * l_hg**2
+
+            lg = detector.data[irow, :, :] >= l_th
+            l_lg = detector.data[irow, lg]
+            self.snr[irow, :, :][lg] = p_lg[0, lg] + p_lg[1, lg] * l_lg + p_lg[2, lg] * l_lg ** 2
+
+    def calc_snr_swir(self, detector, snr_data_fn: str) -> None:
         """Compute EnMAP SNR from radiance data.
 
-        :param data: Numpy array with radiance for scene
+        :param snr_data_fn: filename to SNR file
+        :param detector: swir instance of EnMAP_Detector_SensorGeo
         """
-        self.logger.info("Compute snr for: %s" % self.detector_name)
-        self.logger.warning("SNR model missing -> const. value of 500 is returned")
-        return 500 * np.ones(data.shape, dtype=np.float)
+        assert self.unit == 'mW m^-2 sr^-1 nm^-1'
+        self.logger.info("Compute snr for: %s using: %s" % (self.detector_name, snr_data_fn))
+        pp = sp.open_image(snr_data_fn)[:, :, :]
+        self.snr = pp[0, :, :] + pp[1, :, :] * detector.data[:, :, :] + pp[2, :, :] * detector.data[:, :, :]**2
 
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
