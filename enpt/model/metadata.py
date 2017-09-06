@@ -105,7 +105,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
         self.unit = 'none'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
-        self.unitcode = 'DN'
+
+        try:
+            self.unitcode = xml.findall("%s/unitcode" % lbl)[0].text
+        except IndexError:
+            self.unitcode = 'DN'
+
         self.snr = None
 
     def calc_smile(self):
