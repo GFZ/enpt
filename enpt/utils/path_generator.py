@@ -27,7 +27,7 @@ class PathGenL1BProduct(object):
         """Return the path of the metadata XML file."""
         return glob(os.path.join(self.root_dir, "*_header.xml"))[0]
 
-    def get_path_imagedata(self):
+    def get_path_data(self):
         """Return the path of the image data file."""
         return os.path.join(self.root_dir, self._find_in_metaxml("%s/filename" % self.detector_label))
 

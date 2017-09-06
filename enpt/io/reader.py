@@ -36,24 +36,24 @@ class L1B_Reader(object):
 
         # read VNIR data
         # call L1_obj.vnir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
-        L1_obj.vnir.data = L1_obj.paths.vnir.imagedata
+        L1_obj.vnir.data = L1_obj.paths.vnir.data
         L1_obj.vnir.mask_clouds = L1_obj.paths.vnir.mask_clouds
         L1_obj.vnir.deadpixelmap = L1_obj.paths.vnir.deadpixelmap
         L1_obj.vnir.detector_meta = L1_obj.meta.vnir
 
         # read SWIR data
         # call L1_obj.swir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
-        L1_obj.swir.data = L1_obj.paths.swir.imagedata
+        L1_obj.swir.data = L1_obj.paths.swir.data
         L1_obj.swir.mask_clouds = L1_obj.paths.swir.mask_clouds
         L1_obj.swir.deadpixelmap = L1_obj.paths.swir.deadpixelmap
         L1_obj.swir.detector_meta = L1_obj.meta.swir
 
         # compute radiance and calculate snr
         L1_obj.DN2TOARadiance()
-        if snr_vnir is not None:
+        if snr_vnir is not None and L1_obj.meta.vnir.unit == 'mW m^-2 sr^-1 nm^-1':
             self.logger.info("Compute SNR for vnir: %s" % snr_vnir)
             L1_obj.vnir.detector_meta.calc_snr_vnir(detector=L1_obj.vnir, snr_data_fn=snr_vnir)
-        if snr_swir is not None:
+        if snr_swir is not None and L1_obj.meta.vnir.unit == 'mW m^-2 sr^-1 nm^-1':
             self.logger.info("Compute SNR for swir: %s" % snr_swir)
             L1_obj.swir.detector_meta.calc_snr_swir(detector=L1_obj.swir, snr_data_fn=snr_swir)
 

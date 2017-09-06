@@ -4,6 +4,9 @@
 import logging
 from types import SimpleNamespace
 import numpy as np
+from os import path, sep, makedirs
+from shutil import copyfile
+from xml.etree import ElementTree
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
@@ -378,7 +381,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
         paths.metaxml = pathGen.get_path_metaxml()
-        paths.imagedata = pathGen.get_path_imagedata()
+        paths.data = pathGen.get_path_data()
         paths.mask_clouds = pathGen.get_path_cloudmask()
         paths.deadpixelmap = pathGen.get_path_deadpixelmap()
         paths.quicklook = pathGen.get_path_quicklook()
@@ -394,15 +397,17 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :return: None
         """
         # TODO move to processors.radiometric_transform?
-        if self.detector_meta.unitcode != 'DN':
-            raise RuntimeError("'DN2TOARadiance' is intended to convert digital numbers into TOA radiance. The current "
-                               "unitcode must be 'DN'! Found %s." % self.detector_meta.unitcode)
-
-        self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
-        self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
-                     (2 ** 16 - 1) * self.data[:])
-        self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
-        self.detector_meta.unitcode = "TOARad"
+        if self.detector_meta.unitcode == 'DN':
+            self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
+            self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
+                         (2 ** 16 - 1) * self.data[:])
+            self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
+            self.detector_meta.unitcode = "TOARad"
+        else:
+            self.logger.info(
+                "No is DN to Radiance conversion is performed since unitcode is not DN (found: {code}).".format(
+                    code=self.detector_meta.unitcode)
+            )
 
 
 class EnMAPL1Product_SensorGeo(object):
@@ -457,6 +462,46 @@ class EnMAPL1Product_SensorGeo(object):
         """
         self.vnir.DN2TOARadiance()
         self.swir.DN2TOARadiance()
+
+    def save(self, outdir: str, suffix="") -> str:
+        """Save this product to disk using almost the same format as for reading.
+
+        :param outdir: Path to output directory
+        :return: Root path of written product
+        """
+        product_dir = path.join(
+            path.abspath(outdir),
+            "{name}{suffix}".format(
+                name=[ff for ff in self.paths.root_dir.split(sep) if ff != ''][-1],
+                suffix=suffix)
+        )
+        self.logger.info("Write product to: %s" % product_dir)
+        makedirs(product_dir, exist_ok=True)
+
+        for detector_name in self.detector_attrNames:
+            detector = getattr(self, detector_name)
+            detector_paths = getattr(self.paths, detector_name)
+
+            for atts, fmt in ((("deadpixelmap", "mask_clouds"), "GTIff"),
+                              (("data",), "ENVI")):
+                for att in atts:
+                    getattr(detector, att).save(
+                        path.join(product_dir, path.basename(getattr(detector_paths, att))), fmt=fmt)
+
+            copyfile(
+                src=detector_paths.quicklook,
+                dst=path.join(product_dir, path.basename(detector_paths.quicklook))
+            )
+
+        xml = ElementTree.parse(self.paths.metaxml)
+        for xml_name, real_name in (("detector1", "vnir"), ("detector2", "swir")):
+            ele = xml.getroot().find(xml_name)
+            new_ele = ElementTree.Element("unitcode")
+            new_ele.text = getattr(self.meta, real_name).unitcode
+            ele.append(new_ele)
+        xml.write(path.join(product_dir, path.basename(self.paths.metaxml)))
+
+        return product_dir
 
 
 ####################################
