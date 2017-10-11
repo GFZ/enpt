@@ -2,17 +2,19 @@ FROM centos:7
 RUN yum update -y && \
     yum install -y wget vim bzip2 gcc gcc-c++ make libgl1-mesa-glx mesa-libGL qt5-qtbase-gui git texlive
 
-ENV anaconda_dl 'Anaconda3-4.3.1-Linux-x86_64.sh'
+ENV anaconda_dl 'Anaconda3-5.0.0-Linux-x86_64.sh'
 RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/archive/$anaconda_dl ; \
     bash -i /root/$anaconda_dl -b ; \
     rm -f /root/$anaconda_dl"
 
 # 'conda install --yes -c conda-forge 'icu=58.*' lxml' fixing a bug for conda-forge gdal build, as of 06/2017
+# install geoarray dependencies: gdal rasterio pyproj basemap shapely
 RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
-    conda install --yes -c conda-forge gdal ; \
-    conda install --yes -c conda-forge 'icu=58.*' lxml ; \
-    conda install --yes -c conda-forge glymur ; \
-    pip install sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 nose-htmloutput coverage rednose; "
+    conda install --yes -q -c conda-forge gdal rasterio pyproj basemap shapely ; \
+    conda install --yes -q -c conda-forge 'icu=58.*' lxml ; \
+    conda install --yes -q -c conda-forge scipy; \
+    pip install geoarray>=0.6.12 spectral>=0.16 sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 \
+        nose-htmloutput coverage rednose; "
 
 # installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
 ENV git_lfs_v='2.1.1'

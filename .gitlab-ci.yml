@@ -49,7 +49,10 @@ test_enpt_install:
     - conda create -y -q --name enpt python=3
     - source activate enpt
     # install some dependencies that cause trouble when installed via pip
-    - conda install -y -q -c conda-forge gdal scikit-image matplotlib
+    - conda install -y -c conda-forge scipy  # scikit-image, matplotlib
+    # install not pip-installable deps of geoarray
+    - conda install -y -c conda-forge numpy scikit-image matplotlib pandas gdal rasterio pyproj basemap shapely
+    - conda install -y -c conda-forge 'icu=58.*' lxml  # fixes bug for conda-forge gdal build
     # install enpt
     - make install
     - cd ..

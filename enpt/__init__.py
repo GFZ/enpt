@@ -3,5 +3,5 @@
 
 __author__ = """Karl Segl"""
 __email__ = 'segl@gfz-potsdam.de'
-__version__ = '0.2.7'
-__versionalias__ = '2017-08-30_02'
+__version__ = '0.2.8'
+__versionalias__ = '2017-10-11_01'

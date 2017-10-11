@@ -10,14 +10,14 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [  # put package requirements here
-    'numpy', 'scipy', 'geoarray', 'spectral'
+    'numpy', 'scipy', 'geoarray>=0.6.12', 'spectral>=0.16'
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 
 setup(
     name='enpt',
-    version='0.2.7',
+    version='0.2.8',
     description="EnMAP PT",
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
