@@ -1,13 +1,21 @@
 before_script:
   - git lfs pull
 
+
+stages:
+    - test
+    - deploy
+
+
 test_enpt:
+  stage: test
   script:
     - source /root/anaconda3/bin/activate
     - export GDAL_DATA=/root/anaconda3/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
-    - make lint
+    # run nosetests
     - make nosetests  # test are called here
+    # create the docs
     - make docs
   artifacts:
     paths:
@@ -16,12 +24,29 @@ test_enpt:
     - nosetests.html
     - nosetests.xml
     - tests/linting
+  when: always
+
+
+test_styles:
+  stage: test
+  script:
+    - source /root/anaconda3/bin/activate
+    - export GDAL_DATA=/root/anaconda3/share/gdal
+    - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
+    - make lint
+  artifacts:
+    paths:
+    - tests/linting/flake8.log
+    - tests/linting/pycodestyle.log
+    - tests/linting/pydocstyle.log
+    when: always
 
 
 test_enpt_install:
+  stage: test
   script:
     - source /root/anaconda3/bin/activate
-    - conda create -y -q --name enpt python=3.5
+    - conda create -y -q --name enpt python=3
     - source activate enpt
     # install some dependencies that cause trouble when installed via pip
     - conda install -y -q -c conda-forge gdal scikit-image matplotlib
@@ -30,6 +55,7 @@ test_enpt_install:
     - cd ..
     - pwd
     - ls
+    # test importability
     - python -c "import enpt; print(enpt)"
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
 
@@ -39,14 +65,23 @@ pages:
   dependencies:
     - test_enpt
   script:
-    - mkdir -p public/coverage
-    - cp -r htmlcov/* public/coverage/
-    - mkdir -p public/nosetests_reports
-    - cp nosetests.* public/nosetests_reports/
+    # Create the public directory
+    - rm -rf public
+    - mkdir public
     - mkdir -p public/doc
+    - mkdir -p public/coverage
+    - mkdir -p public/nosetests_reports
+    # Copy over the docs
     - cp -r docs/_build/html/* public/doc/
-    - mkdir -p public/linting
-    - cp tests/linting/*.log public/linting
+    # Copy over the coverage reports
+    - cp -r htmlcov/* public/coverage/
+    # Copy over the nosetests reports
+    - cp nosetests.* public/nosetests_reports/
+    # Check if everything is working great
+    - ls -al public
+    - ls -al public/doc
+    - ls -al public/coverage
+    - ls -al public/nosetests_reports
   artifacts:
     paths:
       - public
