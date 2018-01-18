@@ -1,30 +1,30 @@
 FROM centos:7
+# matplotlib requires freetype, freetype-devel, libpng-devel under centos
+# scikit-image requires blas-devel, lapack-devel, atlas-devel under centos
 RUN yum update -y && \
-    yum install -y wget vim bzip2 gcc gcc-c++ make libgl1-mesa-glx mesa-libGL qt5-qtbase-gui git texlive
+    yum install -y wget vim bzip2 gcc gcc-c++ make libgl1-mesa-glx mesa-libGL qt5-qtbase-gui git nano tree gdb texlive
 
-ENV anaconda_dl 'Anaconda3-5.0.0-Linux-x86_64.sh'
-RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/archive/$anaconda_dl ; \
-    bash -i /root/$anaconda_dl -b ; \
-    rm -f /root/$anaconda_dl"
-
-# 'conda install --yes -c conda-forge 'icu=58.*' lxml' fixing a bug for conda-forge gdal build, as of 06/2017
-# install geoarray dependencies: gdal rasterio pyproj basemap shapely
-RUN /bin/bash -i -c "source /root/anaconda3/bin/activate ; \
-    conda install --yes -q -c conda-forge gdal rasterio pyproj basemap shapely ; \
-    conda install --yes -q -c conda-forge 'icu=58.*' lxml ; \
-    conda install --yes -q -c conda-forge scipy; \
-    pip install geoarray>=0.6.12 spectral>=0.16 sphinx-argparse flake8 pycodestyle pylint pydocstyle nose nose2 \
-        nose-htmloutput coverage rednose; "
-
-# installing git large file support, see here: https://git-lfs.github.com/ , change version number below for future upgrades
+# change version numbers for future upgrades
+ENV miniconda_dl 'Miniconda3-latest-Linux-x86_64.sh'
+ENV envconfig 'environment_enpt.yml'
 ENV git_lfs_v='2.1.1'
+
+RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/miniconda/$miniconda_dl ; \
+    bash -i /root/$miniconda_dl -b ; \
+    rm -f /root/$miniconda_dl"
+
+# copy some needed stuff to /root
+COPY *.yml /root/
+
+# create an environment with all packages specified in $envconfig
+RUN /bin/bash -i -c "source /root/miniconda3/bin/activate ; \
+    conda env update -f /root/$envconfig"
+
+# install git lfs
+RUN /bin/bash -i -c "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash"
+
+# install git large file support, see here: https://git-lfs.github.com/
 RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
     tar -zxvf git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
     cd git-lfs-${git_lfs_v}; \
     bash ./install.sh"
-
-# set matplotlib backend to Agg as default, Qt won't work in headless docker containers
-RUN bash -i -c 'source /root/anaconda3/bin/activate; \
-    sed -i "/backend      : tkagg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())"); \
-    sed -i "/backend      : Qt4Agg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())"); \
-    sed -i "/backend      : qt5agg/c\backend      : Agg" $(python -c "import matplotlib; print(matplotlib.matplotlib_fname())")'

@@ -1,0 +1,38 @@
+name: enpt
+
+channels: &id1
+  - http://conda.anaconda.org/ioam  # only for holoviews
+  - http://conda.anaconda.org/conda-forge
+
+dependencies:
+  - python=3.*.*
+  - numpy
+
+  # geoarray
+  - pyqt
+  - gdal
+  - scikit-image
+  - rasterio
+  - pyproj
+  - lxml
+  - geopandas
+  - ipython
+  - matplotlib
+  - basemap
+  - shapely
+  - holoviews
+  - bokeh
+  - pip:
+    - scipy
+    - geoarray>=0.6.12
+    - spectral>=0.16
+    - sphinx-argparse
+    - flake8
+    - pycodestyle
+    - pylint
+    - pydocstyle
+    - nose
+    - nose2
+    - nose-htmloutput
+    - coverage
+    - rednose

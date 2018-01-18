@@ -25,6 +25,6 @@ sudo docker exec -it ${gitlab_runner} /bin/bash -c "export RUNNER_EXECUTOR=docke
   --registration-token '${token}' \
   --run-untagged=true \
   --locked=true \
-  --tag-list  sicor_client \
+  --tag-list  enpt_client \
   --description '${runner_name}' \
   --docker-image '${tag}' "
