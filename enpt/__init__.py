@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """EnMAP processing tools (EnPT) software package developed by GFZ."""
 
+from .version import __version__, __versionalias__   # noqa (E402 + F401)
+
 __author__ = """Karl Segl"""
 __email__ = 'segl@gfz-potsdam.de'
-__version__ = '0.2.8'
-__versionalias__ = '2017-10-11_01'
+__all__ = ['__version__',
+           '__versionalias__',
+           '__author__',
+           '__email__'
+           ]

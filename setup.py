@@ -9,6 +9,10 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
+version = {}
+with open("enpt/version.py") as version_file:
+    exec(version_file.read(), version)
+
 requirements = [  # put package requirements here
     'numpy', 'scipy', 'geoarray>=0.6.12', 'spectral>=0.16'
 ]
@@ -17,7 +21,7 @@ test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 
 setup(
     name='enpt',
-    version='0.2.8',
+    version=version['__version__'],
     description="EnMAP PT",
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
