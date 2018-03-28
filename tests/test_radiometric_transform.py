@@ -38,8 +38,8 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
                     # input assertions
                     self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-                    # # run
-                    output = self.RT.transform(L1_obj)  # for now only test if its runnable without error
+                    # run transformation
+                    output = self.RT.transform_dummy(L1_obj)  # for now only test if its runnable without error
 
             # output assertions
             self.assertIsInstance(output, EnMAPL1Product_SensorGeo)

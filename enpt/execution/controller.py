@@ -29,7 +29,7 @@ class EnPT_controller(object):
         RT = TOARad2TOARef_Transformer(None, None)
 
         # run transformation to TOARef
-        RT.transform(self.Images[0])
+        RT.transform_dummy(self.Images[0])
 
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""

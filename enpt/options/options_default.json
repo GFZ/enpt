@@ -1,0 +1,46 @@
+{
+    "general_opts": {
+        "CPUs": "None",  /*number of CPU cores to be used for processing (default: "None" -> use all available)*/
+        "log_level": "INFO"  /*the logging level to be used (choices: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL';*/
+    },
+
+    "processors": {
+        "toa_ref": {
+            "path_earthSunDist": "./resources/earth_sun_distance/Earth_Sun_distances_per_day_edited.csv",  /*input path of the earth sun distance model*/
+            "path_solar_irr": "./resources/solar_irradiance/SUNp1fontenla__350-2500nm_@0.1nm_converted.txt"  /*input path of the solar irradiance model*/
+        },
+
+        "geometry": {
+            "enable_keystone_correction": "false",
+            "enable_vnir_swir_coreg": "false"
+        },
+
+        "atmospheric_correction": {
+
+        },
+
+        "smile": {
+            "run_processor": "false"
+        },
+
+        "dead_pixel": {
+            "run_processor": "false"
+        },
+
+        "orthorectification": {
+            "resamp_alg": 1  /*resampling algorithm TODO*/
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+}
