@@ -13,6 +13,7 @@ test_enpt:
     - source /root/anaconda3/bin/activate
     - export GDAL_DATA=/root/anaconda3/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
+    - pip install cerberus jsmin  # FIXME remove that as soon as docker CI runner is rebuilt
     # run nosetests
     - make nosetests  # test are called here
     # create the docs

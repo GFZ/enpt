@@ -62,8 +62,9 @@ class TOARad2TOARef_Transformer(object):
         """
         # compute TOA reflectance
         # formula:  toaRef = scale_factor * (math.pi * toaRad * earthSunDist**2) / (solIrr * math.cos(zenithAngleDeg))
-        constant = scale_factor * math.pi * enmap_ImageL1.meta.vnir.earthSunDist ** 2 / \
-                   (math.cos(math.radians(enmap_ImageL1.meta.vnir.geom_sun_zenith)))
+        constant = \
+            scale_factor * math.pi * enmap_ImageL1.meta.vnir.earthSunDist ** 2 / \
+            (math.cos(math.radians(enmap_ImageL1.meta.vnir.geom_sun_zenith)))
         solIrr = np.array(enmap_ImageL1.meta.vnir.solar_irrad).reshape(1, 1, enmap_ImageL1.vnir.data.bands)
         toaRef = (constant * enmap_ImageL1.vnir.data / solIrr).astype(np.int16)
 

@@ -14,7 +14,7 @@ with open("enpt/version.py") as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
-    'numpy', 'scipy', 'geoarray>=0.6.12', 'spectral>=0.16'
+    'numpy', 'scipy', 'geoarray>=0.6.12', 'spectral>=0.16', 'cerberus', 'jsmin'
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
@@ -22,7 +22,7 @@ test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 setup(
     name='enpt',
     version=version['__version__'],
-    description="EnMAP PT",
+    description="EnMAP Processing Tools",
     long_description=readme + '\n\n' + history,
     author="Karl Segl",
     author_email='segl@gfz-potsdam.de',

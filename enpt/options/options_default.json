@@ -11,20 +11,21 @@
         },
 
         "geometry": {
-            "enable_keystone_correction": "false",
-            "enable_vnir_swir_coreg": "false"
+            "enable_keystone_correction": false,
+            "enable_vnir_swir_coreg": false
         },
 
         "atmospheric_correction": {
-
+            "auto_download_ecmwf": false,
+            "enable_cloud_screening": false
         },
 
         "smile": {
-            "run_processor": "false"
+            "run_processor": false
         },
 
         "dead_pixel": {
-            "run_processor": "false"
+            "run_processor": false
         },
 
         "orthorectification": {

@@ -29,6 +29,8 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    auto_download_ecmwf=dict(type='boolean', required=False),
+                    enable_cloud_screening=dict(type='boolean', required=False),
                 )),
 
             smile=dict(
@@ -50,3 +52,65 @@ enpt_schema_input = dict(
                 ))
         ))
 )
+
+
+parameter_mapping = dict(
+    # general opts
+    CPUs=('general_opts', 'CPUs'),
+    log_level=('general_opts', 'log_level'),
+
+    # processors > toa_ref
+    path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),
+    path_solar_irr=('processors', 'toa_ref', 'path_solar_irr'),
+
+    # processors > geometry
+    enable_keystone_correction=('processors', 'geometry', 'enable_keystone_correction'),
+    enable_vnir_swir_coreg=('processors', 'geometry', 'enable_vnir_swir_coreg'),
+
+    # processors > atmospheric_correction
+    auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
+    enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
+
+    # processors > smile
+    run_smile_P=('processors', 'smile', 'run_processor'),
+
+    # processors > dead_pixel
+    run_deadpix_P=('processors', 'dead_pixel', 'run_processor'),
+
+    # processors > orthorectification
+    ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),
+)
+
+
+def get_updated_schema(source_schema, key2update, new_value):
+    def deep_update(schema, key2upd, new_val):
+        """Return true if update, else false"""
+
+        for key in schema:
+            if key == key2upd:
+                schema[key] = new_val
+            elif isinstance(schema[key], dict):
+                deep_update(schema[key], key2upd, new_val)
+
+        return schema
+
+    from copy import deepcopy
+    tgt_schema = deepcopy(source_schema)
+    return deep_update(tgt_schema, key2update, new_value)
+
+
+enpt_schema_config_output = get_updated_schema(enpt_schema_input, key2update='required', new_value=True)
+
+
+def get_param_from_json_config(paramname, json_config):
+    keymap = parameter_mapping[paramname]  # tuple
+
+    dict2search = json_config
+    for i, k in enumerate(keymap):
+        if i < len(keymap) - 1:
+            # not the last element of the tuple -> contains a sub-dictionary
+            dict2search = dict2search[k]
+        elif isinstance(k, list):
+            return [dict2search[sk] for sk in k]
+        else:
+            return dict2search[k]

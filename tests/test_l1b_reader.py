@@ -3,7 +3,7 @@
 
 """
 test_l1b_reader
-----------------------------------
+---------------
 
 Tests for `l1b_reader` module.
 """
