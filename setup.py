@@ -34,7 +34,7 @@ setup(
     install_requires=requirements,
     license="GNU General Public License v3",
     zip_safe=False,
-    scripts=[],  # TODO
+    scripts=['enpt_cli.py'],
     data=[],  # TODO
     keywords='enpt',
     classifiers=[
