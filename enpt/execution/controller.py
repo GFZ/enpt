@@ -3,18 +3,20 @@
 
 from ..model.images import EnMAPL1Product_SensorGeo
 from ..processors.radiometric_transform import TOARad2TOARef_Transformer
+from ..options.config import EnPTConfig
 
 
 class EnPT_controller(object):
     """Class of EnPT process controller."""
 
-    def __init__(self, entity_ID):
+    def __init__(self, config: EnPTConfig=None, **config_kwargs: dict):
         # type: (str) -> None
         """Initialize the Process Controller.
 
-        :param entity_ID:   ID of the scene to be processed, e.g. 'EM_20170515_12345'
+        :param config:          an instance of the EnPTConfig class (overrides config_kwargs)
+        :param config_kwargs:   configuration parameters to be passed to EnPTConfig class
         """
-        raise NotImplementedError('The process controller is not yet working.')
+        self.cfg = config or EnPTConfig(**config_kwargs)
 
         self.Images = [EnMAPL1Product_SensorGeo, ]
 

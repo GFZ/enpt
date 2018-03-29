@@ -108,7 +108,10 @@ class EnPTConfig(object):
         # 2. priority: default options, overridden by eventually provided json_config
         else:
             param = get_param_from_json_config(key_user_opts, self.json_opts_fused_valid)
-            return param if not (param is None and fallback) else fallback
+            if param is None:
+                if fallback:
+                    return fallback
+            return param
 
     def get_json_opts(self, validate=True):
         """Get a dictionary of EnPT config parameters.
