@@ -16,7 +16,7 @@ RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/miniconda/$minicon
 # copy some needed stuff to /root
 COPY *.yml /root/
 
-# create an environment with all packages specified in $envconfig
+# create an environment with all packages specified in $envconfig (name is 'enpt' -> also specified in $envconfig)
 RUN /bin/bash -i -c "source /root/miniconda3/bin/activate ; \
     conda env update -f /root/$envconfig"
 

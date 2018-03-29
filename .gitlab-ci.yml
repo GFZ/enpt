@@ -10,7 +10,7 @@ stages:
 test_enpt:
   stage: test
   script:
-    - source activate enpt
+    - source root/miniconda3/bin/activate enpt
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
     # run nosetests
@@ -30,7 +30,7 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source activate enpt
+    - source root/miniconda3/bin/activate enpt
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
     - make lint
