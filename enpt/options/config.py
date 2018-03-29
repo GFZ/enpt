@@ -74,6 +74,7 @@ class EnPTConfig(object):
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')
         self.enable_vnir_swir_coreg = gp('enable_vnir_swir_coreg')
+        self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
         self.auto_download_ecmwf = gp('auto_download_ecmwf')

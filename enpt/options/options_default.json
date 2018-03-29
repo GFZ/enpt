@@ -12,7 +12,8 @@
 
         "geometry": {
             "enable_keystone_correction": false,
-            "enable_vnir_swir_coreg": false
+            "enable_vnir_swir_coreg": false,
+            "path_reference_image": ""
         },
 
         "atmospheric_correction": {

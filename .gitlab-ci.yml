@@ -10,10 +10,9 @@ stages:
 test_enpt:
   stage: test
   script:
-    - source /root/anaconda3/bin/activate
-    - export GDAL_DATA=/root/anaconda3/share/gdal
+    - source /root/miniconda3/bin/activate
+    - export GDAL_DATA=/root/miniconda3/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
-    - pip install cerberus jsmin  # FIXME remove that as soon as docker CI runner is rebuilt
     # run nosetests
     - make nosetests  # test are called here
     # create the docs
@@ -31,8 +30,8 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source /root/anaconda3/bin/activate
-    - export GDAL_DATA=/root/anaconda3/share/gdal
+    - source /root/miniconda3/bin/activate
+    - export GDAL_DATA=/root/miniconda3/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
     - make lint
   artifacts:
@@ -46,7 +45,7 @@ test_styles:
 test_enpt_install:
   stage: test
   script:
-    - source /root/anaconda3/bin/activate
+    - source /root/miniconda3/bin/activate
     - conda create -y -q --name enpt python=3
     - source activate enpt
     # install some dependencies that cause trouble when installed via pip
@@ -89,4 +88,4 @@ pages:
   artifacts:
     paths:
       - public
-    expire_in: 600 days
+    expire_in: 30 days

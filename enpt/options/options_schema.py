@@ -24,6 +24,7 @@ enpt_schema_input = dict(
                 schema=dict(
                     enable_keystone_correction=dict(type='boolean', required=False),
                     enable_vnir_swir_coreg=dict(type='boolean', required=False),
+                    path_reference_image=dict(type='string', required=False),
                 )),
 
             atmospheric_correction=dict(
@@ -66,6 +67,7 @@ parameter_mapping = dict(
     # processors > geometry
     enable_keystone_correction=('processors', 'geometry', 'enable_keystone_correction'),
     enable_vnir_swir_coreg=('processors', 'geometry', 'enable_vnir_swir_coreg'),
+    path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
