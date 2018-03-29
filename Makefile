@@ -45,7 +45,6 @@ clean-pyc: ## remove Python file artifacts
 clean-test: ## remove test and coverage artifacts
 	## don't include coverage lib here because clean-test is also executed during package setup and coverage is only a
 	## test requirement
-	coverage erase
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
@@ -64,6 +63,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
+	coverage erase
 	coverage run --source enpt --source bin setup.py test
 	coverage combine 	# must be called in order to make coverage work in multiprocessing
 	coverage report -m
