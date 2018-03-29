@@ -1,7 +1,8 @@
 {
     "general_opts": {
         "CPUs": "None",  /*number of CPU cores to be used for processing (default: "None" -> use all available)*/
-        "log_level": "INFO"  /*the logging level to be used (choices: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL';*/
+        "log_level": "INFO",  /*the logging level to be used (choices: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL';*/
+        "path_l1b_snr_model": "./resources/EnMAP_Sensor/EnMAP_Level_1B_SNR.zip"  /*input path of the EnMAP SNR model*/
     },
 
     "processors": {

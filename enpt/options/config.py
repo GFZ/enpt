@@ -62,6 +62,7 @@ class EnPTConfig(object):
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
+        self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
 
         ###########################
         # processor configuration #

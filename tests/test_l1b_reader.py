@@ -16,15 +16,15 @@ import tempfile
 import zipfile
 from datetime import datetime
 
+from enpt.options.config import EnPTConfig
+
 
 class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class.."""
 
     def setUp(self):
         self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
-        self.l1b_snr_file = glob(os.path.join(os.path.dirname(__file__),
-                                              "data", "EnMAP_Sensor", "EnMAP_Level_1B_SNR.zip"))[0]
-        self.user_config = dict()
+        self.config = EnPTConfig()
 
     def tearDown(self):
         pass
@@ -35,12 +35,12 @@ class Test_L1B_Reader(unittest.TestCase):
 
         print("Test reading EnMAP Level-1B products")
 
-        rd = L1B_Reader(**self.user_config)
+        rd = L1B_Reader()
 
         for l1b_file in self.pathList_testimages:
             with tempfile.TemporaryDirectory() as tmpdir:
                 print("Tmp dir: %s" % tmpdir)
-                with zipfile.ZipFile(self.l1b_snr_file, "r") as zf:
+                with zipfile.ZipFile(self.config.path_l1b_snr_model, "r") as zf:
                     zf.extractall(tmpdir)
 
                     with zipfile.ZipFile(l1b_file, "r") as zf:

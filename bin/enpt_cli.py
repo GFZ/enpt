@@ -24,6 +24,9 @@ def get_enpt_argparser():
     add = parser.add_argument
     add('--version', action='version', version=__version__)
 
+    # NOTE: don't define any defaults here for parameters that are passed to EnPTConfig!
+    #       -> otherwise, we cannot distinguish between explicity given parameters and default values
+    #       => see docs in parsedArgs_to_user_opts() for explanation
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
              'https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
@@ -77,3 +80,5 @@ def run_job(config: EnPTConfig):
 if __name__ == '__main__':
     parsed_args = get_enpt_argparser().parse_args()
     parsed_args.func(parsed_args)
+
+    print('\nready.')

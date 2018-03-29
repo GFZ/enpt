@@ -16,8 +16,8 @@ class L1B_Reader(object):
         self.logger = logger or logging.getLogger(__name__)
         self.cfg = user_inputs
 
-    def read_inputdata(self, root_dir, observation_time: datetime, lon_lat_smpl=(15, 15), nsmile_coef=5,
-                       snr_vnir=None, snr_swir=None):
+    def read_inputdata(self, root_dir, observation_time: datetime, lon_lat_smpl: tuple=(15, 15), nsmile_coef: int=5,
+                       snr_vnir: str=None, snr_swir: str=None):
         # TODO move to init?
         """Read L1B, DEM and spatial reference data.
 
