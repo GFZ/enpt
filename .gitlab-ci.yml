@@ -10,8 +10,8 @@ stages:
 test_enpt:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate
-    - export GDAL_DATA=/root/miniconda3/share/gdal
+    - source activate enpt
+    - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
     # run nosetests
     - make nosetests  # test are called here
@@ -30,8 +30,8 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate
-    - export GDAL_DATA=/root/miniconda3/share/gdal
+    - source activate enpt
+    - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
     - make lint
   artifacts:
@@ -46,8 +46,8 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
-    - conda create -y -q --name enpt python=3
-    - source activate enpt
+    - conda create -y -q --name enpt_test python=3
+    - source activate enpt_test
     # install some dependencies that cause trouble when installed via pip
     - conda install -y -c conda-forge scipy  # scikit-image, matplotlib
     # install not pip-installable deps of geoarray
