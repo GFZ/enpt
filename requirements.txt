@@ -4,3 +4,4 @@ geoarray>=0.6.12
 spectral>=0.16
 cerberus
 jsmin
+matplotlib

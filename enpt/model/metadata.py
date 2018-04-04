@@ -10,6 +10,7 @@ from scipy.interpolate import interp2d
 import spectral as sp
 
 from ..options.config import EnPTConfig
+from .srf import SRF
 
 
 L1B_product_props = dict(
@@ -48,6 +49,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
+        self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
+        self.solar_irrad = None  # type: dict  # solar irradiance in [W/m2/nm] for eac band
         self.nwvl = None  # type: int  # Number of wave bands
         self.nrows = None  # type: int  # number of rows
         self.ncols = None  # type: int  # number of columns
@@ -82,6 +85,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.fwhm = np.array(xml.findall("%s/fwhm" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
         self.wvl_center = np.array(
             xml.findall("%s/centre_wavelength" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
+        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+        self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
         self.nwvl = len(self.wvl_center)
         self.nrows = np.int(xml.findall("%s/rows" % lbl)[0].text)
         self.ncols = np.int(xml.findall("%s/columns" % lbl)[0].text)
@@ -176,6 +181,30 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             for j, y in enumerate(np.linspace(0, 1, ny)):
                 rr[i, j] = ff(x, y)
         return rr
+
+    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> dict:
+        from ..io.reader import Solar_Irradiance_reader
+
+        self.logger.debug('Calculating solar irradiance...')
+
+        sol_irr = Solar_Irradiance_reader(path_solar_irr_model=self.cfg.path_solar_irr, wvl_min_nm=350, wvl_max_nm=2500)
+
+        irr_bands = {}
+        for band in self.srf.bands:
+            if self.srf[band] is None:
+                irr_bands[band] = None
+            else:
+                # WVL_band = (self.srf[band][:, 0] if 300 < np.max(self.srf[band][:, 0]) < 15000 else
+                #             self.srf[band][:, 0] * 1000)  # reads wavelengths given in nm and µm
+                # RSP_band = self.srf[band][:, 1]
+
+                WVL_band = self.srf.srfs_wvl if self.srf.wvl_unit == 'nanometers' else self.srf.srfs_wvl * 1000
+                RSP_band = self.srf.srfs_norm01[band]
+                sol_irr_at_WVL = np.interp(WVL_band, sol_irr[:, 0], sol_irr[:, 1], left=0, right=0)
+
+                irr_bands[band] = round(np.sum(sol_irr_at_WVL * RSP_band) / np.sum(RSP_band), 2)
+
+        return irr_bands
 
 
 class EnMAP_Metadata_L1B_SensorGeo(object):

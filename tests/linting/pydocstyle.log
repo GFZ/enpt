@@ -1,9 +1,21 @@
 enpt/version.py:1 at module level:
         D100: Missing docstring in public module
-enpt/model/metadata.py:183 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:185 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
+        D102: Missing docstring in public method
+enpt/model/metadata.py:248 in public method `get_earth_sun_distance`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:183 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:248 in public method `get_earth_sun_distance`:
         D400: First line should end with a period (not ')')
+enpt/model/srf.py:11 in public class `SRF`:
+        D101: Missing docstring in public class
+enpt/model/srf.py:96 in public method `instrument`:
+        D102: Missing docstring in public method
+enpt/model/srf.py:111 in public method `__call__`:
+        D102: Missing docstring in public method
+enpt/model/srf.py:114 in public method `__getitem__`:
+        D105: Missing docstring in magic method
+enpt/model/srf.py:117 in public method `__iter__`:
+        D105: Missing docstring in magic method
 enpt/execution/controller.py:50 in public method `read_L1B_data`:
         D205: 1 blank line required between summary line and description (found 0)
 enpt/execution/controller.py:50 in public method `read_L1B_data`:

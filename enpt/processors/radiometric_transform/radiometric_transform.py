@@ -8,67 +8,50 @@ Contained Transformations:
 import math
 import numpy as np
 
-from ...model.images import EnMAPL1Product_SensorGeo
+from ...model.images import EnMAPL1Product_SensorGeo, EnMAP_Detector_SensorGeo  # noqa F401  # flake8 issue
 from ...options.config import EnPTConfig
 
 
-class TOARad2TOARef_Transformer(object):
-    """Class for transforming top-of-atmosphere radiance EnMAP images to top-of-atmosphere reflectance."""
+class Radiometric_Transformer(object):
+    """Class for performing all kinds of radiometric transformations of EnMAP images."""
 
     def __init__(self, config: EnPTConfig=None):
-        # type: (dict, dict) -> None
-        """Class for all kinds of radiometric transformations."""
+        """Create an instance of Radiometric_Transformer."""
         self.cfg = config
         self.solarIrr = config.path_solar_irr  # path of model for solar irradiance
         self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
 
-    def transform_dummy(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+    @staticmethod
+    def transform_TOARad2TOARef(enmap_ImageL1: EnMAPL1Product_SensorGeo,
+                                scale_factor: int=10000
+                                ):
         """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
 
-        :param enmap_ImageL1: instance of the class 'EnMAPL1Product_ImGeo'
-        :return:
-        """
-        # TODO: Implement that function! The code below is only dummy code.
-        enmap_ImageL1.logger.info('I am the TOARef transformer and I am logging something! \n')
-
-        # get original data for VNIR
-        rows, cols, _ = enmap_ImageL1.vnir.data.shape
-        original_data = enmap_ImageL1.vnir.data[int(rows / 2):int((rows / 2) + 5),
-                                                int(cols / 2):int((cols / 2) + 5), 0]
-
-        # do something
-        result = original_data * 2
-
-        # give some output
-        enmap_ImageL1.logger.info('This is a small subset of the input image: \n%s \n' % repr(original_data))
-        enmap_ImageL1.logger.info('This is what comes out after multiplying it with 2: \n%s \n' % repr(result))
-
-        # merge the results into the EnMAP image
-        enmap_ImageL1.vnir.data = result
-
-        return enmap_ImageL1
-
-    def transform(self,
-                  enmap_ImageL1: EnMAPL1Product_SensorGeo,
-                  scale_factor: int=10000
-                  ):
-        """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
+        NOTE: The following formula is used:
+                toaRef = (scale_factor * math.pi * toaRad * earthSunDist**2) /
+                         (solIrr * math.cos(zenithAngleDeg))
 
         :param enmap_ImageL1:   instance of the class 'EnMAPL1Product_ImGeo'
         :param scale_factor:    scale factor to be applied to TOA reflectance result
         :return:
         """
-        # compute TOA reflectance
-        # formula:  toaRef = (scale_factor * math.pi * toaRad * earthSunDist**2) / (solIrr * math.cos(zenithAngleDeg))
-        constant = \
-            scale_factor * math.pi * enmap_ImageL1.meta.vnir.earthSunDist ** 2 / \
-            (math.cos(math.radians(enmap_ImageL1.meta.vnir.geom_sun_zenith)))
-        solIrr = np.array(enmap_ImageL1.meta.vnir.solar_irrad).reshape(1, 1, enmap_ImageL1.vnir.data.bands)
-        toaRef = (constant * enmap_ImageL1.vnir.data / solIrr).astype(np.int16)
+        for detectorName in enmap_ImageL1.detector_attrNames:
+            detector = getattr(enmap_ImageL1, detectorName)  # type: EnMAP_Detector_SensorGeo
 
-        # update EnMAP image
-        enmap_ImageL1.vnir.data = toaRef
-        enmap_ImageL1.meta.vnir.unit = ''  # TODO
-        enmap_ImageL1.meta.vnir.unitcode = 'TOARef'
+            enmap_ImageL1.logger.info('Converting TOA radiance to TOA reflectance for %s detector...'
+                                      % detector.detector_name)  # FIXME does not log anything
+
+            # compute TOA reflectance
+            constant = \
+                scale_factor * math.pi * enmap_ImageL1.meta.earthSunDist ** 2 / \
+                (math.cos(math.radians(detector.detector_meta.geom_sun_zenith)))
+            solIrr = np.array([detector.detector_meta.solar_irrad[band] for band in detector.detector_meta.srf.bands])\
+                .reshape(1, 1, detector.data.bands)
+            toaRef = (constant * detector.data[:] / solIrr).astype(np.int16)
+
+            # update EnMAP image
+            detector.data = toaRef
+            detector.detector_meta.unit = '0-%d' % scale_factor
+            detector.detector_meta.unitcode = 'TOARef'
 
         return enmap_ImageL1

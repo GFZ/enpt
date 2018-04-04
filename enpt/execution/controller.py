@@ -11,7 +11,7 @@ import warnings
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
-from ..processors.radiometric_transform import TOARad2TOARef_Transformer
+from ..processors.radiometric_transform import Radiometric_Transformer
 from ..model.images import EnMAPL1Product_SensorGeo
 
 
@@ -74,10 +74,10 @@ class EnPT_Controller(object):
     def run_toaRad2toaRef(self):
         """Run conversion from TOA radiance to TOA reflectance."""
         # get a new instance of radiometric transformer
-        RT = TOARad2TOARef_Transformer(self.cfg)
+        RT = Radiometric_Transformer(self.cfg)
 
         # run transformation to TOARef
-        self.L1_obj = RT.transform_dummy(self.L1_obj)
+        self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""

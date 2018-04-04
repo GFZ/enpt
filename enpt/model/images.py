@@ -405,8 +405,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
             self.detector_meta.unitcode = "TOARad"
         else:
-            self.logger.info(
-                "No is DN to Radiance conversion is performed since unitcode is not DN (found: {code}).".format(
+            self.logger.warning(
+                "No DN to Radiance conversion is performed because unitcode is not DN (found: {code}).".format(
                     code=self.detector_meta.unitcode)
             )
 
