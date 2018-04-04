@@ -38,7 +38,7 @@ class Test_L1B_Reader(unittest.TestCase):
 
         print("Test reading EnMAP Level-1B products")
 
-        rd = L1B_Reader()
+        rd = L1B_Reader(config=self.config)
 
         for l1b_file in self.pathList_testimages:
             print("Tmp dir: %s" % self.tmpdir)

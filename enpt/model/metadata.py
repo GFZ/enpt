@@ -60,7 +60,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
@@ -100,8 +99,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
         self.geom_sun_azimuth = np.float(
             xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
-        self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # TODO
         self.lat_UL_UR_LL_LR = \
             [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
              for corner in ("UL", "UR", "LL", "LR")]
@@ -180,29 +177,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 rr[i, j] = ff(x, y)
         return rr
 
-    def get_earth_sun_distance(self, acqDate):
-        """Get earth sun distance (requires file of pre calculated earth sun distance per day)
-
-        :param acqDate:
-        """
-
-        if not os.path.exists(self.cfg.path_earthSunDist):
-            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be "
-                                "1.0 because no database can be found at %s.""" % self.cfg.path_earthSunDist)
-            return 1.0
-        if not acqDate:
-            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be 1.0 because "
-                                "acquisition date could not be read from metadata.")
-            return 1.0
-
-        with open(self.cfg.path_earthSunDist, "r") as EA_dist_f:
-            EA_dist_dict = {}
-            for line in EA_dist_f:
-                date, EA = [item.strip() for item in line.split(",")]
-                EA_dist_dict[date] = EA
-
-        return float(EA_dist_dict[acqDate])
-
 
 class EnMAP_Metadata_L1B_SensorGeo(object):
     """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
@@ -227,6 +201,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # defaults
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
+        self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']
@@ -238,6 +213,31 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
+        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
+        self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+
+    def get_earth_sun_distance(self, acqDate: datetime):
+        """Get earth sun distance (requires file of pre calculated earth sun distance per day)
+
+        :param acqDate:
+        """
+
+        if not os.path.exists(self.cfg.path_earthSunDist):
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be "
+                                "1.0 because no database can be found at %s.""" % self.cfg.path_earthSunDist)
+            return 1.0
+        if not acqDate:
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be 1.0 because "
+                                "acquisition date could not be read from metadata.")
+            return 1.0
+
+        with open(self.cfg.path_earthSunDist, "r") as EA_dist_f:
+            EA_dist_dict = {}
+            for line in EA_dist_f:
+                date, EA = [item.strip() for item in line.split(",")]
+                EA_dist_dict[date] = EA
+
+        return float(EA_dist_dict[acqDate.strftime('%Y-%m-%d')])
 
     def read_metadata(self, observation_time: datetime, lon_lat_smpl, nsmile_coef):
         """Read the metadata of the whole EnMAP L1B product in sensor geometry.

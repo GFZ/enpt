@@ -12,7 +12,7 @@ from ..options.config import EnPTConfig
 class L1B_Reader(object):
     """Reader for EnMAP Level-1B products."""
 
-    def __init__(self, config: EnPTConfig=None, logger: logging.Logger=None):
+    def __init__(self, config: EnPTConfig, logger: logging.Logger=None):
         """Get an instance of L1B_Reader."""
         self.cfg = config
         self.logger = logger or logging.getLogger(__name__)
