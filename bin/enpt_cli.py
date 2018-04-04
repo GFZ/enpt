@@ -6,7 +6,7 @@ import argparse
 
 from enpt import __version__
 from enpt.options.config import EnPTConfig
-from enpt.execution.controller import EnPT_controller
+from enpt.execution.controller import EnPT_Controller
 
 
 def get_enpt_argparser():
@@ -33,6 +33,10 @@ def get_enpt_argparser():
              'EnPT/blob/master/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
         help='number of CPU cores to be used for processing (default: "None" -> use all available')
+    add('-im', '--path_l1b_enmap_image', default=None,
+        help='input path of the EnMAP L1B image to be processed (zip-archive or root directory)')
+    add('-imgap', '--path_l1b_enmap_image_gapfill', default=None,
+        help='input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)')
 
     # link parser to run function
     parser.set_defaults(func=run_job)
@@ -74,7 +78,7 @@ def get_config(cli_args: argparse.Namespace):
 
 
 def run_job(config: EnPTConfig):
-    EnPT_controller(config)
+    EnPT_Controller(config)
 
 
 if __name__ == '__main__':

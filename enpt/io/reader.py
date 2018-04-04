@@ -6,15 +6,16 @@ import logging
 
 from ..model.images import EnMAPL1Product_SensorGeo
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo
+from ..options.config import EnPTConfig
 
 
 class L1B_Reader(object):
     """Reader for EnMAP Level-1B products."""
 
-    def __init__(self, logger=None, **user_inputs):
+    def __init__(self, config: EnPTConfig=None, logger: logging.Logger=None):
         """Get an instance of L1B_Reader."""
+        self.cfg = config
         self.logger = logger or logging.getLogger(__name__)
-        self.cfg = user_inputs
 
     def read_inputdata(self, root_dir, observation_time: datetime, lon_lat_smpl: tuple=(15, 15), nsmile_coef: int=5,
                        snr_vnir: str=None, snr_swir: str=None):
@@ -28,10 +29,10 @@ class L1B_Reader(object):
         :return: instance of EnMAPL1Product_MapGeo
         """
         # get a new instance of EnMAPL1Product_MapGeo
-        L1_obj = EnMAPL1Product_SensorGeo(root_dir)
+        L1_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
 
         # read metadata
-        L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml)
+        L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml, config=self.cfg)
         L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
         # read VNIR data

@@ -8,21 +8,19 @@ Contained Transformations:
 import math
 import numpy as np
 
-from enpt.model.images import EnMAPL1Product_SensorGeo
+from ...model.images import EnMAPL1Product_SensorGeo
+from ...options.config import EnPTConfig
 
 
 class TOARad2TOARef_Transformer(object):
     """Class for transforming top-of-atmosphere radiance EnMAP images to top-of-atmosphere reflectance."""
 
-    def __init__(self, solarIrr, earthSunDist):
+    def __init__(self, config: EnPTConfig=None):
         # type: (dict, dict) -> None
-        """Class for all kinds of radiometric transformations.
-
-        :param solarIrr:        model for solar irradiance
-        :param earthSunDist:    model for earth sun distance
-        """
-        self.solarIrr = solarIrr
-        self.sunEarthDist = earthSunDist
+        """Class for all kinds of radiometric transformations."""
+        self.cfg = config
+        self.solarIrr = config.path_solar_irr  # path of model for solar irradiance
+        self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
 
     def transform_dummy(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
@@ -61,7 +59,7 @@ class TOARad2TOARef_Transformer(object):
         :return:
         """
         # compute TOA reflectance
-        # formula:  toaRef = scale_factor * (math.pi * toaRad * earthSunDist**2) / (solIrr * math.cos(zenithAngleDeg))
+        # formula:  toaRef = (scale_factor * math.pi * toaRad * earthSunDist**2) / (solIrr * math.cos(zenithAngleDeg))
         constant = \
             scale_factor * math.pi * enmap_ImageL1.meta.vnir.earthSunDist ** 2 / \
             (math.cos(math.radians(enmap_ImageL1.meta.vnir.geom_sun_zenith)))

@@ -13,7 +13,7 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
-
+from ..options.config import EnPTConfig
 
 ##############
 # BASE CLASSES
@@ -352,7 +352,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     """
 
-    def __init__(self, detector_name: str, root_dir: str, logger=None):
+    def __init__(self, detector_name: str, root_dir: str, config: EnPTConfig, logger=None):
         """Get an instance of _EnMAP_Detector_SensorGeo.
 
         :param detector_name:   'VNIR' or 'SWIR'
@@ -362,6 +362,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         if detector_name not in ['VNIR', 'SWIR']:
             raise ValueError("'detector_name' must be 'VNIR' or 'SWIR'. Received %s!" % detector_name)
 
+        self.cfg = config
         self._root_dir = root_dir
         self.detector_name = detector_name
         self.logger = logger or logging.getLogger()
@@ -370,7 +371,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         super(EnMAP_Detector_SensorGeo, self).__init__()
         self.paths = self.get_paths()
         # instance an empty metadata object
-        self.detector_meta = EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, logger=logger)
+        self.detector_meta = EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, config=self.cfg, logger=logger)
 
     def get_paths(self):
         """Get all file paths associated with the current instance of _EnMAP_Detector_SensorGeo.
@@ -429,17 +430,18 @@ class EnMAPL1Product_SensorGeo(object):
 
     """
 
-    def __init__(self, root_dir: str, logger=None):
+    def __init__(self, root_dir: str, config: EnPTConfig, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.
 
         :param root_dir: Root directory of EnMAP Level-1B product
         :param logger: None or logging instance
         """
+        self.cfg = config
         self.logger = logger or logging.getLogger(__name__)
-        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, logger=logger)
-        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, logger=logger)
+        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=logger)
+        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=logger)
         self.paths = self.get_paths()
-        self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, logger=logger)
+        self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, config=self.cfg, logger=logger)
         self.detector_attrNames = ['vnir', 'swir']
 
     def get_paths(self):

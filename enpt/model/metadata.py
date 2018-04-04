@@ -4,9 +4,13 @@
 from datetime import datetime
 from xml.etree import ElementTree
 import logging
+import os
 import numpy as np
 from scipy.interpolate import interp2d
 import spectral as sp
+
+from ..options.config import EnPTConfig
+
 
 L1B_product_props = dict(
     xml_detector_label=dict(
@@ -31,12 +35,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     """
 
-    def __init__(self, detector_name: str, logger: logging.Logger=None):
+    def __init__(self, detector_name: str, config: EnPTConfig, logger: logging.Logger=None):
         """Get a metadata object containing the metadata of a single EnMAP detector in sensor geometry.
 
         :param detector_name: Name of the detector (VNIR or SWIR)
         :param logger:
         """
+        self.cfg = config
         self.detector_name = detector_name  # type: str
         self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
         self.logger = logger or logging.getLogger()
@@ -95,7 +100,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
         self.geom_sun_azimuth = np.float(
             xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))
+        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
+        self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # TODO
         self.lat_UL_UR_LL_LR = \
             [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
              for corner in ("UL", "UR", "LL", "LR")]
@@ -174,6 +180,29 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 rr[i, j] = ff(x, y)
         return rr
 
+    def get_earth_sun_distance(self, acqDate):
+        """Get earth sun distance (requires file of pre calculated earth sun distance per day)
+
+        :param acqDate:
+        """
+
+        if not os.path.exists(self.cfg.path_earthSunDist):
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be "
+                                "1.0 because no database can be found at %s.""" % self.cfg.path_earthSunDist)
+            return 1.0
+        if not acqDate:
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be 1.0 because "
+                                "acquisition date could not be read from metadata.")
+            return 1.0
+
+        with open(self.cfg.path_earthSunDist, "r") as EA_dist_f:
+            EA_dist_dict = {}
+            for line in EA_dist_f:
+                date, EA = [item.strip() for item in line.split(",")]
+                EA_dist_dict[date] = EA
+
+        return float(EA_dist_dict[acqDate])
+
 
 class EnMAP_Metadata_L1B_SensorGeo(object):
     """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
@@ -186,12 +215,13 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
     """
 
-    def __init__(self, path_metaxml, logger=None):
+    def __init__(self, path_metaxml, config: EnPTConfig, logger=None):
         """Get a metadata object instance for the given EnMAP L1B product in sensor geometry.
 
         :param path_metaxml:  file path of the EnMAP L1B metadata XML file
         :param logger:  instance of logging.logger or subclassed
         """
+        self.cfg = config
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
 
@@ -217,7 +247,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         :param nsmile_coef:  number of polynomial coefficients for smile
         """
         self.read_common_meta(observation_time)
-        self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', logger=self.logger)
+        self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
         self.vnir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-        self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', logger=self.logger)
+        self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
         self.swir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)

@@ -6,6 +6,8 @@ enpt_schema_input = dict(
         schema=dict(
             CPUs=dict(type='integer', required=False, nullable=True),
             log_level=dict(type='string', required=False, allowed=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']),
+            path_l1b_enmap_image=dict(type='string', required=False),
+            path_l1b_enmap_image_gapfill=dict(type='string', required=False),
             path_l1b_snr_model=dict(type='string', required=False),
         )),
 
@@ -60,6 +62,8 @@ parameter_mapping = dict(
     # general opts
     CPUs=('general_opts', 'CPUs'),
     log_level=('general_opts', 'log_level'),
+    path_l1b_enmap_image=('general_opts', 'path_l1b_enmap_image'),
+    path_l1b_enmap_image_gapfill=('general_opts', 'path_l1b_enmap_image_gapfill'),
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
 
     # processors > toa_ref

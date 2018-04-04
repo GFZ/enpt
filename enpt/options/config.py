@@ -62,6 +62,8 @@ class EnPTConfig(object):
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
+        self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
+        self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
 
         ###########################
@@ -98,8 +100,7 @@ class EnPTConfig(object):
 
     @staticmethod
     def absPath(path):
-        if not os.path.isabs(path):
-            return os.path.abspath(os.path.join(path_enptlib, path))
+        return path if not path or os.path.isabs(path) else os.path.abspath(os.path.join(path_enptlib, path))
 
     def get_parameter(self, key_user_opts, fallback=None):
         # 1. priority: parameters that have directly passed to EnPTConfig within user_opts
@@ -109,7 +110,7 @@ class EnPTConfig(object):
         # 2. priority: default options, overridden by eventually provided json_config
         else:
             param = get_param_from_json_config(key_user_opts, self.json_opts_fused_valid)
-            if param is None:
+            if not param:
                 if fallback:
                     return fallback
             return param
@@ -265,8 +266,8 @@ class EnPTValidator(Validator):
 def get_options(target: str, validation: bool=True):
     """Return dictionary with all options.
 
-    :param validation:  True / False, whether to validate options read from files or not
     :param target:      if path to file, then json is used to load, otherwise the default template is used
+    :param validation:  True / False, whether to validate options read from files or not
     :return: dictionary with options
     """
 
