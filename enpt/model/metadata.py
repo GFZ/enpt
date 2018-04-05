@@ -194,10 +194,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             if self.srf[band] is None:
                 irr_bands[band] = None
             else:
-                # WVL_band = (self.srf[band][:, 0] if 300 < np.max(self.srf[band][:, 0]) < 15000 else
-                #             self.srf[band][:, 0] * 1000)  # reads wavelengths given in nm and µm
-                # RSP_band = self.srf[band][:, 1]
-
                 WVL_band = self.srf.srfs_wvl if self.srf.wvl_unit == 'nanometers' else self.srf.srfs_wvl * 1000
                 RSP_band = self.srf.srfs_norm01[band]
                 sol_irr_at_WVL = np.interp(WVL_band, sol_irr[:, 0], sol_irr[:, 1], left=0, right=0)

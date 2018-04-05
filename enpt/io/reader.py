@@ -77,7 +77,7 @@ def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float=None, wvl
 
     :param path_solar_irr_model:    file path to solar irradiance model
                                     -> must be arranged like that:
-                                       col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm])
+                                        col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm])
     :param resol_nm:                spectral resolution for returned irradiances [nanometers]
     :param wvl_min_nm:              minimum wavelength of returned irradiances [nanometers]
     :param wvl_max_nm:              maximum wavelength of returned irradiances [nanometers]

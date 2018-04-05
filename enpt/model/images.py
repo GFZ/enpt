@@ -462,8 +462,10 @@ class EnMAPL1Product_SensorGeo(object):
 
         :return: None
         """
-        self.vnir.DN2TOARadiance()
-        self.swir.DN2TOARadiance()
+        if self.vnir.detector_meta.unitcode != 'TOARad':
+            self.vnir.DN2TOARadiance()
+        if self.swir.detector_meta.unitcode != 'TOARad':
+            self.swir.DN2TOARadiance()
 
     def save(self, outdir: str, suffix="") -> str:
         """Save this product to disk using almost the same format as for reading.
