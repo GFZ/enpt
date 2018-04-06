@@ -42,33 +42,41 @@ class Test_L1B_Reader(unittest.TestCase):
 
         for l1b_file in self.pathList_testimages:
             print("Tmp dir: %s" % self.tmpdir)
-            with zipfile.ZipFile(self.config.path_l1b_snr_model, "r") as zf:
+            with zipfile.ZipFile(l1b_file, "r") as zf:
                 zf.extractall(self.tmpdir)
 
-                with zipfile.ZipFile(l1b_file, "r") as zf:
-                    zf.extractall(self.tmpdir)
-                    # without snr
-                    root_dir = os.path.join(self.tmpdir, os.path.basename(l1b_file).split(".zip")[0])
-                    L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                root_dir = os.path.join(self.tmpdir, os.path.basename(l1b_file).split(".zip")[0])
 
-                    root_dir = L1_obj.save(path.join(self.tmpdir, "_no_snr"))
-                    L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                ###############
+                # without snr #
+                ###############
 
-                    # with snr
-                    L1_obj = rd.read_inputdata(
-                        root_dir, observation_time=datetime(2015, 12, 7, 10),
-                        snr_vnir=os.path.join(self.tmpdir, "SNR_D1.hdr"),
-                        snr_swir=os.path.join(self.tmpdir, "SNR_D2.hdr"))
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                # read and write L1 data
+                L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10), compute_snr=False)
+                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                self.assertIsNone(L1_obj.vnir.detector_meta.snr)
+                self.assertIsNone(L1_obj.swir.detector_meta.snr)
+                root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "no_snr"))
 
-                    root_dir = L1_obj.save(path.join(self.tmpdir), "with_snr")
-                    L1_obj = rd.read_inputdata(
-                        root_dir, observation_time=datetime(2015, 12, 7, 10),
-                        snr_vnir=os.path.join(self.tmpdir, "SNR_D1.hdr"),
-                        snr_swir=os.path.join(self.tmpdir, "SNR_D2.hdr"))
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                # read self written L1 data
+                L1_obj = rd.read_inputdata(root_dir_written_L1_data, observation_time=datetime(2015, 12, 7, 10),
+                                           compute_snr=False)
+                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+
+                ############
+                # with snr #
+                ############
+
+                # read and write L1 data
+                L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
+                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
+                self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
+                root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "with_snr"))
+
+                # read self written L1 data
+                L1_obj = rd.read_inputdata(root_dir_written_L1_data, observation_time=datetime(2015, 12, 7, 10))
+                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
 
 if __name__ == "__main__":
