@@ -244,7 +244,6 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
-        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
         self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
 
     def get_earth_sun_distance(self, acqDate: datetime):
