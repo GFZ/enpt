@@ -144,36 +144,53 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
     def calc_snr_from_radiance(self, rad_data: Union[GeoArray, np.ndarray], dir_snr_models: str):
         """Compute EnMAP SNR from radiance data for the given detector.
 
+        SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].
+        NOTE:   The SNR model files (SNR_D1.bsq/SNR_D2.bsq) contain polynomial coefficients needed to compute SNR.
+                SNR_D1.bsq: SNR model for EnMAP SWIR detector (contains high gain and low gain model coefficients)
+                            - 1000 columns (for 1000 EnMAP columns)
+                            - 88 bands for 88 EnMAP VNIR bands
+                            - 7 lines:  - 3 lines: high gain coefficients
+                                        - 3 lines: low gain coefficients
+                                        - 1 line: threshold needed to decide about high gain or low gain
+                SNR_D2.bsq: SNR model for EnMAP SWIR detector
+                            - 1000 columns (for 1000 EnMAP columns)
+                            - x bands for x EnMAP SWIR bands
+                            - 3 lines for 3 coefficients
+
         :param rad_data:        image radiance data of EnMAP_Detector_SensorGeo
         :param dir_snr_models:  root directory where SNR model data is stored (must contain SNR_D1.bsq/SNR_D2.bsq)
         """
         path_snr_model = os.path.join(dir_snr_models, "SNR_D1.hdr" if self.detector_name == 'VNIR' else "SNR_D2.hdr")
+        rad_data = np.array(rad_data)
 
         assert self.unitcode == 'TOARad'
         self.logger.info("Computing SNR for: %s using: %s" % (self.detector_name, path_snr_model))
 
         if self.detector_name == 'VNIR':
-            ds = sp.open_image(path_snr_model)
-            p_hg = ds[0:3, :, :]
-            p_lg = ds[0:3, :, :]
-            l_th = np.squeeze(ds[6, :, :])
+            gA = sp.open_image(path_snr_model)
+            coeffs_highgain = gA[0:3, :, :]
+            coeffs_lowgain = gA[3:6, :, :]
+            gain_threshold = np.squeeze(gA[6, :, :])
 
             self.snr = np.zeros(rad_data.shape)
             for irow in range(self.nrows):
-                hg = rad_data[irow, :, :] < l_th
-                l_hg = rad_data[irow, hg]
-                try:
-                    self.snr[irow, :, :][hg] = p_hg[0, hg] + p_hg[1, hg] * l_hg + p_hg[2, hg] * l_hg ** 2
-                except:
-                    a=1
+                highgain_mask = rad_data[irow, :, :] < gain_threshold  # a single row
+                rad_highgain = rad_data[irow, highgain_mask]
+                self.snr[irow, :, :][highgain_mask] = \
+                    coeffs_highgain[0, highgain_mask] + \
+                    coeffs_highgain[1, highgain_mask] * rad_highgain + \
+                    coeffs_highgain[2, highgain_mask] * rad_highgain ** 2
 
-                lg = rad_data[irow, :, :] >= l_th
-                l_lg = rad_data[irow, lg]
-                self.snr[irow, :, :][lg] = p_lg[0, lg] + p_lg[1, lg] * l_lg + p_lg[2, lg] * l_lg ** 2
+                lowgain_mask = rad_data[irow, :, :] >= gain_threshold
+                rad_lowgain = rad_data[irow, lowgain_mask]
+                self.snr[irow, :, :][lowgain_mask] = \
+                    coeffs_lowgain[0, lowgain_mask] + \
+                    coeffs_lowgain[1, lowgain_mask] * rad_lowgain + \
+                    coeffs_lowgain[2, lowgain_mask] * rad_lowgain ** 2
 
         else:
-            pp = sp.open_image(path_snr_model)[:, :, :]
-            self.snr = pp[0, :, :] + pp[1, :, :] * rad_data[:, :, :] + pp[2, :, :] * rad_data[:, :, :] ** 2
+            coeffs = sp.open_image(path_snr_model)[:, :, :]
+            self.snr = coeffs[0, :, :] + coeffs[1, :, :] * rad_data[:, :, :] + coeffs[2, :, :] * rad_data[:, :, :] ** 2
 
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):

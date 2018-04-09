@@ -24,7 +24,7 @@ dependencies:
   - bokeh
   - pip:
     - scipy
-    - geoarray>=0.6.12
+    - geoarray>=0.7.15
     - spectral>=0.16
     - cerberus
     - jsmin

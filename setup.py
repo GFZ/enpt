@@ -14,7 +14,7 @@ with open("enpt/version.py") as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
-    'numpy', 'scipy', 'geoarray>=0.6.12', 'spectral>=0.16', 'cerberus', 'jsmin', 'matplotlib'
+    'numpy', 'scipy', 'geoarray>=0.7.15', 'spectral>=0.16', 'cerberus', 'jsmin', 'matplotlib'
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
