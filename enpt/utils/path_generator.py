@@ -18,6 +18,8 @@ class PathGenL1BProduct(object):
         :param detector_name:
         """
         self.root_dir = root_dir
+        assert len(os.listdir(self.root_dir)) > 0, 'Image root directory must contain files.'
+
         self.detector_name = detector_name
         self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
         self.detector_fn_suffix = L1B_product_props['fn_detector_suffix'][detector_name]

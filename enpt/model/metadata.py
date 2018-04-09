@@ -4,9 +4,14 @@
 from datetime import datetime
 from xml.etree import ElementTree
 import logging
+import os
 import numpy as np
 from scipy.interpolate import interp2d
 import spectral as sp
+
+from ..options.config import EnPTConfig
+from .srf import SRF
+
 
 L1B_product_props = dict(
     xml_detector_label=dict(
@@ -31,18 +36,21 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     """
 
-    def __init__(self, detector_name: str, logger: logging.Logger=None):
+    def __init__(self, detector_name: str, config: EnPTConfig, logger: logging.Logger=None):
         """Get a metadata object containing the metadata of a single EnMAP detector in sensor geometry.
 
         :param detector_name: Name of the detector (VNIR or SWIR)
         :param logger:
         """
+        self.cfg = config
         self.detector_name = detector_name  # type: str
         self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
         self.logger = logger or logging.getLogger()
 
         self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
+        self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
+        self.solar_irrad = None  # type: dict  # solar irradiance in [W/m2/nm] for eac band
         self.nwvl = None  # type: int  # Number of wave bands
         self.nrows = None  # type: int  # number of rows
         self.ncols = None  # type: int  # number of columns
@@ -55,7 +63,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.mu_sun = None  # type: float  # earth-sun distance # TODO doc correct?
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
@@ -78,6 +85,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.fwhm = np.array(xml.findall("%s/fwhm" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
         self.wvl_center = np.array(
             xml.findall("%s/centre_wavelength" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
+        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+        self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
         self.nwvl = len(self.wvl_center)
         self.nrows = np.int(xml.findall("%s/rows" % lbl)[0].text)
         self.ncols = np.int(xml.findall("%s/columns" % lbl)[0].text)
@@ -95,7 +104,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
         self.geom_sun_azimuth = np.float(
             xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.lat_UL_UR_LL_LR = \
             [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
              for corner in ("UL", "UR", "LL", "LR")]
@@ -174,6 +182,26 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 rr[i, j] = ff(x, y)
         return rr
 
+    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> dict:
+        from ..io.reader import Solar_Irradiance_reader
+
+        self.logger.debug('Calculating solar irradiance...')
+
+        sol_irr = Solar_Irradiance_reader(path_solar_irr_model=self.cfg.path_solar_irr, wvl_min_nm=350, wvl_max_nm=2500)
+
+        irr_bands = {}
+        for band in self.srf.bands:
+            if self.srf[band] is None:
+                irr_bands[band] = None
+            else:
+                WVL_band = self.srf.srfs_wvl if self.srf.wvl_unit == 'nanometers' else self.srf.srfs_wvl * 1000
+                RSP_band = self.srf.srfs_norm01[band]
+                sol_irr_at_WVL = np.interp(WVL_band, sol_irr[:, 0], sol_irr[:, 1], left=0, right=0)
+
+                irr_bands[band] = round(np.sum(sol_irr_at_WVL * RSP_band) / np.sum(RSP_band), 2)
+
+        return irr_bands
+
 
 class EnMAP_Metadata_L1B_SensorGeo(object):
     """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
@@ -186,17 +214,19 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
     """
 
-    def __init__(self, path_metaxml, logger=None):
+    def __init__(self, path_metaxml, config: EnPTConfig, logger=None):
         """Get a metadata object instance for the given EnMAP L1B product in sensor geometry.
 
         :param path_metaxml:  file path of the EnMAP L1B metadata XML file
         :param logger:  instance of logging.logger or subclassed
         """
+        self.cfg = config
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
 
         # defaults
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
+        self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']
@@ -208,6 +238,31 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
+        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
+        self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+
+    def get_earth_sun_distance(self, acqDate: datetime):
+        """Get earth sun distance (requires file of pre calculated earth sun distance per day)
+
+        :param acqDate:
+        """
+
+        if not os.path.exists(self.cfg.path_earthSunDist):
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be "
+                                "1.0 because no database can be found at %s.""" % self.cfg.path_earthSunDist)
+            return 1.0
+        if not acqDate:
+            self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be 1.0 because "
+                                "acquisition date could not be read from metadata.")
+            return 1.0
+
+        with open(self.cfg.path_earthSunDist, "r") as EA_dist_f:
+            EA_dist_dict = {}
+            for line in EA_dist_f:
+                date, EA = [item.strip() for item in line.split(",")]
+                EA_dist_dict[date] = EA
+
+        return float(EA_dist_dict[acqDate.strftime('%Y-%m-%d')])
 
     def read_metadata(self, observation_time: datetime, lon_lat_smpl, nsmile_coef):
         """Read the metadata of the whole EnMAP L1B product in sensor geometry.
@@ -217,7 +272,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         :param nsmile_coef:  number of polynomial coefficients for smile
         """
         self.read_common_meta(observation_time)
-        self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', logger=self.logger)
+        self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
         self.vnir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-        self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', logger=self.logger)
+        self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
         self.swir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)

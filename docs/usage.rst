@@ -8,12 +8,12 @@ To use EnPT in a project::
 Command line utilities
 **********************
 
-test_script_enpt.py
--------------------
+enpt_cli.py
+-----------
 
-At the command line, EnPT provides the **test_script_enpt.py** command:
+At the command line, EnPT provides the **enpt_cli.py** command:
 
 .. argparse::
-   :filename: ./../bin/test_script_enpt.py
-   :func: get_parser
-   :prog: test_script_enpt.py
+   :filename: ./../bin/enpt_cli.py
+   :func: get_enpt_argparser
+   :prog: enpt_cli.py

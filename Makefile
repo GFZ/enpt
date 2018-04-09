@@ -64,7 +64,8 @@ test-all: ## run tests on every Python version with tox
 
 coverage: ## check code coverage quickly with the default Python
 	coverage erase
-	coverage run --source enpt setup.py test
+	coverage run --source enpt --source bin setup.py test
+	coverage combine 	# must be called in order to make coverage work in multiprocessing
 	coverage report -m
 	coverage html
 	# $(BROWSER) htmlcov/index.html

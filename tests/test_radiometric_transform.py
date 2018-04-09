@@ -7,17 +7,20 @@ import tempfile
 import zipfile
 from datetime import datetime
 
-from enpt.processors.radiometric_transform import TOARad2TOARef_Transformer
+from enpt.processors.radiometric_transform import Radiometric_Transformer
+from enpt.options.config import EnPTConfig
+
+from . import config_for_testing
 
 
-class Radiometric_Transformer_Tester(unittest.TestCase):
+class Test_Radiometric_Transformer(unittest.TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
 
+        self.cfg = EnPTConfig(**config_for_testing)
         self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
-        self.user_config = dict()
-        self.RT = TOARad2TOARef_Transformer(None, None)
+        self.RT = Radiometric_Transformer(config=self.cfg)
 
     def test_transform_TOARad2TOARef(self):
         from enpt.io.reader import L1B_Reader
@@ -32,14 +35,16 @@ class Radiometric_Transformer_Tester(unittest.TestCase):
                     root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
 
                     # create EnPT Level 1 image
-                    L1_obj = L1B_Reader(**self.user_config)\
+                    L1_obj = L1B_Reader(config=self.cfg)\
                         .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
 
                     # input assertions
                     self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-                    # # run
-                    output = self.RT.transform(L1_obj)  # for now only test if its runnable without error
+                    # run transformation
+                    L1_obj = self.RT.transform_TOARad2TOARef(L1_obj)  # for now only test if its runnable without error
 
             # output assertions
-            self.assertIsInstance(output, EnMAPL1Product_SensorGeo)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            self.assertTrue(L1_obj.vnir.detector_meta.unitcode == 'TOARef')
+            self.assertTrue(L1_obj.swir.detector_meta.unitcode == 'TOARef')
