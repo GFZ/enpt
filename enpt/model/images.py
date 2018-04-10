@@ -386,7 +386,6 @@ class EnMAPL1Product_SensorGeo(object):
         """
         # protected attributes
         self._logger = None
-        self._log = ''
 
         # populate attributes
         self.cfg = config
@@ -399,7 +398,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.detector_attrNames = ['vnir', 'swir']
 
     @property
-    def logger(self):
+    def logger(self) -> EnPT_Logger:
         """Get a an instance of enpt.utils.logging.EnPT_Logger.
 
         NOTE:
@@ -437,18 +436,18 @@ class EnMAPL1Product_SensorGeo(object):
         #     self.log += self.logger.captured_stream
         self._logger = logger
 
-    @property  # FIXME does not work yet
-    def log(self):
+    @property
+    def log(self) -> str:
         """Return a string of all logged messages until now.
 
         NOTE: self.log can also be set to a string.
         """
-        return self._log
+        return self.logger.captured_stream
 
     @log.setter
-    def log(self, string):
+    def log(self, string: str):
         assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
-        self._log = string
+        self.logger.captured_stream = string
 
     def get_paths(self):
         """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
