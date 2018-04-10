@@ -97,6 +97,17 @@ class EnPT_Logger(logging.Logger):
         #         logger.addHandler(logfileHandler)
         #         logger.addHandler(consoleHandler_out)
 
+    def __getstate__(self):
+        self.close()
+        return self.__dict__
+
+    def __setstate__(self, ObjDict):
+        """Defines how the attributes of EnPT_Logger are unpickled."""
+        self.__init__(ObjDict['name_logfile'], fmt_suffix=ObjDict['fmt_suffix'], path_logfile=ObjDict['path_logfile'],
+                      log_level=ObjDict['log_level'], append=True)
+        ObjDict = self.__dict__
+        return ObjDict
+
     @property
     def captured_stream(self):
         """Return the already captured logging stream.
@@ -132,9 +143,9 @@ class EnPT_Logger(logging.Logger):
                 # if handler.get_name() == 'StringIO handler':
                 #     self.streamObj.flush()
                 #     self.streamHandler.flush()
-
-                handler.close()
                 self.removeHandler(handler)  # if not called with '[:]' the StreamHandlers are left open
+                handler.flush()
+                handler.close()
             except PermissionError:
                 warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
 
@@ -148,6 +159,16 @@ class EnPT_Logger(logging.Logger):
         with open(self.path_logfile) as inF:
             print(inF.read())
 
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return True if exc_type is None else False
+
 
 def close_logger(logger):
     """Close the handlers of the given logging.Logger instance.
@@ -157,8 +178,9 @@ def close_logger(logger):
     if logger and hasattr(logger, 'handlers'):
         for handler in logger.handlers[:]:  # if not called with '[:]' the StreamHandlers are left open
             try:
-                handler.close()
                 logger.removeHandler(handler)
+                handler.flush()
+                handler.close()
             except PermissionError:
                 warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
 

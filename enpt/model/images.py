@@ -43,15 +43,10 @@ class _EnMAP_Image(object):
                         super(EnMAP_Image_Subclass, self).__init__()
 
         """
-        # get all attributes of base class "Dataset"
-        super(_EnMAP_Image, self).__init__()
-
         # add EnMAP specific attributes
         self.paths = SimpleNamespace()
 
         # protected attributes
-        self._logger = None
-        self._log = ''
         self._arr = None
         self._mask_nodata = None
         self._mask_clouds = None
@@ -64,55 +59,6 @@ class _EnMAP_Image(object):
         # defaults
         self.entity_ID = ''
         self.basename = ''
-
-    @property
-    def logger(self):
-        """Get a an instance of enpt.utils.logging.EnPT_Logger.
-
-        NOTE:
-            - The logging level will be set according to the user inputs of EnPT.
-            - The path of the log file is directly derived from the attributes of the _EnMAP_Image instance.
-
-        Usage:
-            - get the logger:
-                logger = self.logger
-            - set the logger
-                self.logger = logging.getLogger()  # NOTE: only instances of logging.Logger are allowed here
-            - delete the logger:
-                del self.logger  # or "self.logger = None"
-
-        :return: EnPT_Logger instance
-        """
-        if self._logger and self._logger.handlers[:]:
-            return self._logger
-        else:
-            self._logger = EnPT_Logger('log__' + self.basename, fmt_suffix=None, path_logfile='',
-                                       log_level='INFO', append=True)  # TODO revise the logger
-
-            return self._logger
-
-    @logger.setter
-    def logger(self, logger: logging.Logger):
-        assert isinstance(logger, logging.Logger) or logger in ['not set', None], \
-            "_EnMAP_Image.logger can not be set to %s." % logger
-
-        # save prior logs
-        # if logger is None and self._logger is not None:
-        #     self.log += self.logger.captured_stream
-        self._logger = logger
-
-    @property  # FIXME does not work yet
-    def log(self):
-        """Return a string of all logged messages until now.
-
-        NOTE: self.log can also be set to a string.
-        """
-        return self._log
-
-    @log.setter
-    def log(self, string):
-        assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
-        self._log = string
 
     @property
     def data(self):
@@ -371,7 +317,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         super(EnMAP_Detector_SensorGeo, self).__init__()
         self.paths = self.get_paths()
         # instance an empty metadata object
-        self.detector_meta = EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, config=self.cfg, logger=logger)
+        self.detector_meta = \
+            EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, config=self.cfg, logger=self.logger)
 
     def get_paths(self):
         """Get all file paths associated with the current instance of _EnMAP_Detector_SensorGeo.
@@ -416,7 +363,7 @@ class EnMAPL1Product_SensorGeo(object):
 
     Attributes:
         - logger:
-            - logging.Logger instance or subclassed
+            - logging.Logger instance or subclass instance
         - vnir
             - instance of EnMAP_VNIR_SensorGeo class
         - swir
@@ -433,16 +380,75 @@ class EnMAPL1Product_SensorGeo(object):
     def __init__(self, root_dir: str, config: EnPTConfig, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.
 
-        :param root_dir: Root directory of EnMAP Level-1B product
-        :param logger: None or logging instance
+        :param root_dir:    Root directory of EnMAP Level-1B product
+        :param logger:      None or logging instance to be appended to EnMAPL1Product_SensorGeo instance
+                            (If None, a default EnPT_Logger is used).
         """
+        # protected attributes
+        self._logger = None
+        self._log = ''
+
+        # populate attributes
         self.cfg = config
-        self.logger = logger or logging.getLogger(__name__)
-        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=logger)
-        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=logger)
+        if logger:
+            self.logger = logger
+        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger)
+        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger)
         self.paths = self.get_paths()
-        self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, config=self.cfg, logger=logger)
+        self.meta = EnMAP_Metadata_L1B_SensorGeo(self.paths.metaxml, config=self.cfg, logger=self.logger)
         self.detector_attrNames = ['vnir', 'swir']
+
+    @property
+    def logger(self):
+        """Get a an instance of enpt.utils.logging.EnPT_Logger.
+
+        NOTE:
+            - The logging level will be set according to the user inputs of EnPT.
+            - The path of the log file is directly derived from the attributes of the _EnMAP_Image instance.
+
+        Usage:
+            - get the logger:
+                logger = self.logger
+            - set the logger
+                self.logger = logging.getLogger()  # NOTE: only instances of logging.Logger are allowed here
+            - delete the logger:
+                del self.logger  # or "self.logger = None"
+
+        :return: EnPT_Logger instance
+        """
+        if self._logger and self._logger.handlers[:]:
+            return self._logger
+        else:
+            basename = path.splitext(path.basename(self.cfg.path_l1b_enmap_image))[0]
+            path_logfile = path.join(self.cfg.output_dir, basename + '.log') \
+                if self.cfg.create_logfile and self.cfg.output_dir else ''
+            self._logger = EnPT_Logger('log__' + basename, fmt_suffix=None, path_logfile=path_logfile,
+                                       log_level=self.cfg.log_level, append=False)
+
+            return self._logger
+
+    @logger.setter
+    def logger(self, logger: logging.Logger):
+        assert isinstance(logger, logging.Logger) or logger in ['not set', None], \
+            "%s.logger can not be set to %s." % (self.__class__.__name__, logger)
+
+        # save prior logs
+        # if logger is None and self._logger is not None:
+        #     self.log += self.logger.captured_stream
+        self._logger = logger
+
+    @property  # FIXME does not work yet
+    def log(self):
+        """Return a string of all logged messages until now.
+
+        NOTE: self.log can also be set to a string.
+        """
+        return self._log
+
+    @log.setter
+    def log(self, string):
+        assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
+        self._log = string
 
     def get_paths(self):
         """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
@@ -470,12 +476,12 @@ class EnMAPL1Product_SensorGeo(object):
     def save(self, outdir: str, suffix="") -> str:
         """Save this product to disk using almost the same format as for reading.
 
-        :param outdir: Path to output directory
+        :param outdir:  Path to output directory
+        :param suffix:  Suffix to be appended to the output filename
         :return: Root path of written product
         """
         product_dir = path.join(
-            path.abspath(outdir),
-            "{name}{suffix}".format(
+            path.abspath(outdir), "{name}{suffix}".format(
                 name=[ff for ff in self.paths.root_dir.split(sep) if ff != ''][-1],
                 suffix=suffix)
         )

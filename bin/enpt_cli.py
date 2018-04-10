@@ -35,8 +35,12 @@ def get_enpt_argparser():
         help='number of CPU cores to be used for processing (default: "None" -> use all available')
     add('-im', '--path_l1b_enmap_image', default=None,
         help='input path of the EnMAP L1B image to be processed (zip-archive or root directory)')
+    add('-od', '--output_dir', default=None,
+        help='output directory where processed data and log files are saved')
     add('-imgap', '--path_l1b_enmap_image_gapfill', default=None,
         help='input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)')
+    add('-wd', '--working_dir', default=None,
+        help='directory to be used for temporary files')
 
     # link parser to run function
     parser.set_defaults(func=run_job)
@@ -78,7 +82,8 @@ def get_config(cli_args: argparse.Namespace):
 
 
 def run_job(config: EnPTConfig):
-    EnPT_Controller(config)
+    CTR = EnPT_Controller(config)
+    CTR.run_all_processors()
 
 
 if __name__ == '__main__':

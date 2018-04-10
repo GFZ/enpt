@@ -6,9 +6,17 @@ enpt_schema_input = dict(
         schema=dict(
             CPUs=dict(type='integer', required=False, nullable=True),
             log_level=dict(type='string', required=False, allowed=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']),
+            create_logfile=dict(type='boolean', required=False),
             path_l1b_enmap_image=dict(type='string', required=False),
             path_l1b_enmap_image_gapfill=dict(type='string', required=False),
             path_l1b_snr_model=dict(type='string', required=False),
+            working_dir=dict(type='string', required=False, nullable=True),
+        )),
+
+    output=dict(
+        type='dict', required=False,
+        schema=dict(
+            output_dir=dict(type='string', required=False),
         )),
 
     processors=dict(
@@ -62,9 +70,14 @@ parameter_mapping = dict(
     # general opts
     CPUs=('general_opts', 'CPUs'),
     log_level=('general_opts', 'log_level'),
+    create_logfile=('general_opts', 'create_logfile'),
     path_l1b_enmap_image=('general_opts', 'path_l1b_enmap_image'),
     path_l1b_enmap_image_gapfill=('general_opts', 'path_l1b_enmap_image_gapfill'),
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
+    working_dir=('general_opts', 'working_dir'),
+
+    # output
+    output_dir=('output', 'output_dir'),
 
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),

@@ -29,7 +29,7 @@ class EnPT_Controller(object):
         # generate temporary directory (must be deleted at the end of the pipeline)
         self.tempDir = tempfile.mkdtemp()
 
-        # setup a finalizer that destroys remaining data in case of unexpected exit
+        # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
         self._finalizer = weakref.finalize(self, self._cleanup, self.tempDir,
                                            warn_message="Implicitly cleaning up {!r}".format(self))
 
@@ -83,11 +83,16 @@ class EnPT_Controller(object):
         """Run atmospheric correction only."""
         pass
 
+    def write_output(self):
+        if self.cfg.output_dir:
+            self.L1_obj.save(self.cfg.output_dir)
+
     def run_all_processors(self):
         """Run all processors at once."""
         try:
             self.run_toaRad2toaRef()
             self.run_atmospheric_correction()
+            self.write_output()
         finally:
             self.cleanup()
 
