@@ -5,9 +5,11 @@ from datetime import datetime
 from xml.etree import ElementTree
 import logging
 import os
+from typing import Union
 import numpy as np
 from scipy.interpolate import interp2d
 import spectral as sp
+from geoarray import GeoArray
 
 from ..options.config import EnPTConfig
 from .srf import SRF
@@ -112,12 +114,16 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
              for corner in ("UL", "UR", "LL", "LR")]
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
-        self.unit = 'none'  # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
 
         try:
             self.unitcode = xml.findall("%s/unitcode" % lbl)[0].text
+            # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
+            self.unit = xml.findall("%s/unit" % lbl)[0].text
         except IndexError:
             self.unitcode = 'DN'
+            self.unit = 'none'
+        except Exception:
+            raise
 
         self.snr = None
 
@@ -135,39 +141,56 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.smile_coef  # shape = (nwvl, nsmile_coef)
         )  # shape = (ncols, nwvl)
 
-    def calc_snr_vnir(self, detector, snr_data_fn: str) -> None:
-        """Compute EnMAP-VNIR SNR from radiance data.
+    def calc_snr_from_radiance(self, rad_data: Union[GeoArray, np.ndarray], dir_snr_models: str):
+        """Compute EnMAP SNR from radiance data for the given detector.
 
-        :param snr_data_fn: filename to SNR file
-        :param detector: vnir instance of EnMAP_Detector_SensorGeo
+        SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].
+        NOTE:   The SNR model files (SNR_D1.bsq/SNR_D2.bsq) contain polynomial coefficients needed to compute SNR.
+                SNR_D1.bsq: SNR model for EnMAP SWIR detector (contains high gain and low gain model coefficients)
+                            - 1000 columns (for 1000 EnMAP columns)
+                            - 88 bands for 88 EnMAP VNIR bands
+                            - 7 lines:  - 3 lines: high gain coefficients
+                                        - 3 lines: low gain coefficients
+                                        - 1 line: threshold needed to decide about high gain or low gain
+                SNR_D2.bsq: SNR model for EnMAP SWIR detector
+                            - 1000 columns (for 1000 EnMAP columns)
+                            - x bands for x EnMAP SWIR bands
+                            - 3 lines for 3 coefficients
+
+        :param rad_data:        image radiance data of EnMAP_Detector_SensorGeo
+        :param dir_snr_models:  root directory where SNR model data is stored (must contain SNR_D1.bsq/SNR_D2.bsq)
         """
-        assert self.unit == 'mW m^-2 sr^-1 nm^-1'
-        self.logger.info("Compute snr for: %s using: %s" % (self.detector_name, snr_data_fn))
-        ds = sp.open_image(snr_data_fn)
-        p_hg = ds[0:3, :, :]
-        p_lg = ds[0:3, :, :]
-        l_th = np.squeeze(ds[6, :, :])
+        path_snr_model = os.path.join(dir_snr_models, "SNR_D1.hdr" if self.detector_name == 'VNIR' else "SNR_D2.hdr")
+        rad_data = np.array(rad_data)
 
-        self.snr = np.zeros(detector.data.shape)
-        for irow in range(self.nrows):
-            hg = detector.data[irow, :, :] < l_th
-            l_hg = detector.data[irow, hg]
-            self.snr[irow, :, :][hg] = p_hg[0, hg] + p_hg[1, hg] * l_hg + p_hg[2, hg] * l_hg**2
+        assert self.unitcode == 'TOARad'
+        self.logger.info("Computing SNR for: %s using: %s" % (self.detector_name, path_snr_model))
 
-            lg = detector.data[irow, :, :] >= l_th
-            l_lg = detector.data[irow, lg]
-            self.snr[irow, :, :][lg] = p_lg[0, lg] + p_lg[1, lg] * l_lg + p_lg[2, lg] * l_lg ** 2
+        if self.detector_name == 'VNIR':
+            gA = sp.open_image(path_snr_model)
+            coeffs_highgain = gA[0:3, :, :]
+            coeffs_lowgain = gA[3:6, :, :]
+            gain_threshold = np.squeeze(gA[6, :, :])
 
-    def calc_snr_swir(self, detector, snr_data_fn: str) -> None:
-        """Compute EnMAP SNR from radiance data.
+            self.snr = np.zeros(rad_data.shape)
+            for irow in range(self.nrows):
+                highgain_mask = rad_data[irow, :, :] < gain_threshold  # a single row
+                rad_highgain = rad_data[irow, highgain_mask]
+                self.snr[irow, :, :][highgain_mask] = \
+                    coeffs_highgain[0, highgain_mask] + \
+                    coeffs_highgain[1, highgain_mask] * rad_highgain + \
+                    coeffs_highgain[2, highgain_mask] * rad_highgain ** 2
 
-        :param snr_data_fn: filename to SNR file
-        :param detector: swir instance of EnMAP_Detector_SensorGeo
-        """
-        assert self.unit == 'mW m^-2 sr^-1 nm^-1'
-        self.logger.info("Compute snr for: %s using: %s" % (self.detector_name, snr_data_fn))
-        pp = sp.open_image(snr_data_fn)[:, :, :]
-        self.snr = pp[0, :, :] + pp[1, :, :] * detector.data[:, :, :] + pp[2, :, :] * detector.data[:, :, :]**2
+                lowgain_mask = rad_data[irow, :, :] >= gain_threshold
+                rad_lowgain = rad_data[irow, lowgain_mask]
+                self.snr[irow, :, :][lowgain_mask] = \
+                    coeffs_lowgain[0, lowgain_mask] + \
+                    coeffs_lowgain[1, lowgain_mask] * rad_lowgain + \
+                    coeffs_lowgain[2, lowgain_mask] * rad_lowgain ** 2
+
+        else:
+            coeffs = sp.open_image(path_snr_model)[:, :, :]
+            self.snr = coeffs[0, :, :] + coeffs[1, :, :] * rad_data[:, :, :] + coeffs[2, :, :] * rad_data[:, :, :] ** 2
 
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
@@ -238,7 +261,6 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         # FIXME observation time is currently missing in the XML
         self.observation_datetime = observation_time
-        # self.earthSunDist = np.cos(np.deg2rad(self.geom_sun_zenith))  # this seems to be wrong -> Andre?
         self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
 
     def get_earth_sun_distance(self, acqDate: datetime):

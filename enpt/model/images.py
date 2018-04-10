@@ -500,9 +500,17 @@ class EnMAPL1Product_SensorGeo(object):
         xml = ElementTree.parse(self.paths.metaxml)
         for xml_name, real_name in (("detector1", "vnir"), ("detector2", "swir")):
             ele = xml.getroot().find(xml_name)
+
+            # add unitcode
             new_ele = ElementTree.Element("unitcode")
             new_ele.text = getattr(self.meta, real_name).unitcode
             ele.append(new_ele)
+
+            # add unit
+            new_ele = ElementTree.Element("unit")
+            new_ele.text = getattr(self.meta, real_name).unit
+            ele.append(new_ele)
+
         xml.write(path.join(product_dir, path.basename(self.paths.metaxml)))
 
         return product_dir

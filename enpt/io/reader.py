@@ -3,6 +3,8 @@
 
 from datetime import datetime
 import logging
+import tempfile
+import zipfile
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -20,7 +22,7 @@ class L1B_Reader(object):
         self.logger = logger or logging.getLogger(__name__)
 
     def read_inputdata(self, root_dir, observation_time: datetime, lon_lat_smpl: tuple=(15, 15), nsmile_coef: int=5,
-                       snr_vnir: str=None, snr_swir: str=None):
+                       compute_snr: bool=True):
         # TODO move to init?
         """Read L1B, DEM and spatial reference data.
 
@@ -51,14 +53,18 @@ class L1B_Reader(object):
         L1_obj.swir.deadpixelmap = L1_obj.paths.swir.deadpixelmap
         L1_obj.swir.detector_meta = L1_obj.meta.swir
 
-        # compute radiance and calculate snr
+        # compute radiance
         L1_obj.DN2TOARadiance()
-        if snr_vnir is not None and L1_obj.meta.vnir.unit == 'mW m^-2 sr^-1 nm^-1':
-            self.logger.info("Compute SNR for vnir: %s" % snr_vnir)
-            L1_obj.vnir.detector_meta.calc_snr_vnir(detector=L1_obj.vnir, snr_data_fn=snr_vnir)
-        if snr_swir is not None and L1_obj.meta.vnir.unit == 'mW m^-2 sr^-1 nm^-1':
-            self.logger.info("Compute SNR for swir: %s" % snr_swir)
-            L1_obj.swir.detector_meta.calc_snr_swir(detector=L1_obj.swir, snr_data_fn=snr_swir)
+
+        # compute SNR
+        if compute_snr:
+            with tempfile.TemporaryDirectory() as tmpDir, zipfile.ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
+                zf.extractall(tmpDir)
+
+                if L1_obj.meta.vnir.unitcode == 'TOARad':
+                    L1_obj.vnir.detector_meta.calc_snr_from_radiance(rad_data=L1_obj.vnir.data, dir_snr_models=tmpDir)
+                if L1_obj.meta.swir.unitcode == 'TOARad':
+                    L1_obj.swir.detector_meta.calc_snr_from_radiance(rad_data=L1_obj.swir.data, dir_snr_models=tmpDir)
 
         return L1_obj
 
