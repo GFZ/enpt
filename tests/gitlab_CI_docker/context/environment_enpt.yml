@@ -23,7 +23,11 @@ dependencies:
   - holoviews
   - bokeh
 
-    # sicor
+  # arosics
+  - pyfftw
+  - pykrige
+
+  # sicor
   - glymur
   - pygrib
   - cachetools
