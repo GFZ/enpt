@@ -11,7 +11,7 @@ import warnings
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
-from ..processors.radiometric_transform import Radiometric_Transformer
+from ..processors import Radiometric_Transformer
 from ..model.images import EnMAPL1Product_SensorGeo
 
 

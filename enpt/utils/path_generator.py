@@ -56,3 +56,15 @@ def get_path_ac_options() -> str:
     path_ac = os.path.join(os.path.dirname(options.__file__), 'enmap_options.json')
 
     return path_ac
+
+
+def get_path_ac_aerosol_table():
+    import sicor
+    return os.path.join(sicor.__path__[0], 'tables',
+                        'linear_atm_functions_ncwv_5_npre_4_ncoz_2_ntmp_2_wvl_350.0_2550.0_1.00_pca.h5')
+
+
+def get_path_ac_ch4_table():
+    import sicor
+    return os.path.join(sicor.__path__[0], 'tables',
+                        'linear_atm_functions_ncwv_4_npre_2_ncoz_2_ntmp_1_nch4_4_wvl_350.0_2550.0_1.00_pca.h5')

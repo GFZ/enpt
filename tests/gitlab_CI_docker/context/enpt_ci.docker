@@ -30,3 +30,14 @@ RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v
     tar -zxvf git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
     cd git-lfs-${git_lfs_v}; \
     bash ./install.sh"
+
+# copy sicor code to /tmp
+COPY sicor /tmp/sicor
+
+# install sicor
+RUN bash -i -c "source /root/miniconda3/bin/activate; \
+    cd /tmp/sicor/ ; \
+    make clean ; \
+    make requirements ; \
+    make download-tables ; \
+    pip install . --no-cache-dir"

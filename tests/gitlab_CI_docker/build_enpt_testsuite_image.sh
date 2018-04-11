@@ -5,6 +5,10 @@ dockerfile="enpt_ci.docker"
 tag="enpt_ci:latest"
 gitlab_runner="enpt_gitlab_CI_runner"
 
+# get sicor project
+rm -rf context/sicor
+git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+
 echo "#### Build runner docker image"
 sudo docker rmi ${tag}
 sudo docker build -f ${context_dir}/${dockerfile} -m 20G -t ${tag} ${context_dir}
