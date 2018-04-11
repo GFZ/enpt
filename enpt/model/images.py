@@ -472,6 +472,11 @@ class EnMAPL1Product_SensorGeo(object):
         if self.swir.detector_meta.unitcode != 'TOARad':
             self.swir.DN2TOARadiance()
 
+    def run_AC(self):
+        from ..processors import AtmosphericCorrector
+        AC = AtmosphericCorrector(config=self.cfg)
+        AC.run_ac(self)
+
     def save(self, outdir: str, suffix="") -> str:
         """Save this product to disk using almost the same format as for reading.
 

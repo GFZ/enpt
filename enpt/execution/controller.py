@@ -81,7 +81,7 @@ class EnPT_Controller(object):
 
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""
-        pass
+        self.L1_obj.run_AC()
 
     def write_output(self):
         if self.cfg.output_dir:
