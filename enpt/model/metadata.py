@@ -82,7 +82,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """
         xml = ElementTree.parse(path_xml).getroot()
         lbl = self.detector_label
-        self.logger.info("Load data for: %s" % lbl)
+        self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
         self.fwhm = np.array(xml.findall("%s/fwhm" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
         self.wvl_center = np.array(
@@ -164,7 +164,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         rad_data = np.array(rad_data)
 
         assert self.unitcode == 'TOARad'
-        self.logger.info("Computing SNR for: %s using: %s" % (self.detector_name, path_snr_model))
+        self.logger.info("Computing SNR for %s using %s" % (self.detector_name, path_snr_model))
 
         if self.detector_name == 'VNIR':
             gA = sp.open_image(path_snr_model)

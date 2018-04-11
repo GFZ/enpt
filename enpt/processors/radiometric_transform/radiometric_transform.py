@@ -22,9 +22,7 @@ class Radiometric_Transformer(object):
         self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
 
     @staticmethod
-    def transform_TOARad2TOARef(enmap_ImageL1: EnMAPL1Product_SensorGeo,
-                                scale_factor: int=10000
-                                ):
+    def transform_TOARad2TOARef(enmap_ImageL1: EnMAPL1Product_SensorGeo, scale_factor: int=10000):
         """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
 
         NOTE: The following formula is used:
@@ -39,7 +37,7 @@ class Radiometric_Transformer(object):
             detector = getattr(enmap_ImageL1, detectorName)  # type: EnMAP_Detector_SensorGeo
 
             enmap_ImageL1.logger.info('Converting TOA radiance to TOA reflectance for %s detector...'
-                                      % detector.detector_name)  # FIXME does not log anything
+                                      % detector.detector_name)
 
             # compute TOA reflectance
             constant = \

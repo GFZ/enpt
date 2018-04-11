@@ -17,7 +17,12 @@ class L1B_Reader(object):
     """Reader for EnMAP Level-1B products."""
 
     def __init__(self, config: EnPTConfig, logger: logging.Logger=None):
-        """Get an instance of L1B_Reader."""
+        """Get an instance of L1B_Reader.
+
+        :param config:  instance of EnPTConfig class
+        :param logger:  instance of logging.Logger (NOTE: This logger is only used to log messages within L1B_Reader.
+                                                          It is not appended to the read L1B EnMAP object).
+        """
         self.cfg = config
         self.logger = logger or logging.getLogger(__name__)
 
@@ -26,17 +31,18 @@ class L1B_Reader(object):
         # TODO move to init?
         """Read L1B, DEM and spatial reference data.
 
-        :param root_dir: Root directory of EnMAP Level-1B product
-        :param observation_time: datetime of observation time (currently missing in metadata)
-        :param lon_lat_smpl: number if sampling points in lon, lat fields
-        :param nsmile_coef: number of polynomial coefficients for smile
-        :return: instance of EnMAPL1Product_MapGeo
+        :param root_dir:            Root directory of EnMAP Level-1B product
+        :param observation_time:    datetime of observation time (currently missing in metadata)
+        :param lon_lat_smpl:        number if sampling points in lon, lat fields
+        :param nsmile_coef:         number of polynomial coefficients for smile
+        :param compute_snr:         whether to compute SNR or not (default: True)
+        :return:    instance of EnMAPL1Product_MapGeo
         """
         # get a new instance of EnMAPL1Product_MapGeo
         L1_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
 
         # read metadata
-        L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml, config=self.cfg)
+        L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml, config=self.cfg, logger=L1_obj.logger)
         L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
 
         # read VNIR data
@@ -58,7 +64,8 @@ class L1B_Reader(object):
 
         # compute SNR
         if compute_snr:
-            with tempfile.TemporaryDirectory() as tmpDir, zipfile.ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
+            with tempfile.TemporaryDirectory(dir=self.cfg.working_dir) as tmpDir,\
+                    zipfile.ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
                 zf.extractall(tmpDir)
 
                 if L1_obj.meta.vnir.unitcode == 'TOARad':

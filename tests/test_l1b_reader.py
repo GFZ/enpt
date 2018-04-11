@@ -18,6 +18,7 @@ from datetime import datetime
 import shutil
 
 from enpt.options.config import EnPTConfig
+from . import config_for_testing
 
 
 class Test_L1B_Reader(unittest.TestCase):
@@ -25,12 +26,12 @@ class Test_L1B_Reader(unittest.TestCase):
 
     def setUp(self):
         self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
-        self.config = EnPTConfig()
-
-        self.tmpdir = tempfile.mkdtemp()
+        self.config = EnPTConfig(**config_for_testing)
+        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.config.output_dir)
 
     def test_read_and_save_inputdata(self):
         from enpt.io.reader import L1B_Reader
@@ -72,7 +73,7 @@ class Test_L1B_Reader(unittest.TestCase):
                 self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
                 self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
                 self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
-                root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "with_snr"))
+                root_dir_written_L1_data = L1_obj.save(path.join(self.config.output_dir, "with_snr"))
 
                 # read self written L1 data
                 L1_obj = rd.read_inputdata(root_dir_written_L1_data, observation_time=datetime(2015, 12, 7, 10))

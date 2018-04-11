@@ -62,9 +62,17 @@ class EnPTConfig(object):
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
+        self.create_logfile = gp('create_logfile')
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
+        self.working_dir = self.absPath(gp('working_dir')) or None
+
+        ##################
+        # output options #
+        ##################
+
+        self.output_dir = self.absPath(gp('output_dir'))
 
         ###########################
         # processor configuration #
