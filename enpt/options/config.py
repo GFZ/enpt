@@ -17,6 +17,8 @@ from collections import OrderedDict, Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
+import sicor
+
 from .options_schema import \
     enpt_schema_input, \
     enpt_schema_config_output, \
@@ -88,6 +90,7 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_cloud_screening = gp('enable_cloud_screening')
 

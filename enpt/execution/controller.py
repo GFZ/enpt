@@ -79,6 +79,9 @@ class EnPT_Controller(object):
         # run transformation to TOARef
         self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
+    def run_geometry_processor(self):
+        pass
+
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""
         self.L1_obj.run_AC()
@@ -90,7 +93,8 @@ class EnPT_Controller(object):
     def run_all_processors(self):
         """Run all processors at once."""
         try:
-            self.run_toaRad2toaRef()
+            # self.run_toaRad2toaRef()
+            self.run_geometry_processor()
             self.run_atmospheric_correction()
             self.write_output()
         finally:

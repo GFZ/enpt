@@ -41,6 +41,7 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    sicor_cache_dir=dict(type='string', required=False),
                     auto_download_ecmwf=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
                 )),
@@ -89,6 +90,7 @@ parameter_mapping = dict(
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
+    sicor_cache_dir=('processors', 'atmospheric_correction', 'sicor_cache_dir'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
 
