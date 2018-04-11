@@ -35,7 +35,7 @@ RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v
 COPY sicor /tmp/sicor
 
 # install sicor
-RUN bash -i -c "source /root/miniconda3/bin/activate; \
+RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
     cd /tmp/sicor/ ; \
     make clean ; \
     make requirements ; \
