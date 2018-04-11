@@ -13,6 +13,7 @@ test_enpt:
     - source /root/miniconda3/bin/activate enpt
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
+    - pip install xlrd  # FIXME due to https://gitext.gfz-potsdam.de/EnMAP/sicor/issues/23
 
     # update sicor
     # - conda install -y -q -c conda-forge basemap
