@@ -65,6 +65,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
+        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
@@ -106,6 +107,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
         self.geom_sun_azimuth = np.float(
             xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
+        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.lat_UL_UR_LL_LR = \
             [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
              for corner in ("UL", "UR", "LL", "LR")]
