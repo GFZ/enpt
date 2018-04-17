@@ -21,8 +21,7 @@ class Radiometric_Transformer(object):
         self.solarIrr = config.path_solar_irr  # path of model for solar irradiance
         self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
 
-    @staticmethod
-    def transform_TOARad2TOARef(enmap_ImageL1: EnMAPL1Product_SensorGeo, scale_factor: int=10000):
+    def transform_TOARad2TOARef(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
 
         NOTE: The following formula is used:
@@ -30,7 +29,6 @@ class Radiometric_Transformer(object):
                          (solIrr * math.cos(zenithAngleDeg))
 
         :param enmap_ImageL1:   instance of the class 'EnMAPL1Product_ImGeo'
-        :param scale_factor:    scale factor to be applied to TOA reflectance result
         :return:
         """
         for detectorName in enmap_ImageL1.detector_attrNames:
@@ -41,7 +39,7 @@ class Radiometric_Transformer(object):
 
             # compute TOA reflectance
             constant = \
-                scale_factor * math.pi * enmap_ImageL1.meta.earthSunDist ** 2 / \
+                self.cfg.scale_factor_toa_ref * math.pi * enmap_ImageL1.meta.earthSunDist ** 2 / \
                 (math.cos(math.radians(detector.detector_meta.geom_sun_zenith)))
             solIrr = np.array([detector.detector_meta.solar_irrad[band] for band in detector.detector_meta.srf.bands])\
                 .reshape(1, 1, detector.data.bands)
@@ -49,7 +47,7 @@ class Radiometric_Transformer(object):
 
             # update EnMAP image
             detector.data = toaRef
-            detector.detector_meta.unit = '0-%d' % scale_factor
+            detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_toa_ref
             detector.detector_meta.unitcode = 'TOARef'
 
         return enmap_ImageL1

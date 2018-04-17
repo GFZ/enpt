@@ -47,7 +47,7 @@ class _EnMAP_Image(object):
         self.paths = SimpleNamespace()
 
         # protected attributes
-        self._arr = None
+        self._data = None
         self._mask_nodata = None
         self._mask_clouds = None
         self._mask_clouds_confidence = None
@@ -61,7 +61,7 @@ class _EnMAP_Image(object):
         self.basename = ''
 
     @property
-    def data(self):
+    def data(self) -> GeoArray:
         """Return the actual EnMAP image data.
 
         Bundled with all the corresponding metadata.
@@ -105,26 +105,25 @@ class _EnMAP_Image(object):
 
         :return:    instance of geoarray.GeoArray
         """
-        # TODO this must return a subset if self.subset is not None
-        return self._arr
+        return self._data
 
     @data.setter
     def data(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             # TODO this must be able to handle subset inputs in tiled processing
-            if self._arr and len(geoArr_initArgs[0]) and isinstance(geoArr_initArgs[0], np.ndarray):
-                self._arr = GeoArray(geoArr_initArgs[0], geotransform=self._arr.gt, projection=self._arr.prj)
+            if self._data and len(geoArr_initArgs[0]) and isinstance(geoArr_initArgs[0], np.ndarray):
+                self._data = GeoArray(geoArr_initArgs[0], geotransform=self._data.gt, projection=self._data.prj)
             else:
-                self._arr = GeoArray(*geoArr_initArgs)
+                self._data = GeoArray(*geoArr_initArgs)
         else:
             del self.data
 
     @data.deleter
     def data(self):
-        self._arr = None
+        self._data = None
 
     @property
-    def mask_clouds(self):
+    def mask_clouds(self) -> GeoArray:
         """Return the cloud mask.
 
         Bundled with all the corresponding metadata.
@@ -155,7 +154,7 @@ class _EnMAP_Image(object):
         self._mask_clouds = None
 
     @property
-    def mask_clouds_confidence(self):
+    def mask_clouds_confidence(self) -> GeoArray:
         """Return pixelwise information on the cloud mask confidence.
 
         Bundled with all the corresponding metadata.
@@ -190,7 +189,7 @@ class _EnMAP_Image(object):
         self._mask_clouds_confidence = None
 
     @property
-    def dem(self):
+    def dem(self) -> GeoArray:
         """Return an SRTM DEM in the exact dimension an pixel grid of self.arr.
 
         :return: geoarray.GeoArray
@@ -220,7 +219,7 @@ class _EnMAP_Image(object):
         self._dem = None
 
     @property
-    def ac_errors(self):
+    def ac_errors(self) -> GeoArray:
         """Return error information calculated by the atmospheric correction.
 
         :return: geoarray.GeoArray
@@ -251,7 +250,7 @@ class _EnMAP_Image(object):
         self._ac_errors = None
 
     @property
-    def deadpixelmap(self):
+    def deadpixelmap(self) -> GeoArray:
         """Return the dead pixel map.
 
         Bundled with all the corresponding metadata. Dimensions: (bands x columns).
@@ -558,7 +557,7 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
         super(EnMAP_Detector_MapGeo, self).__init__()
 
     @property
-    def mask_nodata(self):
+    def mask_nodata(self) -> GeoArray:
         """Return the no data mask.
 
         Bundled with all the corresponding metadata.
@@ -592,7 +591,7 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
     def mask_nodata(self):
         self._mask_nodata = None
 
-    def calc_mask_nodata(self, fromBand=None, overwrite=False):
+    def calc_mask_nodata(self, fromBand=None, overwrite=False) -> GeoArray:
         """Calculate a no data mask with (values: 0=nodata; 1=data).
 
         :param fromBand:  <int> index of the band to be used (if None, all bands are used)

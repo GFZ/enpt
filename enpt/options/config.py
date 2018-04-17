@@ -83,6 +83,7 @@ class EnPTConfig(object):
         # toa_ref
         self.path_earthSunDist = self.absPath(gp('path_earthSunDist'))
         self.path_solar_irr = self.absPath(gp('path_solar_irr'))
+        self.scale_factor_toa_ref = gp('scale_factor_toa_ref'),
 
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')
@@ -93,6 +94,7 @@ class EnPTConfig(object):
         self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_cloud_screening = gp('enable_cloud_screening')
+        self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
 
         # smile
         self.run_smile_P = gp('run_smile_P')

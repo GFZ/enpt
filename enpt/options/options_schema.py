@@ -83,6 +83,7 @@ parameter_mapping = dict(
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),
     path_solar_irr=('processors', 'toa_ref', 'path_solar_irr'),
+    scale_factor_toa_ref=('processors', 'toa_ref', 'scale_factor_toa_ref'),
 
     # processors > geometry
     enable_keystone_correction=('processors', 'geometry', 'enable_keystone_correction'),
@@ -93,6 +94,7 @@ parameter_mapping = dict(
     sicor_cache_dir=('processors', 'atmospheric_correction', 'sicor_cache_dir'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
+    scale_factor_boa_ref=('processors', 'atmospheric_correction', 'scale_factor_boa_ref'),
 
     # processors > smile
     run_smile_P=('processors', 'smile', 'run_processor'),
