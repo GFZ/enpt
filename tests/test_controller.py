@@ -20,7 +20,8 @@ class Test_EnPT_Controller(TestCase):
         self.CTR = EnPT_Controller(**config_for_testing)
 
     def tearDown(self):
-        shutil.rmtree(self.CTR.cfg.output_dir)
+        # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
+        shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
 
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
