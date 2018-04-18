@@ -57,7 +57,7 @@ class EnPT_Controller(object):
         if not os.path.isdir(path_enmap_image) and \
            not (os.path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
             raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
-                             "archive.")
+                             "archive. Received %s." % path_enmap_image)
 
         # extract L1B image archive if needed
         if path_enmap_image.endswith('.zip'):
