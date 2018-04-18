@@ -33,6 +33,12 @@ path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 
 
+config_for_testing = dict(
+    path_l1b_enmap_image=os.path.join(path_enptlib, 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip'),
+    output_dir=os.path.join(path_enptlib, 'tests', 'data', 'test_outputs')
+)
+
+
 class EnPTConfig(object):
     def __init__(self, json_config='', **user_opts):
         """Create a job configuration.
@@ -83,7 +89,7 @@ class EnPTConfig(object):
         # toa_ref
         self.path_earthSunDist = self.absPath(gp('path_earthSunDist'))
         self.path_solar_irr = self.absPath(gp('path_solar_irr'))
-        self.scale_factor_toa_ref = gp('scale_factor_toa_ref'),
+        self.scale_factor_toa_ref = gp('scale_factor_toa_ref')
 
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')

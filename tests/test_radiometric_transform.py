@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#  -*- coding: utf-8 -*-
 
 import os
-import unittest
+from unittest import TestCase, main
 from glob import glob
 import tempfile
 import zipfile
 from datetime import datetime
 
 from enpt.processors import Radiometric_Transformer
-from enpt.options.config import EnPTConfig
-
-from . import config_for_testing
+from enpt.options.config import EnPTConfig, config_for_testing
 
 
-class Test_Radiometric_Transformer(unittest.TestCase):
+class Test_Radiometric_Transformer(TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
-
         self.cfg = EnPTConfig(**config_for_testing)
         self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
         self.RT = Radiometric_Transformer(config=self.cfg)
@@ -48,3 +46,7 @@ class Test_Radiometric_Transformer(unittest.TestCase):
             self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
             self.assertTrue(L1_obj.vnir.detector_meta.unitcode == 'TOARef')
             self.assertTrue(L1_obj.swir.detector_meta.unitcode == 'TOARef')
+
+
+if __name__ == "__main__":
+    main()

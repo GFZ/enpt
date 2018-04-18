@@ -17,8 +17,7 @@ import zipfile
 from datetime import datetime
 import shutil
 
-from enpt.options.config import EnPTConfig
-from . import config_for_testing
+from enpt.options.config import EnPTConfig, config_for_testing
 
 
 class Test_L1B_Reader(unittest.TestCase):
