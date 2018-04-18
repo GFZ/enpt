@@ -42,33 +42,33 @@ enpt/execution/controller.py:82 in public method `run_geometry_processor`:
         D102: Missing docstring in public method
 enpt/execution/controller.py:89 in public method `write_output`:
         D102: Missing docstring in public method
-enpt/options/config.py:36 in public class `EnPTConfig`:
+enpt/options/config.py:42 in public class `EnPTConfig`:
         D101: Missing docstring in public class
-enpt/options/config.py:37 in public method `__init__`:
+enpt/options/config.py:43 in public method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:115 in public method `absPath`:
+enpt/options/config.py:121 in public method `absPath`:
         D102: Missing docstring in public method
-enpt/options/config.py:118 in public method `get_parameter`:
+enpt/options/config.py:124 in public method `get_parameter`:
         D102: Missing docstring in public method
-enpt/options/config.py:181 in public method `to_dict`:
+enpt/options/config.py:187 in public method `to_dict`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:195 in public method `to_jsonable_dict`:
+enpt/options/config.py:201 in public method `to_jsonable_dict`:
         D102: Missing docstring in public method
-enpt/options/config.py:206 in public method `__repr__`:
+enpt/options/config.py:212 in public method `__repr__`:
         D105: Missing docstring in magic method
-enpt/options/config.py:210 in public function `json_to_python`:
+enpt/options/config.py:216 in public function `json_to_python`:
         D103: Missing docstring in public function
-enpt/options/config.py:243 in public function `python_to_json`:
+enpt/options/config.py:249 in public function `python_to_json`:
         D103: Missing docstring in public function
-enpt/options/config.py:265 in public class `EnPTValidator`:
+enpt/options/config.py:271 in public class `EnPTValidator`:
         D101: Missing docstring in public class
-enpt/options/config.py:266 in public method `__init__`:
+enpt/options/config.py:272 in public method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/options/config.py:266 in public method `__init__`:
+enpt/options/config.py:272 in public method `__init__`:
         D400: First line should end with a period (not 'r')
-enpt/options/config.py:274 in public method `validate`:
+enpt/options/config.py:280 in public method `validate`:
         D102: Missing docstring in public method
-enpt/options/config.py:279 in public function `get_options`:
+enpt/options/config.py:285 in public function `get_options`:
         D202: No blank lines allowed after function docstring (found 1)
 enpt/options/__init__.py:1 at module level:
         D104: Missing docstring in public package

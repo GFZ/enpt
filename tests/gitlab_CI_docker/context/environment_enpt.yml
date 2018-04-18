@@ -42,8 +42,8 @@ dependencies:
     - cerberus
     - jsmin
     - sphinx-argparse
-    - flake8
     - pycodestyle
+    - flake8
     - pylint
     - pydocstyle
     - nose
