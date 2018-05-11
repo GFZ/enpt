@@ -57,6 +57,7 @@ test_styles:
 test_enpt_install:
   stage: test
   script:
+    # TODO: add sicor here
     - source /root/miniconda3/bin/activate
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
