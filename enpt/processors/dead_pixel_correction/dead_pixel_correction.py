@@ -22,7 +22,7 @@ class Dead_Pixel_Corrector(object):
         if (image2correct.bands, image2correct.columns) != deadcolumn_map.shape:
             raise ValueError('The given image to be corrected (shape: %s) requires a dead column map with shape '
                              '(%s, %s). Received %s.'
-                             % (image2correct.shape, image2correct.columns, image2correct.bands, deadcolumn_map.shape))
+                             % (image2correct.shape, image2correct.bands, image2correct.columns, deadcolumn_map.shape))
 
     def correct(self, image2correct: Union[np.ndarray, GeoArray], deadcolumn_map: Union[np.ndarray, GeoArray]):
         """
