@@ -62,7 +62,8 @@ class Dead_Pixel_Corrector(object):
                 interp = np.array(column_data_float)
 
                 interp[np.isnan(interp)] = \
-                    griddata((x[~np.isnan(column_data_float)], y[~np.isnan(column_data_float)]),  # points we know
+                    griddata(np.array([x[~np.isnan(column_data_float)],
+                                       y[~np.isnan(column_data_float)]]).T,  # points we know
                              column_data_float[~np.isnan(column_data_float)],  # values we know
                              (x[np.isnan(column_data_float)], y[np.isnan(column_data_float)]),  # points to interpolate
                              method=self.interp_alg)
