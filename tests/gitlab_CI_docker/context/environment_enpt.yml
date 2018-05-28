@@ -14,7 +14,7 @@ dependencies:
   - scikit-image
   - rasterio
   - pyproj
-  - lxml
+  # - lxml
   - geopandas
   - ipython
   - matplotlib
