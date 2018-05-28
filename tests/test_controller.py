@@ -8,7 +8,7 @@ test_controller
 Tests for `execution.controller` module.
 """
 
-from unittest import TestCase, main, SkipTest
+from unittest import TestCase, main
 import shutil
 
 from enpt.execution.controller import EnPT_Controller
@@ -23,7 +23,6 @@ class Test_EnPT_Controller(TestCase):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
         shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
 
-    @SkipTest
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
