@@ -41,6 +41,9 @@ dependencies:
     - spectral>=0.16
     - cerberus
     - jsmin
+    - utm
+    - lxml
+    - imageio
     - sphinx-argparse
     - pycodestyle
     - flake8
