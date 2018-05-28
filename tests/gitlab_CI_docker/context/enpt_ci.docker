@@ -4,7 +4,7 @@ FROM centos:7
 RUN yum update -y && \
     yum install -y wget vim bzip2 gcc gcc-c++ make libgl1-mesa-glx mesa-libGL qt5-qtbase-gui git nano tree gdb texlive
 
-# change version numbers for future upgrades   # currently Anaconda 4.5.1
+# change version numbers for future upgrades   # currently Anaconda 4.5.1 (worked fine)
 ENV miniconda_dl 'Miniconda3-latest-Linux-x86_64.sh'
 # use miniconda 4.3.31 as workaround for "IsADirectoryError(21, 'Is a directory')" with version 4.4.10 (currently latest)
 # ENV miniconda_dl 'Miniconda3-4.3.31-Linux-x86_64.sh'
