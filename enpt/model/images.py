@@ -7,6 +7,7 @@ import numpy as np
 from os import path, sep, makedirs
 from shutil import copyfile
 from xml.etree import ElementTree
+from datetime import datetime
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
@@ -14,6 +15,7 @@ from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ..options.config import EnPTConfig
+from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 
 ##############
 # BASE CLASSES
@@ -112,7 +114,7 @@ class _EnMAP_Image(object):
     def data(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             # TODO this must be able to handle subset inputs in tiled processing
-            if self._arr and len(geoArr_initArgs[0]) and isinstance(geoArr_initArgs[0], np.ndarray):
+            if isinstance(geoArr_initArgs[0], np.ndarray):
                 self._arr = GeoArray(geoArr_initArgs[0], geotransform=self._arr.gt, projection=self._arr.prj)
             else:
                 self._arr = GeoArray(*geoArr_initArgs)
@@ -261,7 +263,9 @@ class _EnMAP_Image(object):
 
         :return: instance of geoarray.GeoArray
         """
-        return self._deadpixelmap
+        if self._deadpixelmap is not None:
+            self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
+            return self._deadpixelmap
 
     @deadpixelmap.setter
     def deadpixelmap(self, *geoArr_initArgs):
@@ -335,6 +339,14 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         paths.quicklook = pathGen.get_path_quicklook()
 
         return paths
+
+    def correct_dead_pixels(self):
+        """Correct dead pixels with respect to the dead pixel mask."""
+        self.logger.info("Correcting dead pixels of %s detector..." % self.detector_name)
+
+        self.data = \
+            Dead_Pixel_Corrector(algorithm='spectral', interp='linear', logger=self.logger)\
+            .correct(self.data, self.deadpixelmap)
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.
@@ -462,6 +474,33 @@ class EnMAPL1Product_SensorGeo(object):
 
         return paths
 
+    # @classmethod
+    # def from_L1B_provider_data(cls, path_enmap_image: str, config: EnPTConfig=None) -> EnMAPL1Product_SensorGeo:
+    #     """
+    #
+    #     :param path_enmap_image:
+    #     :param config:
+    #     :return:
+    #     """
+    #     # input validation
+    #     if not path.isdir(path_enmap_image) and \
+    #        not (path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
+    #         raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
+    #                          "archive.")
+    #
+    #     # extract L1B image archive if needed
+    #     if path_enmap_image.endswith('.zip'):
+    #         path_enmap_image = self.extract_zip_archive(path_enmap_image)
+    #         if not path.isdir(path_enmap_image):
+    #             raise NotADirectoryError(path_enmap_image)
+    #
+    #     # run the reader
+    #     from ..io.reader import L1B_Reader
+    #     RD = L1B_Reader(config=config)
+    #     L1_obj = RD.read_inputdata(path_enmap_image, observation_time=datetime(2015, 12, 7, 10))
+    #
+    #     return L1_obj
+
     def DN2TOARadiance(self):
         """Convert self.vnir.data and self.swir.data from digital numbers to top-of-atmosphere radiance.
 
@@ -471,6 +510,11 @@ class EnMAPL1Product_SensorGeo(object):
             self.vnir.DN2TOARadiance()
         if self.swir.detector_meta.unitcode != 'TOARad':
             self.swir.DN2TOARadiance()
+
+    def correct_dead_pixels(self):
+        """Correct dead pixels of both detectors."""
+        self.vnir.correct_dead_pixels()
+        self.swir.correct_dead_pixels()
 
     def save(self, outdir: str, suffix="") -> str:
         """Save this product to disk using almost the same format as for reading.

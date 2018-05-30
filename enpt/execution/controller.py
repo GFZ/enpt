@@ -90,6 +90,7 @@ class EnPT_Controller(object):
     def run_all_processors(self):
         """Run all processors at once."""
         try:
+            self.L1_obj.correct_dead_pixels()
             self.run_toaRad2toaRef()
             self.run_atmospheric_correction()
             self.write_output()
