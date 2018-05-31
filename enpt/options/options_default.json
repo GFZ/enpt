@@ -29,7 +29,7 @@
         "atmospheric_correction": {
             "sicor_cache_dir": "",  /*directory to be used to stored sicor cache files
                                       NOTE: SICOR stores intermediate results there that need to computed only once
-                                            for atmospheric correction of multiple EnMAP images. (default: 'auto'*/
+                                            for atmospheric correction of multiple EnMAP images. (default: 'auto')*/
             "auto_download_ecmwf": false,
             "enable_cloud_screening": false,
             "scale_factor_boa_ref": 10000  /*scale factor to be applied to BOA reflectance result*/
