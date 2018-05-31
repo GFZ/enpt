@@ -45,7 +45,7 @@ dependencies:
     - lxml
     - imageio
     - sphinx-argparse
-    - pycodestyle
+    - pycodestyle<2.4.0  # version 2.4.0 causes ImportError: module 'pycodestyle' has no attribute 'break_around_binary_operator'
     - flake8
     - pylint
     - pydocstyle
