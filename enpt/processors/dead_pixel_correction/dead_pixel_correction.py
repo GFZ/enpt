@@ -63,7 +63,8 @@ class Dead_Pixel_Corrector(object):
                 #################
 
                 # first or last bands (number depends on filter half width)
-                if band in list(range(self.fhw)) + list(range(image2correct.bands, image2correct.bands-self.fhw, -1)):
+                if band in \
+                        list(range(self.fhw)) + list(range(image2correct.bands-1, image2correct.bands-self.fhw-1, -1)):
                     pass  # TODO
 
                 # any other band
