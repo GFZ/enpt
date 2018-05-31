@@ -7,7 +7,7 @@ import numpy as np
 from os import path, sep, makedirs
 from shutil import copyfile
 from xml.etree import ElementTree
-from datetime import datetime
+# from datetime import datetime
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
