@@ -36,7 +36,7 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
-    output_dir=os.path.join(path_enptlib, 'tests', 'data', 'test_outputs')
+    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')
 )
 
 
@@ -81,7 +81,7 @@ class EnPTConfig(object):
         # output options #
         ##################
 
-        self.output_dir = self.absPath(gp('output_dir'))
+        self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
 
         ###########################
         # processor configuration #
