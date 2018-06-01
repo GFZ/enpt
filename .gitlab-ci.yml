@@ -43,10 +43,10 @@ test_styles:
     - source /root/miniconda3/bin/activate enpt
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
-    - pip install flake8  # FIXME version incompatibility between flake8 and pycodestyle
     - make lint
   artifacts:
     paths:
+    - tests/data/test_outputs/*.log
     - tests/linting/flake8.log
     - tests/linting/pycodestyle.log
     - tests/linting/pydocstyle.log

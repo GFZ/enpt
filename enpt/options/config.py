@@ -36,6 +36,7 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
+    log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')
 )
 
