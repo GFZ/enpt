@@ -46,7 +46,7 @@ test_styles:
     - make lint
   artifacts:
     paths:
-    - tests/data/test_outputs/*.log
+    # - tests/data/test_outputs/*.log  # log files are deleted by test teardown method
     - tests/linting/flake8.log
     - tests/linting/pycodestyle.log
     - tests/linting/pydocstyle.log
