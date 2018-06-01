@@ -34,7 +34,7 @@ RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v
 # copy sicor code to /tmp
 COPY sicor /tmp/sicor
 
-# install sicor
+# install sicor (in pip development mode so that its root directory in /tmp/sicor matching with the subsequent COPY command)
 RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
     cd /tmp/sicor/ ; \
     make clean ; \
