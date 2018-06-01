@@ -14,7 +14,7 @@ dependencies:
   - scikit-image
   - rasterio
   - pyproj
-  - lxml
+  # - lxml
   - geopandas
   - ipython
   - matplotlib
@@ -22,15 +22,32 @@ dependencies:
   - shapely
   - holoviews
   - bokeh
+
+  # arosics
+  - pyfftw
+  - pykrige
+
+  # sicor
+  - glymur
+  - pygrib
+  - cachetools
+  - pyhdf
+  - h5py
+  - pytables
+
   - pip:
     - scipy
     - geoarray>=0.7.15
     - spectral>=0.16
     - cerberus
     - jsmin
+    - tqdm
+    - utm
+    - lxml
+    - imageio
     - sphinx-argparse
+    - pycodestyle<2.4.0  # version 2.4.0 causes ImportError: module 'pycodestyle' has no attribute 'break_around_binary_operator'
     - flake8
-    - pycodestyle
     - pylint
     - pydocstyle
     - nose
@@ -38,3 +55,6 @@ dependencies:
     - nose-htmloutput
     - coverage
     - rednose
+
+    # sicor
+    - https://software.ecmwf.int/wiki/download/attachments/56664858/ecmwf-api-client-python.tgz

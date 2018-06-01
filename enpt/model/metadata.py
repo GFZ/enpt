@@ -36,6 +36,7 @@ L1B_product_props = dict(
     )
 )
 
+
 #########################################################
 # EnPT metadata objects for EnMAP data in sensor geometry
 #########################################################
@@ -82,6 +83,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
+        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling

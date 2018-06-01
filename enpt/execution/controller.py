@@ -11,7 +11,6 @@ import warnings
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
-from ..processors.radiometric_transform import Radiometric_Transformer
 from ..model.images import EnMAPL1Product_SensorGeo
 
 
@@ -57,7 +56,7 @@ class EnPT_Controller(object):
         if not os.path.isdir(path_enmap_image) and \
            not (os.path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
             raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
-                             "archive.")
+                             "archive. Received %s." % path_enmap_image)
 
         # extract L1B image archive if needed
         if path_enmap_image.endswith('.zip'):
@@ -74,14 +73,18 @@ class EnPT_Controller(object):
     def run_toaRad2toaRef(self):
         """Run conversion from TOA radiance to TOA reflectance."""
         # get a new instance of radiometric transformer
+        from ..processors.radiometric_transform import Radiometric_Transformer
         RT = Radiometric_Transformer(self.cfg)
 
         # run transformation to TOARef
         self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
+    def run_geometry_processor(self):
+        pass
+
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""
-        pass
+        self.L1_obj.run_AC()
 
     def write_output(self):
         if self.cfg.output_dir:
@@ -90,7 +93,10 @@ class EnPT_Controller(object):
     def run_all_processors(self):
         """Run all processors at once."""
         try:
-            self.run_toaRad2toaRef()
+            if self.cfg.run_deadpix_P:
+                self.L1_obj.correct_dead_pixels()
+            # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+            self.run_geometry_processor()
             self.run_atmospheric_correction()
             self.write_output()
         finally:

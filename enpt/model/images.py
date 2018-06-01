@@ -10,6 +10,7 @@ from lxml import etree
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
+# from datetime import datetime
 
 # Use to generate preview
 import imageio
@@ -23,6 +24,7 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ..options.config import EnPTConfig
+from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 
 ##############
 # BASE CLASSES
@@ -56,7 +58,7 @@ class _EnMAP_Image(object):
         self.paths = SimpleNamespace()
 
         # protected attributes
-        self._arr = None
+        self._data = None
         self._mask_nodata = None
         self._mask_clouds = None
         self._mask_clouds_confidence = None
@@ -64,14 +66,14 @@ class _EnMAP_Image(object):
         self._deadpixelmap = None
         self._ac_options = {}
         self._ac_errors = None
-        self._subset = None
+        self._subset = None  # FIXME(Stephane) how is _subset to be set?
 
         # defaults
         self.entity_ID = ''
         self.basename = ''
 
     @property
-    def data(self):
+    def data(self) -> GeoArray:
         """Return the actual EnMAP image data.
 
         Bundled with all the corresponding metadata.
@@ -116,28 +118,28 @@ class _EnMAP_Image(object):
         :return:    instance of geoarray.GeoArray
         """
         if self._subset is None:
-            return self._arr
+            return self._data
 
-        return GeoArray(self._arr.arr[self._subset[0]:self._subset[1], self._subset[2]:self._subset[3], :],
-                        geotransform=self._arr.gt, projection=self._arr.prj)
+        return GeoArray(self._data[self._subset[0]:self._subset[1], self._subset[2]:self._subset[3], :],
+                        geotransform=self._data.gt, projection=self._data.prj)
 
     @data.setter
     def data(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             # TODO this must be able to handle subset inputs in tiled processing
-            if self._arr and len(geoArr_initArgs[0]) and isinstance(geoArr_initArgs[0], np.ndarray):
-                self._arr = GeoArray(geoArr_initArgs[0], geotransform=self._arr.gt, projection=self._arr.prj)
+            if isinstance(geoArr_initArgs[0], np.ndarray):
+                self._data = GeoArray(geoArr_initArgs[0], geotransform=self._data.gt, projection=self._data.prj)
             else:
-                self._arr = GeoArray(*geoArr_initArgs)
+                self._data = GeoArray(*geoArr_initArgs)
         else:
             del self.data
 
     @data.deleter
     def data(self):
-        self._arr = None
+        self._data = None
 
     @property
-    def mask_clouds(self):
+    def mask_clouds(self) -> GeoArray:
         """Return the cloud mask.
 
         Bundled with all the corresponding metadata.
@@ -168,7 +170,7 @@ class _EnMAP_Image(object):
         self._mask_clouds = None
 
     @property
-    def mask_clouds_confidence(self):
+    def mask_clouds_confidence(self) -> GeoArray:
         """Return pixelwise information on the cloud mask confidence.
 
         Bundled with all the corresponding metadata.
@@ -203,7 +205,7 @@ class _EnMAP_Image(object):
         self._mask_clouds_confidence = None
 
     @property
-    def dem(self):
+    def dem(self) -> GeoArray:
         """Return an SRTM DEM in the exact dimension an pixel grid of self.arr.
 
         :return: geoarray.GeoArray
@@ -233,7 +235,7 @@ class _EnMAP_Image(object):
         self._dem = None
 
     @property
-    def ac_errors(self):
+    def ac_errors(self) -> GeoArray:
         """Return error information calculated by the atmospheric correction.
 
         :return: geoarray.GeoArray
@@ -264,7 +266,7 @@ class _EnMAP_Image(object):
         self._ac_errors = None
 
     @property
-    def deadpixelmap(self):
+    def deadpixelmap(self) -> GeoArray:
         """Return the dead pixel map.
 
         Bundled with all the corresponding metadata. Dimensions: (bands x columns).
@@ -274,7 +276,9 @@ class _EnMAP_Image(object):
 
         :return: instance of geoarray.GeoArray
         """
-        return self._deadpixelmap
+        if self._deadpixelmap is not None:
+            self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
+            return self._deadpixelmap
 
     @deadpixelmap.setter
     def deadpixelmap(self, *geoArr_initArgs):
@@ -351,6 +355,16 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename)
         paths.quicklook = path.join(self._root_dir, self.detector_meta.quicklook_filename)
         return paths
+
+    def correct_dead_pixels(self):
+        """Correct dead pixels with respect to the dead pixel mask."""
+        self.logger.info("Correcting dead pixels of %s detector..." % self.detector_name)
+
+        self.data = \
+            Dead_Pixel_Corrector(algorithm=self.cfg.deadpix_P_algorithm,
+                                 interp=self.cfg.deadpix_P_interp,
+                                 logger=self.logger)\
+            .correct(self.data, self.deadpixelmap)
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.
@@ -553,6 +567,33 @@ class EnMAPL1Product_SensorGeo(object):
     #
     #     return paths
 
+    # @classmethod
+    # def from_L1B_provider_data(cls, path_enmap_image: str, config: EnPTConfig=None) -> EnMAPL1Product_SensorGeo:
+    #     """
+    #
+    #     :param path_enmap_image:
+    #     :param config:
+    #     :return:
+    #     """
+    #     # input validation
+    #     if not path.isdir(path_enmap_image) and \
+    #        not (path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
+    #         raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
+    #                          "archive.")
+    #
+    #     # extract L1B image archive if needed
+    #     if path_enmap_image.endswith('.zip'):
+    #         path_enmap_image = self.extract_zip_archive(path_enmap_image)
+    #         if not path.isdir(path_enmap_image):
+    #             raise NotADirectoryError(path_enmap_image)
+    #
+    #     # run the reader
+    #     from ..io.reader import L1B_Reader
+    #     RD = L1B_Reader(config=config)
+    #     L1_obj = RD.read_inputdata(path_enmap_image, observation_time=datetime(2015, 12, 7, 10))
+    #
+    #     return L1_obj
+
     def DN2TOARadiance(self):
         """Convert self.vnir.data and self.swir.data from digital numbers to top-of-atmosphere radiance.
 
@@ -560,12 +601,22 @@ class EnMAPL1Product_SensorGeo(object):
         """
         if self.vnir.detector_meta.unitcode != 'TOARad':
             self.vnir.DN2TOARadiance()
-            self.meta.vnir.unitcode = self.vnir.detector_meta.unitcode
-            self.meta.vnir.unit = self.vnir.detector_meta.unit
+            self.meta.vnir.unitcode = self.vnir.detector_meta.unitcode  # FIXME possible duplicate?
+            self.meta.vnir.unit = self.vnir.detector_meta.unit  # FIXME possible duplicate?
         if self.swir.detector_meta.unitcode != 'TOARad':
             self.swir.DN2TOARadiance()
             self.meta.swir.unitcode = self.swir.detector_meta.unitcode
             self.meta.swir.unit = self.swir.detector_meta.unit
+
+    def correct_dead_pixels(self):
+        """Correct dead pixels of both detectors."""
+        self.vnir.correct_dead_pixels()
+        self.swir.correct_dead_pixels()
+
+    def run_AC(self):
+        from ..processors.atmospheric_correction import AtmosphericCorrector
+        AC = AtmosphericCorrector(config=self.cfg)
+        AC.run_ac(self)
 
     # Define a new save to take into account the fact that 2 images might be appended
     # Here we save the radiance and not DN (otherwise there will be a problem with the concatened images)
@@ -611,7 +662,6 @@ class EnMAPL1Product_SensorGeo(object):
         xml_file.close()
 
         return product_dir
-
 
     # def save_old(self, outdir: str, suffix="") -> str:
     #     """Save this product to disk using almost the same format as for reading.
@@ -723,7 +773,6 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger.warning("Set the number of line to 50")
             n_lines = 50
 
-
         self.meta.vnir.nrows += n_lines
 
         # Create new corner coordinate - VNIR
@@ -805,7 +854,7 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
         super(EnMAP_Detector_MapGeo, self).__init__()
 
     @property
-    def mask_nodata(self):
+    def mask_nodata(self) -> GeoArray:
         """Return the no data mask.
 
         Bundled with all the corresponding metadata.
@@ -839,7 +888,7 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
     def mask_nodata(self):
         self._mask_nodata = None
 
-    def calc_mask_nodata(self, fromBand=None, overwrite=False):
+    def calc_mask_nodata(self, fromBand=None, overwrite=False) -> GeoArray:
         """Calculate a no data mask with (values: 0=nodata; 1=data).
 
         :param fromBand:  <int> index of the band to be used (if None, all bands are used)

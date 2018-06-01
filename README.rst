@@ -6,7 +6,7 @@ EnPT - EnMAP Processing Tools
 
 Please check the documentation_ for usage and in depth information.
 
-Licence
+License
 -------
 Free software: GNU General Public License v3
 
@@ -25,7 +25,7 @@ See also the latest coverage_ report and the nosetests_ HTML report.
 
 
 Credits
----------
+-------
 
 This software was funded from BMBF under EnMAP ... 
 
