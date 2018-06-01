@@ -96,6 +96,8 @@ class EnPTConfig(object):
 
         # dead_pixel
         self.run_deadpix_P = gp('run_deadpix_P')
+        self.deadpix_P_algorithm = gp('deadpix_P_algorithm')
+        self.deadpix_P_interp = gp('deadpix_P_interp')
 
         # orthorectification
         self.ortho_resampAlg = gp('ortho_resampAlg')

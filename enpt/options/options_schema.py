@@ -55,6 +55,9 @@ enpt_schema_input = dict(
                 type='dict', required=False,
                 schema=dict(
                     run_processor=dict(type='boolean', required=False),
+                    algorithm=dict(type='string', required=False, allowed=['spectral', 'spatial']),
+                    interpolation_method=dict(type='string', required=False,
+                                              allowed=['linear', 'bilinear', 'cubic', 'spline']),
                 )),
 
             orthorectification=dict(
@@ -97,6 +100,8 @@ parameter_mapping = dict(
 
     # processors > dead_pixel
     run_deadpix_P=('processors', 'dead_pixel', 'run_processor'),
+    deadpix_P_algorithm=('processors', 'dead_pixel', 'algorithm'),
+    deadpix_P_interp=('processors', 'dead_pixel', 'interpolation_method'),
 
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),
