@@ -36,9 +36,9 @@ enpt/processors/atmospheric_correction/atmospheric_correction.py:25 in public me
         D102: Missing docstring in public method
 enpt/processors/atmospheric_correction/atmospheric_correction.py:47 in public method `run_ac`:
         D102: Missing docstring in public method
-enpt/execution/controller.py:50 in public method `read_L1B_data`:
+enpt/execution/controller.py:49 in public method `read_L1B_data`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/execution/controller.py:50 in public method `read_L1B_data`:
+enpt/execution/controller.py:49 in public method `read_L1B_data`:
         D400: First line should end with a period (not ':')
 enpt/execution/controller.py:82 in public method `run_geometry_processor`:
         D102: Missing docstring in public method
