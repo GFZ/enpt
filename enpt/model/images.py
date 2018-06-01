@@ -519,7 +519,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.swir.correct_dead_pixels()
 
     def run_AC(self):
-        from ..processors import AtmosphericCorrector
+        from ..processors.atmospheric_correction import AtmosphericCorrector
         AC = AtmosphericCorrector(config=self.cfg)
         AC.run_ac(self)
 

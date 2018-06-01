@@ -8,7 +8,7 @@ import tempfile
 import zipfile
 from datetime import datetime
 
-from enpt.processors import Radiometric_Transformer
+from enpt.processors.radiometric_transform import Radiometric_Transformer
 from enpt.options.config import EnPTConfig, config_for_testing
 
 
