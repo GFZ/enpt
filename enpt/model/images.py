@@ -345,7 +345,9 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.logger.info("Correcting dead pixels of %s detector..." % self.detector_name)
 
         self.data = \
-            Dead_Pixel_Corrector(algorithm='spectral', interp='linear', logger=self.logger)\
+            Dead_Pixel_Corrector(algorithm=self.cfg.deadpix_P_algorithm,
+                                 interp=self.cfg.deadpix_P_interp,
+                                 logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
     def DN2TOARadiance(self):

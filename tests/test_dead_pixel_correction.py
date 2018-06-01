@@ -12,17 +12,15 @@ class Test_Dead_Pixel_Corrector(unittest.TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
-
-        # self.cfg = EnPTConfig(**config_for_testing)
-        # self.RT = Dead_Pixel_Corrector(config=self.cfg)
-        self.DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear')
+        self.DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
 
         # create test data
         self.im = np.random.randint(0, 10, (50, 1000, 88), np.int16)  # VNIR size
         self.deadpixelmap = np.zeros((self.im.shape[2], self.im.shape[1]))
 
         for band, column in \
-            [[0, 2],  # first band
+            [[0, 0],  # first band, first column
+             [0, 2],  # first band, any column
              [1, 2],  # first band, same column
              [50, 4],  # 2 adjacent bands
              [51, 4],  # 2 adjacent bands
@@ -38,11 +36,12 @@ class Test_Dead_Pixel_Corrector(unittest.TestCase):
 
         # output assertions
         self.assertIsInstance(corrected, (GeoArray, np.ndarray))
-        # self.assertNotEqual(np.mean(self.im[:, 2, 0]), 0)  # first band
-        # self.assertNotEqual(np.mean(self.im[:, 2, 1]), 0)  # first band, same column
+        self.assertEqual(np.mean(self.im[:, 0, 0]), 0)  # first band, first column (currently not corrected)
+        self.assertNotEqual(np.mean(self.im[:, 2, 0]), 0)  # first band, any column
+        self.assertNotEqual(np.mean(self.im[:, 2, 1]), 0)  # first band, same column
         self.assertNotEqual(np.mean(self.im[:, 4, 50]), 0)  # 2 adjacent bands
         self.assertNotEqual(np.mean(self.im[:, 4, 10]), 0)  # 2 adjacent bands
         self.assertNotEqual(np.mean(self.im[:, 20, 60]), 0)  # single dead column
-        # self.assertNotEqual(np.mean(self.im[:, 50, 86]), 0)  # second last band, same column
-        # self.assertNotEqual(np.mean(self.im[:, 50, 87]), 0)  # last band, same column
-        # self.assertNotEqual(np.mean(self.im[:, 2, 87]), 0)  # single dead column, last band
+        self.assertNotEqual(np.mean(self.im[:, 50, 86]), 0)  # second last band, same column
+        self.assertNotEqual(np.mean(self.im[:, 50, 87]), 0)  # last band, same column
+        self.assertNotEqual(np.mean(self.im[:, 2, 87]), 0)  # single dead column, last band

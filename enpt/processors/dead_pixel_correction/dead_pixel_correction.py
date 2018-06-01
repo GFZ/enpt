@@ -52,26 +52,63 @@ class Dead_Pixel_Corrector(object):
         # validate
         self._validate_inputs(image2correct, deadcolumn_map)
 
-        # correct
+        #################
+        # Interpolation #
+        #################
+
         if self.algorithm == 'spectral':
+            # set bands where no spectral interpolation is possible -> spatial interpolation
+            band_nbrs_spatial_interp = \
+                list(range(self.fhw)) + list(range(image2correct.bands-1, image2correct.bands-self.fhw-1, -1))
+
+            # spatial interpolation (fallback) #
+            ####################################
+
+            # NOTE: this is done first, because spectral interpolation needs the information on the outermost pixels
+
+            for band, column in np.argwhere(deadcolumn_map):
+
+                # only first or last bands (number depends on filter half width)
+                if band in band_nbrs_spatial_interp:
+                    if column in [0, image2correct.shape[1] - 1]:
+                        # currently, dead pixels in the outermost bands at the outermost columns are not corrected
+                        self.logger.warning('Unable to correct dead column %s in band %s.' % (column, band))
+                    else:
+                        self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
+
+                        band_data_orig = image2correct[:, column - 1:column + 2, band]  # target and adjacent columns
+                        band_data_float = band_data_orig.astype(np.float)
+                        band_data_float[:, 1] = np.NaN
+
+                        x, y = np.indices(band_data_float.shape)
+                        interp = np.array(band_data_float)
+
+                        interp[np.isnan(interp)] = \
+                            griddata(np.array([x[~np.isnan(band_data_float)],
+                                               y[~np.isnan(band_data_float)]]).T,  # points we know
+                                     band_data_float[~np.isnan(band_data_float)],  # values we know
+                                     np.array([x[np.isnan(band_data_float)],
+                                               y[np.isnan(band_data_float)]]).T,  # points to interpolate
+                                     method=self.interp_alg)
+
+                        # copy corrected columns to image2correct
+                        interp[np.isnan(interp)] = band_data_orig[np.isnan(interp)]
+                        image2correct[:, column - 1:column + 2, band] = interp.astype(image2correct.dtype)
+
+            # spectral interpolation #
+            #########################
 
             for band, column in tqdm(np.argwhere(deadcolumn_map), disable=False):  # set disable=True to mute progress
-                self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
-
-                #################
-                # Interpolation #
-                #################
-
-                # first or last bands (number depends on filter half width)
-                if band in \
-                        list(range(self.fhw)) + list(range(image2correct.bands-1, image2correct.bands-self.fhw-1, -1)):
-                    pass  # TODO
+                if band in band_nbrs_spatial_interp:
+                    continue  # already interpolated spatially above
 
                 # any other band
                 else:
+                    self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
+
                     column_data_orig = image2correct[:, column, band-self.fhw:band+self.fhw+1]
                     column_data_float = column_data_orig.astype(np.float)
-                    column_data_float[:, 1] = np.NaN
+                    column_data_float[:, self.fhw] = np.NaN
 
                     x, y = np.indices(column_data_float.shape)
                     interp = np.array(column_data_float)
