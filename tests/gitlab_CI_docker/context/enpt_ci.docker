@@ -18,10 +18,6 @@ RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/miniconda/$minicon
 # copy some needed stuff to /root
 COPY *.yml /root/
 
-# copy sicor cache files to sicor root directory (speeds up SICOR CI tests because table subsets dont have to be created each time)
-# -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
-COPY *.zip /tmp/sicor/sicor
-
 # create an environment with all packages specified in $envconfig (name is 'enpt' -> also specified in $envconfig)
 RUN /bin/bash -i -c "source /root/miniconda3/bin/activate ; \
     conda env update -f /root/$envconfig"
@@ -45,3 +41,7 @@ RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
     make requirements ; \
     make download-tables ; \
     pip install . --no-cache-dir"
+
+# copy sicor cache files to sicor root directory (speeds up SICOR CI tests because table subsets dont have to be created each time)
+# -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
+COPY *.zip /tmp/sicor/sicor
