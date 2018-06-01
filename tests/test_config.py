@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -11,7 +12,7 @@ from json import \
     dumps, \
     JSONDecodeError
 
-from unittest import TestCase
+from unittest import TestCase, main
 
 from enpt.options.config import \
     get_options, \
@@ -87,3 +88,7 @@ class Test_EnPTConfig(TestCase):
 
         # check validity
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(params)
+
+
+if __name__ == '__main__':
+    main()

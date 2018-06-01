@@ -1,10 +1,12 @@
 enpt/version.py:1 at module level:
         D100: Missing docstring in public module
-enpt/model/metadata.py:185 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
+enpt/model/images.py:474 in public method `run_AC`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:248 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:210 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
+        D102: Missing docstring in public method
+enpt/model/metadata.py:268 in public method `get_earth_sun_distance`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:248 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:268 in public method `get_earth_sun_distance`:
         D400: First line should end with a period (not ')')
 enpt/model/srf.py:11 in public class `SRF`:
         D101: Missing docstring in public class
@@ -16,45 +18,65 @@ enpt/model/srf.py:114 in public method `__getitem__`:
         D105: Missing docstring in magic method
 enpt/model/srf.py:117 in public method `__iter__`:
         D105: Missing docstring in magic method
+enpt/utils/path_generator.py:53 in public function `get_path_ac_options`:
+        D401: First line should be in imperative mood ('Return', not 'Returns')
+enpt/utils/logging.py:83 in public method `__getstate__`:
+        D105: Missing docstring in magic method
+enpt/utils/logging.py:87 in public method `__setstate__`:
+        D401: First line should be in imperative mood ('Define', not 'Defines')
+enpt/utils/logging.py:138 in public method `__del__`:
+        D105: Missing docstring in magic method
+enpt/utils/logging.py:141 in public method `__enter__`:
+        D105: Missing docstring in magic method
+enpt/utils/logging.py:144 in public method `__exit__`:
+        D105: Missing docstring in magic method
+enpt/processors/atmospheric_correction/atmospheric_correction.py:25 in public method `get_ac_options`:
+        D102: Missing docstring in public method
+enpt/processors/atmospheric_correction/atmospheric_correction.py:47 in public method `run_ac`:
+        D102: Missing docstring in public method
 enpt/execution/controller.py:50 in public method `read_L1B_data`:
         D205: 1 blank line required between summary line and description (found 0)
 enpt/execution/controller.py:50 in public method `read_L1B_data`:
         D400: First line should end with a period (not ':')
-enpt/options/config.py:34 in public class `EnPTConfig`:
+enpt/execution/controller.py:82 in public method `run_geometry_processor`:
+        D102: Missing docstring in public method
+enpt/execution/controller.py:89 in public method `write_output`:
+        D102: Missing docstring in public method
+enpt/options/config.py:42 in public class `EnPTConfig`:
         D101: Missing docstring in public class
-enpt/options/config.py:35 in public method `__init__`:
+enpt/options/config.py:43 in public method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:102 in public method `absPath`:
+enpt/options/config.py:121 in public method `absPath`:
         D102: Missing docstring in public method
-enpt/options/config.py:105 in public method `get_parameter`:
+enpt/options/config.py:124 in public method `get_parameter`:
         D102: Missing docstring in public method
-enpt/options/config.py:168 in public method `to_dict`:
+enpt/options/config.py:187 in public method `to_dict`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:182 in public method `to_jsonable_dict`:
+enpt/options/config.py:201 in public method `to_jsonable_dict`:
         D102: Missing docstring in public method
-enpt/options/config.py:193 in public method `__repr__`:
+enpt/options/config.py:212 in public method `__repr__`:
         D105: Missing docstring in magic method
-enpt/options/config.py:197 in public function `json_to_python`:
+enpt/options/config.py:216 in public function `json_to_python`:
         D103: Missing docstring in public function
-enpt/options/config.py:230 in public function `python_to_json`:
+enpt/options/config.py:249 in public function `python_to_json`:
         D103: Missing docstring in public function
-enpt/options/config.py:252 in public class `EnPTValidator`:
+enpt/options/config.py:271 in public class `EnPTValidator`:
         D101: Missing docstring in public class
-enpt/options/config.py:253 in public method `__init__`:
+enpt/options/config.py:272 in public method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/options/config.py:253 in public method `__init__`:
+enpt/options/config.py:272 in public method `__init__`:
         D400: First line should end with a period (not 'r')
-enpt/options/config.py:261 in public method `validate`:
+enpt/options/config.py:280 in public method `validate`:
         D102: Missing docstring in public method
-enpt/options/config.py:266 in public function `get_options`:
+enpt/options/config.py:285 in public function `get_options`:
         D202: No blank lines allowed after function docstring (found 1)
 enpt/options/__init__.py:1 at module level:
         D104: Missing docstring in public package
-enpt/options/options_schema.py:93 in public function `get_updated_schema`:
+enpt/options/options_schema.py:110 in public function `get_updated_schema`:
         D103: Missing docstring in public function
-enpt/options/options_schema.py:94 in private nested function `deep_update`:
+enpt/options/options_schema.py:111 in private nested function `deep_update`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/options_schema.py:94 in private nested function `deep_update`:
+enpt/options/options_schema.py:111 in private nested function `deep_update`:
         D400: First line should end with a period (not 'e')
-enpt/options/options_schema.py:113 in public function `get_param_from_json_config`:
+enpt/options/options_schema.py:130 in public function `get_param_from_json_config`:
         D103: Missing docstring in public function

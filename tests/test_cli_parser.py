@@ -13,10 +13,10 @@ import os
 from runpy import run_path
 from multiprocessing import cpu_count
 
-from enpt import __path__
+import enpt
 
 
-path_run_enpt = os.path.abspath(os.path.join(__path__[0], '..', 'bin', 'enpt_cli.py'))
+path_run_enpt = os.path.abspath(os.path.join(enpt.__path__[0], '..', 'bin', 'enpt_cli.py'))
 
 
 class Test_CLIParser(TestCase):

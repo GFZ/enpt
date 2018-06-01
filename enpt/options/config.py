@@ -17,6 +17,8 @@ from collections import OrderedDict, Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
+import sicor
+
 from .options_schema import \
     enpt_schema_input, \
     enpt_schema_config_output, \
@@ -29,6 +31,14 @@ from ..version import \
 
 path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
+
+
+config_for_testing = dict(
+    path_l1b_enmap_image=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
+    log_level='DEBUG',
+    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')
+)
 
 
 class EnPTConfig(object):
@@ -72,7 +82,7 @@ class EnPTConfig(object):
         # output options #
         ##################
 
-        self.output_dir = self.absPath(gp('output_dir'))
+        self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
 
         ###########################
         # processor configuration #
@@ -81,6 +91,7 @@ class EnPTConfig(object):
         # toa_ref
         self.path_earthSunDist = self.absPath(gp('path_earthSunDist'))
         self.path_solar_irr = self.absPath(gp('path_solar_irr'))
+        self.scale_factor_toa_ref = gp('scale_factor_toa_ref')
 
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')
@@ -88,8 +99,10 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_cloud_screening = gp('enable_cloud_screening')
+        self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
 
         # smile
         self.run_smile_P = gp('run_smile_P')

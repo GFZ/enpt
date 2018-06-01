@@ -5,3 +5,4 @@ spectral>=0.16
 cerberus
 jsmin
 matplotlib
+git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
