@@ -95,7 +95,7 @@ class EnPT_Controller(object):
         try:
             if self.cfg.run_deadpix_P:
                 self.L1_obj.correct_dead_pixels()
-            self.run_toaRad2toaRef()
+            # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
             self.run_geometry_processor()
             self.run_atmospheric_correction()
             self.write_output()
