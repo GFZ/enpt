@@ -41,6 +41,7 @@ dependencies:
     - spectral>=0.16
     - cerberus
     - jsmin
+    - tqdm
     - utm
     - lxml
     - imageio
