@@ -5,7 +5,7 @@ import logging
 from types import SimpleNamespace
 import numpy as np
 from os import path, makedirs
-from shutil import copyfile
+# from shutil import copyfile
 from lxml import etree
 from glob import glob
 import utm

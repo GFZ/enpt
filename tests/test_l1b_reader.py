@@ -154,7 +154,6 @@ class Test_L1B_Reader(unittest.TestCase):
                 print("")
                 shutil.rmtree(tempdir)
 
-
         return
 
 
