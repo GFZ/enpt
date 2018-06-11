@@ -257,7 +257,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
     Attributes:
         - logger(logging.Logger):  None or logging instance
-        - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
+        - observation_datetime(datetime.datetime):  datetime of observation time
         - geom_view_zenith: viewing zenith angle
         - geom_view_azimuth: viewing azimuth angle
         - geom_sun_zenith: sun zenith angle
@@ -302,11 +302,11 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         xml = ElementTree.parse(path_xml).getroot()
 
         # read the acquisition time
-        self.observation_datetime = xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text
+        self.observation_datetime = \
+            datetime.strptime(xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text, '%Y-%m-%dT%H:%M:%S.%fZ')
 
         # get the distance earth sun from the acquisition date
-        self.earthSunDist = \
-            self.get_earth_sun_distance(datetime.strptime(self.observation_datetime, '%Y-%m-%dT%H:%M:%S.%fZ'))
+        self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
 
         # read Geometry (observation/illumination) angle
         self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)

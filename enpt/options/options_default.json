@@ -8,8 +8,9 @@
                                                (zip-archive or root directory)*/
         "path_l1b_snr_model": "./resources/EnMAP_Sensor/EnMAP_Level_1B_SNR.zip",  /*input path of the EnMAP SNR model*/
         "working_dir": "",  /*directory to be used for temporary files*/
-        "n_lines_to_append": "None"  /*Number of lines to be added to the main image [if None, use the whole path_l1b_enmap_image_gapfill].
-                                       Requires path_l1b_enmap_image_gapfill to be set.*/
+        "n_lines_to_append": "None",  /*Number of lines to be added to the main image [if None, use the whole path_l1b_enmap_image_gapfill].
+                                        Requires path_l1b_enmap_image_gapfill to be set.*/
+        "disable_progress_bars": false  /*whether to disable all progress bars during processing*/
     },
 
     "output": {

@@ -12,6 +12,7 @@ enpt_schema_input = dict(
             path_l1b_snr_model=dict(type='string', required=False),
             working_dir=dict(type='string', required=False, nullable=True),
             n_lines_to_append=dict(type='integer', required=False, nullable=True),
+            disable_progress_bars=dict(type='boolean', required=False, nullable=True),
         )),
 
     output=dict(
@@ -81,6 +82,7 @@ parameter_mapping = dict(
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
     working_dir=('general_opts', 'working_dir'),
     n_lines_to_append=('general_opts', 'n_lines_to_append'),
+    disable_progress_bars=('general_opts', 'disable_progress_bars'),
 
     # output
     output_dir=('output', 'output_dir'),

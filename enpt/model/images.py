@@ -360,7 +360,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             Dead_Pixel_Corrector(algorithm=self.cfg.deadpix_P_algorithm,
                                  interp=self.cfg.deadpix_P_interp,
                                  logger=self.logger)\
-            .correct(self.data, self.deadpixelmap)
+            .correct(self.data, self.deadpixelmap, progress=False if self.cfg.disable_progress_bars else True)
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.

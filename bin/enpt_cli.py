@@ -44,6 +44,8 @@ def get_enpt_argparser():
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,
         help='number of lines to be added to the main image [if None, use the whole imgap]. Requires --imgap to be set')
+    add('-dpb', '--disable_progress_bars', type=bool, default=False,
+        help='whether to disable all progress bars during processing')
     add('--path_earthSunDist', type=str, default=None,
         help='input path of the earth sun distance model')
     add('--path_solar_irr', type=str,  default=None,

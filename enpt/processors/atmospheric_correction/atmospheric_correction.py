@@ -21,8 +21,7 @@ class AtmosphericCorrector(object):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
 
-    @staticmethod
-    def get_ac_options(buffer_dir):
+    def get_ac_options(self, buffer_dir):
         path_opts = get_path_ac_options()
 
         try:
@@ -37,6 +36,7 @@ class AtmosphericCorrector(object):
                                           tmp='%0f,',
                                           tau_a='%.2f,',
                                           vza='%.0f,')
+                vv["disable"] = self.cfg.disable_progress_bars
             options["ECMWF"]["path_db"] = "./ecmwf"
 
             return options
