@@ -32,7 +32,7 @@ class EnPT_Controller(object):
                                            warn_message="Implicitly cleaning up {!r}".format(self))
 
         # read the L1B data
-        self.L1_obj = self.read_L1B_data(self.cfg.path_l1b_enmap_image)
+        self.L1_obj = self.read_L1B_data()
 
     def extract_zip_archive(self, path_zipfile: str) -> str:
         """Extract the given EnMAP image zip archive and return the L1B image root directory path.
@@ -43,14 +43,18 @@ class EnPT_Controller(object):
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(self.tempDir)
 
-        return os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
+        outdir = os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
 
-    def read_L1B_data(self, path_enmap_image: str) -> EnMAPL1Product_SensorGeo:
-        """
+        if not os.path.isdir(outdir):
+            raise NotADirectoryError(outdir)
 
-        :param path_enmap_image:
-        :return:
-        """
+        return outdir
+
+    def read_L1B_data(self) -> EnMAPL1Product_SensorGeo:
+        """Read the provider L1B data given in config and return an EnMAP image object."""
+        path_enmap_image = self.cfg.path_l1b_enmap_image
+        path_enmap_image_gapfill = self.cfg.path_l1b_enmap_image_gapfill
+
         # input validation
         if not os.path.isdir(path_enmap_image) and \
            not (os.path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
@@ -60,12 +64,14 @@ class EnPT_Controller(object):
         # extract L1B image archive if needed
         if path_enmap_image.endswith('.zip'):
             path_enmap_image = self.extract_zip_archive(path_enmap_image)
-            if not os.path.isdir(path_enmap_image):
-                raise NotADirectoryError(path_enmap_image)
+
+        # extract L1B gap fill image archive if needed
+        if path_enmap_image_gapfill and path_enmap_image_gapfill.endswith('.zip'):
+            path_enmap_image_gapfill = self.extract_zip_archive(path_enmap_image_gapfill)
 
         # run the reader
         RD = L1B_Reader(config=self.cfg)
-        L1_obj = RD.read_inputdata(path_enmap_image)
+        L1_obj = RD.read_inputdata(root_dir_main=path_enmap_image, root_dir_ext=path_enmap_image_gapfill)
 
         return L1_obj
 

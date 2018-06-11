@@ -15,16 +15,7 @@ from ..options.config import EnPTConfig
 from .srf import SRF
 
 
-# L1B_product_props = dict(
-#     xml_detector_label=dict(
-#         VNIR='detector1',
-#         SWIR='detector2'),
-#     fn_detector_suffix=dict(
-#         VNIR='D1',
-#         SWIR='D2')
-# )
-
-# Define a new L1B_product_props
+# Define L1B_product_props
 L1B_product_props = dict(
     xml_detector_label=dict(
         VNIR='VNIR',
@@ -79,11 +70,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
         self.l_min = None  # type: np.ndarray
         self.l_max = None  # type: np.ndarray
-        self.geom_view_zenith = None  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = None  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
@@ -120,10 +106,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         # read some basic information concerning the detector
         self.nrows = np.int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
         self.ncols = np.int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
-        self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
-        self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
-        self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
-        self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
         self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
         self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
 
@@ -166,60 +148,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-    # def read_metadata_old(self, path_xml, lon_lat_smpl, nsmile_coef):
-    #     """Read the metadata of a specific EnMAP detector in sensor geometry.
-    #
-    #     :param path_xml:  file path of the metadata XML file
-    #     :param lon_lat_smpl:  number if sampling points in lon, lat fields
-    #     :param nsmile_coef:  number of polynomial coefficients for smile
-    #     """
-        # xml = ElementTree.parse(path_xml).getroot()
-        # lbl = self.detector_label
-        # self.logger.info("Reading metadata for %s detector..." % self.detector_name)
-
-        # self.fwhm = np.array(xml.findall("%s/fwhm" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
-        # self.wvl_center = np.array(
-        #     xml.findall("%s/centre_wavelength" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
-        # self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-        # self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-        # self.nwvl = len(self.wvl_center)
-        # self.nrows = np.int(xml.findall("%s/rows" % lbl)[0].text)
-        # self.ncols = np.int(xml.findall("%s/columns" % lbl)[0].text)
-        # self.smile_coef = np.array(xml.findall("%s/smile" % lbl)[0].text.replace("\n", "").split(), dtype=np.float) \
-        #                     .reshape((-1, nsmile_coef + 1))[:, 1:]
-        # self.nsmile_coef = nsmile_coef
-        # self.smile = self.calc_smile()
-        # self.l_min = np.array(xml.findall("%s/L_min" % lbl)[0].text.split(), dtype=np.float)
-        # self.l_max = np.array(xml.findall("%s/L_max" % lbl)[0].text.split(), dtype=np.float)
-        # self.geom_view_zenith = np.float(
-        #     xml.findall("%s/observation_geometry/zenith_angle" % lbl)[0].text.split()[0])
-        # self.geom_view_azimuth = np.float(
-        #     xml.findall("%s/observation_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        # self.geom_sun_zenith = np.float(
-        #     xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
-        # self.geom_sun_azimuth = np.float(
-        #     xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        # self.lat_UL_UR_LL_LR = \
-        #     [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
-        #      for corner in ("UL", "UR", "LL", "LR")]
-        # self.lon_UL_UR_LL_LR = \
-        #     [float(xml.findall("%s/geometry/bounding_box/%s_easting" % (lbl, corner))[0].text.split()[0])
-        #      for corner in ("UL", "UR", "LL", "LR")]
-        # self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
-        # self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
-        #
-        # try:
-        #     self.unitcode = xml.findall("%s/unitcode" % lbl)[0].text
-        #     # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
-        #     self.unit = xml.findall("%s/unit" % lbl)[0].text
-        # except IndexError:
-        #     self.unitcode = 'DN'
-        #     self.unit = 'none'
-        # except Exception:
-        #     raise
-        #
-        # self.snr = None
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -330,13 +258,13 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
     Attributes:
         - logger(logging.Logger):  None or logging instance
         - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
-        - geom_view_zenith: tbd
-        - geom_view_azimuth: tbd
-        - geom_sun_zenith: tbd
-        - geom_sun_azimuth: tbd
+        - geom_view_zenith: viewing zenith angle
+        - geom_view_azimuth: viewing azimuth angle
+        - geom_sun_zenith: sun zenith angle
+        - geom_sun_azimuth: sun azimuth angle
+        - mu_sun: needed by SICOR for TOARad > TOARef conversion
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
-
     """
 
     def __init__(self, path_metaxml, config: EnPTConfig, logger=None):
@@ -351,10 +279,11 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # defaults - Common
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
-        self.geom_view_zenith = None  # type: float # tbd
-        self.geom_view_azimuth = None  # type: float # tbd
-        self.geom_sun_zenith = None  # type: float # tbd
-        self.geom_sun_azimuth = None  # type: float # tbd
+        self.geom_view_zenith = None  # type: float  # viewing zenith angle
+        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
+        self.geom_sun_zenith = None  # type: float  # sun zenith angle
+        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
+        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
@@ -384,15 +313,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
         self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
         self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
-
-    # def read_common_meta_old(self, observation_time: datetime=None):
-    #    """Read the metadata belonging to both, the VNIR and SWIR detector of the EnMAP L1B product in sensor geometry.
-    #
-    #     :param observation_time:  date and time of image observation (datetime.datetime)
-    #     """
-    #     # FIXME observation time is currently missing in the XML -- DONE
-    #     self.observation_datetime = observation_time
-    #     self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
         """Get earth sun distance (requires file of pre calculated earth sun distance per day)
@@ -433,16 +354,3 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # define and read the SWIR metadata
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
         self.swir.read_metadata(self._path_xml, lon_lat_smpl)
-
-    # def read_metadata_old(self, observation_time: datetime, lon_lat_smpl, nsmile_coef):
-    #     """Read the metadata of the whole EnMAP L1B product in sensor geometry.
-    #
-    #     :param observation_time:  date and time of image observation (datetime.datetime)
-    #     :param lon_lat_smpl:  number if sampling points in lon, lat fields
-    #     :param nsmile_coef:  number of polynomial coefficients for smile
-    #     """
-    #     self.read_common_meta(observation_time)
-    #     self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
-    #     self.vnir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
-    #     self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
-    #     self.swir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)

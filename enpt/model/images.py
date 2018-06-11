@@ -5,12 +5,10 @@ import logging
 from types import SimpleNamespace
 import numpy as np
 from os import path, makedirs
-# from shutil import copyfile
 from lxml import etree
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
-# from datetime import datetime
 
 # Use to generate preview
 import imageio
@@ -18,17 +16,15 @@ from skimage import exposure
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
-# Not used (thank to pycharm)
-# from enpt.options.config import EnPTConfig
-# from ..utils.path_generator import PathGenL1BProduct
 from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 
-##############
-# BASE CLASSES
-##############
+
+################
+# BASE CLASSES #
+################
 
 
 class _EnMAP_Image(object):
@@ -441,12 +437,7 @@ class EnMAPL1Product_SensorGeo(object):
         if logger:
             self.logger = logger
 
-        # Define the path. get_paths will be removed (see comments below)
-        # self.paths = self.get_paths()        return glob(os.path.join(self.root_dir, "*_header.xml"))[0]
-        # self.paths = SimpleNamespace()
-
         # Read metadata here in order to get all information needed by to get paths.
-        # self.paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
         self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
                                                  config=self.cfg, logger=self.logger)
         self.meta.read_metadata(lon_lat_smpl)
@@ -457,37 +448,8 @@ class EnMAPL1Product_SensorGeo(object):
 
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths(root_dir)
-        # self.paths.root_dir = root_dir
-        #
-        # # Get paths for vnir
-        # self.paths.vnir = SimpleNamespace()
-        # self.paths.vnir.root_dir = root_dir
-        # self.paths.vnir.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
-        # self.paths.vnir.data = path.join(root_dir, self.meta.vnir.data_filename)
-        # self.paths.vnir.mask_clouds = path.join(root_dir, self.meta.vnir.cloud_mask_filename)
-        # self.paths.vnir.deadpixelmap = path.join(root_dir, self.meta.vnir.dead_pixel_filename)
-        # self.paths.vnir.quicklook = path.join(root_dir, self.meta.vnir.quicklook_filename)
-        #
-        # # Get paths for swir
-        # self.paths.swir = SimpleNamespace()
-        # self.paths.swir.root_dir = root_dir
-        # self.paths.swir.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
-        # self.paths.swir.data = path.join(root_dir, self.meta.swir.data_filename)
-        # self.paths.swir.mask_clouds = path.join(root_dir, self.meta.swir.cloud_mask_filename)
-        # self.paths.swir.deadpixelmap = path.join(root_dir, self.meta.swir.dead_pixel_filename)
-        # self.paths.swir.quicklook = path.join(root_dir, self.meta.swir.quicklook_filename)
 
         self.detector_attrNames = ['vnir', 'swir']
-
-        # Create a temporary tmp directory to store some data if needed
-        # self.tmpdir = tempfile.mkdtemp(dir=self.cfg.working_dir)
-
-    # def __del__(self):
-    #     """
-    #     Remove the (un)used temporary directory
-    #     :return: None
-    #     """
-    #     print("shutil.rmtree(self.tmpdir)")
 
     def get_paths(self, root_dir):
         """
@@ -553,19 +515,6 @@ class EnMAPL1Product_SensorGeo(object):
     def log(self, string: str):
         assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
         self.logger.captured_stream = string
-
-    # def get_paths(self):
-    #     """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
-    #
-    #     :return: types.SimpleNamespace()
-    #     """
-    #     paths = SimpleNamespace()
-    #     paths.vnir = self.vnir.get_paths()
-    #     paths.swir = self.swir.get_paths()
-    #     paths.root_dir = paths.vnir.root_dir
-    #     paths.metaxml = paths.vnir.metaxml
-    #
-    #     return paths
 
     # @classmethod
     # def from_L1B_provider_data(cls, path_enmap_image: str, config: EnPTConfig=None) -> EnMAPL1Product_SensorGeo:
@@ -657,59 +606,10 @@ class EnMAPL1Product_SensorGeo(object):
         xml.findall("ProductComponent/SWIRDetector/Data/Type/UnitCode")[0].text = self.meta.swir.unitcode
         xml.findall("ProductComponent/SWIRDetector/Data/Type/Unit")[0].text = self.meta.swir.unit
         xml_string = etree.tostring(xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
-        xml_file = open(product_dir + path.sep + path.basename(self.paths.metaxml), "w")
-        xml_file.write(xml_string.decode("utf-8"))
-        xml_file.close()
+        with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
+            xml_file.write(xml_string.decode("utf-8"))
 
         return product_dir
-
-    # def save_old(self, outdir: str, suffix="") -> str:
-    #     """Save this product to disk using almost the same format as for reading.
-    #
-    #     :param outdir:  Path to output directory
-    #     :param suffix:  Suffix to be appended to the output filename
-    #     :return: Root path of written product
-    #     """
-    #     product_dir = path.join(
-    #         path.abspath(outdir), "{name}{suffix}".format(
-    #             name=[ff for ff in self.paths.root_dir.split(path.sep) if ff != ''][-1],
-    #             suffix=suffix)
-    #     )
-    #     self.logger.info("Write product to: %s" % product_dir)
-    #     makedirs(product_dir, exist_ok=True)
-    #
-    #     for detector_name in self.detector_attrNames:
-    #         detector = getattr(self, detector_name)
-    #         detector_paths = getattr(self.paths, detector_name)
-    #
-    #         for atts, fmt in ((("deadpixelmap", "mask_clouds"), "GTIff"),
-    #                           (("data",), "ENVI")):
-    #             for att in atts:
-    #                 getattr(detector, att).save(
-    #                     path.join(product_dir, path.basename(getattr(detector_paths, att))), fmt=fmt)
-    #
-    #         copyfile(
-    #             src=detector_paths.quicklook,
-    #             dst=path.join(product_dir, path.basename(detector_paths.quicklook))
-    #         )
-    #
-    #     xml = ElementTree.parse(self.paths.metaxml)
-    #     for xml_name, real_name in (("detector1", "vnir"), ("detector2", "swir")):
-    #         ele = xml.getroot().find(xml_name)
-    #
-    #         # add unitcode
-    #         new_ele = ElementTree.Element("unitcode")
-    #         new_ele.text = getattr(self.meta, real_name).unitcode
-    #         ele.append(new_ele)
-    #
-    #         # add unit
-    #         new_ele = ElementTree.Element("unit")
-    #         new_ele.text = getattr(self.meta, real_name).unit
-    #         ele.append(new_ele)
-    #
-    #     xml.write(path.join(product_dir, path.basename(self.paths.metaxml)))
-    #
-    #     return product_dir
 
     def append_new_image(self, img2, n_lines: int=None):
         """
@@ -768,7 +668,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger.warning("Set to the image number of line")
             n_lines = img2.meta.vnir.nrows
 
-        if n_lines < 50:  # TODO: determine this values
+        if n_lines < 50:  # TODO: determine these values
             self.logger.warning("A minimum of 50 lines is required, only %s were selected" % n_lines)
             self.logger.warning("Set the number of line to 50")
             n_lines = 50
@@ -779,31 +679,31 @@ class EnMAPL1Product_SensorGeo(object):
         ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lat_UL_UR_LL_LR[0], img2.meta.vnir.lat_UL_UR_LL_LR[1]],
                                              [img2.meta.vnir.lat_UL_UR_LL_LR[2], img2.meta.vnir.lat_UL_UR_LL_LR[3]]],
                       kind='linear')
-        self.meta.vnir.lat_UL_UR_LL_LR[2] = ff(0, n_lines/img2.meta.vnir.nrows)[0]
-        self.meta.vnir.lat_UL_UR_LL_LR[3] = ff(1, n_lines/img2.meta.vnir.nrows)[0]
+        self.meta.vnir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
+        self.meta.vnir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
         lon_lat_smpl = (15, 15)
         self.meta.vnir.lats = self.meta.vnir.interpolate_corners(*self.meta.vnir.lat_UL_UR_LL_LR, *lon_lat_smpl)
 
         ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
                                              [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
                       kind='linear')
-        self.meta.vnir.lon_UL_UR_LL_LR[2] = ff(0, n_lines/img2.meta.vnir.nrows)[0]
-        self.meta.vnir.lon_UL_UR_LL_LR[3] = ff(1, n_lines/img2.meta.vnir.nrows)[0]
+        self.meta.vnir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
+        self.meta.vnir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
         self.meta.vnir.lons = self.meta.vnir.interpolate_corners(*self.meta.vnir.lon_UL_UR_LL_LR, *lon_lat_smpl)
 
         # Create new corner coordinate - SWIR
         ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.swir.lat_UL_UR_LL_LR[0], img2.meta.swir.lat_UL_UR_LL_LR[1]],
                                              [img2.meta.swir.lat_UL_UR_LL_LR[2], img2.meta.swir.lat_UL_UR_LL_LR[3]]],
                       kind='linear')
-        self.meta.swir.lat_UL_UR_LL_LR[2] = ff(0, n_lines/img2.meta.swir.nrows)[0]
-        self.meta.swir.lat_UL_UR_LL_LR[3] = ff(1, n_lines/img2.meta.swir.nrows)[0]
+        self.meta.swir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
+        self.meta.swir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
         lon_lat_smpl = (15, 15)
         self.meta.swir.lats = self.meta.swir.interpolate_corners(*self.meta.swir.lat_UL_UR_LL_LR, *lon_lat_smpl)
         ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
                                              [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
                       kind='linear')
-        self.meta.swir.lon_UL_UR_LL_LR[2] = ff(0, n_lines/img2.meta.swir.nrows)[0]
-        self.meta.swir.lon_UL_UR_LL_LR[3] = ff(1, n_lines/img2.meta.swir.nrows)[0]
+        self.meta.swir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
+        self.meta.swir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
         self.meta.swir.lons = self.meta.swir.interpolate_corners(*self.meta.swir.lon_UL_UR_LL_LR, *lon_lat_smpl)
 
         # append the vnir/swir image

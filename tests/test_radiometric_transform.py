@@ -3,7 +3,6 @@
 
 import os
 from unittest import TestCase, main
-from glob import glob
 import tempfile
 import zipfile
 
@@ -16,7 +15,8 @@ class Test_Radiometric_Transformer(TestCase):
     def setUp(self):
         """Set up the needed test data"""
         self.cfg = EnPTConfig(**config_for_testing)
-        self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
+        self.pathList_testimages = [self.cfg.path_l1b_enmap_image,
+                                    self.cfg.path_l1b_enmap_image_gapfill]
         self.RT = Radiometric_Transformer(config=self.cfg)
 
     def test_transform_TOARad2TOARef(self):

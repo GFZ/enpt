@@ -1,50 +1,52 @@
 enpt/version.py:1 at module level:
         D100: Missing docstring in public module
-enpt/io/reader.py:42 in public method `read_inputdata`:
+enpt/io/reader.py:40 in public method `read_inputdata`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/io/reader.py:42 in public method `read_inputdata`:
+enpt/io/reader.py:40 in public method `read_inputdata`:
         D400: First line should end with a period (not ']')
-enpt/model/images.py:344 in public method `get_paths`:
+enpt/model/images.py:340 in public method `get_paths`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:344 in public method `get_paths`:
+enpt/model/images.py:340 in public method `get_paths`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:390 in public method `generate_quicklook`:
+enpt/model/images.py:386 in public method `generate_quicklook`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:390 in public method `generate_quicklook`:
+enpt/model/images.py:386 in public method `generate_quicklook`:
         D400: First line should end with a period (not 'e')
-enpt/model/images.py:492 in public method `get_paths`:
+enpt/model/images.py:454 in public method `get_paths`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:492 in public method `get_paths`:
+enpt/model/images.py:454 in public method `get_paths`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:616 in public method `run_AC`:
+enpt/model/images.py:565 in public method `run_AC`:
         D102: Missing docstring in public method
-enpt/model/images.py:623 in public method `save`:
+enpt/model/images.py:572 in public method `save`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:623 in public method `save`:
+enpt/model/images.py:572 in public method `save`:
         D400: First line should end with a period (not 't')
-enpt/model/images.py:714 in public method `append_new_image`:
+enpt/model/images.py:614 in public method `append_new_image`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:97 in public method `read_metadata`:
+enpt/model/metadata.py:83 in public method `read_metadata`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:97 in public method `read_metadata`:
+enpt/model/metadata.py:83 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
-enpt/model/metadata.py:290 in public method `interpolate_corners`:
+enpt/model/metadata.py:218 in public method `interpolate_corners`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:306 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
+enpt/model/metadata.py:234 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:364 in public method `read_common_meta`:
+enpt/model/metadata.py:255 in public class `EnMAP_Metadata_L1B_SensorGeo`:
+        D413: Missing blank line after last section ('Attributes')
+enpt/model/metadata.py:293 in public method `read_common_meta`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:364 in public method `read_common_meta`:
+enpt/model/metadata.py:293 in public method `read_common_meta`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:364 in public method `read_common_meta`:
+enpt/model/metadata.py:293 in public method `read_common_meta`:
         D400: First line should end with a period (not 'o')
-enpt/model/metadata.py:397 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:318 in public method `get_earth_sun_distance`:
         D400: First line should end with a period (not ')')
-enpt/model/metadata.py:419 in public method `read_metadata`:
+enpt/model/metadata.py:340 in public method `read_metadata`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:419 in public method `read_metadata`:
+enpt/model/metadata.py:340 in public method `read_metadata`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:419 in public method `read_metadata`:
+enpt/model/metadata.py:340 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
 enpt/model/srf.py:11 in public class `SRF`:
         D101: Missing docstring in public class
@@ -56,7 +58,9 @@ enpt/model/srf.py:114 in public method `__getitem__`:
         D105: Missing docstring in magic method
 enpt/model/srf.py:117 in public method `__iter__`:
         D105: Missing docstring in magic method
-enpt/utils/path_generator.py:53 in public function `get_path_ac_options`:
+enpt/utils/path_generator.py:15 in public class `PathGenL1BProduct`:
+        D204: 1 blank line required after class docstring (found 0)
+enpt/utils/path_generator.py:58 in public function `get_path_ac_options`:
         D401: First line should be in imperative mood ('Return', not 'Returns')
 enpt/utils/logging.py:83 in public method `__getstate__`:
         D105: Missing docstring in magic method
@@ -74,41 +78,37 @@ enpt/processors/atmospheric_correction/atmospheric_correction.py:25 in public me
         D102: Missing docstring in public method
 enpt/processors/atmospheric_correction/atmospheric_correction.py:47 in public method `run_ac`:
         D102: Missing docstring in public method
-enpt/execution/controller.py:48 in public method `read_L1B_data`:
-        D205: 1 blank line required between summary line and description (found 0)
-enpt/execution/controller.py:48 in public method `read_L1B_data`:
-        D400: First line should end with a period (not ':')
-enpt/execution/controller.py:81 in public method `run_geometry_processor`:
+enpt/execution/controller.py:87 in public method `run_geometry_processor`:
         D102: Missing docstring in public method
-enpt/execution/controller.py:88 in public method `write_output`:
+enpt/execution/controller.py:94 in public method `write_output`:
         D102: Missing docstring in public method
-enpt/options/config.py:44 in public class `EnPTConfig`:
+enpt/options/config.py:46 in public class `EnPTConfig`:
         D101: Missing docstring in public class
-enpt/options/config.py:45 in public method `__init__`:
+enpt/options/config.py:47 in public method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:125 in public method `absPath`:
+enpt/options/config.py:127 in public method `absPath`:
         D102: Missing docstring in public method
-enpt/options/config.py:128 in public method `get_parameter`:
+enpt/options/config.py:130 in public method `get_parameter`:
         D102: Missing docstring in public method
-enpt/options/config.py:191 in public method `to_dict`:
+enpt/options/config.py:193 in public method `to_dict`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:205 in public method `to_jsonable_dict`:
+enpt/options/config.py:207 in public method `to_jsonable_dict`:
         D102: Missing docstring in public method
-enpt/options/config.py:216 in public method `__repr__`:
+enpt/options/config.py:218 in public method `__repr__`:
         D105: Missing docstring in magic method
-enpt/options/config.py:220 in public function `json_to_python`:
+enpt/options/config.py:222 in public function `json_to_python`:
         D103: Missing docstring in public function
-enpt/options/config.py:253 in public function `python_to_json`:
+enpt/options/config.py:255 in public function `python_to_json`:
         D103: Missing docstring in public function
-enpt/options/config.py:275 in public class `EnPTValidator`:
+enpt/options/config.py:277 in public class `EnPTValidator`:
         D101: Missing docstring in public class
-enpt/options/config.py:276 in public method `__init__`:
+enpt/options/config.py:278 in public method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/options/config.py:276 in public method `__init__`:
+enpt/options/config.py:278 in public method `__init__`:
         D400: First line should end with a period (not 'r')
-enpt/options/config.py:284 in public method `validate`:
+enpt/options/config.py:286 in public method `validate`:
         D102: Missing docstring in public method
-enpt/options/config.py:289 in public function `get_options`:
+enpt/options/config.py:291 in public function `get_options`:
         D202: No blank lines allowed after function docstring (found 1)
 enpt/options/__init__.py:1 at module level:
         D104: Missing docstring in public package

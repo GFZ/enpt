@@ -9,13 +9,10 @@ Tests for `l1b_reader` module.
 """
 
 import unittest
-from glob import glob
 import os
 from os import path
-# import sys
 import tempfile
 import zipfile
-# from datetime import datetime
 import shutil
 
 from enpt.options.config import EnPTConfig, config_for_testing
@@ -25,8 +22,9 @@ class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class.."""
 
     def setUp(self):
-        self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B_new", "*.zip"))
         self.config = EnPTConfig(**config_for_testing)
+        self.pathList_testimages = [self.config.path_l1b_enmap_image,
+                                    self.config.path_l1b_enmap_image_gapfill]
         self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
 
     def tearDown(self):
