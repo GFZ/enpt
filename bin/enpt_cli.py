@@ -33,15 +33,35 @@ def get_enpt_argparser():
              'EnPT/blob/master/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
         help='number of CPU cores to be used for processing (default: "None" -> use all available')
-    add('-im', '--path_l1b_enmap_image', default=None,
+    add('-im', '--path_l1b_enmap_image', type=str, default=None,
         help='input path of the EnMAP L1B image to be processed '
              '(zip-archive or root directory; must be given if not contained in --json-config.)')
-    add('-imgap', '--path_l1b_enmap_image_gapfill', default=None,
+    add('-imgap', '--path_l1b_enmap_image_gapfill', type=str,  default=None,
         help='input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)')
-    add('-od', '--output_dir', default=None,
+    add('-od', '--output_dir', type=str, default=None,
         help='output directory where processed data and log files are saved')
-    add('-wd', '--working_dir', default=None,
+    add('-wd', '--working_dir', type=str, default=None,
         help='directory to be used for temporary files')
+    add('-nla', '--n_lines_to_append', type=int, default=None,
+        help='number of lines to be added to the main image [if None, use the whole imgap]. Requires --imgap to be set')
+    add('--path_earthSunDist', type=str, default=None,
+        help='input path of the earth sun distance model')
+    add('--path_solar_irr', type=str,  default=None,
+        help='input path of the solar irradiance model')
+    add('--scale_factor_toa_ref', type=int, default=None,
+        help='scale factor to be applied to TOA reflectance result')
+    add('--enable_keystone_correction', type=int, default=False)
+    add('--enable_vnir_swir_coreg', type=int, default=False)
+    add('--path_reference_image', type=str, default=None)
+    add('--sicor_cache_dir', type=str, default=None)
+    add('--auto_download_ecmwf', type=bool, default=False)
+    add('--enable_cloud_screening', type=bool, default=False)
+    add('--scale_factor_boa_ref', type=int, default=10000)
+    add('--run_smile_P', type=bool, default=False)
+    add('--run_deadpix_P', type=bool, default=True)
+    add('--deadpix_P_algorithm', type=str, default="spectral")
+    add('--deadpix_P_interp', type=str, default="linear")
+    add('--ortho_resampAlg', type=int, default=1)
 
     # link parser to run function
     parser.set_defaults(func=run_job)
