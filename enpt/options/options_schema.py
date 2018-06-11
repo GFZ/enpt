@@ -11,6 +11,7 @@ enpt_schema_input = dict(
             path_l1b_enmap_image_gapfill=dict(type='string', required=False),
             path_l1b_snr_model=dict(type='string', required=False),
             working_dir=dict(type='string', required=False, nullable=True),
+            n_lines_to_append=dict(type='integer', required=False, nullable=True),
         )),
 
     output=dict(
@@ -79,6 +80,7 @@ parameter_mapping = dict(
     path_l1b_enmap_image_gapfill=('general_opts', 'path_l1b_enmap_image_gapfill'),
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
     working_dir=('general_opts', 'working_dir'),
+    n_lines_to_append=('general_opts', 'n_lines_to_append'),
 
     # output
     output_dir=('output', 'output_dir'),

@@ -79,6 +79,7 @@ class EnPTConfig(object):
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
+        self.n_lines_to_append = gp('n_lines_to_append')
 
         ##################
         # output options #

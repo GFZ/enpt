@@ -71,7 +71,8 @@ class EnPT_Controller(object):
 
         # run the reader
         RD = L1B_Reader(config=self.cfg)
-        L1_obj = RD.read_inputdata(root_dir_main=path_enmap_image, root_dir_ext=path_enmap_image_gapfill)
+        L1_obj = RD.read_inputdata(root_dir_main=path_enmap_image, root_dir_ext=path_enmap_image_gapfill,
+                                   n_line_ext=self.cfg.n_lines_to_append)
 
         return L1_obj
 

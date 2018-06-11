@@ -49,7 +49,7 @@ class L1B_Reader(object):
         Read L1B EnMAP data. Extend the image by adding a second image [entire, partial]
         :param root_dir_main: Root directory of the main EnMAP Level-1B product
         :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product [optional]
-        :param n_line_ext:    Number of line to be added to the main image [if None, use the whole image]
+        :param n_line_ext:    Number of lines to be added to the main image [if None, use the whole image]
         :param lon_lat_smpl:  number if sampling points in lon, lat fields
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
