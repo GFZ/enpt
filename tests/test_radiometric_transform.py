@@ -6,7 +6,6 @@ from unittest import TestCase, main
 from glob import glob
 import tempfile
 import zipfile
-from datetime import datetime
 
 from enpt.processors.radiometric_transform import Radiometric_Transformer
 from enpt.options.config import EnPTConfig, config_for_testing
@@ -33,8 +32,7 @@ class Test_Radiometric_Transformer(TestCase):
                     root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
 
                     # create EnPT Level 1 image
-                    L1_obj = L1B_Reader(config=self.cfg)\
-                        .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
+                    L1_obj = L1B_Reader(config=self.cfg).read_inputdata(root_dir)
 
                     # input assertions
                     self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)

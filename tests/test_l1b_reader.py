@@ -59,7 +59,6 @@ class Test_L1B_Reader(unittest.TestCase):
         print("")
         print("")
 
-
         print("================================================")
         print("Create the L1B_Reader new instance")
         print("================================================")

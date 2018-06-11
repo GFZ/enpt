@@ -2,7 +2,6 @@
 """EnPT process controller module."""
 
 import os
-from datetime import datetime
 import tempfile
 import zipfile
 import shutil
@@ -66,7 +65,7 @@ class EnPT_Controller(object):
 
         # run the reader
         RD = L1B_Reader(config=self.cfg)
-        L1_obj = RD.read_inputdata(path_enmap_image, observation_time=datetime(2015, 12, 7, 10))
+        L1_obj = RD.read_inputdata(path_enmap_image)
 
         return L1_obj
 

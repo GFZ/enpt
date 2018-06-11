@@ -6,4 +6,7 @@ cerberus
 jsmin
 matplotlib
 tqdm
+utm
+lxml
+imageio
 git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git

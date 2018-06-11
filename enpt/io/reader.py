@@ -43,7 +43,7 @@ class L1B_Reader(object):
                        root_dir_main,
                        root_dir_ext: str=None,
                        n_line_ext: int=None,
-                       lon_lat_smpl: tuple=(15,15),
+                       lon_lat_smpl: tuple=(15, 15),
                        compute_snr: bool=True):
         # All information are read from data itself now
         # In case of multiple files, temporary files are created to store them.
@@ -92,12 +92,11 @@ class L1B_Reader(object):
                     l1b_main_obj.swir.detector_meta.calc_snr_from_radiance(rad_data=l1b_main_obj.swir.data,
                                                                            dir_snr_models=tmpDir)
 
-
         # Return the l1b_main_obj
         return l1b_main_obj
 
-    # def read_inputdata_old(self, root_dir, observation_time: datetime, lon_lat_smpl: tuple=(15, 15), nsmile_coef: int=5,
-    #                    compute_snr: bool=True):
+    # def read_inputdata_old(self, root_dir, observation_time: datetime, lon_lat_smpl: tuple=(15, 15),
+    #                        nsmile_coef: int=5, compute_snr: bool=True):
     #     # TODO move to init? --> This has been added in the init phase (will call the new read_inputdata method
     #     """Read L1B, DEM and spatial reference data.
     #
@@ -113,7 +112,8 @@ class L1B_Reader(object):
     #
     #     # read metadata
     #     L1_obj.meta = EnMAP_Metadata_L1B_SensorGeo(L1_obj.paths.metaxml, config=self.cfg, logger=L1_obj.logger)
-    #     L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
+    #     L1_obj.meta.read_metadata(observation_time=observation_time, lon_lat_smpl=lon_lat_smpl,
+    #                               nsmile_coef=nsmile_coef)
     #
     #     # read VNIR data
     #     # call L1_obj.vnir.arr.setter which sets L1_obj.swir.arr to an instance of GeoArray class
