@@ -36,7 +36,7 @@ class AtmosphericCorrector(object):
                                           tmp='%0f,',
                                           tau_a='%.2f,',
                                           vza='%.0f,')
-                vv["disable"] = self.cfg.disable_progress_bars
+                vv["disable_progress_bars"] = self.cfg.disable_progress_bars
             options["ECMWF"]["path_db"] = "./ecmwf"
 
             return options
