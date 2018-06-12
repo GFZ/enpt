@@ -4,9 +4,13 @@
         "log_level": "INFO",  /*the logging level to be used (choices: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')*/
         "create_logfile": true,  /*whether to write all log messages to a file (within output the directory)*/
         "path_l1b_enmap_image": "",  /*input path of the EnMAP L1B image to be processed (zip-archive or root directory)*/
-        "path_l1b_enmap_image_gapfill": "",  /*input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)*/
+        "path_l1b_enmap_image_gapfill": "",  /*input path of an adjacent EnMAP L1B image to be used for gap-filling
+                                               (zip-archive or root directory)*/
         "path_l1b_snr_model": "./resources/EnMAP_Sensor/EnMAP_Level_1B_SNR.zip",  /*input path of the EnMAP SNR model*/
-        "working_dir": ""  /*directory to be used for temporary files*/
+        "working_dir": "",  /*directory to be used for temporary files*/
+        "n_lines_to_append": "None",  /*Number of lines to be added to the main image [if None, use the whole path_l1b_enmap_image_gapfill].
+                                        Requires path_l1b_enmap_image_gapfill to be set.*/
+        "disable_progress_bars": false  /*whether to disable all progress bars during processing*/
     },
 
     "output": {

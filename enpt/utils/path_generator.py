@@ -8,8 +8,13 @@ from xml.etree import ElementTree
 from ..model.metadata import L1B_product_props
 
 
+# NOTE:
+# paths belonging to providers L1B product are included in the *_header.xml file and read within metadata reader
+
+
 class PathGenL1BProduct(object):
     """Path generator class for generating file pathes corresponding to the EnMAP L1B product."""
+    # TODO update this class
 
     def __init__(self, root_dir: str, detector_name: str):
         """Get an instance of the EnPT L1B image path generator.

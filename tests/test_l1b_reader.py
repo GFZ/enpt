@@ -9,12 +9,10 @@ Tests for `l1b_reader` module.
 """
 
 import unittest
-from glob import glob
 import os
 from os import path
 import tempfile
 import zipfile
-from datetime import datetime
 import shutil
 
 from enpt.options.config import EnPTConfig, config_for_testing
@@ -24,8 +22,9 @@ class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class.."""
 
     def setUp(self):
-        self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
         self.config = EnPTConfig(**config_for_testing)
+        self.pathList_testimages = [self.config.path_l1b_enmap_image,
+                                    self.config.path_l1b_enmap_image_gapfill]
         self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
 
     def tearDown(self):
@@ -36,47 +35,123 @@ class Test_L1B_Reader(unittest.TestCase):
         from enpt.io.reader import L1B_Reader
         from enpt.model.images import EnMAPL1Product_SensorGeo
 
-        print("Test reading EnMAP Level-1B products")
+        print("")
+        print("################################################")
+        print("#                                              #")
+        print("# Test reading EnMAP Level-1B products from SG #")
+        print("#                                              #")
+        print("################################################")
+        print("")
+        print("")
 
-        rd = L1B_Reader(config=self.config)
-
+        print("================================================")
+        print("Unzip Test data files")
+        print("================================================")
+        print("")
         for l1b_file in self.pathList_testimages:
-            print("Tmp dir: %s" % self.tmpdir)
             with zipfile.ZipFile(l1b_file, "r") as zf:
                 zf.extractall(self.tmpdir)
+        prods = [os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[0]).split(".zip")[0]),
+                 os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[1]).split(".zip")[0])]
+        print("Done!")
+        print("")
+        print("")
 
-                root_dir = os.path.join(self.tmpdir, os.path.basename(l1b_file).split(".zip")[0])
+        print("================================================")
+        print("Create the L1B_Reader new instance")
+        print("================================================")
+        print("")
+        rd = L1B_Reader(config=self.config)
+        print("Done!")
+        print("")
+        print("")
 
-                ###############
-                # without snr #
-                ###############
+        # TEST FOR ONE IMAGE ONLY
+        print("=======================================================================================================")
+        print("Test: Read and write ONE image only")
+        print("=======================================================================================================")
+        print("")
+        for prod in prods:
+            # for l1b_file in self.pathList_testimages:
+            #     with zipfile.ZipFile(l1b_file, "r") as zf:
+            #
+            #         zf.extractall(self.tmpdir)
+            #
+            #         prod = os.path.join(self.tmpdir, os.path.basename(l1b_file).split(".zip")[0])
+            print("-------------------------------------")
+            print("Test with %s" % os.path.basename(prod))
+            print("-------------------------------------")
+            print("Tmp dir: %s" % self.tmpdir)
+            print("")
+            print(" * Without SNR ")
+            print("")
+            L1_obj = rd.read_inputdata(prod, compute_snr=False)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            self.assertIsNone(L1_obj.vnir.detector_meta.snr)
+            self.assertIsNone(L1_obj.swir.detector_meta.snr)
+            root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "no_snr"))
 
-                # read and write L1 data
-                L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10), compute_snr=False)
+            # read self written L1 data
+            L1_obj = rd.read_inputdata(root_dir_written_L1_data, compute_snr=False)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+
+            print("")
+            print(" * With SNR ")
+            print("")
+            L1_obj = rd.read_inputdata(prod)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
+            self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
+            root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "with_snr"))
+            L1_obj = rd.read_inputdata(root_dir_written_L1_data)
+            self.assertIsNotNone(L1_obj, EnMAPL1Product_SensorGeo)
+
+        # TEST FOR ONE IMAGE ONLY
+        print("=======================================================================================================")
+        print("Test: read, join and write 2 images if possible!")
+        print("=======================================================================================================")
+        print("")
+
+        for k_prod1, k_prod2 in ((0, 1), (1, 0)):
+            for n_lines in (-1, 10, 50, 80, 100, 150):
+                tempdir = tempfile.mkdtemp(dir=self.config.working_dir)
+                if n_lines is -1:
+                    n_lines = "all"
+                print("-----------------------------------------------------------------------------------------------")
+                print("Test with %s and %s, with: %s lines" % (os.path.basename(prods[k_prod1]),
+                                                               os.path.basename(prods[k_prod2]),
+                                                               n_lines))
+                print("-----------------------------------------------------------------------------------------------")
+
+                if n_lines is "all":
+                    n_lines = None
+
+                print("")
+                print(" * Without SNR")
+                print("")
+                L1_obj = rd.read_inputdata(prods[k_prod1], prods[k_prod2], n_lines, compute_snr=False)
                 self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
                 self.assertIsNone(L1_obj.vnir.detector_meta.snr)
                 self.assertIsNone(L1_obj.swir.detector_meta.snr)
-                root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "no_snr"))
-
-                # read self written L1 data
-                L1_obj = rd.read_inputdata(root_dir_written_L1_data, observation_time=datetime(2015, 12, 7, 10),
-                                           compute_snr=False)
+                root_dir_written_L1_data = L1_obj.save(path.join(tempdir, "no_snr"))
+                L1_obj = rd.read_inputdata(root_dir_written_L1_data, compute_snr=False)
                 self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-                ############
-                # with snr #
-                ############
-
-                # read and write L1 data
-                L1_obj = rd.read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
+                print("")
+                print(" * With SNR")
+                print("")
+                L1_obj = rd.read_inputdata(prods[k_prod1], prods[k_prod2], n_lines)
                 self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
                 self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
                 self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
-                root_dir_written_L1_data = L1_obj.save(path.join(self.config.output_dir, "with_snr"))
-
-                # read self written L1 data
-                L1_obj = rd.read_inputdata(root_dir_written_L1_data, observation_time=datetime(2015, 12, 7, 10))
+                root_dir_written_L1_data = L1_obj.save(path.join(tempdir, "with_snr"))
+                L1_obj = rd.read_inputdata(root_dir_written_L1_data)
                 self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                print("")
+                print("")
+                shutil.rmtree(tempdir)
+
+        return
 
 
 if __name__ == "__main__":

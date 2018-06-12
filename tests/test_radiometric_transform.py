@@ -3,10 +3,8 @@
 
 import os
 from unittest import TestCase, main
-from glob import glob
 import tempfile
 import zipfile
-from datetime import datetime
 
 from enpt.processors.radiometric_transform import Radiometric_Transformer
 from enpt.options.config import EnPTConfig, config_for_testing
@@ -17,7 +15,8 @@ class Test_Radiometric_Transformer(TestCase):
     def setUp(self):
         """Set up the needed test data"""
         self.cfg = EnPTConfig(**config_for_testing)
-        self.pathList_testimages = glob(os.path.join(os.path.dirname(__file__), "data", "EnMAP_Level_1B", "*.zip"))
+        self.pathList_testimages = [self.cfg.path_l1b_enmap_image,
+                                    self.cfg.path_l1b_enmap_image_gapfill]
         self.RT = Radiometric_Transformer(config=self.cfg)
 
     def test_transform_TOARad2TOARef(self):
@@ -33,8 +32,7 @@ class Test_Radiometric_Transformer(TestCase):
                     root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
 
                     # create EnPT Level 1 image
-                    L1_obj = L1B_Reader(config=self.cfg)\
-                        .read_inputdata(root_dir, observation_time=datetime(2015, 12, 7, 10))
+                    L1_obj = L1B_Reader(config=self.cfg).read_inputdata(root_dir)
 
                     # input assertions
                     self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)

@@ -2,6 +2,15 @@
 History
 =======
 
+0.x.x (coming soon)
+-------------------
+New features:
+
+* Use a new header file
+* Add a second image at the bottom of the main image (if possible), select a possible number of line
+* Save extended image
+
+
 0.4.0 (2018-06-01)
 ------------------
 New features:

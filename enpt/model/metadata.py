@@ -15,13 +15,16 @@ from ..options.config import EnPTConfig
 from .srf import SRF
 
 
+# Define L1B_product_props
 L1B_product_props = dict(
     xml_detector_label=dict(
-        VNIR='detector1',
-        SWIR='detector2'),
+        VNIR='VNIR',
+        SWIR='SWIR'
+    ),
     fn_detector_suffix=dict(
         VNIR='D1',
-        SWIR='D2')
+        SWIR='D2'
+    )
 )
 
 
@@ -49,6 +52,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
         self.logger = logger or logging.getLogger()
 
+        # These lines are used to load path information
+        self.data_filename = None  # type: str # detector data filename
+        self.dead_pixel_filename = None  # type: str # filename of the dead pixel file
+        self.quicklook_filename = None  # type: str # filename of the quicklook file
+        self.cloud_mask_filename = None  # type: str # filename of the cloud mask file
+
         self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
         self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
@@ -61,73 +70,84 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
         self.l_min = None  # type: np.ndarray
         self.l_max = None  # type: np.ndarray
-        self.geom_view_zenith = None  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = None  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
         self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
         self.unit = ''  # type: str  # radiometric unit of pixel values
         self.unitcode = ''  # type: str  # code of radiometric unit
+        self.preview_bands = None
         self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
 
-    def read_metadata(self, path_xml, lon_lat_smpl, nsmile_coef):
-        """Read the metadata of a specific EnMAP detector in sensor geometry.
-
-        :param path_xml:  file path of the metadata XML file
-        :param lon_lat_smpl:  number if sampling points in lon, lat fields
-        :param nsmile_coef:  number of polynomial coefficients for smile
+    # On this new version of read_data, we don't need anymore nsmile_coef (will be read from xml file)
+    def read_metadata(self, path_xml, lon_lat_smpl):
+        """
+        Read the meadata of a specific EnMAP detector in sensor geometry
+        :param path_xml: file path of the metadata file
+        :param lon_lat_smpl:  number if sampling in lon, lat fields
+        :return: None
         """
         xml = ElementTree.parse(path_xml).getroot()
-        lbl = self.detector_label
+        lbl = self.detector_label + "Detector"
         self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
-        self.fwhm = np.array(xml.findall("%s/fwhm" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
-        self.wvl_center = np.array(
-            xml.findall("%s/centre_wavelength" % lbl)[0].text.replace("\n", "").split(), dtype=np.float)
+        # read data filenames
+        self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
+        self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
+        self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
+        self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+
+        # read preview bands
+        self.preview_bands = np.zeros(3, dtype=np.int)
+        self.preview_bands[0] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
+        self.preview_bands[1] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
+        self.preview_bands[2] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
+
+        # read some basic information concerning the detector
+        self.nrows = np.int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
+        self.ncols = np.int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
+        self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
+        self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
+
+        # Read image coordinates
+        scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/SceneCornerCoordinates" % lbl)
+        self.lat_UL_UR_LL_LR = [
+            np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
+            np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
+            np.float(scene_corner_coordinates[2].findall("Latitude")[0].text),
+            np.float(scene_corner_coordinates[3].findall("Latitude")[0].text)
+        ]
+        self.lon_UL_UR_LL_LR = [
+            np.float(scene_corner_coordinates[0].findall("Longitude")[0].text),
+            np.float(scene_corner_coordinates[1].findall("Longitude")[0].text),
+            np.float(scene_corner_coordinates[2].findall("Longitude")[0].text),
+            np.float(scene_corner_coordinates[3].findall("Longitude")[0].text)
+        ]
+
+        # read the band related information: wavelength, fwhm
+        self.nwvl = np.int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
+        self.nsmile_coef = np.int(xml.findall(
+            "ProductComponent/%s/Data/BandInformationList/SmileInformation/NumberOfCoefficients" % lbl)[0].text)
+        self.fwhm = np.zeros(self.nwvl, dtype=np.float)
+        self.wvl_center = np.zeros(self.nwvl, dtype=np.float)
+        self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
+        self.l_min = np.zeros(self.nwvl, dtype=np.float)
+        self.l_max = np.zeros(self.nwvl, dtype=np.float)
+        band_informations = xml.findall("ProductComponent/%s/Data/BandInformationList/BandInformation" % lbl)
+        for bi in band_informations:
+            k = np.int64(bi.attrib['Id']) - 1
+            self.wvl_center[k] = np.float(bi.findall("CenterWavelength")[0].text)
+            self.fwhm[k] = np.float(bi.findall("FullWidthHalfMaximum")[0].text)
+            self.l_min[k] = np.float(bi.findall("L_min")[0].text)
+            self.l_max[k] = np.float(bi.findall("L_max")[0].text)
+            scl = bi.findall("Smile/Coefficient")
+            for sc in scl:
+                self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
+        self.smile = self.calc_smile()
         self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
         self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-        self.nwvl = len(self.wvl_center)
-        self.nrows = np.int(xml.findall("%s/rows" % lbl)[0].text)
-        self.ncols = np.int(xml.findall("%s/columns" % lbl)[0].text)
-        self.smile_coef = np.array(xml.findall("%s/smile" % lbl)[0].text.replace("\n", "").split(), dtype=np.float) \
-                            .reshape((-1, nsmile_coef + 1))[:, 1:]
-        self.nsmile_coef = nsmile_coef
-        self.smile = self.calc_smile()
-        self.l_min = np.array(xml.findall("%s/L_min" % lbl)[0].text.split(), dtype=np.float)
-        self.l_max = np.array(xml.findall("%s/L_max" % lbl)[0].text.split(), dtype=np.float)
-        self.geom_view_zenith = np.float(
-            xml.findall("%s/observation_geometry/zenith_angle" % lbl)[0].text.split()[0])
-        self.geom_view_azimuth = np.float(
-            xml.findall("%s/observation_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        self.geom_sun_zenith = np.float(
-            xml.findall("%s/illumination_geometry/zenith_angle" % lbl)[0].text.split()[0])
-        self.geom_sun_azimuth = np.float(
-            xml.findall("%s/illumination_geometry/azimuth_angle" % lbl)[0].text.split()[0])
-        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
-        self.lat_UL_UR_LL_LR = \
-            [float(xml.findall("%s/geometry/bounding_box/%s_northing" % (lbl, corner))[0].text.split()[0])
-             for corner in ("UL", "UR", "LL", "LR")]
-        self.lon_UL_UR_LL_LR = \
-            [float(xml.findall("%s/geometry/bounding_box/%s_easting" % (lbl, corner))[0].text.split()[0])
-             for corner in ("UL", "UR", "LL", "LR")]
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-        try:
-            self.unitcode = xml.findall("%s/unitcode" % lbl)[0].text
-            # '" ".join(xml.findall("%s/radiance_unit" % lbl)[0].text.split())
-            self.unit = xml.findall("%s/unit" % lbl)[0].text
-        except IndexError:
-            self.unitcode = 'DN'
-            self.unit = 'none'
-        except Exception:
-            raise
-
-        self.snr = None
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -197,8 +217,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
         """Compute interpolated field from corner values of a scalar field given at: ul, ur, ll, lr.
-
-        :param nx, ny: final shape
+        :param ul:  tbd
+        :param ur:  tbd
+        :param ll:  tbd
+        :param lr:  tbd
+        :param nx: final shape (x-axis direction)
+        :param ny: final shape (y-axis direction)
         """
         ff = interp2d(x=[0, 1], y=[0, 1], z=[[ul, ur], [ll, lr]], kind='linear')
         rr = np.zeros((nx, ny), dtype=np.float)
@@ -233,10 +257,14 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
     Attributes:
         - logger(logging.Logger):  None or logging instance
-        - observation_datetime(datetime.datetime):  datetime of observation time (currently missing in metadata)
+        - observation_datetime(datetime.datetime):  datetime of observation time
+        - geom_view_zenith: viewing zenith angle
+        - geom_view_azimuth: viewing azimuth angle
+        - geom_sun_zenith: sun zenith angle
+        - geom_sun_azimuth: sun azimuth angle
+        - mu_sun: needed by SICOR for TOARad > TOARef conversion
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
-
     """
 
     def __init__(self, path_metaxml, config: EnPTConfig, logger=None):
@@ -249,28 +277,49 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.logger = logger or logging.getLogger()
         self._path_xml = path_metaxml
 
-        # defaults
+        # defaults - Common
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
+        self.geom_view_zenith = None  # type: float  # viewing zenith angle
+        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
+        self.geom_sun_zenith = None  # type: float  # sun zenith angle
+        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
+        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']
 
-    def read_common_meta(self, observation_time: datetime=None):
-        """Read the metadata belonging to both, the VNIR and SWIR detector of the EnMAP L1B product in sensor geometry.
-
-        :param observation_time:  date and time of image observation (datetime.datetime)
+    # Read common metadata method
+    def read_common_meta(self, path_xml):
+        """Read the common metadata, principally stored in General Info
+        - the acquisition time
+        - the geometrical observation and illumination
+        :param path_xml: path to the main xml file
+        :return: None
         """
-        # FIXME observation time is currently missing in the XML
-        self.observation_datetime = observation_time
+
+        # load the metadata xml file
+        xml = ElementTree.parse(path_xml).getroot()
+
+        # read the acquisition time
+        self.observation_datetime = \
+            datetime.strptime(xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # get the distance earth sun from the acquisition date
         self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+
+        # read Geometry (observation/illumination) angle
+        self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
+        self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
+        self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
+        self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
+        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
         """Get earth sun distance (requires file of pre calculated earth sun distance per day)
 
         :param acqDate:
         """
-
         if not os.path.exists(self.cfg.path_earthSunDist):
             self.logger.warning("\n\t WARNING: Earth Sun Distance is assumed to be "
                                 "1.0 because no database can be found at %s.""" % self.cfg.path_earthSunDist)
@@ -288,15 +337,20 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         return float(EA_dist_dict[acqDate.strftime('%Y-%m-%d')])
 
-    def read_metadata(self, observation_time: datetime, lon_lat_smpl, nsmile_coef):
-        """Read the metadata of the whole EnMAP L1B product in sensor geometry.
-
-        :param observation_time:  date and time of image observation (datetime.datetime)
-        :param lon_lat_smpl:  number if sampling points in lon, lat fields
-        :param nsmile_coef:  number of polynomial coefficients for smile
+    def read_metadata(self, lon_lat_smpl):
         """
-        self.read_common_meta(observation_time)
+        Read the metadata of the entire EnMAP L1B product in sensor geometry
+        :param lon_lat_smpl:  number if sampling point in lon, lat fields
+        :return: None
+        """
+
+        # first read common metadata
+        self.read_common_meta(self._path_xml)
+
+        # define and read the VNIR metadata
         self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
-        self.vnir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
+        self.vnir.read_metadata(self._path_xml, lon_lat_smpl)
+
+        # define and read the SWIR metadata
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
-        self.swir.read_metadata(self._path_xml, lon_lat_smpl=lon_lat_smpl, nsmile_coef=nsmile_coef)
+        self.swir.read_metadata(self._path_xml, lon_lat_smpl)

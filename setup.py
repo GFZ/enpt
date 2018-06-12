@@ -14,7 +14,8 @@ with open("enpt/version.py") as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
-    'numpy', 'scipy', 'geoarray>=0.7.15', 'spectral>=0.16', 'cerberus', 'jsmin', 'matplotlib', 'tqdm'
+    'numpy', 'scipy', 'geoarray>=0.7.15', 'spectral>=0.16', 'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml',
+    'imageio'
     # 'sicor', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 ]
 

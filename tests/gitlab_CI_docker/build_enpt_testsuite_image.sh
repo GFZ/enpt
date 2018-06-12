@@ -2,13 +2,13 @@
 
 context_dir="./context"
 dockerfile="enpt_ci.docker"
-tag="enpt_ci:0.4.0b4"
+tag="enpt_ci:0.4.0"
 gitlab_runner="enpt_gitlab_CI_runner"
 
 # get sicor project
 rm -rf context/sicor
-# git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
+git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+# git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
 
 # download sicor cache (fastens SICOR CI tests a lot, but cache needs to be updated manually using a local sicor repo:
 # 1. clone a fresh copy of sicor or delete sicor/sicor/aerosol_0_ch4_34d3778719cc87188787de09bb8f870d16050078.pkl.zip

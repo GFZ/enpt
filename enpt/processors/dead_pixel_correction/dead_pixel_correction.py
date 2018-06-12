@@ -37,13 +37,15 @@ class Dead_Pixel_Corrector(object):
                              '(%s, %s). Received %s.'
                              % (image2correct.shape, image2correct.bands, image2correct.columns, deadcolumn_map.shape))
 
-    def correct(self, image2correct: Union[np.ndarray, GeoArray], deadcolumn_map: Union[np.ndarray, GeoArray]):
+    def correct(self, image2correct: Union[np.ndarray, GeoArray], deadcolumn_map: Union[np.ndarray, GeoArray],
+                progress=False):
         """
 
         NOTE: dead columns in the first or the last band are unmodified.
 
         :param image2correct:
         :param deadcolumn_map:
+        :param progress:        whether to show progress bars
         :return:
         """
         image2correct = GeoArray(image2correct) if not isinstance(image2correct, GeoArray) else image2correct
@@ -98,7 +100,7 @@ class Dead_Pixel_Corrector(object):
             # spectral interpolation #
             #########################
 
-            for band, column in tqdm(np.argwhere(deadcolumn_map), disable=False):  # set disable=True to mute progress
+            for band, column in tqdm(np.argwhere(deadcolumn_map), disable=False if progress else True):
                 if band in band_nbrs_spatial_interp:
                     continue  # already interpolated spatially above
 

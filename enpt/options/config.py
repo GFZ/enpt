@@ -36,8 +36,12 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
+    path_l1b_enmap_image_gapfill=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest2_CWV2_SM0.zip')),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')
+    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
+    n_lines_to_append=50,
+    disable_progress_bars=True
 )
 
 
@@ -77,6 +81,8 @@ class EnPTConfig(object):
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
+        self.n_lines_to_append = gp('n_lines_to_append')
+        self.disable_progress_bars = gp('disable_progress_bars')
 
         ##################
         # output options #

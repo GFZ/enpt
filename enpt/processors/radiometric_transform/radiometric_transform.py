@@ -40,7 +40,7 @@ class Radiometric_Transformer(object):
             # compute TOA reflectance
             constant = \
                 self.cfg.scale_factor_toa_ref * math.pi * enmap_ImageL1.meta.earthSunDist ** 2 / \
-                (math.cos(math.radians(detector.detector_meta.geom_sun_zenith)))
+                (math.cos(math.radians(enmap_ImageL1.meta.geom_sun_zenith)))
             solIrr = np.array([detector.detector_meta.solar_irrad[band] for band in detector.detector_meta.srf.bands])\
                 .reshape(1, 1, detector.data.bands)
             toaRef = (constant * detector.data[:] / solIrr).astype(np.int16)
