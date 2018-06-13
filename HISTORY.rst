@@ -4,10 +4,18 @@ History
 
 0.x.x (coming soon)
 -------------------
-New features:
 
-* Use a new header file
-* Add a second image at the bottom of the main image (if possible), select a possible number of line
+New features:
+* TBD
+
+
+0.5.0 (2018-06-13)
+------------------
+
+New features:
+* Added algorithm to automatically append a second EnMAP image to the main image in order to fill the along-track gap
+* Updated test data (updated metadata header file, now 2 EnMAP subset scenes)
+* Updated metadata reader
 * Save extended image
 
 
