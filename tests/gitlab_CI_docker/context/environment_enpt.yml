@@ -1,6 +1,7 @@
 name: enpt
 
 channels: &id1
+  - http://conda.anaconda.org/ccpi  # only for pyfftw under windows
   - http://conda.anaconda.org/ioam  # only for holoviews
   - http://conda.anaconda.org/conda-forge
 
