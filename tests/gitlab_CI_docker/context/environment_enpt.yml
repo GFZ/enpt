@@ -30,7 +30,6 @@ dependencies:
 
   # sicor
   - glymur
-  # - pygrib
   - cachetools
   - pyhdf
   - h5py

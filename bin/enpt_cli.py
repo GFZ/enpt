@@ -52,18 +52,31 @@ def get_enpt_argparser():
         help='input path of the solar irradiance model')
     add('--scale_factor_toa_ref', type=int, default=None,
         help='scale factor to be applied to TOA reflectance result')
-    add('--enable_keystone_correction', type=int, default=False)
-    add('--enable_vnir_swir_coreg', type=int, default=False)
-    add('--path_reference_image', type=str, default=None)
-    add('--sicor_cache_dir', type=str, default=None)
-    add('--auto_download_ecmwf', type=bool, default=False)
-    add('--enable_cloud_screening', type=bool, default=False)
-    add('--scale_factor_boa_ref', type=int, default=10000)
-    add('--run_smile_P', type=bool, default=False)
-    add('--run_deadpix_P', type=bool, default=True)
-    add('--deadpix_P_algorithm', type=str, default="spectral")
-    add('--deadpix_P_interp', type=str, default="linear")
-    add('--ortho_resampAlg', type=int, default=1)
+    add('--enable_keystone_correction', type=int, default=False,
+        help='Enable keystone correction')
+    add('--enable_vnir_swir_coreg', type=int, default=False,
+        help='Enable VNIR/SWIR co-registration')
+    add('--path_reference_image', type=str, default=None,
+        help='Reference image for co-registration.')
+    add('--sicor_cache_dir', type=str, default=None,
+        help='SICOR cache directory')
+    add('--auto_download_ecmwf', type=bool, default=False,
+        help='Automatically download ECMWF data for atmospheric correction')
+    add('--enable_cloud_screening', type=bool, default=False,
+        help='Enable cloud screening during atmospheric correction')
+    add('--scale_factor_boa_ref', type=int, default=10000,
+        help='Scale factor to be applied to BOA reflectance result')
+    add('--run_smile_P', type=bool, default=False,
+        help='Enable extra smile detection and correction (provider smile coefficients are ignored)')
+    add('--run_deadpix_P', type=bool, default=True,
+        help='Enable dead pixel correction')
+    add('--deadpix_P_algorithm', type=str, default="spectral",
+        help="Algorithm for dead pixel correction ('spectral' or 'spatial')")
+    add('--deadpix_P_interp', type=str, default="linear",
+        help="Interpolation algorithm to be used during dead pixel correction "
+             "('linear', 'bilinear', 'cubic', 'spline')")
+    add('--ortho_resampAlg', type=int, default=1,
+        help='Ortho-rectification resampling algorithm')
 
     # link parser to run function
     parser.set_defaults(func=run_job)
