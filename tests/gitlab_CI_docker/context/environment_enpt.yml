@@ -35,6 +35,7 @@ dependencies:
   - h5py
   - pytables
   - llvmlite
+  - scikit-learn
 
   - pip:
     - scipy
