@@ -224,12 +224,19 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param nx: final shape (x-axis direction)
         :param ny: final shape (y-axis direction)
         """
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[ul, ur], [ll, lr]], kind='linear')
-        rr = np.zeros((nx, ny), dtype=np.float)
-        for i, x in enumerate(np.linspace(0, 1, nx)):
-            for j, y in enumerate(np.linspace(0, 1, ny)):
-                rr[i, j] = ff(x, y)
-        return rr
+        corner_coords = np.array([[ul, ur],
+                                  [ll, lr]])
+        rowpos, colpos = [0, 1], [0, 1]
+
+        from scipy.interpolate import RegularGridInterpolator
+        rgi = RegularGridInterpolator([rowpos, colpos], corner_coords, method='linear')
+        out_rows_grid, out_cols_grid = np.meshgrid(np.linspace(0, 1, ny),
+                                                   np.linspace(0, 1, nx),
+                                                   indexing='ij')
+
+        coords = rgi(np.dstack([out_rows_grid, out_cols_grid]))
+
+        return coords
 
     def calc_solar_irradiance_CWL_FWHM_per_band(self) -> dict:
         from ..io.reader import Solar_Irradiance_reader

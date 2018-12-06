@@ -202,7 +202,7 @@ class _EnMAP_Image(object):
 
     @property
     def dem(self) -> GeoArray:
-        """Return an SRTM DEM in the exact dimension an pixel grid of self.arr.
+        """Return an SRTM DEM in the exact dimension and pixel grid of self.arr.
 
         :return: geoarray.GeoArray
         """
