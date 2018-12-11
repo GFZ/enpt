@@ -24,29 +24,29 @@ enpt/model/images.py:572 in public method `save`:
         D400: First line should end with a period (not 't')
 enpt/model/images.py:614 in public method `append_new_image`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:83 in public method `read_metadata`:
+enpt/model/metadata.py:82 in public method `read_metadata`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:83 in public method `read_metadata`:
+enpt/model/metadata.py:82 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
-enpt/model/metadata.py:218 in public method `interpolate_corners`:
+enpt/model/metadata.py:217 in public method `interpolate_corners`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:234 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
+enpt/model/metadata.py:240 in public method `calc_solar_irradiance_CWL_FWHM_per_band`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:255 in public class `EnMAP_Metadata_L1B_SensorGeo`:
+enpt/model/metadata.py:261 in public class `EnMAP_Metadata_L1B_SensorGeo`:
         D413: Missing blank line after last section ('Attributes')
-enpt/model/metadata.py:293 in public method `read_common_meta`:
+enpt/model/metadata.py:299 in public method `read_common_meta`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:293 in public method `read_common_meta`:
+enpt/model/metadata.py:299 in public method `read_common_meta`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:293 in public method `read_common_meta`:
+enpt/model/metadata.py:299 in public method `read_common_meta`:
         D400: First line should end with a period (not 'o')
-enpt/model/metadata.py:318 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:324 in public method `get_earth_sun_distance`:
         D400: First line should end with a period (not ')')
-enpt/model/metadata.py:340 in public method `read_metadata`:
+enpt/model/metadata.py:346 in public method `read_metadata`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:340 in public method `read_metadata`:
+enpt/model/metadata.py:346 in public method `read_metadata`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:340 in public method `read_metadata`:
+enpt/model/metadata.py:346 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
 enpt/model/srf.py:11 in public class `SRF`:
         D101: Missing docstring in public class
@@ -72,6 +72,10 @@ enpt/utils/logging.py:141 in public method `__enter__`:
         D105: Missing docstring in magic method
 enpt/utils/logging.py:144 in public method `__exit__`:
         D105: Missing docstring in magic method
+enpt/processors/spatial_transform/spatial_transform.py:1 at module level:
+        D100: Missing docstring in public module
+enpt/processors/spatial_transform/spatial_transform.py:5 in public class `Geometry_Transformer`:
+        D101: Missing docstring in public class
 enpt/processors/dead_pixel_correction/dead_pixel_correction.py:15 in public class `Dead_Pixel_Corrector`:
         D101: Missing docstring in public class
 enpt/processors/atmospheric_correction/atmospheric_correction.py:24 in public method `get_ac_options`:

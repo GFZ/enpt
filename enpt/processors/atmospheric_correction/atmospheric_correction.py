@@ -17,7 +17,7 @@ from ...utils.path_generator import get_path_ac_options
 class AtmosphericCorrector(object):
     """Class for performing atmospheric correction of EnMAP L1 images using SICOR."""
 
-    def __init__(self, config: EnPTConfig=None):
+    def __init__(self, config: EnPTConfig = None):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
 

@@ -7,7 +7,6 @@ import logging
 import os
 from typing import Union
 import numpy as np
-from scipy.interpolate import interp2d
 import spectral as sp
 from geoarray import GeoArray
 
@@ -41,7 +40,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     """
 
-    def __init__(self, detector_name: str, config: EnPTConfig, logger: logging.Logger=None):
+    def __init__(self, detector_name: str, config: EnPTConfig, logger: logging.Logger = None):
         """Get a metadata object containing the metadata of a single EnMAP detector in sensor geometry.
 
         :param detector_name: Name of the detector (VNIR or SWIR)
