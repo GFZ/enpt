@@ -9,7 +9,7 @@ dependencies:
   - python=3.*.*
   - numpy
 
-  # geoarray
+  # geoarray / py_tools_ds
   - pyqt
   - gdal
   - scikit-image
@@ -40,6 +40,7 @@ dependencies:
   - pip:
     - scipy
     - geoarray>=0.7.15
+    - py_tools_ds>=0.14.0
     - spectral>=0.16
     - cerberus
     - jsmin
