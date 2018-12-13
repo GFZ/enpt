@@ -216,6 +216,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
         """Compute interpolated field from corner values of a scalar field given at: ul, ur, ll, lr.
+
         :param ul:  tbd
         :param ur:  tbd
         :param ll:  tbd
@@ -223,6 +224,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param nx: final shape (x-axis direction)
         :param ny: final shape (y-axis direction)
         """
+        # FIXME this method must later be replaced by the geolayer provided by the ground segment
+        #       => a linear interpolation between the EnMAP corner coordinates is NOT sufficient for modelling the
+        #          geometry of VNIR and SWIR
+        #       - especially at off-nadir acquisitions and with some terrain present, a linear interpolation leads
+        #         to large deviations (> 180 m y-coordinate offset for the EnPT test dataset)
+
         corner_coords = np.array([[ul, ur],
                                   [ll, lr]])
         rowpos, colpos = [0, 1], [0, 1]

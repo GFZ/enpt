@@ -54,6 +54,8 @@ class L1B_Reader(object):
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
         """
+        # TODO add check for valid EnMAP L1B root directory
+
         self.logger.info("Reading Input Data")
 
         # Get a new instance of the EnMAPL1Product_SensorGeo for the main image

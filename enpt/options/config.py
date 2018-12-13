@@ -46,6 +46,9 @@ config_for_testing = dict(
     disable_progress_bars=True
 )
 
+enmap_coordinate_grid = dict(x=np.array([0, 30]),
+                             y=np.array([0, 30]))
+
 
 class EnPTConfig(object):
     def __init__(self, json_config='', **user_opts):
