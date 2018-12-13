@@ -12,7 +12,8 @@ from scipy.interpolate import interp2d
 
 # Use to generate preview
 import imageio
-from skimage import exposure
+# noinspection PyPackageRequirements
+from skimage import exposure  # contained in package requirements as scikit-image
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
@@ -611,7 +612,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         return product_dir
 
-    def append_new_image(self, img2, n_lines: int=None):
+    def append_new_image(self, img2, n_lines: int = None):
         """
         Check if a second image could pass with the first image.
         In this version we assume that the image will be add below

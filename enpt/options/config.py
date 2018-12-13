@@ -38,6 +38,8 @@ config_for_testing = dict(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
     path_l1b_enmap_image_gapfill=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest2_CWV2_SM0.zip')),
+    path_dem=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'dem_map_geo.bsq')),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
@@ -79,6 +81,8 @@ class EnPTConfig(object):
         self.create_logfile = gp('create_logfile')
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
+        self.path_dem = self.absPath(gp('path_dem'))
+        self.average_elevation = self.absPath(gp('average_elevation'))
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
         self.n_lines_to_append = gp('n_lines_to_append')
@@ -292,7 +296,7 @@ class EnPTValidator(Validator):
             raise ValueError("Options is malformed: %s" % str(self.errors))
 
 
-def get_options(target: str, validation: bool=True):
+def get_options(target: str, validation: bool = True):
     """Return dictionary with all options.
 
     :param target:      if path to file, then json is used to load, otherwise the default template is used

@@ -16,10 +16,10 @@ class L1B_Reader(object):
 
     def __init__(self,
                  config: EnPTConfig,
-                 logger: logging.Logger=None,
-                 root_dir_main: str=None,
-                 root_dir_ext: str=None,
-                 n_line_ext: int=None):
+                 logger: logging.Logger = None,
+                 root_dir_main: str = None,
+                 root_dir_ext: str = None,
+                 n_line_ext: int = None):
         # Add option to init as suggested.
         """Get an instance of L1B_Reader.
 
@@ -39,10 +39,10 @@ class L1B_Reader(object):
 
     def read_inputdata(self,
                        root_dir_main,
-                       root_dir_ext: str=None,
-                       n_line_ext: int=None,
-                       lon_lat_smpl: tuple=(15, 15),
-                       compute_snr: bool=True):
+                       root_dir_ext: str = None,
+                       n_line_ext: int = None,
+                       lon_lat_smpl: tuple = (15, 15),
+                       compute_snr: bool = True):
         # All information are read from data itself now
         # In case of multiple files, temporary files are created to store them.
         """
@@ -50,7 +50,7 @@ class L1B_Reader(object):
         :param root_dir_main: Root directory of the main EnMAP Level-1B product
         :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product [optional]
         :param n_line_ext:    Number of lines to be added to the main image [if None, use the whole image]
-        :param lon_lat_smpl:  number if sampling points in lon, lat fields
+        :param lon_lat_smpl:  number of sampling points in lon, lat fields
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
         """
@@ -104,8 +104,8 @@ class L1B_Reader(object):
         pass
 
 
-def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float=None, wvl_min_nm: float=None,
-                            wvl_max_nm: float=None) -> np.ndarray:
+def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float = None, wvl_min_nm: float = None,
+                            wvl_max_nm: float = None) -> np.ndarray:
     """Read the given solar irradiance file and return an array of irradiances.
 
     :param path_solar_irr_model:    file path to solar irradiance model
