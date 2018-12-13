@@ -17,7 +17,7 @@ import numpy as np
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_grid import is_point_on_grid
 
-from enpt.processors.spatial_transform.spatial_transform import Geometry_Transformer
+from enpt.processors.spatial_transform import Geometry_Transformer
 from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid

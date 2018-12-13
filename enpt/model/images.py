@@ -21,6 +21,7 @@ from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
+from ..processors.dem_preprocessing import DEM_Processor
 
 
 ################
@@ -203,7 +204,7 @@ class _EnMAP_Image(object):
 
     @property
     def dem(self) -> GeoArray:
-        """Return an SRTM DEM in the exact dimension and pixel grid of self.arr.
+        """Return a DEM in the exact dimension and pixel grid of self.arr.
 
         :return: geoarray.GeoArray
         """
@@ -215,12 +216,11 @@ class _EnMAP_Image(object):
     def dem(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             dem = GeoArray(*geoArr_initArgs)
-            assert self._dem.shape[:2] == self.data.shape[:2]
 
-            self._dem = dem
             if not dem.shape == self.data.shape[:2]:
                 raise ValueError("The 'dem' GeoArray can only be instanced with an array of the "
                                  "same dimensions like _EnMAP_Image.arr. Got %s." % str(dem.shape))
+            self._dem = dem
             self._dem.nodata = 0  # FIXME
             self._dem.gt = self.data.gt
             self._dem.prj = self.data.prj
@@ -336,7 +336,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta = \
                 EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, config=self.cfg, logger=self.logger)
         else:
-            self.detector_meta = meta
+            self.detector_meta = meta  # type: EnMAP_Metadata_L1B_Detector_SensorGeo
 
     def get_paths(self):
         """
@@ -362,6 +362,39 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  interp=self.cfg.deadpix_P_interp,
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap, progress=False if self.cfg.disable_progress_bars else True)
+
+    def get_preprocessed_dem(self):
+        if self.cfg.path_dem:
+            self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
+            DP = DEM_Processor(self.cfg.path_dem, CPUs=self.cfg.CPUs)
+            DP.fill_gaps()
+
+            R, C = self.data.shape[:2]
+            if DP.dem.is_map_geo:
+                # FIXME replace linear interpolation by native geolayers
+                lons = self.detector_meta.lons
+                lats = self.detector_meta.lats
+
+                msg = 'Unable to use the full 3D information of geolayers for transforming the DEM '\
+                      'to sensor geometry. Using first band of %s array.'
+                if self.detector_meta.lons.ndim > 2:
+                    self.logger.warning(msg % 'longitude')
+                    lons = lons[:, :, 0]
+                if self.detector_meta.lats.ndim > 2:
+                    self.logger.warning(msg % 'latitude')
+                    lats = lats[:, :, 0]
+
+                if lons.shape != self.data.shape:
+                    lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
+                if lats.shape != self.data.shape:
+                    lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
+
+                self.logger.info(('Transforming %s DEM to sensor geometry...' % self.detector_name))
+                self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
+            else:
+                self.dem = DP.dem
+
+        return self.dem
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.
@@ -562,6 +595,10 @@ class EnMAPL1Product_SensorGeo(object):
         """Correct dead pixels of both detectors."""
         self.vnir.correct_dead_pixels()
         self.swir.correct_dead_pixels()
+
+    def get_preprocessed_dem(self):
+        self.vnir.get_preprocessed_dem()
+        self.swir.get_preprocessed_dem()
 
     def run_AC(self):
         from ..processors.atmospheric_correction import AtmosphericCorrector

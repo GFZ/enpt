@@ -16,7 +16,7 @@ from ..model.images import EnMAPL1Product_SensorGeo
 class EnPT_Controller(object):
     """Class of EnPT process controller."""
 
-    def __init__(self, config: EnPTConfig=None, **config_kwargs: dict):
+    def __init__(self, config: EnPTConfig = None, **config_kwargs: dict):
         """Initialize the Process Controller.
 
         :param config:          an instance of the EnPTConfig class (overrides config_kwargs)
@@ -85,6 +85,9 @@ class EnPT_Controller(object):
         # run transformation to TOARef
         self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
+    def run_dem_processor(self):
+        self.L1_obj.get_preprocessed_dem()
+
     def run_geometry_processor(self):
         pass
 
@@ -102,8 +105,9 @@ class EnPT_Controller(object):
             if self.cfg.run_deadpix_P:
                 self.L1_obj.correct_dead_pixels()
             # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
-            self.run_geometry_processor()
+            self.run_dem_processor()
             self.run_atmospheric_correction()
+            self.run_geometry_processor()
             self.write_output()
         finally:
             self.cleanup()

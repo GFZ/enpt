@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-""""""
+"""EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
 import numpy as np
+from typing import Union, Tuple  # noqa: F401
 from geoarray import GeoArray
 
 from py_tools_ds.geo.raster.reproject import SensorMapGeometryTransformer
@@ -22,25 +23,21 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
 
         super(Geometry_Transformer, self).__init__(self._data2transform[:], lons, lats, **opts)
 
-    @property
-    def is_sensor_geo(self):
-        return self._data2transform.gt is None or self._data2transform.gt == [0, 1, 0, 0, 0, -1] \
-               or not self._data2transform.prj
-
-    @property
-    def is_map_geo(self):
-        return not self.is_sensor_geo
-
-    def to_sensor_geometry(self, src_prj=None, src_extent=None):
-        if self.is_sensor_geo:
+    def to_sensor_geometry(self,
+                           src_prj: Union[str, int] = None,
+                           src_extent: Tuple[float, float, float, float] = None):
+        if not self._data2transform.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
         return super(Geometry_Transformer, self).to_sensor_geometry(
             src_prj=src_prj or self._data2transform.prj,
             src_extent=src_extent or list(np.array(self._data2transform.box.boundsMap)[[0, 2, 1, 3]]))
 
-    def to_map_geometry(self, tgt_prj, tgt_extent=None, tgt_res=None):
-        if self.is_map_geo:
+    def to_map_geometry(self,
+                        tgt_prj:  Union[str, int],
+                        tgt_extent: Tuple[float, float, float, float] = None,
+                        tgt_res: Tuple[float, float] = None):
+        if self._data2transform.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))

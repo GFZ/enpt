@@ -52,7 +52,7 @@ class AtmosphericCorrector(object):
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
         enmap_l2a_sens_geo, state, cwv_map, ch4_map = sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options,
-                                                                     logger=enmap_ImageL1.logger, debug=True)
+                                                                     logger=enmap_ImageL1.logger)
 
         # join results
         enmap_ImageL1.logger.info('Joining results of atmospheric correction.')
