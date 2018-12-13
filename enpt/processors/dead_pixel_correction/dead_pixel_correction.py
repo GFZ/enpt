@@ -13,8 +13,8 @@ from geoarray import GeoArray
 
 
 class Dead_Pixel_Corrector(object):
-    def __init__(self, algorithm: str='spectral', interp: str='linear', filter_halfwidth: int=1,
-                 logger: logging.Logger=None):
+    def __init__(self, algorithm: str = 'spectral', interp: str = 'linear', filter_halfwidth: int = 1,
+                 logger: logging.Logger = None):
         """Get an instance of Dead_Pixel_Corrector.
 
         :param algorithm:           algorithm how to correct dead pixels

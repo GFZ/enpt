@@ -9,6 +9,18 @@ New features:
 * TBD
 
 
+0.6.0 (2018-12-13)
+-------------------
+
+New features:
+* Updated test datasets (bugfix for wrong corner coordinates)
+* Added dem in map geometry to test data
+* Added spatial_transform module to transform between sensor and map geometry
+* Added first version of dem_preprocessor module for pre-processing elevation data
+* Added tests for new modules
+* Added parameters 'path_dem' and 'average_elevation' to config parameters
+
+
 0.5.0 (2018-06-13)
 ------------------
 
