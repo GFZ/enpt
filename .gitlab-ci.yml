@@ -14,6 +14,9 @@ test_enpt:
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
+    # update py_tools_ds
+    - pip install 'py_tools_ds>=0.14.2'  # FIXME remove as soon as git runner has been rebuilt (included in geoarray)
+
     # update sicor
     # - conda install -y -q -c conda-forge basemap
     # - rm -rf context/sicor
@@ -68,7 +71,7 @@ test_enpt_install:
     - conda install -y -c conda-forge 'icu=58.*' lxml  # fixes bug for conda-forge gdal build
 
     # install py_tools_ds
-    - pip install 'py_tools_ds>=0.14.0'  # FIXME remove as soon as git runner has been rebuilt (included in geoarray)
+    - pip install 'py_tools_ds>=0.14.2'  # FIXME remove as soon as git runner has been rebuilt (included in geoarray)
 
     # install sicor
     - conda install -y -q -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn
