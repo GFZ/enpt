@@ -1,6 +1,6 @@
 numpy
 scipy
-geoarray>=0.7.15
+geoarray>=0.8.9
 py_tools_ds>=0.14.2
 spectral>=0.16
 cerberus

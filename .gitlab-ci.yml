@@ -16,6 +16,7 @@ test_enpt:
 
     # update py_tools_ds
     - pip install 'py_tools_ds>=0.14.2'  # FIXME remove as soon as git runner has been rebuilt (included in geoarray)
+    - pip install 'geoarray>=0.8.9'  # FIXME remove as soon as git runner has been rebuilt (included in geoarray)
 
     # update sicor
     # - conda install -y -q -c conda-forge basemap
