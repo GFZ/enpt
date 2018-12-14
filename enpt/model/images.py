@@ -839,3 +839,101 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
             self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
             self.mask_nodata = self.data.mask_nodata
             return self.mask_nodata
+
+
+class EnMAPL2Product_MapGeo(_EnMAP_Image):
+    """Class for EnPT Level-2 EnMAP object in map geometry.
+
+    Attributes:
+        - logger:
+            - logging.Logger instance or subclass instance
+        - paths:
+            - paths belonging to the EnMAP product
+        - meta:
+            - instance of EnMAP_Metadata_SensorGeo class
+    """
+    def __init__(self, config: EnPTConfig, logger=None):
+        # protected attributes
+        self._logger = None
+
+        # populate attributes
+        self.cfg = config
+        if logger:
+            self.logger = logger
+
+        # TODO add metadata object here
+        # self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
+        #                                          config=self.cfg, logger=self.logger)
+
+        super(EnMAPL2Product_MapGeo, self).__init__()
+
+    @property
+    def logger(self) -> EnPT_Logger:
+        """Get a an instance of enpt.utils.logging.EnPT_Logger.
+
+        NOTE:
+            - The logging level will be set according to the user inputs of EnPT.
+            - The path of the log file is directly derived from the attributes of the _EnMAP_Image instance.
+
+        Usage:
+            - get the logger:
+                logger = self.logger
+            - set the logger
+                self.logger = logging.getLogger()  # NOTE: only instances of logging.Logger are allowed here
+            - delete the logger:
+                del self.logger  # or "self.logger = None"
+
+        :return: EnPT_Logger instance
+        """
+        if self._logger and self._logger.handlers[:]:
+            return self._logger
+        else:
+            basename = path.splitext(path.basename(self.cfg.path_l1b_enmap_image))[0]
+            path_logfile = path.join(self.cfg.output_dir, basename + '.log') \
+                if self.cfg.create_logfile and self.cfg.output_dir else ''
+            self._logger = EnPT_Logger('log__' + basename, fmt_suffix=None, path_logfile=path_logfile,
+                                       log_level=self.cfg.log_level, append=False)
+
+            return self._logger
+
+    @logger.setter
+    def logger(self, logger: logging.Logger):
+        assert isinstance(logger, logging.Logger) or logger in ['not set', None], \
+            "%s.logger can not be set to %s." % (self.__class__.__name__, logger)
+
+        # save prior logs
+        # if logger is None and self._logger is not None:
+        #     self.log += self.logger.captured_stream
+        self._logger = logger
+
+    @property
+    def log(self) -> str:
+        """Return a string of all logged messages until now.
+
+        NOTE: self.log can also be set to a string.
+        """
+        return self.logger.captured_stream
+
+    @log.setter
+    def log(self, string: str):
+        assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
+        self.logger.captured_stream = string
+
+    def save(self, outdir: str, suffix="") -> str:
+        """
+        Save the product to disk using almost the same input format
+        :param outdir: path to the output directory
+        :param suffix: suffix to be appended to the output filename (???)
+        :return: root path (root directory) where products were written
+        """
+        product_dir = path.join(
+            path.abspath(outdir), "{name}{suffix}".format(
+                name=[ff for ff in self.paths.root_dir.split(path.sep) if ff != ''][-1],
+                suffix=suffix)
+        )
+        self.logger.info("Write product to: %s" % product_dir)
+        makedirs(product_dir, exist_ok=True)
+
+        raise NotImplementedError()  # TODO implement save method for L2A data
+
+        return product_dir
