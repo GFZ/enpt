@@ -42,30 +42,29 @@ class Test_Geometry_Transformer(TestCase):
         self.gA2transform_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
 
     def test_to_map_geometry(self):
+        GT = Geometry_Transformer(lons=self.lons_vnir, lats=self.lats_vnir)
+
         # transforming map to map geometry must raise a RuntimeError
         with self.assertRaises(RuntimeError):
-            GT = Geometry_Transformer(self.gA2transform_mapgeo, lons=self.lons_vnir, lats=self.lats_vnir)
-            GT.to_map_geometry(tgt_prj=32632)
+            GT.to_map_geometry(self.gA2transform_mapgeo, tgt_prj=32632)
 
         # test transformation to UTM zone 32
-        GT = Geometry_Transformer(self.gA2transform_sensorgeo, lons=self.lons_vnir, lats=self.lats_vnir)
-        data_mapgeo, gt, prj = GT.to_map_geometry(tgt_prj=32632)
+        data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632)
         self.assertEqual((gt[1], -gt[5]), (np.ptp(enmap_coordinate_grid['x']),
                                            np.ptp(enmap_coordinate_grid['x'])))  # 30m output
         self.assertTrue(is_point_on_grid((gt[0], gt[3]),
                                          xgrid=enmap_coordinate_grid['x'], ygrid=enmap_coordinate_grid['y']))
 
         # test transformation to LonLat
-        GT = Geometry_Transformer(self.gA2transform_sensorgeo, lons=self.lons_vnir, lats=self.lats_vnir)
-        GT.to_map_geometry(tgt_prj=4326)
+        GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=4326)
 
     def test_to_sensor_geometry(self):
+        GT = Geometry_Transformer(lons=self.lons_vnir, lats=self.lats_vnir)
+
         # transforming sensor to sensor geometry must raise a RuntimeError
         with self.assertRaises(RuntimeError):
-            GT = Geometry_Transformer(self.gA2transform_sensorgeo, lons=self.lons_vnir, lats=self.lats_vnir)
-            GT.to_sensor_geometry()
+            GT.to_sensor_geometry(self.gA2transform_sensorgeo)
 
-        GT = Geometry_Transformer(self.gA2transform_mapgeo, lons=self.lons_vnir, lats=self.lats_vnir)
-        data_sensorgeo = GT.to_sensor_geometry()
+        data_sensorgeo = GT.to_sensor_geometry(self.gA2transform_mapgeo)
 
         self.assertEqual(data_sensorgeo.shape, self.gA2transform_sensorgeo.shape)

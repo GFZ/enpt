@@ -37,15 +37,15 @@ class DEM_Processor(object):
                         lons: np.ndarray,
                         lats: np.ndarray,
                         tgt_prj: Union[str, int] = None):
-        GT = Geometry_Transformer(self.dem, lons=lons, lats=lats, nprocs=self.CPUs)
-        data_mapgeo, gt, prj = GT.to_map_geometry(tgt_prj=tgt_prj)
+        GT = Geometry_Transformer(lons=lons, lats=lats, nprocs=self.CPUs)
+        data_mapgeo, gt, prj = GT.to_map_geometry(self.dem, tgt_prj=tgt_prj)
 
         return GeoArray(data_mapgeo, geotransform=gt, projection=prj)
 
     def to_sensor_geometry(self,
                            lons: np.ndarray,
                            lats: np.ndarray):
-        GT = Geometry_Transformer(self.dem, lons=lons, lats=lats, nprocs=self.CPUs)
-        data_sensorgeo = GT.to_sensor_geometry()
+        GT = Geometry_Transformer(lons=lons, lats=lats, nprocs=self.CPUs)
+        data_sensorgeo = GT.to_sensor_geometry(self.dem)
 
         return GeoArray(data_sensorgeo)
