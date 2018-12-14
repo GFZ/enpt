@@ -8,7 +8,7 @@
                                                (zip-archive or root directory)*/
         "path_dem": "", /*input path of digital elevation model in map or sensor geometry; GDAL compatible file format
                           (must cover the EnMAP L1B data completely if given in map geometry or must have the same
-                           pixel dimensions like the EnMAP L1B data if given in sensor geometry*/
+                           pixel dimensions like the EnMAP L1B data if given in sensor geometry)*/
         "average_elevation": 0,  /*average elevation in meters above sea level; may be provided if no DEM is available;
                                    ignored if DEM is given*/
         "path_l1b_snr_model": "./resources/EnMAP_Sensor/EnMAP_Level_1B_SNR.zip",  /*input path of the EnMAP SNR model*/

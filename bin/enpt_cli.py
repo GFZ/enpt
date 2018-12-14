@@ -38,6 +38,13 @@ def get_enpt_argparser():
              '(zip-archive or root directory; must be given if not contained in --json-config.)')
     add('-imgap', '--path_l1b_enmap_image_gapfill', type=str,  default=None,
         help='input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)')
+    add('-dem', '--path_dem', type=str,  default=None,
+        help='input path of digital elevation model in map or sensor geometry; GDAL compatible file format '
+             '(must cover the EnMAP L1B data completely if given in map geometry or must have the same pixel '
+             'dimensions like the EnMAP L1B data if given in sensor geometry)')
+    add('-ele', '--average_elevation', type=int, default=0,
+        help='average elevation in meters above sea level; may be provided if no DEM is available; '
+             'ignored if DEM is given')
     add('-od', '--output_dir', type=str, default=None,
         help='output directory where processed data and log files are saved')
     add('-wd', '--working_dir', type=str, default=None,
