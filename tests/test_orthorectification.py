@@ -21,18 +21,18 @@ from enpt.model.images import EnMAPL2Product_MapGeo
 
 class Test_Orthorectifier(TestCase):
     def setUp(self):
-        config = EnPTConfig(**config_for_testing)
+        self.config = EnPTConfig(**config_for_testing)
 
         # get lons / lats
-        with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
+        with TemporaryDirectory() as td, ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
             zf.extractall(td)
-            self.L1_obj = L1B_Reader(config=config).read_inputdata(
-                root_dir_main=os.path.join(td, os.path.splitext(os.path.basename(config.path_l1b_enmap_image))[0]),
+            self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
+                root_dir_main=os.path.join(td, os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0]),
                 lon_lat_smpl=(1000, 100),
                 compute_snr=False)
 
     def test_run_transformation(self):
-        OR = Orthorectifier(config=config_for_testing)
+        OR = Orthorectifier(config=self.config)
         L2_obj = OR.run_transformation(self.L1_obj)
 
         self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
