@@ -10,7 +10,8 @@ import warnings
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
-from ..model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
+from ..model.images import EnMAPL1Product_SensorGeo
+from ..model.images import EnMAPL2Product_MapGeo  # noqa: F401
 
 
 class EnPT_Controller(object):

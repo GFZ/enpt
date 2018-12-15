@@ -130,5 +130,3 @@ class Orthorectifier(object):
 
         # TODO implement VNIR / SWIR fusion respecting their spectral overlap
         return GeoArray(np.dstack([vnir_data, swir_data]), geotransform=vnir_gt, projection=vnir_prj)
-
-
