@@ -68,4 +68,6 @@ class AtmosphericCorrector(object):
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
 
+            # FIXME what about mask_clouds, mask_clouds_confidence, ac_errors?
+
         return enmap_ImageL1

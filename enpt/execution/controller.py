@@ -11,6 +11,7 @@ import warnings
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
 from ..model.images import EnMAPL1Product_SensorGeo
+from ..model.images import EnMAPL2Product_MapGeo  # noqa: F401
 
 
 class EnPT_Controller(object):
@@ -33,6 +34,9 @@ class EnPT_Controller(object):
 
         # read the L1B data
         self.L1_obj = self.read_L1B_data()
+
+        # defaults
+        self.L2_obj = None  # type: EnMAPL2Product_MapGeo
 
     def extract_zip_archive(self, path_zipfile: str) -> str:
         """Extract the given EnMAP image zip archive and return the L1B image root directory path.
@@ -95,9 +99,22 @@ class EnPT_Controller(object):
         """Run atmospheric correction only."""
         self.L1_obj.run_AC()
 
+    def run_orthorectification(self):
+        """Run orthorectification to transform L1 sensor geometry image to L2 map geometry."""
+        from ..processors.orthorectification import Orthorectifier
+        OR = Orthorectifier(self.cfg)
+
+        # run transformation from sensor to map geometry
+        self.L2_obj = OR.run_transformation(self.L1_obj)
+
     def write_output(self):
         if self.cfg.output_dir:
-            self.L1_obj.save(self.cfg.output_dir)
+            try:
+                self.L2_obj.save(self.cfg.output_dir)
+            except NotImplementedError:
+                self.L2_obj.logger.warning('Currently L2A EnMAP images cannot be written to disk. '
+                                           'Writing level 1 image instead.')
+                self.L1_obj.save(self.cfg.output_dir)
 
     def run_all_processors(self):
         """Run all processors at once."""
@@ -108,6 +125,7 @@ class EnPT_Controller(object):
             self.run_dem_processor()
             self.run_atmospheric_correction()
             self.run_geometry_processor()
+            self.run_orthorectification()
             self.write_output()
         finally:
             self.cleanup()

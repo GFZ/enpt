@@ -40,7 +40,7 @@ dependencies:
   - pip:
     - scipy
     - geoarray>=0.8.9
-    - py_tools_ds>=0.14.2
+    - py_tools_ds>=0.14.4
     - spectral>=0.16
     - cerberus
     - jsmin

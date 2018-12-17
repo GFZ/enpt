@@ -234,6 +234,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         #       - especially at off-nadir acquisitions and with some terrain present, a linear interpolation leads
         #         to large deviations (> 180 m y-coordinate offset for the EnPT test dataset)
 
+        # TODO ensure that lons/lats represent UL coordinates not pixel coordinate centers (as given by Karl / DLR(?))
+
         corner_coords = np.array([[ul, ur],
                                   [ll, lr]])
         rowpos, colpos = [0, 1], [0, 1]
