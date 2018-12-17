@@ -8,6 +8,7 @@ import os
 from typing import Union
 import numpy as np
 import spectral as sp
+from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon
 from geoarray import GeoArray
 
 from ..options.config import EnPTConfig
@@ -71,6 +72,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.l_max = None  # type: np.ndarray
         self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
+        self.ll_mapPoly = None  # type: Polygon  # footprint polygon in longitude/latitude map coordinates
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
         self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
         self.unit = ''  # type: str  # radiometric unit of pixel values
@@ -145,6 +147,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.smile = self.calc_smile()
         self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
         self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
+        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
+                                                fix_invalid=True)
         self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
         self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
 
