@@ -5,7 +5,7 @@ from datetime import datetime
 from xml.etree import ElementTree
 import logging
 import os
-from typing import Union
+from typing import Union, Tuple  # noqa: F401
 import numpy as np
 import spectral as sp
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon
@@ -70,8 +70,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
         self.l_min = None  # type: np.ndarray
         self.l_max = None  # type: np.ndarray
-        self.lat_UL_UR_LL_LR = None  # type:  list  # latitude coordinates for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR = None  # type:  list  # longitude coordinates for UL, UR, LL, LR
+        self.lat_UL_UR_LL_LR = None  # type:  Tuple[float, float, float, float]  # latitude coords for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR = None  # type:  Tuple[float, float, float, float]  # longitude coords for UL, UR, LL, LR
         self.ll_mapPoly = None  # type: Polygon  # footprint polygon in longitude/latitude map coordinates
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
         self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
@@ -112,18 +112,18 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         # Read image coordinates
         scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/SceneCornerCoordinates" % lbl)
-        self.lat_UL_UR_LL_LR = [
+        self.lat_UL_UR_LL_LR = tuple([
             np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
             np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
             np.float(scene_corner_coordinates[2].findall("Latitude")[0].text),
             np.float(scene_corner_coordinates[3].findall("Latitude")[0].text)
-        ]
-        self.lon_UL_UR_LL_LR = [
+        ])
+        self.lon_UL_UR_LL_LR = tuple([
             np.float(scene_corner_coordinates[0].findall("Longitude")[0].text),
             np.float(scene_corner_coordinates[1].findall("Longitude")[0].text),
             np.float(scene_corner_coordinates[2].findall("Longitude")[0].text),
             np.float(scene_corner_coordinates[3].findall("Longitude")[0].text)
-        ]
+        ])
 
         # read the band related information: wavelength, fwhm
         self.nwvl = np.int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)

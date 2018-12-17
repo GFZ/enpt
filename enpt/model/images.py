@@ -366,7 +366,9 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
     def get_preprocessed_dem(self):
         if self.cfg.path_dem:
             self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
-            DP = DEM_Processor(self.cfg.path_dem, CPUs=self.cfg.CPUs)
+            DP = DEM_Processor(self.cfg.path_dem, enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
+                                                                                 self.detector_meta.lat_UL_UR_LL_LR)),
+                               CPUs=self.cfg.CPUs)
             DP.fill_gaps()
 
             R, C = self.data.shape[:2]
