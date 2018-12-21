@@ -13,7 +13,7 @@ from py_tools_ds.geo.projection import EPSG2WKT, prj_equal
 
 from ...options.config import EnPTConfig
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
-from ..spatial_transform import Geometry_Transformer, move_extent_to_EnMAP_grid
+from ..spatial_transform import Geometry_Transformer, move_extent_to_EnMAP_grid, get_UTMEPSG_from_LonLat_cornersXY
 
 
 class Orthorectifier(object):
@@ -80,16 +80,8 @@ class Orthorectifier(object):
 
     @staticmethod
     def _get_tgt_UTMepsg(enmap_ImageL1: EnMAPL1Product_SensorGeo) -> int:
-        # get center lon/lat
-        lon = np.mean([np.min(enmap_ImageL1.vnir.detector_meta.lon_UL_UR_LL_LR),
-                       np.max(enmap_ImageL1.vnir.detector_meta.lon_UL_UR_LL_LR)])
-        lat = np.mean([np.min(enmap_ImageL1.vnir.detector_meta.lat_UL_UR_LL_LR),
-                       np.max(enmap_ImageL1.vnir.detector_meta.lat_UL_UR_LL_LR)])
-
-        zoneNr = int(1 + (lon + 180.0) / 6.0)
-        isNorth = lat >= 0
-
-        return int('326' + str(zoneNr)) if isNorth else int('327' + str(zoneNr))
+        return get_UTMEPSG_from_LonLat_cornersXY(lons=enmap_ImageL1.vnir.detector_meta.lon_UL_UR_LL_LR,
+                                                 lats=enmap_ImageL1.vnir.detector_meta.lat_UL_UR_LL_LR)
 
     @staticmethod
     def _get_common_extent(enmap_ImageL1: EnMAPL1Product_SensorGeo,
