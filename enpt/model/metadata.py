@@ -5,7 +5,9 @@ from datetime import datetime
 from xml.etree import ElementTree
 import logging
 import os
+import fnmatch
 from typing import Union, List  # noqa: F401
+from collections import OrderedDict
 import numpy as np
 import spectral as sp
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -13,13 +15,26 @@ from geoarray import GeoArray
 
 from ..options.config import EnPTConfig
 from .srf import SRF
+from ..processors.spatial_transform import RPC_3D_Geolayer_Generator
 
 
 # Define L1B_product_props
 L1B_product_props = dict(
     xml_detector_label=dict(
-        VNIR='VNIR',
-        SWIR='SWIR'
+        VNIR='VNIRDetector',
+        SWIR='SWIRDetector'
+    ),
+    fn_detector_suffix=dict(
+        VNIR='D1',
+        SWIR='D2'
+    )
+)
+
+
+L1B_product_props_DLR = dict(
+    xml_detector_label=dict(
+        VNIR='vnir',
+        SWIR='swir'
     ),
     fn_detector_suffix=dict(
         VNIR='D1',
@@ -49,7 +64,10 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """
         self.cfg = config
         self.detector_name = detector_name  # type: str
-        self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
+        if self.cfg.is_dlr_dataformat:
+            self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
+        else:
+            self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
@@ -68,10 +86,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.smile_coef = None  # type: np.ndarray  # smile coefficients needed for smile computation
         self.nsmile_coef = None  # type: int  # number of smile coefficients
         self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
-        self.l_min = None  # type: np.ndarray
-        self.l_max = None  # type: np.ndarray
+        self.gains = None  # type: np.ndarray  # band-wise gains for computing radiance from DNs
+        self.offsets = None  # type: np.ndarray  # band-wise offsets for computing radiance from DNs
+        self.l_min = None  # type: np.ndarray  # band-wise l-min for computing radiance from DNs
+        self.l_max = None  # type: np.ndarray  # band-wise l-max for computing radiance from DNs
         self.lat_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # latitude coords for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # longitude coords for UL, UR, LL, LR
+        self.rpc_coeffs = OrderedDict()  # type: OrderedDict  # RPC coefficients for geolayer computation
         self.ll_mapPoly = None  # type: Polygon  # footprint polygon in longitude/latitude map coordinates
         self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
         self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
@@ -89,68 +110,150 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :return: None
         """
         xml = ElementTree.parse(path_xml).getroot()
-        lbl = self.detector_label + "Detector"
-        self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
-        # read data filenames
-        self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
-        self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
-        self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
-        self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+        if self.cfg.is_dlr_dataformat:
+            lbl = self.detector_label
+            self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
-        # read preview bands
-        self.preview_bands = np.zeros(3, dtype=np.int)
-        self.preview_bands[0] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
-        self.preview_bands[1] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
-        self.preview_bands[2] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
+            # read data filenames
+            all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
 
-        # read some basic information concerning the detector
-        self.nrows = np.int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
-        self.ncols = np.int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
-        self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
-        self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
+            self.data_filename = xml.find("product/image/%s/name" % lbl).text
+            # FIXME no dead pixel mask included? QL_PIXELMASK_VNIR.GEOTIFF?
+            self.logger.warning('DLR test data provide no dead pixel map!')
+            self.dead_pixel_filename = None
+            self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
+            # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES.GEOTIFF as combined product?
+            #   - QL_QUALITY_CLOUD.GEOTIFF
+            #   - QL_QUALITY_CIRRUS.GEOTIFF
+            #   - QL_QUALITY_SNOW.GEOTIFF
+            #   - QL_QUALITY_CLOUDSHADOW.GEOTIFF
+            #   - QL_QUALITY_HAZE.GEOTIFF
+            self.logger.warning('DLR test data provide multiple cloud masks. Added only *QUALITY_CLOUD.GEOTIFF!')
+            self.cloud_mask_filename = fnmatch.filter(all_filenames, '*QUALITY_CLOUD.GEOTIFF')[0]
 
-        # Read image coordinates
-        scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/SceneCornerCoordinates" % lbl)
-        self.lat_UL_UR_LL_LR = [
-            np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
-            np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
-            np.float(scene_corner_coordinates[2].findall("Latitude")[0].text),
-            np.float(scene_corner_coordinates[3].findall("Latitude")[0].text)
-        ]
-        self.lon_UL_UR_LL_LR = [
-            np.float(scene_corner_coordinates[0].findall("Longitude")[0].text),
-            np.float(scene_corner_coordinates[1].findall("Longitude")[0].text),
-            np.float(scene_corner_coordinates[2].findall("Longitude")[0].text),
-            np.float(scene_corner_coordinates[3].findall("Longitude")[0].text)
-        ]
+            # read some basic information concerning the detector
+            self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
+            self.ncols = int(xml.find("product/image/%s/dimension/columns" % lbl).text)
+            self.unitcode = 'DN'  # FIXME hardcoded / does DLR provide DNs?
+            self.unit = None  # FIXME hardcoded
 
-        # read the band related information: wavelength, fwhm
-        self.nwvl = np.int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
-        self.nsmile_coef = np.int(xml.findall(
-            "ProductComponent/%s/Data/BandInformationList/SmileInformation/NumberOfCoefficients" % lbl)[0].text)
-        self.fwhm = np.zeros(self.nwvl, dtype=np.float)
-        self.wvl_center = np.zeros(self.nwvl, dtype=np.float)
-        self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
-        self.l_min = np.zeros(self.nwvl, dtype=np.float)
-        self.l_max = np.zeros(self.nwvl, dtype=np.float)
-        band_informations = xml.findall("ProductComponent/%s/Data/BandInformationList/BandInformation" % lbl)
-        for bi in band_informations:
-            k = np.int64(bi.attrib['Id']) - 1
-            self.wvl_center[k] = np.float(bi.findall("CenterWavelength")[0].text)
-            self.fwhm[k] = np.float(bi.findall("FullWidthHalfMaximum")[0].text)
-            self.l_min[k] = np.float(bi.findall("L_min")[0].text)
-            self.l_max[k] = np.float(bi.findall("L_max")[0].text)
-            scl = bi.findall("Smile/Coefficient")
-            for sc in scl:
-                self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
-        self.smile = self.calc_smile()
-        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-        self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
-                                                fix_invalid=True)
-        self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
-        self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
+            # Read image coordinates
+            # FIXME why do we have the same corner coordinates for VNIR and SWIR?
+            points = xml.findall("base/spatialCoverage/boundingPolygon/point")
+            coords_xy = {p.find('frame').text: (float(p.find('longitude').text),
+                                                float(p.find('latitude').text))
+                         for p in points}
+            coord_tags = ['upper_left', 'upper_right', 'lower_left', 'lower_right']
+            self.lon_UL_UR_LL_LR = [coords_xy[ct][0] for ct in coord_tags]
+            self.lat_UL_UR_LL_LR = [coords_xy[ct][1] for ct in coord_tags]
+
+            # read the band related information: wavelength, fwhm
+            self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
+            # FIXME hardcoded - DLR does not provide any smile information
+            self.nsmile_coef = 5
+            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)  # FIXME hardcoded
+
+            startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
+            subset = slice(startband, startband + self.nwvl)
+            bi = "specific/bandCharacterisation/bandID/"
+            self.wvl_center = np.array([float(ele.text) for ele in xml.findall(bi + "wavelengthCenterOfBand")[subset]])
+            self.fwhm = np.array([float(ele.text) for ele in xml.findall(bi + "FWHMOfBand")[subset]])
+            # FIXME DLR provides gains and offsets instead of lmin/lmax
+            self.gains = np.array([float(ele.text) for ele in xml.findall(bi + "GainOfBand")[subset]])
+            self.offsets = np.array([float(ele.text) for ele in xml.findall(bi + "OffsetOfBand")[subset]])
+
+            # read preview bands
+            wvl_red = float(xml.find("product/image/%s/qlChannels/red" % lbl).text)
+            wvl_green = float(xml.find("product/image/%s/qlChannels/green" % lbl).text)
+            wvl_blue = float(xml.find("product/image/%s/qlChannels/blue" % lbl).text)
+            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl))
+                                           for wvl in [wvl_red, wvl_green, wvl_blue]])
+
+            # read RPC coefficients
+            for bID in xml.findall("product/navigation/RPC/bandID")[subset]:
+                bN = 'band_%d' % np.int64(bID.attrib['number'])
+
+                keys2combine = ('row_num', 'row_den', 'col_num', 'col_den')
+
+                tmp = OrderedDict([(ele.tag.lower(), np.float(ele.text)) for ele in bID.findall('./')])
+                self.rpc_coeffs[bN] = {k: v for k, v in tmp.items() if not k.startswith(keys2combine)}
+
+                for n in keys2combine:
+                    self.rpc_coeffs[bN]['%s_coeffs' % n.lower()] = \
+                        np.array([v for k, v in tmp.items() if k.startswith(n)])
+
+            # compute metadata derived from read data
+            self.smile = self.calc_smile()
+            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
+            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
+                                                              self.lat_UL_UR_LL_LR)), fix_invalid=True)
+            self.lons, self.lats = self.compute_geolayer_for_cube()
+
+        else:
+            lbl = self.detector_label
+            self.logger.info("Reading metadata for %s detector..." % self.detector_name)
+
+            # read data filenames
+            self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
+            self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
+            self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
+            self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+
+            # read preview bands
+            self.preview_bands = np.zeros(3, dtype=np.int)
+            self.preview_bands[0] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
+            self.preview_bands[1] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
+            self.preview_bands[2] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
+
+            # read some basic information concerning the detector
+            self.nrows = np.int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
+            self.ncols = np.int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
+            self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
+            self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
+
+            # Read image coordinates
+            scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/SceneCornerCoordinates" % lbl)
+            self.lat_UL_UR_LL_LR = [
+                np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
+                np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
+                np.float(scene_corner_coordinates[2].findall("Latitude")[0].text),
+                np.float(scene_corner_coordinates[3].findall("Latitude")[0].text)
+            ]
+            self.lon_UL_UR_LL_LR = [
+                np.float(scene_corner_coordinates[0].findall("Longitude")[0].text),
+                np.float(scene_corner_coordinates[1].findall("Longitude")[0].text),
+                np.float(scene_corner_coordinates[2].findall("Longitude")[0].text),
+                np.float(scene_corner_coordinates[3].findall("Longitude")[0].text)
+            ]
+
+            # read the band related information: wavelength, fwhm
+            self.nwvl = np.int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
+            self.nsmile_coef = np.int(xml.findall(
+                "ProductComponent/%s/Data/BandInformationList/SmileInformation/NumberOfCoefficients" % lbl)[0].text)
+            self.fwhm = np.zeros(self.nwvl, dtype=np.float)
+            self.wvl_center = np.zeros(self.nwvl, dtype=np.float)
+            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
+            self.l_min = np.zeros(self.nwvl, dtype=np.float)
+            self.l_max = np.zeros(self.nwvl, dtype=np.float)
+            band_informations = xml.findall("ProductComponent/%s/Data/BandInformationList/BandInformation" % lbl)
+            for bi in band_informations:
+                k = np.int64(bi.attrib['Id']) - 1
+                self.wvl_center[k] = np.float(bi.findall("CenterWavelength")[0].text)
+                self.fwhm[k] = np.float(bi.findall("FullWidthHalfMaximum")[0].text)
+                self.l_min[k] = np.float(bi.findall("L_min")[0].text)
+                self.l_max[k] = np.float(bi.findall("L_max")[0].text)
+                scl = bi.findall("Smile/Coefficient")
+                for sc in scl:
+                    self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
+            self.smile = self.calc_smile()
+            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
+            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
+                                                    fix_invalid=True)
+            self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
+            self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -250,6 +353,19 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         return coords
 
+    def compute_geolayer_for_cube(self):
+        self.logger.info('Computing %s geolayer...' % self.detector_name)
+
+        lons, lats = RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
+                                               dem=self.cfg.path_dem,
+                                               enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR,
+                                                                              self.lat_UL_UR_LL_LR)),
+                                               enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
+                                               CPUs=self.cfg.CPUs)\
+            .compute_geolayer()
+
+        return lons, lats
+
     def calc_solar_irradiance_CWL_FWHM_per_band(self) -> dict:
         from ..io.reader import Solar_Irradiance_reader
 
@@ -297,6 +413,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self._path_xml = path_metaxml
 
         # defaults - Common
+        self.proc_level = None  # type: str  # Dataset processing level
         self.observation_datetime = None  # type: datetime  # Date and Time of image observation
         self.geom_view_zenith = None  # type: float  # viewing zenith angle
         self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
@@ -320,19 +437,43 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # load the metadata xml file
         xml = ElementTree.parse(path_xml).getroot()
 
-        # read the acquisition time
-        self.observation_datetime = \
-            datetime.strptime(xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text, '%Y-%m-%dT%H:%M:%S.%fZ')
+        if self.cfg.is_dlr_dataformat:
+            # read processing level
+            self.proc_level = xml.find("base/level").text
+            if self.proc_level != 'L1B':
+                raise RuntimeError(self.proc_level, "Unexpected input data processing level. Expected 'L1B'.")
 
-        # get the distance earth sun from the acquisition date
-        self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+            # read the acquisition time
+            self.observation_datetime = \
+                datetime.strptime(xml.find("base/temporalCoverage/startTime").text, '%Y-%m-%dT%H:%M:%S.%fZ')
 
-        # read Geometry (observation/illumination) angle
-        self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
-        self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
-        self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
-        self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
-        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
+            # get the distance earth sun from the acquisition date
+            self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+
+            # read Geometry (observation/illumination) angle
+            # NOTE: EnMAP metadata provide also the angles for the image corners
+            #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
+            self.geom_view_zenith = np.float(0)  # FIXME use acrossOffNadirAngle and alongOffNadirAngle
+            # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
+            self.geom_view_azimuth = np.float(xml.find("specific/sceneAzimuthAngle/center").text)
+            self.geom_sun_zenith = 90 - np.float(xml.find("specific/sunElevationAngle/center").text)
+            self.geom_sun_azimuth = np.float(xml.find("specific/sunAzimuthAngle/center").text)
+            self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
+        else:
+            # read the acquisition time
+            self.observation_datetime = \
+                datetime.strptime(xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text,
+                                  '%Y-%m-%dT%H:%M:%S.%fZ')
+
+            # get the distance earth sun from the acquisition date
+            self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+
+            # read Geometry (observation/illumination) angle
+            self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
+            self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
+            self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
+            self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
+            self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
         """Get earth sun distance (requires file of pre calculated earth sun distance per day)

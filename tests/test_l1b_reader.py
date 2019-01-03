@@ -15,7 +15,9 @@ import tempfile
 import zipfile
 import shutil
 
-from enpt.options.config import EnPTConfig, config_for_testing
+from enpt.io.reader import L1B_Reader
+from enpt.model.images import EnMAPL1Product_SensorGeo
+from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
 
 
 class Test_L1B_Reader(unittest.TestCase):
@@ -32,9 +34,6 @@ class Test_L1B_Reader(unittest.TestCase):
         shutil.rmtree(self.config.output_dir)
 
     def test_read_and_save_inputdata(self):
-        from enpt.io.reader import L1B_Reader
-        from enpt.model.images import EnMAPL1Product_SensorGeo
-
         print("")
         print("################################################")
         print("#                                              #")
@@ -152,6 +151,29 @@ class Test_L1B_Reader(unittest.TestCase):
                 shutil.rmtree(tempdir)
 
         return
+
+
+class Test_L1B_Reader_DLR(unittest.TestCase):
+    """Tests for L1B_Reader class.."""
+
+    def setUp(self):
+        self.config = EnPTConfig(**config_for_testing_dlr)
+        self.pathList_testimages = [self.config.path_l1b_enmap_image,
+                                    self.config.path_l1b_enmap_image_gapfill]
+        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.config.output_dir)
+
+    def test_read_inputdata(self):
+        with zipfile.ZipFile(self.pathList_testimages[0], "r") as zf:
+            zf.extractall(self.tmpdir)
+
+        RD = L1B_Reader(config=self.config)
+
+        L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
+        root_dir_written_L1_data = L1_obj.save(path.join(self.config.output_dir, "no_snr"))
 
 
 if __name__ == "__main__":

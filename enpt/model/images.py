@@ -5,20 +5,19 @@ import logging
 from types import SimpleNamespace
 import numpy as np
 from os import path, makedirs
-from lxml import etree
+from xml.etree import ElementTree
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
 
-# Use to generate preview
-import imageio
 # noinspection PyPackageRequirements
 from skimage import exposure  # contained in package requirements as scikit-image
 
 from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
+from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo, \
+    L1B_product_props, L1B_product_props_DLR
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
@@ -196,7 +195,7 @@ class _EnMAP_Image(object):
 
             self._mask_clouds_confidence = cnfArr
         else:
-            del self._mask_clouds_confidence
+            del self.mask_clouds_confidence
 
     @mask_clouds_confidence.deleter
     def mask_clouds_confidence(self):
@@ -275,7 +274,8 @@ class _EnMAP_Image(object):
         """
         if self._deadpixelmap is not None:
             self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
-            return self._deadpixelmap
+
+        return self._deadpixelmap
 
     @deadpixelmap.setter
     def deadpixelmap(self, *geoArr_initArgs):
@@ -288,7 +288,7 @@ class _EnMAP_Image(object):
 
             self._deadpixelmap = dpm
         else:
-            del self._deadpixelmap
+            del self.deadpixelmap
 
     @deadpixelmap.deleter
     def deadpixelmap(self):
@@ -346,10 +346,18 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
-        paths.metaxml = glob(path.join(self._root_dir, "*_header.xml"))[0]
+        if self.cfg.is_dlr_dataformat:
+            paths.metaxml = glob(path.join(self._root_dir, "*METADATA.XML"))[0]
+        else:
+            paths.metaxml = glob(path.join(self._root_dir, "*_header.xml"))[0]
+
         paths.data = path.join(self._root_dir, self.detector_meta.data_filename)
-        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename)
-        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename)
+
+        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename) \
+            if self.detector_meta.cloud_mask_filename else None
+        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename) \
+            if self.detector_meta.dead_pixel_filename else None
+
         paths.quicklook = path.join(self._root_dir, self.detector_meta.quicklook_filename)
         return paths
 
@@ -409,8 +417,23 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # TODO move to processors.radiometric_transform?
         if self.detector_meta.unitcode == 'DN':
             self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
-            self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
-                         (2 ** 16 - 1) * self.data[:])
+
+            if self.detector_meta.l_min is not None and self.detector_meta.l_max is not None:
+                self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
+                             (2 ** 16 - 1) * self.data[:])
+
+            elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
+                if self.cfg.is_dlr_dataformat:
+                    self.logger.warning('The current version of DN2TOARadiance does not respect the correct scaling '
+                                        'factor of the DLR L1B test data! Radiances are faulty!')
+
+                # TODO check correct scaling factor (10?)
+                self.data = (10 * (self.detector_meta.offsets + self.data[:] * self.detector_meta.gains))
+
+            else:
+                raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
+                                 "are available for radiance computation.")
+
             self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
             self.detector_meta.unitcode = "TOARad"
         else:
@@ -419,11 +442,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     code=self.detector_meta.unitcode)
             )
 
-    def generate_quicklook(self, filename):
+    def generate_quicklook(self) -> GeoArray:
         """
         Generate image quicklook and save into a file
-        :param filename: file path to store the image
-        :return: None
+        :return: GeoArray
         """
         p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 2)
         p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 98)
@@ -436,7 +458,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         blue_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[2]], (p2, p98))
         pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
         pix = np.uint8(pix * 255)
-        imageio.imwrite(filename, pix)
+
+        return GeoArray(pix)
 
 
 class EnMAPL1Product_SensorGeo(object):
@@ -474,8 +497,12 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger = logger
 
         # Read metadata here in order to get all information needed by to get paths.
-        self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
-                                                 config=self.cfg, logger=self.logger)
+        if self.cfg.is_dlr_dataformat:
+            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
+                                                     config=self.cfg, logger=self.logger)
+        else:
+            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
+                                                     config=self.cfg, logger=self.logger)
         self.meta.read_metadata(lon_lat_smpl)
 
         # define VNIR and SWIR detector
@@ -493,11 +520,18 @@ class EnMAPL1Product_SensorGeo(object):
         :param root_dir: directory where the data are located
         :return: paths.SimpleNamespace()
         """
-        paths = SimpleNamespace()
-        paths.vnir = self.vnir.get_paths()
-        paths.swir = self.swir.get_paths()
-        paths.root_dir = root_dir
-        paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
+        if self.cfg.is_dlr_dataformat:
+            paths = SimpleNamespace()
+            paths.vnir = self.vnir.get_paths()
+            paths.swir = self.swir.get_paths()
+            paths.root_dir = root_dir
+            paths.metaxml = glob(path.join(root_dir, "*METADATA.XML"))[0]
+        else:
+            paths = SimpleNamespace()
+            paths.vnir = self.vnir.get_paths()
+            paths.swir = self.swir.get_paths()
+            paths.root_dir = root_dir
+            paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
         return paths
 
     @property
@@ -628,26 +662,46 @@ class EnMAPL1Product_SensorGeo(object):
         # write the VNIR
         self.vnir.data.save(product_dir + path.sep + self.meta.vnir.data_filename, fmt="ENVI")
         self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.cloud_mask_filename, fmt="GTiff")
-        self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.dead_pixel_filename, fmt="GTiff")
-        self.vnir.generate_quicklook(product_dir + path.sep + self.meta.vnir.quicklook_filename)
+        if self.vnir.deadpixelmap is not None:
+            self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.dead_pixel_filename, fmt="GTiff")
+        else:
+            self.logger.warning('Could not save VNIR dead pixel map because there is no corresponding attribute.')
+
+        # FIXME we could also write the quicklook included in DLR L1B format
+        self.vnir.generate_quicklook() \
+            .save(path.join(product_dir, path.basename(self.meta.vnir.quicklook_filename) + '.png'), fmt='PNG')
 
         # write the SWIR
         self.swir.data.save(product_dir + path.sep + self.meta.swir.data_filename, fmt="ENVI")
         self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.cloud_mask_filename, fmt="GTiff")
-        self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
-        self.swir.generate_quicklook(product_dir + path.sep + self.meta.swir.quicklook_filename)
+        if self.swir.deadpixelmap is not None:
+            self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
+        else:
+            self.logger.warning('Could not save SWIR dead pixel map because there is no corresponding attribute.')
+        self.swir.generate_quicklook() \
+            .save(path.join(product_dir, path.basename(self.meta.swir.quicklook_filename) + '.png'), fmt='PNG')
 
         # Update the xml file
-        xml = etree.parse(self.paths.metaxml)
-        xml.findall("ProductComponent/VNIRDetector/Data/Size/NRows")[0].text = str(self.meta.vnir.nrows)
-        xml.findall("ProductComponent/VNIRDetector/Data/Type/UnitCode")[0].text = self.meta.vnir.unitcode
-        xml.findall("ProductComponent/VNIRDetector/Data/Type/Unit")[0].text = self.meta.vnir.unit
-        xml.findall("ProductComponent/SWIRDetector/Data/Size/NRows")[0].text = str(self.meta.swir.nrows)
-        xml.findall("ProductComponent/SWIRDetector/Data/Type/UnitCode")[0].text = self.meta.swir.unitcode
-        xml.findall("ProductComponent/SWIRDetector/Data/Type/Unit")[0].text = self.meta.swir.unit
-        xml_string = etree.tostring(xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
-        with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
-            xml_file.write(xml_string.decode("utf-8"))
+        if self.cfg.is_dlr_dataformat:
+            xml = ElementTree.parse(self.paths.metaxml).getroot()
+            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.meta.vnir, self.meta.swir]):
+                lbl = L1B_product_props_DLR['xml_detector_label'][detName]
+                xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+                xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+                xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+                xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+
+            with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
+                xml_file.write(ElementTree.tostring(xml, encoding='unicode'))
+        else:
+            xml = ElementTree.parse(self.paths.metaxml).getroot()
+            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.meta.vnir, self.meta.swir]):
+                lbl = L1B_product_props['xml_detector_label'][detName]
+                xml.find("ProductComponent/%s/Data/Size/NRows" % lbl).text = str(detMeta.nrows)
+                xml.find("ProductComponent/%s/Data/Type/UnitCode" % lbl).text = detMeta.unitcode
+                xml.find("ProductComponent/%s/Data/Type/Unit" % lbl).text = detMeta.unit
+            with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
+                xml_file.write(ElementTree.tostring(xml, encoding='unicode'))
 
         return product_dir
 

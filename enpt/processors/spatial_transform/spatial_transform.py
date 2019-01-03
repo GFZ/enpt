@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
-import numpy as np
 from typing import Union, Tuple, List  # noqa: F401
+from multiprocessing import Pool, cpu_count
+from collections import OrderedDict
+import numpy as np
 from scipy.interpolate import griddata as interpolate_griddata, interp1d
 from geoarray import GeoArray
 
@@ -321,6 +323,87 @@ class RPC_Geolayer_Generator(object):
 
     def __call__(self, *args, **kwargs):
         return self.compute_geolayer()
+
+
+global_dem_sensorgeo = None  # type: GeoArray
+
+
+def mp_initializer_for_RPC_3D_Geolayer_Generator(dem_sensorgeo):
+    """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_band()
+
+    :param dem_sensorgeo:   DEM in sensor geometry
+    """
+    global global_dem_sensorgeo
+    global_dem_sensorgeo = dem_sensorgeo
+
+
+class RPC_3D_Geolayer_Generator(object):
+    """
+    Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC).
+    """
+    def __init__(self,
+                 rpc_coeffs_per_band: dict,
+                 dem: Union[str, GeoArray],
+                 enmapIm_cornerCoords: Tuple[Tuple[float, float]],
+                 enmapIm_dims_sensorgeo: Tuple[int, int],
+                 CPUs: int = None):
+        """Get an instance of RPC_3D_Geolayer_Generator.
+
+        :param rpc_coeffs_per_band:     RPC coefficients for a single EnMAP band ({'band_1': <rpc_coeffs_dict>,
+                                                                                   'band_2': <rpc_coeffs_dict>,
+                                                                                   ...}
+        :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
+        :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
+        :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
+        :param CPUs:                    number of CPUs to use
+        """
+        self.rpc_coeffs_per_band = OrderedDict(sorted(rpc_coeffs_per_band.items()))
+        self.dem = dem
+        self.enmapIm_cornerCoords = enmapIm_cornerCoords
+        self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
+        self.CPUs = CPUs or cpu_count()
+
+        # get validated DEM in map geometry
+        # self.logger.debug('Verifying DEM...')  # TODO
+        from ..dem_preprocessing import DEM_Processor
+        self.dem = DEM_Processor(dem_path_geoarray=dem,
+                                 enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+        # TODO clip DEM to needed area
+        self.dem.to_mem()
+
+    @staticmethod
+    def _compute_geolayer_for_band(rpc_coeffs, enmapIm_cornerCoords, enmapIm_dims_sensorgeo, band_idx):
+        lons, lats = \
+            RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
+                                   dem=global_dem_sensorgeo,
+                                   enmapIm_cornerCoords=enmapIm_cornerCoords,
+                                   enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo) \
+            .compute_geolayer()
+
+        return lons, lats, band_idx
+
+    def compute_geolayer(self):
+        rows, cols = self.enmapIm_dims_sensorgeo
+        bands = len(self.rpc_coeffs_per_band)
+        lons = np.empty((rows, cols, bands), dtype=np.float)
+        lats = np.empty((rows, cols, bands), dtype=np.float)
+
+        band_inds = list(range(len(self.rpc_coeffs_per_band)))
+        rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
+        args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
+                for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
+
+        with Pool(self.CPUs,
+                  initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
+                  initargs=(self.dem,)) as pool:
+            results = pool.starmap(self._compute_geolayer_for_band, args)
+
+        for res in results:
+            band_lons, band_lats, band_idx = res
+            lons[:, :, band_idx] = band_lons
+            lats[:, :, band_idx] = band_lats
+
+        return lons, lats
 
 
 def get_UTMEPSG_from_LonLat(lon: float, lat: float) -> int:

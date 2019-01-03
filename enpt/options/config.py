@@ -43,8 +43,29 @@ config_for_testing = dict(
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
-    disable_progress_bars=True
+    disable_progress_bars=True,
+    is_dlr_dataformat=False
 )
+
+
+config_for_testing_dlr = dict(
+    path_l1b_enmap_image=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'rows0-99.zip')),
+    path_l1b_enmap_image_gapfill=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'rows100-199.zip')),
+    path_dem=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'DLR_L2A_DEM_UTM32.bsq')),
+    log_level='DEBUG',
+    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
+    n_lines_to_append=50,
+    disable_progress_bars=True,
+    is_dlr_dataformat=True
+)
+
 
 enmap_coordinate_grid = dict(x=np.array([0, 30]),
                              y=np.array([0, 30]))
@@ -79,6 +100,10 @@ class EnPTConfig(object):
         # general options #
         ###################
 
+        try:
+            self.is_dlr_dataformat = gp('is_dlr_dataformat')
+        except:
+            self.is_dlr_dataformat = False
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
