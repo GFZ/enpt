@@ -11,7 +11,7 @@ Tests for `processors.dem_preprocessing` module.
 from unittest import TestCase
 
 import numpy as np
-from py_tools_ds.geo.projection import prj_equal, EPSG2WKT
+from py_tools_ds.geo.projection import EPSG2WKT
 from geoarray import GeoArray
 
 from enpt.processors.dem_preprocessing import DEM_Processor
@@ -74,11 +74,3 @@ class Test_DEM_Processor(TestCase):
         dem_sensor_geo = self.DP_mapgeo.to_sensor_geometry(lons=self.lons, lats=self.lats)
 
         self.assertEquals(dem_sensor_geo.shape, (100, 1000))
-
-    def test_to_map_geometry(self):
-        dem_sensor_geo = self.DP_mapgeo.to_sensor_geometry(lons=self.lons, lats=self.lats)
-
-        DP_sensorgeo = DEM_Processor(GeoArray(dem_sensor_geo), enmapIm_cornerCoords=self.ll_cornerCoords)
-        dem_map_geo_gA = DP_sensorgeo.to_map_geometry(lons=self.lons, lats=self.lats, tgt_prj=32632)  # UTM32
-
-        self.assertTrue(prj_equal(dem_map_geo_gA.prj, 32632))

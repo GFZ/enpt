@@ -62,15 +62,6 @@ class DEM_Processor(object):
         # compute on map geometry (as provided)
         pass
 
-    def to_map_geometry(self,
-                        lons: np.ndarray,
-                        lats: np.ndarray,
-                        tgt_prj: Union[str, int] = None):
-        GT = Geometry_Transformer(lons=lons, lats=lats, nprocs=self.CPUs)
-        data_mapgeo, gt, prj = GT.to_map_geometry(self.dem, tgt_prj=tgt_prj)
-
-        return GeoArray(data_mapgeo, geotransform=gt, projection=prj)
-
     def to_sensor_geometry(self,
                            lons: np.ndarray,
                            lats: np.ndarray):

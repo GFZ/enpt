@@ -10,9 +10,10 @@ Tests for `processors.spatial_transform.spatial_transform` module.
 
 import os
 from typing import Tuple  # noqa: F401
-from unittest import TestCase
+from unittest import TestCase, SkipTest
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
+import pickle
 import numpy as np
 
 from geoarray import GeoArray
@@ -22,6 +23,9 @@ from enpt.processors.spatial_transform import Geometry_Transformer, RPC_Geolayer
 from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid
+
+
+path_testdata = os.path.abspath(os.path.join(__file__, '..', 'data'))
 
 
 class Test_Geometry_Transformer(TestCase):
@@ -73,34 +77,8 @@ class Test_Geometry_Transformer(TestCase):
 
 class Test_RPC_Geolayer_Generator(TestCase):
     def setUp(self):
-        # self.rpc_coeffs = dict(
-        #     row_off=512.0, col_off=500.0, lat_off=47.6257991503, lon_off=10.9372682697,
-        #     height_off=1785.9975032126, row_scale=517.1199951172, col_scale=504.9999952316,
-        #     lat_scale=0.1649981434, lon_scale=0.2274676529, height_scale=1499.847892108,
-        #     row_num_coeffs=np.array(
-        #         [3.57047913e-03, -2.74808704e-01, -1.16541133e+00, -2.86627308e-04, -2.68319570e-01,
-        #          3.48077310e-04, 1.64050321e-03, -7.46389036e-02, -3.24470589e-01, 1.05686138e-04,
-        #          5.15176091e-03, 9.04990036e-03, 4.59846719e-02, 7.66279483e-03, 5.89784062e-02,
-        #          8.07669634e-02, 3.24461847e-02, 6.60198890e-04, 9.61177339e-03, 7.03402953e-06]),
-        #     row_den_coeffs=np.array(
-        #         [1.00000000e+00, 1.75171420e-01, 2.74865227e-01, -1.45692178e-03, -2.09325421e-02,
-        #          -2.43456641e-03, -8.18513259e-03, -5.04700287e-02, -7.07800273e-02, -2.78124516e-02,
-        #          -1.31225254e-05, 3.02270705e-04, -1.85584425e-03, -3.16658113e-06, 3.20667033e-04,
-        #          -1.76663639e-03, 8.62457306e-06, 1.58896500e-04, 1.06977978e-04, 3.45796280e-05]),
-        #     col_num_coeffs=np.array([
-        #         -1.95581836e-02, 1.14502576e+00, -2.76461594e-01, 1.70538121e-04, 2.64971210e-01,
-        #         1.36009430e-03, -2.16623832e-04, 2.01329933e-01, -7.28906110e-02, 5.49497388e-04,
-        #         -8.08011145e-03, -5.83776374e-02, -7.47574926e-02, -3.19433457e-02, -1.06122613e-02,
-        #         2.17612444e-02, 7.50293073e-03, -2.28926437e-03, 1.96028015e-03, -4.49157359e-06]),
-        #     col_den_coeffs=np.array([
-        #         1.00000000e+00, 1.75171420e-01, 2.74865227e-01, -1.45692178e-03, -2.09325421e-02,
-        #         -2.43456641e-03, -8.18513259e-03, -5.04700287e-02, -7.07800273e-02, -2.78124516e-02,
-        #         -1.31225254e-05, 3.02270705e-04, -1.85584425e-03, -3.16658113e-06, 3.20667033e-04,
-        #         -1.76663639e-03, 8.62457306e-06, 1.58896500e-04, 1.06977978e-04, 3.45796280e-05])
-        # )
-        import pickle
-        with open('/home/gfz-fe/scheffler/temp/enpt_testing/dlr_l1b_test_data/rpc_coeffs_B200.pkl', 'rb') as dillF:
-            self.rpc_coeffs = pickle.load(dillF)
+        with open(os.path.join(path_testdata, 'rpc_coeffs_B200.pkl'), 'rb') as pklF:
+            self.rpc_coeffs = pickle.load(pklF)
 
         # bounding polygon DLR test data
         self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
@@ -113,7 +91,7 @@ class Test_RPC_Geolayer_Generator(TestCase):
 
         self.heights = np.array([764, 681, 842, 1539])  # values from ASTER DEM
         # TODO validate dem before passing to RPC_Geolayer_Generator
-        self.dem = '/home/gfz-fe/scheffler/temp/enpt_testing/dlr_l1b_test_data/DLR_L2A_DEM_UTM32.bsq'
+        self.dem = os.path.join(path_testdata, 'DLR_L2A_DEM_UTM32.bsq')
         self.dims_sensorgeo = (1024, 1000)
 
         self.RPCGG = RPC_Geolayer_Generator(self.rpc_coeffs,
