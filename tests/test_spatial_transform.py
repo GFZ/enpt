@@ -10,7 +10,7 @@ Tests for `processors.spatial_transform.spatial_transform` module.
 
 import os
 from typing import Tuple  # noqa: F401
-from unittest import TestCase, SkipTest
+from unittest import TestCase
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import pickle
@@ -124,5 +124,3 @@ class Test_RPC_Geolayer_Generator(TestCase):
         self.assertEquals(lons_interp.shape, self.dims_sensorgeo)
         self.assertFalse(np.isnan(lons_interp).any())
         self.assertFalse(np.isnan(lats_interp).any())
-
-

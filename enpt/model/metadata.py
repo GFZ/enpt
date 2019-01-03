@@ -8,7 +8,7 @@ import os
 from typing import Union, List  # noqa: F401
 import numpy as np
 import spectral as sp
-from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon
+from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
 
 from ..options.config import EnPTConfig
