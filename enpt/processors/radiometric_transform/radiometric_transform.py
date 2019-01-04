@@ -15,7 +15,7 @@ from ...options.config import EnPTConfig
 class Radiometric_Transformer(object):
     """Class for performing all kinds of radiometric transformations of EnMAP images."""
 
-    def __init__(self, config: EnPTConfig=None):
+    def __init__(self, config: EnPTConfig = None):
         """Create an instance of Radiometric_Transformer."""
         self.cfg = config
         self.solarIrr = config.path_solar_irr  # path of model for solar irradiance

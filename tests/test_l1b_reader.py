@@ -173,7 +173,7 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         RD = L1B_Reader(config=self.config)
 
         L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
-        root_dir_written_L1_data = L1_obj.save(path.join(self.config.output_dir, "no_snr"))
+        L1_obj.save(path.join(self.config.output_dir, "no_snr"))
 
 
 if __name__ == "__main__":

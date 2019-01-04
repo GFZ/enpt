@@ -102,7 +102,7 @@ class EnPTConfig(object):
 
         try:
             self.is_dlr_dataformat = gp('is_dlr_dataformat')
-        except:
+        except:  # noqa E722  # FIXME
             self.is_dlr_dataformat = False
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')

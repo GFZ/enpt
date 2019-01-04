@@ -214,7 +214,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
 
             # Read image coordinates
-            scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/SceneCornerCoordinates" % lbl)
+            scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/"
+                                                   "SceneCornerCoordinates" % lbl)
             self.lat_UL_UR_LL_LR = [
                 np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
                 np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
