@@ -47,7 +47,8 @@ class EnPT_Controller(object):
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(self.tempDir)
 
-        outdir = os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
+        outdir = self.tempDir if self.cfg.is_dlr_dataformat else \
+            os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
 
         if not os.path.isdir(outdir):
             raise NotADirectoryError(outdir)

@@ -416,19 +416,27 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         # TODO move to processors.radiometric_transform?
         if self.detector_meta.unitcode == 'DN':
-            self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
+            self.logger.info('Converting DN values to radiance [mW/m^2/sr/nm] for %s detector...' % self.detector_name)
 
             if self.detector_meta.l_min is not None and self.detector_meta.l_max is not None:
-                self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
-                             (2 ** 16 - 1) * self.data[:])
+                # Lλ = (LMINλ + ((LMAXλ - LMINλ)/(QCALMAX-QCALMIN)) * (QCAL-QCALMIN))
+                # FIXME this asserts LMIN and LMAX in mW m^-2 sr^-1 nm^-1
+
+                QCALMIN = 1
+                QCALMAX = 2 ** 16  # 65535 (16-bit maximum value)
+                LMIN = self.detector_meta.l_min
+                LMAX = self.detector_meta.l_max
+                QCAL = self.data[:]
+
+                self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
 
             elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
-                if self.cfg.is_dlr_dataformat:
-                    self.logger.warning('The current version of DN2TOARadiance does not respect the correct scaling '
-                                        'factor of the DLR L1B test data! Radiances are faulty!')
-
-                # TODO check correct scaling factor (10?)
-                self.data = (10 * (self.detector_meta.offsets + self.data[:] * self.detector_meta.gains))
+                # Lλ = QCAL / GAIN + OFFSET
+                # FIXME this asserts LMIN and LMAX in mW/cm2/sr/um
+                # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
+                #       - DLR gains / offsets are provided in mW/cm2/sr/um, so we have to multiply by 10 to get
+                #         mW m^-2 sr^-1 nm^-1 as needed later
+                self.data = 10 * self.data[:] / self.detector_meta.gains + self.detector_meta.offsets
 
             else:
                 raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
@@ -705,16 +713,24 @@ class EnMAPL1Product_SensorGeo(object):
 
         return product_dir
 
-    def append_new_image(self, img2, n_lines: int = None):
+    def append_new_image(self, img2, n_lines: int = None) -> None:
         """
         Check if a second image could pass with the first image.
         In this version we assume that the image will be add below
         If it is the case, the method will create temporary files that will be used in the following.
+
         :param img2:
         :param n_lines: number of line to be added
         :return: None
         """
-        self.logger.info("Check new image %s" % img2.paths.root_dir)
+        if self.cfg.is_dlr_dataformat:
+            basename_img1 = self.vnir.detector_meta.data_filename.split('-SPECTRAL_IMAGE_VNIR.GEOTIFF')[0]
+            basename_img2 = img2.vnir.detector_meta.data_filename.split('-SPECTRAL_IMAGE_VNIR.GEOTIFF')[0]
+        else:
+            basename_img1 = self.paths.root_dir
+            basename_img2 = img2.paths.root_dir
+
+        self.logger.info("Check new image %s" % basename_img2)
 
         distance_min = 27.0
         distance_max = 34.0
@@ -747,11 +763,11 @@ class EnMAPL1Product_SensorGeo(object):
         if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
             tag_swir = True
 
-        if tag_vnir is False or tag_swir is False:
-            self.logger.warning("%s and %s don't fit to be appended" % (self.paths.root_dir, img2.paths.root_dir))
+        if tag_vnir and tag_swir:
+            self.logger.info("Append new image: %s" % basename_img2)
+        else:
+            self.logger.warning("%s and %s don't fit to be appended" % (basename_img1, basename_img2))
             return
-
-        self.logger.info("Append new image: %s" % img2.paths.root_dir)
 
         # set new number of line
         if n_lines is None:

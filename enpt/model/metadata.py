@@ -9,7 +9,6 @@ import fnmatch
 from typing import Union, List  # noqa: F401
 from collections import OrderedDict
 import numpy as np
-import spectral as sp
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
 
@@ -135,8 +134,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
             self.ncols = int(xml.find("product/image/%s/dimension/columns" % lbl).text)
-            self.unitcode = 'DN'  # FIXME hardcoded / does DLR provide DNs?
-            self.unit = None  # FIXME hardcoded
+            self.unitcode = 'DN'
+            self.unit = ''
 
             # Read image coordinates
             # FIXME why do we have the same corner coordinates for VNIR and SWIR?
@@ -151,15 +150,15 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             # read the band related information: wavelength, fwhm
             self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
             # FIXME hardcoded - DLR does not provide any smile information
+            #   => smile coefficients are set to zero until we have valid ones
             self.nsmile_coef = 5
-            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)  # FIXME hardcoded
+            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
 
             startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
             subset = slice(startband, startband + self.nwvl)
             bi = "specific/bandCharacterisation/bandID/"
             self.wvl_center = np.array([float(ele.text) for ele in xml.findall(bi + "wavelengthCenterOfBand")[subset]])
             self.fwhm = np.array([float(ele.text) for ele in xml.findall(bi + "FWHMOfBand")[subset]])
-            # FIXME DLR provides gains and offsets instead of lmin/lmax
             self.gains = np.array([float(ele.text) for ele in xml.findall(bi + "GainOfBand")[subset]])
             self.offsets = np.array([float(ele.text) for ele in xml.findall(bi + "OffsetOfBand")[subset]])
 
@@ -289,16 +288,16 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param rad_data:        image radiance data of EnMAP_Detector_SensorGeo
         :param dir_snr_models:  root directory where SNR model data is stored (must contain SNR_D1.bsq/SNR_D2.bsq)
         """
-        path_snr_model = os.path.join(dir_snr_models, "SNR_D1.hdr" if self.detector_name == 'VNIR' else "SNR_D2.hdr")
+        path_snr_model = os.path.join(dir_snr_models, "SNR_D1.bsq" if self.detector_name == 'VNIR' else "SNR_D2.bsq")
         rad_data = np.array(rad_data)
 
         assert self.unitcode == 'TOARad'
         self.logger.info("Computing SNR for %s using %s" % (self.detector_name, path_snr_model))
 
         if self.detector_name == 'VNIR':
-            gA = sp.open_image(path_snr_model)
-            coeffs_highgain = gA[0:3, :, :]
-            coeffs_lowgain = gA[3:6, :, :]
+            gA = GeoArray(path_snr_model)
+            coeffs_highgain = gA[0:3, :, :]  # [3 x ncols x nbands]
+            coeffs_lowgain = gA[3:6, :, :]  # [3 x ncols x nbands]
             gain_threshold = np.squeeze(gA[6, :, :])
 
             self.snr = np.zeros(rad_data.shape)
@@ -318,7 +317,17 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                     coeffs_lowgain[2, lowgain_mask] * rad_lowgain ** 2
 
         else:
-            coeffs = sp.open_image(path_snr_model)[:, :, :]
+            gA = GeoArray(path_snr_model)
+
+            # some SWIR bands may be missing -> find indices of bands we need for SNR computation
+            cwls_gA = gA.metadata.band_meta['wavelength']
+            cwls_needed = self.wvl_center
+
+            idxs_needed = [np.argmin(np.abs(cwls_gA - cwl)) for cwl in cwls_needed]
+            if not len(set(idxs_needed)) == len(idxs_needed) or len(idxs_needed) != self.nwvl:
+                raise RuntimeError('Unclear band allocation during SWIR SNR computation.')
+
+            coeffs = gA[:, :, idxs_needed]  # [3 x ncols x nbands]
             self.snr = coeffs[0, :, :] + coeffs[1, :, :] * rad_data[:, :, :] + coeffs[2, :, :] * rad_data[:, :, :] ** 2
 
     @staticmethod
@@ -421,7 +430,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_sun_zenith = None  # type: float  # sun zenith angle
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
         self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist = None  # type: float  # earth-sun distance # TODO doc correct?
+        self.earthSunDist = None  # type: float  # earth-sun distance
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']
@@ -454,7 +463,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             # read Geometry (observation/illumination) angle
             # NOTE: EnMAP metadata provide also the angles for the image corners
             #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
-            self.geom_view_zenith = np.float(0)  # FIXME use acrossOffNadirAngle and alongOffNadirAngle
+            # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
+            self.geom_view_zenith = np.float(xml.find("specific/acrossOffNadirAngle/center").text)
             # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
             self.geom_view_azimuth = np.float(xml.find("specific/sceneAzimuthAngle/center").text)
             self.geom_sun_zenith = 90 - np.float(xml.find("specific/sunElevationAngle/center").text)
