@@ -245,19 +245,21 @@ class RPC_Geolayer_Generator(object):
         if along_axis not in [0, 1]:
             raise ValueError(along_axis, "The 'axis' parameter must be set to 0 or 1")
 
-        pos_nan = np.argwhere(np.isnan(arr))
-        rows_nan, cols_nan = pos_nan[:, 0], pos_nan[:, 1]
         kw = dict(kind='linear', fill_value='extrapolate')
 
         if along_axis == 0:
             # extrapolate in top/bottom direction
-            for col in cols_nan:
+            cols_with_nan = np.arange(arr.shape[1])[~np.all(np.isnan(arr), axis=0)]
+
+            for col in cols_with_nan:  # FIXME iterating over columns is slow
                 data = arr[:, col]
                 idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
                 arr[:, col] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
         else:
             # extrapolate in left/right direction
-            for row in rows_nan:
+            rows_with_nan = np.arange(arr.shape[0])[~np.all(np.isnan(arr), axis=1)]
+
+            for row in rows_with_nan:  # FIXME iterating over rows is slow
                 data = arr[row, :]
                 idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
                 arr[row, :] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
@@ -315,6 +317,7 @@ class RPC_Geolayer_Generator(object):
         # lons_interp / lats_interp may contain NaN values in case xmin, ymin, xmax, ymax has been set too small
         # to account for RPC transformation errors
         # => fix that by extrapolation at NaN value positions
+
         lons_interp = self._fill_nans_at_corners(lons_interp, along_axis=1)  # extrapolate in left/right direction
         lats_interp = self._fill_nans_at_corners(lats_interp, along_axis=1)
 
@@ -390,20 +393,76 @@ class RPC_3D_Geolayer_Generator(object):
 
         band_inds = list(range(len(self.rpc_coeffs_per_band)))
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
-        args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
-                for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
 
-        with Pool(self.CPUs,
-                  initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
-                  initargs=(self.dem,)) as pool:
-            results = pool.starmap(self._compute_geolayer_for_band, args)
+        if self.CPUs > 1:
+            # multiprocessing
+            args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
+                    for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
 
-        for res in results:
-            band_lons, band_lats, band_idx = res
-            lons[:, :, band_idx] = band_lons
-            lats[:, :, band_idx] = band_lats
+            with Pool(self.CPUs,
+                      initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
+                      initargs=(self.dem,)) as pool:
+                results = pool.starmap(self._compute_geolayer_for_band, args)
+
+            for res in results:
+                band_lons, band_lats, band_idx = res
+                lons[:, :, band_idx] = band_lons
+                lats[:, :, band_idx] = band_lats
+
+        else:
+            # singleprocessing
+            global global_dem_sensorgeo
+            global_dem_sensorgeo = self.dem
+
+            for band_idx in band_inds:
+                lons[:, :, band_idx], lats[:, :, band_idx] = \
+                    self._compute_geolayer_for_band(rpc_coeffs=rpc_coeffs_list[band_idx],
+                                                    enmapIm_cornerCoords=self.enmapIm_cornerCoords,
+                                                    enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
+                                                    band_idx=band_idx)[:2]
 
         return lons, lats
+
+
+def compute_mapCoords_within_sensorGeoDims(rpc_coeffs: dict,
+                                           dem: Union[str, GeoArray],
+                                           enmapIm_cornerCoords: Tuple[Tuple[float, float]],
+                                           enmapIm_dims_sensorgeo: Tuple[int, int],
+                                           sensorgeoCoords_YX: List[Tuple[float, float]]
+                                           ) -> List[Tuple[float, float]]:
+    """
+
+    :param rpc_coeffs:
+    :param dem:                     digital elevation model in MAP geometry
+    :param enmapIm_cornerCoords:
+    :param enmapIm_dims_sensorgeo:  (rows, columns)
+    :param sensorgeoCoords_YX:
+    :return:
+    """
+    # compute coordinate array
+    RPCGG = RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
+                                   dem=dem,
+                                   enmapIm_cornerCoords=enmapIm_cornerCoords,  # order does not matter
+                                   enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo)
+    lons, lats = RPCGG.compute_geolayer()
+
+    # extract the new corner coordinated from the coordinate arrays computed via RPCs
+    rows, cols = enmapIm_dims_sensorgeo
+
+    ul, ur, ll, lr = enmapIm_cornerCoords
+
+    lonlats = []
+    for imYX in sensorgeoCoords_YX:
+        lonlat = \
+            ul if imYX == (0, 0) else \
+            ur if imYX == (0, cols - 1) else \
+            ll if imYX == (rows - 1, 0) else \
+            lr if imYX == (rows - 1, cols - 1) else \
+            (lons[imYX], lats[imYX])
+
+        lonlats.append(lonlat)
+
+    return lonlats
 
 
 def get_UTMEPSG_from_LonLat(lon: float, lat: float) -> int:

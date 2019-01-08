@@ -79,7 +79,18 @@ class L1B_Reader(object):
         #         - The dead pixel map will not change when acquiring 2 adjacent images.
         if root_dir_ext:
             l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir_ext, config=self.cfg, lon_lat_smpl=lon_lat_smpl)
-            l1b_main_obj.append_new_image(l1b_ext_obj, n_line_ext)
+            # TODO simplify redundant code
+            l1b_ext_obj.vnir.data = l1b_ext_obj.paths.vnir.data
+            l1b_ext_obj.vnir.mask_clouds = l1b_ext_obj.paths.vnir.mask_clouds
+            l1b_ext_obj.vnir.deadpixelmap = l1b_ext_obj.paths.vnir.deadpixelmap
+            l1b_ext_obj.swir.data = l1b_ext_obj.paths.swir.data
+            l1b_ext_obj.swir.mask_clouds = l1b_ext_obj.paths.swir.mask_clouds
+            l1b_ext_obj.DN2TOARadiance()
+            l1b_main_obj.swir.deadpixelmap = l1b_main_obj.paths.swir.deadpixelmap
+            l1b_main_obj.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
+            l1b_main_obj.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
+
+            # l1b_main_obj.append_new_image(l1b_ext_obj, n_line_ext)
 
         # compute SNR
         if compute_snr:
@@ -93,6 +104,15 @@ class L1B_Reader(object):
                 if l1b_main_obj.meta.swir.unitcode == 'TOARad':
                     l1b_main_obj.swir.detector_meta.calc_snr_from_radiance(rad_data=l1b_main_obj.swir.data,
                                                                            dir_snr_models=tmpDir)
+
+        # compute geolayer if not already done
+        if l1b_main_obj.meta.vnir.lons is None or l1b_main_obj.meta.vnir.lats is None:
+            l1b_main_obj.meta.vnir.lons, l1b_main_obj.meta.vnir.lats = \
+                l1b_main_obj.meta.vnir.compute_geolayer_for_cube()
+
+        if l1b_main_obj.meta.swir.lons is None or l1b_main_obj.meta.swir.lats is None:
+            l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
+                l1b_main_obj.meta.swir.compute_geolayer_for_cube()
 
         # Return the l1b_main_obj
         return l1b_main_obj

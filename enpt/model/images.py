@@ -21,6 +21,7 @@ from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_De
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
+from ..processors.spatial_transform  import compute_mapCoords_within_sensorGeoDims
 
 
 ################
@@ -341,7 +342,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
     def get_paths(self):
         """
         Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
-        These information are reading from the detector_meta
+        These information are read from the detector_meta.
         :return: paths as SimpleNamespace
         """
         paths = SimpleNamespace()
@@ -405,6 +406,105 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.dem = DP.dem
 
         return self.dem
+
+    def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
+        # TODO convert method to function (would allow correct typing of img2)
+        """
+        Check if a second image could pass with the first image.
+        In this version we assume that the image will be add below
+        If it is the case, the method will create temporary files that will be used in the following.
+
+        :param img2:
+        :param n_lines: number of line to be added
+        :return: None
+        """
+        if self.cfg.is_dlr_dataformat:
+            basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
+            basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
+        else:
+            basename_img1 = path.dirname(self.detector_meta.data_filename)
+            basename_img2 = path.dirname(img2.detector_meta.data_filename)
+
+        self.logger.info("Check new image for %s: %s " % (self.detector_name, basename_img2))
+
+        distance_min = 27.0
+        distance_max = 34.0
+
+        # check bottom left
+        x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[2], self.detector_meta.lon_UL_UR_LL_LR[2])
+        x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[0])
+        distance_left = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+        # check bottom right
+        x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[3], self.detector_meta.lon_UL_UR_LL_LR[3])
+        x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[1])
+        distance_right = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
+            self.logger.info("Append new image to %s: %s" % (self.detector_name, basename_img2))
+        else:
+            self.logger.warning("%s and %s don't fit to be appended." % (basename_img1, basename_img2))
+            return
+
+        # set new number of line
+        n_lines = n_lines or img2.detector_meta.nrows
+
+        if n_lines > img2.detector_meta.nrows:
+            self.logger.warning("n_lines (%s) exceeds the total number of line of second image" % n_lines)
+            self.logger.warning("Set to the image number of line")
+            n_lines = img2.detector_meta.nrows
+
+        if n_lines < 50:  # TODO: determine these values
+            self.logger.warning("A minimum of 50 lines is required, only %s were selected" % n_lines)
+            self.logger.warning("Set the number of line to 50")
+            n_lines = 50
+
+        self.detector_meta.nrows += n_lines
+
+        # Create new corner coordinate - VNIR
+        if self.cfg.is_dlr_dataformat:
+            enmapIm_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
+                                             img2.detector_meta.lat_UL_UR_LL_LR))
+            dem_validated = DEM_Processor(img2.cfg.path_dem,
+                                          enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+            LL, LR = compute_mapCoords_within_sensorGeoDims(
+                rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
+                dem=dem_validated,
+                enmapIm_cornerCoords=enmapIm_cornerCoords,
+                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols),
+                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
+                                    (n_lines - 1, img2.detector_meta.ncols - 1)]  # LR
+            )
+
+            self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
+            self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
+        else:
+            # lats
+            ff = interp2d(x=[0, 1],
+                          y=[0, 1],
+                          z=[[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[1]],
+                             [img2.detector_meta.lat_UL_UR_LL_LR[2], img2.detector_meta.lat_UL_UR_LL_LR[3]]],
+                          kind='linear')
+            self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            lon_lat_smpl = (15, 15)
+            self.detector_meta.lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR,
+                                                                             *lon_lat_smpl)
+            # lons
+            ff = interp2d(x=[0, 1],
+                          y=[0, 1],
+                          z=[[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[1]],
+                             [img2.detector_meta.lon_UL_UR_LL_LR[2], img2.detector_meta.lon_UL_UR_LL_LR[3]]],
+                          kind='linear')
+            self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
+                                                                             *lon_lat_smpl)
+
+        # append the raster data
+        self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
+        self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
+        # TODO append remaining raster layers
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.
@@ -712,124 +812,6 @@ class EnMAPL1Product_SensorGeo(object):
                 xml_file.write(ElementTree.tostring(xml, encoding='unicode'))
 
         return product_dir
-
-    def append_new_image(self, img2, n_lines: int = None) -> None:
-        """
-        Check if a second image could pass with the first image.
-        In this version we assume that the image will be add below
-        If it is the case, the method will create temporary files that will be used in the following.
-
-        :param img2:
-        :param n_lines: number of line to be added
-        :return: None
-        """
-        if self.cfg.is_dlr_dataformat:
-            basename_img1 = self.vnir.detector_meta.data_filename.split('-SPECTRAL_IMAGE_VNIR.GEOTIFF')[0]
-            basename_img2 = img2.vnir.detector_meta.data_filename.split('-SPECTRAL_IMAGE_VNIR.GEOTIFF')[0]
-        else:
-            basename_img1 = self.paths.root_dir
-            basename_img2 = img2.paths.root_dir
-
-        self.logger.info("Check new image %s" % basename_img2)
-
-        distance_min = 27.0
-        distance_max = 34.0
-        tag_vnir = False
-        tag_swir = False
-
-        # check vnir bottom left
-        x1, y1, _, _ = utm.from_latlon(self.meta.vnir.lat_UL_UR_LL_LR[2], self.meta.vnir.lon_UL_UR_LL_LR[2])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.vnir.lat_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[0])
-        distance_left = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        # check vnir bottom right
-        x1, y1, _, _ = utm.from_latlon(self.meta.vnir.lat_UL_UR_LL_LR[3], self.meta.vnir.lon_UL_UR_LL_LR[3])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.vnir.lat_UL_UR_LL_LR[1], img2.meta.vnir.lon_UL_UR_LL_LR[1])
-        distance_right = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
-            tag_vnir = True
-
-        # check swir bottom left
-        x1, y1, _, _ = utm.from_latlon(self.meta.swir.lat_UL_UR_LL_LR[2], self.meta.swir.lon_UL_UR_LL_LR[2])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.swir.lat_UL_UR_LL_LR[0], img2.meta.swir.lon_UL_UR_LL_LR[0])
-        distance_left = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        # check swir bottom right
-        x1, y1, _, _ = utm.from_latlon(self.meta.swir.lat_UL_UR_LL_LR[3], self.meta.swir.lon_UL_UR_LL_LR[3])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.swir.lat_UL_UR_LL_LR[1], img2.meta.swir.lon_UL_UR_LL_LR[1])
-        distance_right = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
-            tag_swir = True
-
-        if tag_vnir and tag_swir:
-            self.logger.info("Append new image: %s" % basename_img2)
-        else:
-            self.logger.warning("%s and %s don't fit to be appended" % (basename_img1, basename_img2))
-            return
-
-        # set new number of line
-        if n_lines is None:
-            n_lines = img2.meta.vnir.nrows
-
-        if n_lines > img2.meta.vnir.nrows:
-            self.logger.warning("n_lines (%s) exceeds the total number of line of second image" % n_lines)
-            self.logger.warning("Set to the image number of line")
-            n_lines = img2.meta.vnir.nrows
-
-        if n_lines < 50:  # TODO: determine these values
-            self.logger.warning("A minimum of 50 lines is required, only %s were selected" % n_lines)
-            self.logger.warning("Set the number of line to 50")
-            n_lines = 50
-
-        self.meta.vnir.nrows += n_lines
-
-        # Create new corner coordinate - VNIR
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lat_UL_UR_LL_LR[0], img2.meta.vnir.lat_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lat_UL_UR_LL_LR[2], img2.meta.vnir.lat_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.vnir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
-        lon_lat_smpl = (15, 15)
-        self.meta.vnir.lats = self.meta.vnir.interpolate_corners(*self.meta.vnir.lat_UL_UR_LL_LR, *lon_lat_smpl)
-
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.vnir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lons = self.meta.vnir.interpolate_corners(*self.meta.vnir.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-        # Create new corner coordinate - SWIR
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.swir.lat_UL_UR_LL_LR[0], img2.meta.swir.lat_UL_UR_LL_LR[1]],
-                                             [img2.meta.swir.lat_UL_UR_LL_LR[2], img2.meta.swir.lat_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.swir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
-        lon_lat_smpl = (15, 15)
-        self.meta.swir.lats = self.meta.swir.interpolate_corners(*self.meta.swir.lat_UL_UR_LL_LR, *lon_lat_smpl)
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.swir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lons = self.meta.swir.interpolate_corners(*self.meta.swir.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-        # append the vnir/swir image
-        img2.vnir.data = img2.paths.vnir.data
-        img2.vnir.data = img2.vnir.data[0:n_lines, :, :]
-        img2.swir.data = img2.paths.swir.data
-        img2.swir.data = img2.swir.data[0:n_lines, :, :]
-        img2.DN2TOARadiance()
-        self.vnir.data = np.append(self.vnir.data, img2.vnir.data, axis=0)
-        self.swir.data = np.append(self.swir.data, img2.swir.data, axis=0)
-
-        # append the mask cloud
-        self.vnir.mask_clouds = np.append(self.vnir.mask_clouds,
-                                          GeoArray(img2.paths.vnir.mask_clouds)[0:n_lines, :], axis=0)
-        self.swir.mask_clouds = np.append(self.swir.mask_clouds,
-                                          GeoArray(img2.paths.swir.mask_clouds)[0:n_lines, :], axis=0)
 
 
 ####################################

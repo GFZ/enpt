@@ -188,7 +188,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
             self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                               self.lat_UL_UR_LL_LR)), fix_invalid=True)
-            self.lons, self.lats = self.compute_geolayer_for_cube()
 
         else:
             lbl = self.detector_label
