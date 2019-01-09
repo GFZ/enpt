@@ -13,7 +13,11 @@ from py_tools_ds.geo.projection import EPSG2WKT, prj_equal
 
 from ...options.config import EnPTConfig
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
-from ..spatial_transform import Geometry_Transformer, move_extent_to_EnMAP_grid, get_UTMEPSG_from_LonLat_cornersXY
+from ..spatial_transform import \
+    Geometry_Transformer, \
+    Geometry_Transformer_3D, \
+    move_extent_to_EnMAP_grid, \
+    get_UTMEPSG_from_LonLat_cornersXY
 
 
 class Orthorectifier(object):
@@ -29,12 +33,12 @@ class Orthorectifier(object):
                                            "Received a '%s' instance." % type(enmap_ImageL1))
 
         # check geolayer shapes
-        datashape = enmap_ImageL1.vnir.data.shape
-        msg = 'Expected a %s ' + 'geolayer shape of %s or %s. ' % (str(datashape[:2]), str(datashape)) + 'Received %s.'
         for detector in [enmap_ImageL1.vnir, enmap_ImageL1.swir]:
             for XY in [detector.detector_meta.lons, detector.detector_meta.lats]:
+                datashape = detector.data.shape
                 if XY.shape not in [datashape, datashape[:2]]:
-                    raise RuntimeError(msg % (detector.detector_name, str(XY.shape)))
+                    raise RuntimeError('Expected a %s geolayer shape of %s or %s. Received %s.'
+                                       % (detector.detector_name, str(datashape), str(datashape[:2]), str(XY.shape)))
 
     def run_transformation(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL2Product_MapGeo:
         self.validate_input(enmap_ImageL1)
@@ -52,16 +56,19 @@ class Orthorectifier(object):
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
 
         # transform VNIR and SWIR to map geometry
-        GT_vnir = Geometry_Transformer(lons=enmap_ImageL1.vnir.detector_meta.lons,
-                                       lats=enmap_ImageL1.vnir.detector_meta.lats,
-                                       nprocs=self.cfg.CPUs)
+        GeoTransformer = \
+            Geometry_Transformer if enmap_ImageL1.vnir.detector_meta.lons.ndim == 2 else Geometry_Transformer_3D
+
+        GT_vnir = GeoTransformer(lons=enmap_ImageL1.vnir.detector_meta.lons,
+                                 lats=enmap_ImageL1.vnir.detector_meta.lats,
+                                 nprocs=self.cfg.CPUs)
         vnir_mapgeo, vnir_gt, vnir_prj = GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:],
                                                                  tgt_prj=tgt_epsg,
                                                                  tgt_extent=tgt_extent)
 
-        GT_swir = Geometry_Transformer(lons=enmap_ImageL1.swir.detector_meta.lons,
-                                       lats=enmap_ImageL1.swir.detector_meta.lats,
-                                       nprocs=self.cfg.CPUs)
+        GT_swir = GeoTransformer(lons=enmap_ImageL1.swir.detector_meta.lons,
+                                 lats=enmap_ImageL1.swir.detector_meta.lats,
+                                 nprocs=self.cfg.CPUs)
         swir_mapgeo, swir_gt, swir_prj = GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:],
                                                                  tgt_prj=tgt_epsg,
                                                                  tgt_extent=tgt_extent)
@@ -74,7 +81,8 @@ class Orthorectifier(object):
         # metadata adjustments #
         ########################
 
-        # TODO
+        # TODO ncols, nrows
+        # TODO add CWLs and FWHM, nodata value to L2_obj.data.metadata
 
         return L2_obj
 

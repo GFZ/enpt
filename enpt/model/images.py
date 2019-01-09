@@ -290,7 +290,7 @@ class _EnMAP_Image(object):
             elif dpm.ndim == 2 and dpm.shape != (self.data.bands, self.data.cols):
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with an array with the size "
                                  "'bands x columns' of the GeoArray _EnMAP_Image.arr. "
-                                 "Received %s." % str(dpm.shape))
+                                 "Received %s. Expected %s" % (str(dpm.shape), str((self.data.bands, self.data.cols))))
 
             self._deadpixelmap = dpm
         else:
@@ -510,7 +510,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
         self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
-        self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
+        if self.cfg.is_dlr_dataformat:
+            self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
         # TODO append remaining raster layers - additional cloud masks, ...
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a

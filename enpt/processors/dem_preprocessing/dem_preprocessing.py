@@ -39,7 +39,7 @@ class DEM_Processor(object):
         dem_ll_mapPoly = reproject_shapelyGeometry(self.dem.footprint_poly, prj_src=self.dem.epsg, prj_tgt=4326)
         enmapIm_ll_mapPoly = get_footprint_polygon(self.enmapIm_cornerCoords, fix_invalid=True)
         overlap_dict = get_overlap_polygon(dem_ll_mapPoly, enmapIm_ll_mapPoly)
-        overlap_perc = overlap_dict['overlap percentage']
+        overlap_perc = round(overlap_dict['overlap percentage'], 4)
 
         if overlap_perc < 100:
             # compute minimal extent in user provided projection
@@ -48,7 +48,7 @@ class DEM_Processor(object):
             ymin, ymax = cornersXY[:, 1].min(), cornersXY[:, 1].max()
 
             raise ValueError('The provided digital elevation model covers %.1f percent of the EnMAP image. It must '
-                             'cover it completely.The minimal needed extent in the provided projection is: \n'
+                             'cover it completely. The minimal needed extent in the provided projection is: \n'
                              'xmin: %s, xmax: %s, ymin: %s, ymax: %s.' % (overlap_perc, xmin, xmax, ymin, ymax))
 
     def fill_gaps(self):

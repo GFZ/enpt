@@ -8,8 +8,11 @@ import numpy as np
 from scipy.interpolate import griddata as interpolate_griddata, interp1d
 from geoarray import GeoArray
 
-from py_tools_ds.geo.raster.reproject import SensorMapGeometryTransformer, AreaDefinition
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, prj_equal, EPSG2WKT
+from py_tools_ds.geo.raster.reproject import \
+    SensorMapGeometryTransformer, \
+    SensorMapGeometryTransformer3D, \
+    AreaDefinition
+from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
@@ -51,6 +54,7 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
             if not tgt_prj:
                 raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
 
+            # compute target resolution and extent (according to EnMAP grid)
             proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
 
             if 'units' in proj4dict and proj4dict['units'] == 'm':
@@ -68,6 +72,58 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
             super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
                                                               tgt_extent=tgt_extent, tgt_res=tgt_res,
                                                               area_definition=self.area_definition)
+
+        return out_data, out_gt, out_prj
+
+
+class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
+    # use Sentinel-2 grid (30m grid with origin at 0/0)
+    # EnMAP geolayer contains pixel center coordinate
+
+    def to_sensor_geometry(self,
+                           path_or_geoarray_mapgeo: Union[str, GeoArray],
+                           src_prj: Union[str, int] = None,
+                           src_extent: Tuple[float, float, float, float] = None):
+        data_mapgeo = GeoArray(path_or_geoarray_mapgeo)
+
+        if not data_mapgeo.is_map_geo:
+            raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
+
+        return super(Geometry_Transformer_3D, self).to_sensor_geometry(
+            data_mapgeo[:],
+            src_prj=src_prj or data_mapgeo.prj,
+            src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
+
+    def to_map_geometry(self,
+                        path_or_geoarray_sensorgeo: Union[str, GeoArray],
+                        tgt_prj:  Union[str, int] = None,
+                        tgt_extent: Tuple[float, float, float, float] = None,
+                        tgt_res: Tuple[float, float] = None):
+        data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
+
+        if data_sensorgeo.is_map_geo:
+            raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
+
+        if not tgt_prj:
+            raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
+
+        # compute target resolution and extent (according to EnMAP grid)
+        proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
+
+        if 'units' in proj4dict and proj4dict['units'] == 'm':
+            if not tgt_res:
+                tgt_res = (np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['x']))
+
+            if not tgt_extent:
+                # use the extent computed by compute_output_shape and move it to the EnMAP coordinate grid
+                tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
+                common_extent = self._get_common_target_extent(tgt_epsg)
+
+                tgt_extent = move_extent_to_EnMAP_grid(tuple(common_extent))
+
+        out_data, out_gt, out_prj = \
+            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
+                                                                 tgt_extent=tgt_extent, tgt_res=tgt_res)
 
         return out_data, out_gt, out_prj
 

@@ -461,7 +461,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             # NOTE: EnMAP metadata provide also the angles for the image corners
             #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
             # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
-            self.geom_view_zenith = np.float(xml.find("specific/acrossOffNadirAngle/center").text)
+            # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
+            self.geom_view_zenith = np.abs(np.float(xml.find("specific/acrossOffNadirAngle/center").text))
             # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
             self.geom_view_azimuth = np.float(xml.find("specific/sceneAzimuthAngle/center").text)
             self.geom_sun_zenith = 90 - np.float(xml.find("specific/sunElevationAngle/center").text)
