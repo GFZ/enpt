@@ -1,7 +1,7 @@
 numpy
 scipy
 geoarray>=0.8.9
-py_tools_ds>=0.14.4
+py_tools_ds>=0.14.7
 cerberus
 jsmin
 matplotlib
