@@ -21,7 +21,7 @@ from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_De
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
-from ..processors.spatial_transform  import compute_mapCoords_within_sensorGeoDims
+from ..processors.spatial_transform import compute_mapCoords_within_sensorGeoDims
 
 
 ################
@@ -283,9 +283,14 @@ class _EnMAP_Image(object):
         if geoArr_initArgs[0] is not None:
             dpm = GeoArray(*geoArr_initArgs)
 
-            if dpm.shape != (self.data.bands, self.data.cols):
+            if dpm.ndim == 3 and dpm.shape != self.data.shape:
+                raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with a 3D array with the same size "
+                                 "like _EnMAP_Image.arr, i.e.: %s "
+                                 "Received %s." % (str(self.data.shape), str(dpm.shape)))
+            elif dpm.ndim == 2 and dpm.shape != (self.data.bands, self.data.cols):
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with an array with the size "
-                                 "'bands x columns' of the GeoArray _EnMAP_Image.arr. Got %s." % str(dpm.shape))
+                                 "'bands x columns' of the GeoArray _EnMAP_Image.arr. "
+                                 "Received %s." % str(dpm.shape))
 
             self._deadpixelmap = dpm
         else:
@@ -378,29 +383,30 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             DP = DEM_Processor(self.cfg.path_dem, enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
                                                                                  self.detector_meta.lat_UL_UR_LL_LR)),
                                CPUs=self.cfg.CPUs)
-            DP.fill_gaps()
+            DP.fill_gaps()  # FIXME this will also be needed at other places
 
             R, C = self.data.shape[:2]
             if DP.dem.is_map_geo:
-                # FIXME replace linear interpolation by native geolayers
                 lons = self.detector_meta.lons
                 lats = self.detector_meta.lats
 
-                msg = 'Unable to use the full 3D information of geolayers for transforming the DEM '\
-                      'to sensor geometry. Using first band of %s array.'
-                if self.detector_meta.lons.ndim > 2:
-                    self.logger.warning(msg % 'longitude')
+                if not (lons.ndim == 2 and lats.ndim == 2) and not (lons.ndim == 3 and lats.ndim == 3):
+                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be either 2- or 3-dimensional.')
+
+                msg_bandinfo = ''
+                if lons.ndim == 3:
                     lons = lons[:, :, 0]
-                if self.detector_meta.lats.ndim > 2:
-                    self.logger.warning(msg % 'latitude')
                     lats = lats[:, :, 0]
+                    msg_bandinfo = ' (using first band of %s geolayer)' % self.detector_name
+                else:
+                    # 2D geolayer
+                    # FIXME replace linear interpolation by native geolayers
+                    if lons.shape != self.data.shape:
+                        lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
+                    if lats.shape != self.data.shape:
+                        lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
 
-                if lons.shape != self.data.shape:
-                    lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
-                if lats.shape != self.data.shape:
-                    lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
-
-                self.logger.info(('Transforming %s DEM to sensor geometry...' % self.detector_name))
+                self.logger.info(('Transforming DEM to %s sensor geometry%s...' % (self.detector_name, msg_bandinfo)))
                 self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
             else:
                 self.dem = DP.dem
@@ -408,7 +414,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         return self.dem
 
     def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
-        # TODO convert method to function (would allow correct typing of img2)
+        # TODO convert method to function?
         """
         Check if a second image could pass with the first image.
         In this version we assume that the image will be add below
@@ -461,7 +467,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         self.detector_meta.nrows += n_lines
 
-        # Create new corner coordinate - VNIR
+        # Create new corner coordinate
         if self.cfg.is_dlr_dataformat:
             enmapIm_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                              img2.detector_meta.lat_UL_UR_LL_LR))

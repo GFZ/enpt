@@ -65,10 +65,16 @@ class L1B_Reader(object):
         # associate raster attributes with file links (raster data is read lazily / on demand)
         l1b_main_obj.vnir.data = l1b_main_obj.paths.vnir.data
         l1b_main_obj.vnir.mask_clouds = l1b_main_obj.paths.vnir.mask_clouds
-        l1b_main_obj.vnir.deadpixelmap = l1b_main_obj.paths.vnir.deadpixelmap
         l1b_main_obj.swir.data = l1b_main_obj.paths.swir.data
         l1b_main_obj.swir.mask_clouds = l1b_main_obj.paths.swir.mask_clouds
-        l1b_main_obj.swir.deadpixelmap = l1b_main_obj.paths.swir.deadpixelmap
+
+        try:  # FIXME remove as soon as DLR pixelmask is correct
+            l1b_main_obj.vnir.deadpixelmap = l1b_main_obj.paths.vnir.deadpixelmap
+            l1b_main_obj.swir.deadpixelmap = l1b_main_obj.paths.swir.deadpixelmap
+        except ValueError:
+            self.logger.warning("Unexpected dimensions of dead pixel mask: %s. Setting all pixels to 'normal'.")
+            l1b_main_obj.vnir.deadpixelmap = np.zeros(l1b_main_obj.vnir.data.shape)
+            l1b_main_obj.swir.deadpixelmap = np.zeros(l1b_main_obj.swir.data.shape)
 
         # compute radiance
         l1b_main_obj.DN2TOARadiance()
@@ -82,11 +88,18 @@ class L1B_Reader(object):
             # TODO simplify redundant code
             l1b_ext_obj.vnir.data = l1b_ext_obj.paths.vnir.data
             l1b_ext_obj.vnir.mask_clouds = l1b_ext_obj.paths.vnir.mask_clouds
-            l1b_ext_obj.vnir.deadpixelmap = l1b_ext_obj.paths.vnir.deadpixelmap
             l1b_ext_obj.swir.data = l1b_ext_obj.paths.swir.data
             l1b_ext_obj.swir.mask_clouds = l1b_ext_obj.paths.swir.mask_clouds
+
+            try:  # FIXME remove as soon as DLR pixelmask is correct
+                l1b_ext_obj.vnir.deadpixelmap = l1b_ext_obj.paths.vnir.deadpixelmap
+                l1b_ext_obj.swir.deadpixelmap = l1b_ext_obj.paths.swir.deadpixelmap
+            except ValueError:
+                self.logger.warning("Unexpected dimensions of dead pixel mask: %s. Setting all pixels to 'normal'.")
+                l1b_ext_obj.vnir.deadpixelmap = np.zeros(l1b_ext_obj.vnir.data.shape)
+                l1b_ext_obj.swir.deadpixelmap = np.zeros(l1b_ext_obj.swir.data.shape)
+
             l1b_ext_obj.DN2TOARadiance()
-            l1b_main_obj.swir.deadpixelmap = l1b_main_obj.paths.swir.deadpixelmap
             l1b_main_obj.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
             l1b_main_obj.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
 

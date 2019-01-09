@@ -22,7 +22,7 @@ class Dead_Pixel_Corrector(object):
                                     'spatial':  interpolate in the spatial domain
         :param interp:              interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')
         :param filter_halfwidth:    half width of interpolation filter
-                                    (determines the number of adjacant pixels to be respected in interpation)
+                                    (determines the number of adjacant pixels to be respected in interpolation)
         :param logger:
         """
         self.algorithm = algorithm
@@ -31,14 +31,25 @@ class Dead_Pixel_Corrector(object):
         self.logger = logger or logging.getLogger()
 
     @staticmethod
-    def _validate_inputs(image2correct: GeoArray, deadcolumn_map: GeoArray):
-        if (image2correct.bands, image2correct.columns) != deadcolumn_map.shape:
-            raise ValueError('The given image to be corrected (shape: %s) requires a dead column map with shape '
-                             '(%s, %s). Received %s.'
-                             % (image2correct.shape, image2correct.bands, image2correct.columns, deadcolumn_map.shape))
+    def _validate_inputs(image2correct: GeoArray, deadpixel_map: GeoArray):
+        if deadpixel_map.ndim == 2:
+            if (image2correct.bands, image2correct.columns) != deadpixel_map.shape:
+                raise ValueError('The given image to be corrected (shape: %s) requires a dead column map with shape '
+                                 '(%s, %s). Received %s.'
+                                 % (image2correct.shape, image2correct.bands,
+                                    image2correct.columns, deadpixel_map.shape))
+        elif deadpixel_map.ndim == 3:
+            if image2correct.shape != deadpixel_map.shape:
+                raise ValueError('The given image to be corrected (shape: %s) requires a dead pixel map with equal '
+                                 'shape. Received %s.' % (image2correct.shape, deadpixel_map.shape))
+        else:
+            raise ValueError('Unexpected number of dimensions of dead column map.')
 
-    def correct(self, image2correct: Union[np.ndarray, GeoArray], deadcolumn_map: Union[np.ndarray, GeoArray],
-                progress=False):
+    def _correct_using_2D_deadpixelmap(self,
+                                       image2correct: GeoArray,
+                                       deadcolumn_map: GeoArray,
+                                       progress=False):
+        # TODO speed this up
         """
 
         NOTE: dead columns in the first or the last band are unmodified.
@@ -48,11 +59,7 @@ class Dead_Pixel_Corrector(object):
         :param progress:        whether to show progress bars
         :return:
         """
-        image2correct = GeoArray(image2correct) if not isinstance(image2correct, GeoArray) else image2correct
-        deadcolumn_map = GeoArray(deadcolumn_map) if not isinstance(deadcolumn_map, GeoArray) else deadcolumn_map
-
-        # validate
-        self._validate_inputs(image2correct, deadcolumn_map)
+        assert deadcolumn_map.ndim == 2, "2D dead column map expected."
 
         #################
         # Interpolation #
@@ -61,7 +68,7 @@ class Dead_Pixel_Corrector(object):
         if self.algorithm == 'spectral':
             # set bands where no spectral interpolation is possible -> spatial interpolation
             band_nbrs_spatial_interp = \
-                list(range(self.fhw)) + list(range(image2correct.bands-1, image2correct.bands-self.fhw-1, -1))
+                list(range(self.fhw)) + list(range(image2correct.bands - 1, image2correct.bands - self.fhw - 1, -1))
 
             # spatial interpolation (fallback) #
             ####################################
@@ -108,7 +115,7 @@ class Dead_Pixel_Corrector(object):
                 else:
                     self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
 
-                    column_data_orig = image2correct[:, column, band-self.fhw:band+self.fhw+1]
+                    column_data_orig = image2correct[:, column, band - self.fhw:band + self.fhw + 1]
                     column_data_float = column_data_orig.astype(np.float)
                     column_data_float[:, self.fhw] = np.NaN
 
@@ -125,9 +132,36 @@ class Dead_Pixel_Corrector(object):
 
                     # copy corrected columns to image2correct
                     interp[np.isnan(interp)] = column_data_orig[np.isnan(interp)]
-                    image2correct[:, column, band-self.fhw:band+self.fhw+1] = interp.astype(image2correct.dtype)
+                    image2correct[:, column, band - self.fhw:band + self.fhw + 1] = interp.astype(image2correct.dtype)
 
         else:
             raise NotImplementedError("Currently only the algorithm 'spectral' is implemented.")
 
         return image2correct
+
+    def _correct_using_3D_deadpixelmap(self,
+                                       image2correct: GeoArray,
+                                       deadpixel_map: GeoArray,
+                                       progress=False):
+        # TODO implement that
+        assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
+
+        self.logger.warning('Dead pixel correction skipped. Currently a dead pixel correction based on a 3D dead pixel '
+                            'map has not been implemented.')
+        return image2correct
+
+    def correct(self, image2correct: Union[np.ndarray, GeoArray], deadpixel_map: Union[np.ndarray, GeoArray],
+                progress=False):
+        image2correct = GeoArray(image2correct) if not isinstance(image2correct, GeoArray) else image2correct
+
+        self._validate_inputs(image2correct, deadpixel_map)
+
+        if 1 in list(np.unique(deadpixel_map)):
+            if deadpixel_map.ndim == 2:
+                return self._correct_using_2D_deadpixelmap(image2correct, deadpixel_map, progress)
+            else:
+                return self._correct_using_3D_deadpixelmap(image2correct, deadpixel_map, progress)
+
+        else:
+            self.logger.info("Dead pixel correction skipped because dead pixel mask labels no pixels as 'defective'.")
+            return image2correct

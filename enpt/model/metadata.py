@@ -118,9 +118,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
 
             self.data_filename = xml.find("product/image/%s/name" % lbl).text
-            # FIXME no dead pixel mask included? QL_PIXELMASK_VNIR.GEOTIFF?
-            self.logger.warning('DLR test data provide no dead pixel map!')
-            self.dead_pixel_filename = None
+            self.dead_pixel_filename = fnmatch.filter(all_filenames, '*QL_PIXELMASK_%s.GEOTIFF' % self.detector_name)[0]
             self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
             # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES.GEOTIFF as combined product?
             #   - QL_QUALITY_CLOUD.GEOTIFF
