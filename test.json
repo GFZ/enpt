@@ -1,0 +1,253 @@
+{
+    "EnMAP": {
+        "solar_model": "Thullier2002",
+        "wvl_rsp_sampling": 1.0,
+        "buffer_dir": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor",
+        "keep_defaults_for": ["spr", "cwv"],
+        "default_values": {
+            "spr": 1020.0,
+            "coz": 400.0,
+            "cwv": 20.0,
+            "tmp": 0,
+            "tau_a": 0.2,
+            "ch4": 3.0,
+            "vza": 0.0,
+            "sza": 0.0,
+            "azi": 0.0},
+        "lon_lat_smpl": [10, 10],
+        "aerosol_model": "aerosol_0",
+        "aerosol_default": "aerosol_0",
+        "scene_detection_flags_to_process": [
+            0.0
+        ],
+        "use_only_rtfo": [
+            "aerosol_0",
+            "ch4"
+        ]
+    },
+    "ECMWF": {
+        "mapping": {
+            "tau_a": "fc_total_AOT_550nm",
+            "coz": "fc_O3",
+            "cwv": "fc_TCWV",
+            "spr": "fc_SLP"
+        },
+        "conversion": {
+            "tau_a": 1.0,
+            "coz": 71524.3,
+            "cwv": 1.0,
+            "spr": 0.01
+        },
+        "path_db": "./ecmwf",
+        "target_resolution": 20.0,
+        "max_delta_day": 10,
+        "variables_aerosol": [
+            "fc_total_AOT_550nm",
+            "fc_sulphate_AOT_550nm",
+            "fc_black_carbon_AOT_550nm",
+            "fc_dust_AOT_550nm",
+            "fc_organic_matter_AOT_550nm",
+            "fc_sea_salt_AOT_550nm"
+        ],
+        "var2type": {
+            "fc_organic_matter_AOT_550nm": "aerosol_2",
+            "fc_sulphate_AOT_550nm": "aerosol_2",
+            "fc_sea_salt_AOT_550nm": "aerosol_1",
+            "fc_black_carbon_AOT_550nm": "aerosol_0",
+            "fc_dust_AOT_550nm": "aerosol_3"
+        }
+    },
+    "RTFO": {
+        "aerosol_1": {
+            "flag": 10,
+            "table_path": "/table_aerosol/type_1",
+            "dim_scat": [
+                "tau_a"
+            ],
+            "atm_tables_fn": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/linear_atm_functions_ncwv_5_npre_4_ncoz_2_ntmp_2_wvl_350.0_2550.0_1.00_pca.h5",
+            "dim_atm": [
+                "spr",
+                "coz",
+                "cwv",
+                "tmp"
+            ],
+            "only_toa": "true",
+            "hash_formats": {
+                "spr": "%.0f",
+                "coz": "%.0f,",
+                "cwv": "%.0f,",
+                "tmp": "%0f,",
+                "tau_a": "%.2f,",
+                "vza": "%.0f,"
+            }
+        },
+        "aerosol_0": {
+            "flag": 10,
+            "table_path": "/table_aerosol/type_0",
+            "dim_scat": [
+                "tau_a"
+            ],
+            "atm_tables_fn": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/linear_atm_functions_ncwv_5_npre_4_ncoz_2_ntmp_2_wvl_350.0_2550.0_1.00_pca.h5",
+            "dim_atm": [
+                "spr",
+                "coz",
+                "cwv",
+                "tmp"
+            ],
+            "only_toa": "true",
+            "hash_formats": {
+                "spr": "%.0f",
+                "coz": "%.0f,",
+                "cwv": "%.0f,",
+                "tmp": "%0f,",
+                "tau_a": "%.2f,",
+                "vza": "%.0f,"
+            }
+        },
+        "aerosol_2": {
+            "flag": 10,
+            "table_path": "/table_aerosol/type_2",
+            "dim_scat": [
+                "tau_a"
+            ],
+            "atm_tables_fn": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/linear_atm_functions_ncwv_5_npre_4_ncoz_2_ntmp_2_wvl_350.0_2550.0_1.00_pca.h5",
+            "dim_atm": [
+                "spr",
+                "coz",
+                "cwv",
+                "tmp"
+            ],
+            "only_toa": "true",
+            "hash_formats": {
+                "spr": "%.0f",
+                "coz": "%.0f,",
+                "cwv": "%.0f,",
+                "tmp": "%0f,",
+                "tau_a": "%.2f,",
+                "vza": "%.0f,"
+            }
+        },
+        "aerosol_3": {
+            "flag": 10,
+            "table_path": "/table_aerosol/type_3",
+            "dim_scat": [
+                "tau_a"
+            ],
+            "atm_tables_fn": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/linear_atm_functions_ncwv_5_npre_4_ncoz_2_ntmp_2_wvl_350.0_2550.0_1.00_pca.h5",
+            "dim_atm": [
+                "spr",
+                "coz",
+                "cwv",
+                "tmp"
+            ],
+            "only_toa": "true",
+            "hash_formats": {
+                "spr": "%.0f",
+                "coz": "%.0f,",
+                "cwv": "%.0f,",
+                "tmp": "%0f,",
+                "tau_a": "%.2f,",
+                "vza": "%.0f,"
+            }
+        },
+        "ch4": {
+            "atm_tables_fn": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/linear_atm_functions_ncwv_4_npre_2_ncoz_2_ntmp_1_nch4_4_wvl_350.0_2550.0_1.00_pca.h5",
+            "dim_atm": ["spr", "coz", "cwv", "ch4"],
+            "dim_scat": [
+                "tau_a"
+            ],
+            "flag": 10,
+            "only_toa": "true",
+            "table_path": "/table_aerosol/type_0_tmp_0",
+            "hash_formats": {
+                "spr": "%.0f",
+                "coz": "%.0f,",
+                "cwv": "%.0f,",
+                "tmp": "%0f,",
+                "tau_a": "%.2f,",
+                "vza": "%.0f,"
+            }
+        }
+    },
+    "output": [
+        {
+            "type": "none"
+        }
+    ],
+    "cld_mask": {
+        "target_resolution": 20.0,
+        "nodata_value_mask": 255,
+        "persistence_file": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/cld_mask_S2_classi_20170412_v20170412_11:43:14.h5",
+        "processing_tiles": 4,
+        "novelty_detector": "/home/gfz-fe/scheffler/python_deployed/sicor/sicor/tables/noclear_novelty_detector_channel2_difference9_0_index10_1_channel12_index1_8.retrain.pkl",
+        "majority_mask_filter": [
+            {"block_replace": "true", "block_replace_params": [[60, 2]], "majority_width": 0},
+            {"block_replace": "true", "block_replace_params": [[50, 3]], "majority_width": 0},
+            {"block_replace": "true", "block_replace_params": [[50, 10], [30, 10]], "majority_width": 10}
+        ]
+    },
+    "processing": {
+        "Exception": "None",
+        "interface": {
+            "args": [],
+            "kwargs": {}
+        },
+        "Exception_type": "",
+        "clear_fraction": "None",
+        "status": 1,
+        "tIO": 0.0,
+        "tRT": 0.0,
+        "uncertainties": {}
+    },
+    "settings": {
+        "fo_instances": {
+            "aerosol_0": {
+                "flag": 10
+            },
+            "ch4": {
+                "flag": 10
+            }
+        },
+        "atm_fields": [
+            "tmp",
+            "tau_a",
+            "cwv",
+            "ch4",
+            "coz",
+            "spr"
+        ],
+        "pt_names": [
+            "spr",
+            "coz",
+            "cwv",
+            "tmp",
+            "tau_a",
+            "vza",
+            "sza",
+            "azi",
+            "ch4"
+        ],
+        "pt_indexes": {
+            "aerosol_0": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+            ],
+            "ch4": [
+                0,
+                1,
+                2,
+                8,
+                4,
+                5,
+                6,
+                7
+            ]
+        }
+    }
+}

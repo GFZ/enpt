@@ -112,7 +112,7 @@ class Test_L1B_Reader(unittest.TestCase):
         print("")
 
         for k_prod1, k_prod2 in ((0, 1), (1, 0)):
-            for n_lines in (-1, 10, 50, 80, 100, 150):
+            for n_lines in (-1, 10, 50, 80, 100, 150):  # TODO isolate the test for different number of lines
                 tempdir = tempfile.mkdtemp(dir=self.config.working_dir)
                 if n_lines is -1:
                     n_lines = "all"

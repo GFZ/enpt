@@ -428,8 +428,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
             basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
         else:
-            basename_img1 = path.dirname(self.detector_meta.data_filename)
-            basename_img2 = path.dirname(img2.detector_meta.data_filename)
+            basename_img1 = path.basename(self._root_dir)
+            basename_img2 = path.basename(img2._root_dir)
 
         self.logger.info("Check new image for %s: %s " % (self.detector_name, basename_img2))
 
