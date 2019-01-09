@@ -510,7 +510,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
         self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
-        # TODO append remaining raster layers
+        self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
+        # TODO append remaining raster layers - additional cloud masks, ...
+
+        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
+        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.

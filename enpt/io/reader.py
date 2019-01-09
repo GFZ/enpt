@@ -76,6 +76,9 @@ class L1B_Reader(object):
             l1b_main_obj.vnir.deadpixelmap = np.zeros(l1b_main_obj.vnir.data.shape)
             l1b_main_obj.swir.deadpixelmap = np.zeros(l1b_main_obj.swir.data.shape)
 
+        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
+        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
+
         # compute radiance
         l1b_main_obj.DN2TOARadiance()
 
