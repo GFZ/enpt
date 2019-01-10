@@ -41,16 +41,12 @@ class L1B_Reader(object):
                        root_dir_main,
                        root_dir_ext: str = None,
                        n_line_ext: int = None,
-                       lon_lat_smpl: tuple = (15, 15),
                        compute_snr: bool = True):
-        # All information are read from data itself now
-        # In case of multiple files, temporary files are created to store them.
         """
         Read L1B EnMAP data. Extend the image by adding a second image [entire, partial]
         :param root_dir_main: Root directory of the main EnMAP Level-1B product
         :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product [optional]
         :param n_line_ext:    Number of lines to be added to the main image [if None, use the whole image]
-        :param lon_lat_smpl:  number of sampling points in lon, lat fields
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
         """
@@ -59,8 +55,7 @@ class L1B_Reader(object):
         self.logger.info("Reading Input Data")
 
         # Get a new instance of the EnMAPL1Product_SensorGeo for the main image
-        l1b_main_obj = EnMAPL1Product_SensorGeo(root_dir_main, config=self.cfg, logger=self.logger,
-                                                lon_lat_smpl=lon_lat_smpl)
+        l1b_main_obj = EnMAPL1Product_SensorGeo(root_dir_main, config=self.cfg, logger=self.logger)
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
         l1b_main_obj.vnir.data = l1b_main_obj.paths.vnir.data
@@ -87,7 +82,7 @@ class L1B_Reader(object):
         # NOTE: We do the following hypothesis:
         #         - The dead pixel map will not change when acquiring 2 adjacent images.
         if root_dir_ext:
-            l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir_ext, config=self.cfg, lon_lat_smpl=lon_lat_smpl)
+            l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir_ext, config=self.cfg)
             # TODO simplify redundant code
             l1b_ext_obj.vnir.data = l1b_ext_obj.paths.vnir.data
             l1b_ext_obj.vnir.mask_clouds = l1b_ext_obj.paths.vnir.mask_clouds

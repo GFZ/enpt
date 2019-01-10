@@ -28,7 +28,6 @@ class Test_Orthorectifier(TestCase):
             zf.extractall(td)
             self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
                 root_dir_main=os.path.join(td, os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0]),
-                lon_lat_smpl=(1000, 100),
                 compute_snr=False)
 
     def test_run_transformation(self):

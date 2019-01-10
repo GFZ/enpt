@@ -74,6 +74,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.data_filename = None  # type: str # detector data filename
         self.dead_pixel_filename = None  # type: str # filename of the dead pixel file
         self.quicklook_filename = None  # type: str # filename of the quicklook file
+        # FIXME cloud mask of BOTH detectors
         self.cloud_mask_filename = None  # type: str # filename of the cloud mask file
 
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
@@ -101,12 +102,11 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.preview_bands = None
         self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
 
-    # On this new version of read_data, we don't need anymore nsmile_coef (will be read from xml file)
-    def read_metadata(self, path_xml, lon_lat_smpl):
+    def read_metadata(self, path_xml):
         """
         Read the meadata of a specific EnMAP detector in sensor geometry
+
         :param path_xml: file path of the metadata file
-        :param lon_lat_smpl:  number if sampling in lon, lat fields
         :return: None
         """
         xml = ElementTree.parse(path_xml).getroot()
@@ -250,8 +250,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
             self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
                                                     fix_invalid=True)
-            self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, *lon_lat_smpl)
-            self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, *lon_lat_smpl)
+            self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
+            self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -506,10 +506,10 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         return float(EA_dist_dict[acqDate.strftime('%Y-%m-%d')])
 
-    def read_metadata(self, lon_lat_smpl):
+    def read_metadata(self):
         """
         Read the metadata of the entire EnMAP L1B product in sensor geometry
-        :param lon_lat_smpl:  number if sampling point in lon, lat fields
+
         :return: None
         """
 
@@ -518,11 +518,11 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # define and read the VNIR metadata
         self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
-        self.vnir.read_metadata(self._path_xml, lon_lat_smpl)
+        self.vnir.read_metadata(self._path_xml)
 
         # define and read the SWIR metadata
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
-        self.swir.read_metadata(self._path_xml, lon_lat_smpl)
+        self.swir.read_metadata(self._path_xml)
 
 
 class EnMAP_Metadata_L2A_MapGeo(object):
@@ -553,6 +553,10 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.earthSunDist = meta_l1b.earthSunDist  # type: float  # earth-sun distance
 
         # generate file names for L2A output
+        if self.cfg.is_dlr_dataformat:
+            self.scene_basename = meta_l1b.vnir.data_filename.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
+        else:
+            self.scene_basename = os.path.splitext(meta_l1b.vnir.data_filename)[0]
         self.data_filename = meta_l1b.vnir.data_filename.replace('L1B-', 'L2A-').replace('_VNIR', '')
         self.dead_pixel_filename_vnir = meta_l1b.vnir.dead_pixel_filename.replace('L1B-', 'L2A-')
         self.dead_pixel_filename_swir = meta_l1b.swir.dead_pixel_filename.replace('L1B-', 'L2A-')
@@ -580,10 +584,14 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.nsmile_coef = meta_l1b.vnir.nsmile_coef
         self.smile_coef = np.vstack([meta_l1b.vnir.smile_coef, meta_l1b.swir.smile_coef])[bandidx_order, :]
         self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
-        self.rpc_coeffs = OrderedDict(zip(
-            ['band_%d' % (i + 1) for i in range(218)],
-            [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
-             meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
+
+        if self.cfg.is_dlr_dataformat:
+            self.rpc_coeffs = OrderedDict(zip(
+                ['band_%d' % (i + 1) for i in range(218)],
+                [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
+                 meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
+        else:
+            self.rpc_coeffs = OrderedDict()
 
         self.nrows = dims_mapgeo[0]
         self.ncols = dims_mapgeo[1]

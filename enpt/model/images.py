@@ -3,6 +3,7 @@
 
 import logging
 from types import SimpleNamespace
+from typing import Tuple  # noqa: F401
 import numpy as np
 from os import path, makedirs
 from xml.etree import ElementTree
@@ -19,9 +20,9 @@ from ..utils.logging import EnPT_Logger
 from ..model.metadata import \
     EnMAP_Metadata_L1B_SensorGeo, \
     EnMAP_Metadata_L1B_Detector_SensorGeo, \
-    EnMAP_Metadata_L2A_MapGeo, \
     L1B_product_props, \
     L1B_product_props_DLR
+from ..model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
@@ -304,6 +305,26 @@ class _EnMAP_Image(object):
     def deadpixelmap(self):
         self._deadpixelmap = None
 
+    def generate_quicklook(self, bands2use: Tuple[int, int, int]) -> GeoArray:
+        """
+        Generate image quicklook and save into a file
+
+        :param bands2use:   (red, green, blue) band indices of self.data to be used for quicklook image, e.g., (3, 2, 1)
+        :return: GeoArray
+        """
+        p2 = np.percentile(self.data[:, :, bands2use[0]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[0]], 98)
+        red_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[0]], (p2, p98))
+        p2 = np.percentile(self.data[:, :, bands2use[1]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[1]], 98)
+        green_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[1]], (p2, p98))
+        p2 = np.percentile(self.data[:, :, bands2use[2]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[2]], 98)
+        blue_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[2]], (p2, p98))
+        pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
+        pix = np.uint8(pix * 255)
+
+        return GeoArray(pix)
 
 #######################################
 # EnPT EnMAP objects in sensor geometry
@@ -497,9 +518,9 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                           kind='linear')
             self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
             self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
-            lon_lat_smpl = (15, 15)
             self.detector_meta.lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR,
-                                                                             *lon_lat_smpl)
+                                                                             self.detector_meta.ncols,
+                                                                             self.detector_meta.nrows)
             # lons
             ff = interp2d(x=[0, 1],
                           y=[0, 1],
@@ -509,7 +530,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
             self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
             self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
-                                                                             *lon_lat_smpl)
+                                                                             self.detector_meta.ncols,
+                                                                             self.detector_meta.nrows)
 
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
@@ -565,25 +587,6 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     code=self.detector_meta.unitcode)
             )
 
-    def generate_quicklook(self) -> GeoArray:
-        """
-        Generate image quicklook and save into a file
-        :return: GeoArray
-        """
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 98)
-        red_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[0]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[1]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[1]], 98)
-        green_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[1]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[2]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[2]], 98)
-        blue_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[2]], (p2, p98))
-        pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
-        pix = np.uint8(pix * 255)
-
-        return GeoArray(pix)
-
 
 class EnMAPL1Product_SensorGeo(object):
     """Class for EnPT EnMAP object in sensor geometry.
@@ -604,10 +607,11 @@ class EnMAPL1Product_SensorGeo(object):
 
     """
 
-    def __init__(self, root_dir: str, config: EnPTConfig, logger=None, lon_lat_smpl=None):
+    def __init__(self, root_dir: str, config: EnPTConfig, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.
 
         :param root_dir:    Root directory of EnMAP Level-1B product
+        :param config:      EnPT configuration object
         :param logger:      None or logging instance to be appended to EnMAPL1Product_SensorGeo instance
                             (If None, a default EnPT_Logger is used).
         """
@@ -626,7 +630,7 @@ class EnMAPL1Product_SensorGeo(object):
         else:
             self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
                                                      config=self.cfg, logger=self.logger)
-        self.meta.read_metadata(lon_lat_smpl)
+        self.meta.read_metadata()
 
         # define VNIR and SWIR detector
         self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
@@ -791,7 +795,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger.warning('Could not save VNIR dead pixel map because there is no corresponding attribute.')
 
         # FIXME we could also write the quicklook included in DLR L1B format
-        self.vnir.generate_quicklook() \
+        self.vnir.generate_quicklook(bands2use=self.vnir.detector_meta.preview_bands) \
             .save(path.join(product_dir, path.basename(self.meta.vnir.quicklook_filename) + '.png'), fmt='PNG')
 
         # write the SWIR
@@ -801,7 +805,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
         else:
             self.logger.warning('Could not save SWIR dead pixel map because there is no corresponding attribute.')
-        self.swir.generate_quicklook() \
+        self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
             .save(path.join(product_dir, path.basename(self.meta.swir.quicklook_filename) + '.png'), fmt='PNG')
 
         # Update the xml file
@@ -931,6 +935,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
             self.logger = logger
 
         self.meta = None  # type: EnMAP_Metadata_L2A_MapGeo
+        self.paths = None  # type: SimpleNamespace
 
         super(EnMAPL2Product_MapGeo, self).__init__()
 
@@ -993,6 +998,33 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         return L2_obj
 
+    def get_paths(self, l2a_outdir: str):
+        """
+        Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
+        These information are read from the detector_meta.
+
+        :param l2a_outdir:  output directory of EnMAP Level-2A dataset
+        :return: paths as SimpleNamespace
+        """
+        paths = SimpleNamespace()
+        paths.root_dir = l2a_outdir
+
+        # TODO
+        # paths.metaxml = self.meta.
+        # if self.cfg.is_dlr_dataformat:
+        #     paths.metaxml = glob(path.join(root_dir, "*METADATA.XML"))[0]
+        # else:
+        #     paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
+
+        paths.data = path.join(l2a_outdir, self.meta.data_filename)
+        paths.mask_clouds = path.join(l2a_outdir, self.meta.cloud_mask_filename)
+        paths.deadpixelmap_vnir = path.join(l2a_outdir, self.meta.dead_pixel_filename_vnir)
+        paths.deadpixelmap_swir = path.join(l2a_outdir, self.meta.dead_pixel_filename_swir)
+        paths.quicklook_vnir = path.join(l2a_outdir, self.meta.quicklook_filename_vnir)
+        paths.quicklook_swir = path.join(l2a_outdir, self.meta.quicklook_filename_swir)
+
+        return paths
+
     def save(self, outdir: str, suffix="") -> str:
         """
         Save the product to disk using almost the same input format
@@ -1000,14 +1032,30 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         :param suffix: suffix to be appended to the output filename (???)
         :return: root path (root directory) where products were written
         """
-        product_dir = path.join(
-            path.abspath(outdir), "{name}{suffix}".format(
-                name=[ff for ff in self.paths.root_dir.split(path.sep) if ff != ''][-1],
-                suffix=suffix)
-        )
+        # TODO optionally add more output formats
+        product_dir = path.join(path.abspath(outdir),
+                                "{name}{suffix}".format(name=self.meta.scene_basename, suffix=suffix))
+
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
-        raise NotImplementedError()  # TODO implement save method for L2A data
+        # save raster data
+        kwargs_save = dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"])
+        self.data.save(path.join(product_dir, self.meta.data_filename), **kwargs_save)
+        self.mask_clouds.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
+
+        # TODO VNIR and SWIR
+        # self.deadpixelmap.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
+        self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
+
+        self.generate_quicklook(bands2use=self.meta.preview_bands_vnir)\
+            .save(path.join(product_dir, self.meta.quicklook_filename_vnir), **kwargs_save)
+        self.generate_quicklook(bands2use=self.meta.preview_bands_swir)\
+            .save(path.join(product_dir, self.meta.quicklook_filename_swir), **kwargs_save)
+
+        # TODO remove GDAL's *.aux.xml files?
+
+        # save metadata
+        self.logger.warning('Currently, L2A metadata cannot be saved yet.')
 
         return product_dir
