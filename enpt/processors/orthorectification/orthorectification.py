@@ -52,21 +52,22 @@ class Orthorectifier(object):
         # geometric transformations #
         #############################
 
-        lons, lats = enmap_ImageL1.vnir.detector_meta.lons, enmap_ImageL1.vnir.detector_meta.lats
+        lons_vnir, lats_vnir = enmap_ImageL1.vnir.detector_meta.lons, enmap_ImageL1.vnir.detector_meta.lats
+        lons_swir, lats_swir = enmap_ImageL1.swir.detector_meta.lons, enmap_ImageL1.swir.detector_meta.lats
 
         # get target UTM zone and common extent  # TODO add optionally user defined UTM zone?
         tgt_epsg = self._get_tgt_UTMepsg(enmap_ImageL1)
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
 
         # transform VNIR and SWIR to map geometry
-        GeoTransformer = Geometry_Transformer if lons.ndim == 2 else Geometry_Transformer_3D
+        GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
 
-        GT_vnir = GeoTransformer(lons=lons, lats=lats, nprocs=self.cfg.CPUs)
+        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, nprocs=self.cfg.CPUs)
         vnir_mapgeo, vnir_gt, vnir_prj = GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:],
                                                                  tgt_prj=tgt_epsg,
                                                                  tgt_extent=tgt_extent)
 
-        GT_swir = GeoTransformer(lons=lons, lats=lats, nprocs=self.cfg.CPUs)
+        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, nprocs=self.cfg.CPUs)
         swir_mapgeo, swir_gt, swir_prj = GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:],
                                                                  tgt_prj=tgt_epsg,
                                                                  tgt_extent=tgt_extent)
@@ -76,8 +77,8 @@ class Orthorectifier(object):
                                                 enmap_ImageL1.meta.vnir.wvl_center, enmap_ImageL1.meta.swir.wvl_center)
 
         # TODO allow to set geolayer band to be used for warping of 2D arrays
-        GT_2D = Geometry_Transformer(lons=lons if lons.ndim == 2 else lons[:, :, 0],
-                                     lats=lats if lats.ndim == 2 else lats[:, :, 0],
+        GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
+                                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
                                      nprocs=self.cfg.CPUs)
 
         # FIXME cloud mask applies to BOTH detectors
@@ -154,6 +155,6 @@ class Orthorectifier(object):
         # stack bands ordered by wavelengths
         data_stacked = np.dstack([vnir_data, swir_data])[:, :, bandidx_order]
 
-        # TODO implement correct for VNIR/SWIR spectral jump
+        # TODO implement correction for VNIR/SWIR spectral jump
 
         return GeoArray(data_stacked, geotransform=vnir_gt, projection=vnir_prj)

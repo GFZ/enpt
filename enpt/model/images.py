@@ -377,11 +377,6 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
-        if self.cfg.is_dlr_dataformat:
-            paths.metaxml = glob(path.join(self._root_dir, "*METADATA.XML"))[0]
-        else:
-            paths.metaxml = glob(path.join(self._root_dir, "*_header.xml"))[0]
-
         paths.data = path.join(self._root_dir, self.detector_meta.data_filename)
 
         paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename) \
@@ -390,6 +385,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             if self.detector_meta.dead_pixel_filename else None
 
         paths.quicklook = path.join(self._root_dir, self.detector_meta.quicklook_filename)
+
         return paths
 
     def correct_dead_pixels(self):
@@ -637,28 +633,21 @@ class EnMAPL1Product_SensorGeo(object):
         self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
 
         # Get the paths according information delivered in the metadata
-        self.paths = self.get_paths(root_dir)
+        self.paths = self.get_paths()
 
         self.detector_attrNames = ['vnir', 'swir']
 
-    def get_paths(self, root_dir):
+    def get_paths(self):
         """
         Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo
-        :param root_dir: directory where the data are located
+
         :return: paths.SimpleNamespace()
         """
-        if self.cfg.is_dlr_dataformat:
-            paths = SimpleNamespace()
-            paths.vnir = self.vnir.get_paths()
-            paths.swir = self.swir.get_paths()
-            paths.root_dir = root_dir
-            paths.metaxml = glob(path.join(root_dir, "*METADATA.XML"))[0]
-        else:
-            paths = SimpleNamespace()
-            paths.vnir = self.vnir.get_paths()
-            paths.swir = self.swir.get_paths()
-            paths.root_dir = root_dir
-            paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
+        paths = SimpleNamespace()
+        paths.vnir = self.vnir.get_paths()
+        paths.swir = self.swir.get_paths()
+        paths.metaxml = self.meta.path_xml
+
         return paths
 
     @property
@@ -768,11 +757,11 @@ class EnMAPL1Product_SensorGeo(object):
         AC = AtmosphericCorrector(config=self.cfg)
         AC.run_ac(self)
 
-    # Define a new save to take into account the fact that 2 images might be appended
-    # Here we save the radiance and not DN (otherwise there will be a problem with the concatened images)
     def save(self, outdir: str, suffix="") -> str:
-        """
-        Save the product to disk using almost the same input format
+        """Save the product to disk using almost the same input format.
+
+        NOTE: Radiance is saved instead of DNs to avoid a radiometric jump between concatenated images.
+
         :param outdir: path to the output directory
         :param suffix: suffix to be appended to the output filename (???)
         :return: root path (root directory) where products were written
@@ -785,7 +774,6 @@ class EnMAPL1Product_SensorGeo(object):
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
-        # We can hardcode the detectors (?)
         # write the VNIR
         self.vnir.data.save(product_dir + path.sep + self.meta.vnir.data_filename, fmt="ENVI")
         self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.cloud_mask_filename, fmt="GTiff")
@@ -809,26 +797,11 @@ class EnMAPL1Product_SensorGeo(object):
             .save(path.join(product_dir, path.basename(self.meta.swir.quicklook_filename) + '.png'), fmt='PNG')
 
         # Update the xml file
-        if self.cfg.is_dlr_dataformat:
-            xml = ElementTree.parse(self.paths.metaxml).getroot()
-            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.meta.vnir, self.meta.swir]):
-                lbl = L1B_product_props_DLR['xml_detector_label'][detName]
-                xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
-                xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
-                xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
-                xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+        metadata_string = self.meta.to_XML()
+        with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
+            xml_file.write(metadata_string)
 
-            with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
-                xml_file.write(ElementTree.tostring(xml, encoding='unicode'))
-        else:
-            xml = ElementTree.parse(self.paths.metaxml).getroot()
-            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.meta.vnir, self.meta.swir]):
-                lbl = L1B_product_props['xml_detector_label'][detName]
-                xml.find("ProductComponent/%s/Data/Size/NRows" % lbl).text = str(detMeta.nrows)
-                xml.find("ProductComponent/%s/Data/Type/UnitCode" % lbl).text = detMeta.unitcode
-                xml.find("ProductComponent/%s/Data/Type/Unit" % lbl).text = detMeta.unit
-            with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
-                xml_file.write(ElementTree.tostring(xml, encoding='unicode'))
+        self.logger.info("L1B product successfully written!")
 
         return product_dir
 
@@ -1008,14 +981,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         """
         paths = SimpleNamespace()
         paths.root_dir = l2a_outdir
-
-        # TODO
-        # paths.metaxml = self.meta.
-        # if self.cfg.is_dlr_dataformat:
-        #     paths.metaxml = glob(path.join(root_dir, "*METADATA.XML"))[0]
-        # else:
-        #     paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
-
+        paths.metaxml = path.join(l2a_outdir, self.meta.metaxml_filename)
         paths.data = path.join(l2a_outdir, self.meta.data_filename)
         paths.mask_clouds = path.join(l2a_outdir, self.meta.cloud_mask_filename)
         paths.deadpixelmap_vnir = path.join(l2a_outdir, self.meta.dead_pixel_filename_vnir)
@@ -1056,6 +1022,12 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         # TODO remove GDAL's *.aux.xml files?
 
         # save metadata
-        self.logger.warning('Currently, L2A metadata cannot be saved yet.')
+        metadata_string = self.meta.to_XML()
+        metadata_outpath = path.join(product_dir, self.meta.metaxml_filename)
+        with open(metadata_outpath, 'w') as metaF:
+            self.logger.info("Writing metdata to %s" % metadata_outpath)
+            metaF.write(metadata_string)
+
+        self.logger.info("L2A product successfully written!")
 
         return product_dir

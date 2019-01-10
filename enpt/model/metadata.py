@@ -42,6 +42,19 @@ L1B_product_props_DLR = dict(
 )
 
 
+# Define L1B_product_props
+L2A_product_props_DLR = dict(
+    xml_detector_label=dict(
+        VNIR='vnir',
+        SWIR='swir'
+    ),
+    fn_detector_suffix=dict(
+        VNIR='D1',
+        SWIR='D2'
+    )
+)
+
+
 #########################################################
 # EnPT metadata objects for EnMAP data in sensor geometry
 #########################################################
@@ -417,7 +430,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         self.cfg = config
         self.logger = logger or logging.getLogger()
-        self._path_xml = path_metaxml
+        self.path_xml = path_metaxml
+        self.rootdir = os.path.dirname(path_metaxml)
 
         # defaults - Common
         self.proc_level = None  # type: str  # Dataset processing level
@@ -431,6 +445,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
+        self.metaxml_filename = None  # type: str # filename of XML metadata file
 
     # Read common metadata method
     def read_common_meta(self, path_xml):
@@ -443,6 +458,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # load the metadata xml file
         xml = ElementTree.parse(path_xml).getroot()
+
+        self.metaxml_filename = os.path.basename(path_xml)
 
         if self.cfg.is_dlr_dataformat:
             # read processing level
@@ -514,15 +531,37 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
 
         # first read common metadata
-        self.read_common_meta(self._path_xml)
+        self.read_common_meta(self.path_xml)
 
         # define and read the VNIR metadata
         self.vnir = EnMAP_Metadata_L1B_Detector_SensorGeo('VNIR', config=self.cfg, logger=self.logger)
-        self.vnir.read_metadata(self._path_xml)
+        self.vnir.read_metadata(self.path_xml)
 
         # define and read the SWIR metadata
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
-        self.swir.read_metadata(self._path_xml)
+        self.swir.read_metadata(self.path_xml)
+
+    def to_XML(self):
+        xml = ElementTree.parse(self.path_xml).getroot()
+
+        if self.cfg.is_dlr_dataformat:
+            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
+                lbl = L1B_product_props_DLR['xml_detector_label'][detName]
+                xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+                xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+                xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+                xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+
+        else:
+            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
+                lbl = L1B_product_props['xml_detector_label'][detName]
+                xml.find("ProductComponent/%s/Data/Size/NRows" % lbl).text = str(detMeta.nrows)
+                xml.find("ProductComponent/%s/Data/Type/UnitCode" % lbl).text = detMeta.unitcode
+                xml.find("ProductComponent/%s/Data/Type/Unit" % lbl).text = detMeta.unit
+
+        xml_string = ElementTree.tostring(xml, encoding='unicode')
+
+        return xml_string
 
 
 class EnMAP_Metadata_L2A_MapGeo(object):
@@ -563,6 +602,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.quicklook_filename_vnir = meta_l1b.vnir.quicklook_filename.replace('L1B-', 'L2A-')
         self.quicklook_filename_swir = meta_l1b.swir.quicklook_filename.replace('L1B-', 'L2A-')
         self.cloud_mask_filename = meta_l1b.vnir.cloud_mask_filename.replace('L1B-', 'L2A-')
+        self.metaxml_filename = meta_l1b.metaxml_filename.replace('L1B-', 'L2A-')
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
         # get band index order
@@ -629,3 +669,75 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 (max([vnir_urx, swir_urx]), max([vnir_ury, swir_ury])),
                 (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
                 (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
+
+    def to_XML(self):
+        xml = ElementTree.parse(self._meta_l1b.path_xml).getroot()
+
+        if not self.cfg.is_dlr_dataformat:
+            self.logger.warning('No XML metadata conversion implemented for datasets different to the DLR format.'
+                                'Metadata XML file will be empty.')
+            return ''
+
+        self.logger.warning('Currently, the L2A metadata XML file does not contain all relevant keys and contains '
+                            'not updated values!')  # FIXME
+
+        # metadata
+        xml.find("metadata/schema/processingLevel").text = self.proc_level
+        xml.find("metadata/name").text = self.metaxml_filename
+        # xml.find("metadata/comment").text = 'EnMAP Level 0 Product of datatake 987'  # FIXME hardcoded
+
+        # processing
+        xml.find("processing/terrainCorrection").text = 'Yes'  # FIXME hardcoded {Yes, No}
+        xml.find("processing/ozoneValue").text = 'NA'  # FIXME {[200-500], NA}
+        xml.find("processing/season").text = 'NA'  # FIXME {summer, winter, NA}
+        xml.find("processing/productFormat").text = 'GeoTIFF+Metadata'  # FIXME hardcoded
+        # {BSQ+Metadata, BIL+Metadata, BIP+Metadata, JPEG2000+Metadata, GeoTiff+Metadata}
+        xml.find("processing/mapProjection").text = 'UTM_Zone_of_Scene_Center'  # FIXME hardcoded
+        # {UTM_Zone_of_Scene_Center, UTM_Zone_of_Scene_Center(-1), UTM_Zone_of_Scene_Center(+1),
+        #  UTM_Zone_of_Datatake_Center, Geographic, European_Projection_LAEA, NA}
+        xml.find("processing/DEMDBVersion").text = 'SRTM-C_v4'  # FIXME hardcoded
+        # {SRTM-C-X_vv.rr, best-of-DEM_vv.rr, DEM-derivedfrom-Tandem-X_vv.rr, ASTER-GDEM_vv.rr, NA}
+        xml.find("processing/correctionType").text = 'NA'  # FIXME hardcoded {Combined, Land_Mode, Water_Mode, NA}
+        xml.find("processing/cirrusHazeRemoval").text = 'NA'  # FIXME hardcoded {Yes, No}
+        xml.find("processing/bandInterpolation").text = 'NA'  # FIXME hardcoded {Yes, No}
+        xml.find("processing/waterType").text = 'NA'  # FIXME hardcoded {Clear, Turbid, Highly_Turbid, NA}
+
+        # base
+        # TODO update corner coordinates? DLR just uses the same coordinates like in L1B
+        # xml.find("base/spatialCoverage" % lbl).text =
+        xml.find("base/format").text = 'ENMAP_%s' % self.proc_level
+        xml.find("base/size").text = 'NA'  # FIXME
+        xml.find("base/size").text = self.proc_level
+
+        # specific
+        xml.find("specific/code").text = self.proc_level
+        # TODO update specific/bandCharacterisation/GainOfBand
+        # TODO update specific/bandCharacterisation/OffsetOfBand
+
+        # product
+        for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
+            lbl = L2A_product_props_DLR['xml_detector_label'][detName]
+            # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
+            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.data_filename
+            xml.find("product/image/%s/size" % lbl).text = 'NA'  # FIXME
+            # FIXME DLR data dimensions equal either L2A data nor L1B data
+            xml.find("product/image/%s/channels" % lbl).text = str(detMetaL1B.nwvl)
+            xml.find("product/image/%s/dimension/rows" % lbl).text = str(self.nrows)
+            xml.find("product/image/%s/dimension/columns" % lbl).text = str(self.ncols)
+
+            xml.find("product/quicklook/%s/name" % lbl).text = \
+                self.quicklook_filename_vnir if detName == 'VNIR' else self.quicklook_filename_swir
+            xml.find("product/quicklook/%s/size" % lbl).text = 'NA'  # FIXME
+            xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(self.nrows)
+            xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(self.ncols)
+        # TODO update product/productFileInformation/name
+        # TODO update product/productFileInformation/size
+        # TODO update product/ortho/projection
+        # TODO update product/ortho/resolution
+        # TODO update product/ortho/resampling
+        # TODO update product/bandStatistics/meanReflectance
+        # TODO update product/bandStatistics/stdDeviation
+
+        xml_string = ElementTree.tostring(xml, encoding='unicode')
+
+        return xml_string
