@@ -101,11 +101,8 @@ class EnPT_Controller(object):
 
     def run_orthorectification(self):
         """Run orthorectification to transform L1 sensor geometry image to L2 map geometry."""
-        from ..processors.orthorectification import Orthorectifier
-        OR = Orthorectifier(self.cfg)
-
         # run transformation from sensor to map geometry
-        self.L2_obj = OR.run_transformation(self.L1_obj)
+        self.L2_obj = EnMAPL2Product_MapGeo.from_L1B_sensorgeo(config=self.cfg, enmap_ImageL1=self.L1_obj)
 
     def write_output(self):
         if self.cfg.output_dir:
@@ -124,7 +121,7 @@ class EnPT_Controller(object):
                 self.L1_obj.correct_dead_pixels()
             # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
             self.run_dem_processor()
-            self.run_atmospheric_correction()
+            # self.run_atmospheric_correction()
             self.run_geometry_processor()
             self.run_orthorectification()
             self.write_output()

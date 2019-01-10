@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List  # noqa: F401
+from typing import Union, List, Tuple  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -58,8 +58,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
     def __init__(self, detector_name: str, config: EnPTConfig, logger: logging.Logger = None):
         """Get a metadata object containing the metadata of a single EnMAP detector in sensor geometry.
 
-        :param detector_name: Name of the detector (VNIR or SWIR)
-        :param logger:
+        :param detector_name:   Name of the detector (VNIR or SWIR)
+        :param config:          EnPT configuration object
+        :param logger:          instance of logging.logger or subclassed
         """
         self.cfg = config
         self.detector_name = detector_name  # type: str
@@ -75,10 +76,10 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.quicklook_filename = None  # type: str # filename of the quicklook file
         self.cloud_mask_filename = None  # type: str # filename of the cloud mask file
 
-        self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
+        self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
         self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
-        self.solar_irrad = None  # type: dict  # solar irradiance in [W/m2/nm] for eac band
+        self.solar_irrad = None  # type: np.array  # solar irradiance in [W/m2/nm] for each band
         self.nwvl = None  # type: int  # Number of wave bands
         self.nrows = None  # type: int  # number of rows
         self.ncols = None  # type: int  # number of columns
@@ -373,29 +374,26 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         return lons, lats
 
-    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> dict:
+    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> np.array:
         from ..io.reader import Solar_Irradiance_reader
 
         self.logger.debug('Calculating solar irradiance...')
 
         sol_irr = Solar_Irradiance_reader(path_solar_irr_model=self.cfg.path_solar_irr, wvl_min_nm=350, wvl_max_nm=2500)
 
-        irr_bands = {}
+        irr_bands = []
         for band in self.srf.bands:
-            if self.srf[band] is None:
-                irr_bands[band] = None
-            else:
-                WVL_band = self.srf.srfs_wvl if self.srf.wvl_unit == 'nanometers' else self.srf.srfs_wvl * 1000
-                RSP_band = self.srf.srfs_norm01[band]
-                sol_irr_at_WVL = np.interp(WVL_band, sol_irr[:, 0], sol_irr[:, 1], left=0, right=0)
+            WVL_band = self.srf.srfs_wvl if self.srf.wvl_unit == 'nanometers' else self.srf.srfs_wvl * 1000
+            RSP_band = self.srf.srfs_norm01[band]
+            sol_irr_at_WVL = np.interp(WVL_band, sol_irr[:, 0], sol_irr[:, 1], left=0, right=0)
 
-                irr_bands[band] = round(np.sum(sol_irr_at_WVL * RSP_band) / np.sum(RSP_band), 2)
+            irr_bands.append(np.round(np.sum(sol_irr_at_WVL * RSP_band) / np.sum(RSP_band), 2))
 
-        return irr_bands
+        return np.array(irr_bands)
 
 
 class EnMAP_Metadata_L1B_SensorGeo(object):
-    """EnMAP Metadata class holding the metadata of the complete EnMAP product in sensor geometry incl. VNIR and SWIR.
+    """EnMAP Metadata class for the metadata of the complete EnMAP L1B product in sensor geometry incl. VNIR and SWIR.
 
     Attributes:
         - logger(logging.Logger):  None or logging instance
@@ -407,13 +405,15 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         - mu_sun: needed by SICOR for TOARad > TOARef conversion
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
+        - detector_attrNames: attribute names of the detector objects
     """
 
     def __init__(self, path_metaxml, config: EnPTConfig, logger=None):
         """Get a metadata object instance for the given EnMAP L1B product in sensor geometry.
 
-        :param path_metaxml:  file path of the EnMAP L1B metadata XML file
-        :param logger:  instance of logging.logger or subclassed
+        :param path_metaxml:    file path of the EnMAP L1B metadata XML file
+        :para, config:          EnPT configuration object
+        :param logger:          instance of logging.logger or subclassed
         """
         self.cfg = config
         self.logger = logger or logging.getLogger()
@@ -430,7 +430,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.earthSunDist = None  # type: float  # earth-sun distance
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
-        self.detector_attrNames = ['vnir', 'swir']
+        self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
 
     # Read common metadata method
     def read_common_meta(self, path_xml):
@@ -523,3 +523,101 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # define and read the SWIR metadata
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
         self.swir.read_metadata(self._path_xml, lon_lat_smpl)
+
+
+class EnMAP_Metadata_L2A_MapGeo(object):
+    def __init__(self,
+                 config: EnPTConfig,
+                 meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
+                 dims_mapgeo: Tuple[int, int, int],
+                 logger=None):
+        """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
+
+        :param config:              EnPT configuration object
+        :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
+        :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
+        :param logger:              instance of logging.logger or subclassed
+        """
+        self.cfg = config
+        self._meta_l1b = meta_l1b
+        self.logger = logger or logging.getLogger()
+
+        self.proc_level = 'L2A'
+        self.observation_datetime = meta_l1b.observation_datetime  # type: datetime  # Date and Time of observation
+        # FIXME VZA may be negative in DLR data
+        self.geom_view_zenith = meta_l1b.geom_view_zenith  # type: float  # viewing zenith angle
+        self.geom_view_azimuth = meta_l1b.geom_view_azimuth  # type: float  # viewing azimuth angle
+        self.geom_sun_zenith = meta_l1b.geom_sun_zenith  # type: float  # sun zenith angle
+        self.geom_sun_azimuth = meta_l1b.geom_sun_azimuth  # type: float  # sun azimuth angle
+        self.mu_sun = meta_l1b.mu_sun  # type: float  # needed by SICOR for TOARad > TOARef conversion
+        self.earthSunDist = meta_l1b.earthSunDist  # type: float  # earth-sun distance
+
+        # generate file names for L2A output
+        self.data_filename = meta_l1b.vnir.data_filename.replace('L1B-', 'L2A-').replace('_VNIR', '')
+        self.dead_pixel_filename_vnir = meta_l1b.vnir.dead_pixel_filename.replace('L1B-', 'L2A-')
+        self.dead_pixel_filename_swir = meta_l1b.swir.dead_pixel_filename.replace('L1B-', 'L2A-')
+        self.quicklook_filename_vnir = meta_l1b.vnir.quicklook_filename.replace('L1B-', 'L2A-')
+        self.quicklook_filename_swir = meta_l1b.swir.quicklook_filename.replace('L1B-', 'L2A-')
+        self.cloud_mask_filename = meta_l1b.vnir.cloud_mask_filename.replace('L1B-', 'L2A-')
+
+        # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
+        # get band index order
+        wvls_vnir_plus_swir = np.hstack([self._meta_l1b.vnir.wvl_center, self._meta_l1b.swir.wvl_center])
+        wvls_sorted = np.array(sorted(wvls_vnir_plus_swir))
+        bandidx_order = np.array([np.argmin(np.abs(wvls_vnir_plus_swir - cwl)) for cwl in wvls_sorted])
+
+        self.wvl_center = np.hstack([meta_l1b.vnir.wvl_center, meta_l1b.swir.wvl_center])[bandidx_order]
+        self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]
+        self.gains = np.full((218,), 100)  # implies reflectance scaled between 0 and 10000
+        self.offsets = np.zeros((218,))
+        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+        self.solar_irrad = np.hstack([meta_l1b.vnir.solar_irrad, meta_l1b.swir.solar_irrad])[bandidx_order]
+
+        if not meta_l1b.vnir.nsmile_coef == meta_l1b.swir.nsmile_coef:
+            raise ValueError('Expected equal number of smile coefficients for VNIR and SWIR. Received %d/%s.'
+                             % (meta_l1b.vnir.nsmile_coef, meta_l1b.swir.nsmile_coef))
+
+        self.nsmile_coef = meta_l1b.vnir.nsmile_coef
+        self.smile_coef = np.vstack([meta_l1b.vnir.smile_coef, meta_l1b.swir.smile_coef])[bandidx_order, :]
+        self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
+        self.rpc_coeffs = OrderedDict(zip(
+            ['band_%d' % (i + 1) for i in range(218)],
+            [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
+             meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
+
+        self.nrows = dims_mapgeo[0]
+        self.ncols = dims_mapgeo[1]
+        self.nwvl = dims_mapgeo[2]
+        common_UL_UR_LL_LR = self.get_common_UL_UR_LL_LR()
+        self.lon_UL_UR_LL_LR = [lon for lon, lat in common_UL_UR_LL_LR]
+        self.lat_UL_UR_LL_LR = [lat for lon, lat in common_UL_UR_LL_LR]
+        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
+                                                          self.lat_UL_UR_LL_LR)), fix_invalid=True)
+
+        if meta_l1b.vnir.unit != meta_l1b.swir.unit or meta_l1b.vnir.unitcode != meta_l1b.swir.unitcode:
+            raise RuntimeError('L2A data should have the same radiometric unit for VNIR and SWIR. '
+                               'Received %s in %s for VNIR and %s in %s for SWIR.'
+                               % (meta_l1b.vnir.unitcode, meta_l1b.vnir.unit,
+                                  meta_l1b.swir.unitcode, meta_l1b.swir.unit))
+
+        self.unit = meta_l1b.vnir.unit
+        self.unitcode = meta_l1b.vnir.unitcode
+        self.preview_bands_vnir = meta_l1b.vnir.preview_bands
+        self.preview_bands_swir = meta_l1b.swir.preview_bands
+
+        self.snr = None
+        if meta_l1b.vnir.snr is not None:
+            assert meta_l1b.swir.snr is not None
+            self.snr = np.dstack([meta_l1b.vnir.snr, meta_l1b.swir.snr])[:, :, bandidx_order]
+
+    def get_common_UL_UR_LL_LR(self):
+        vnir_ulx, vnir_urx, vnir_llx, vnir_lrx = self._meta_l1b.vnir.lon_UL_UR_LL_LR
+        vnir_uly, vnir_ury, vnir_lly, vnir_lry = self._meta_l1b.vnir.lat_UL_UR_LL_LR
+        swir_ulx, swir_urx, swir_llx, swir_lrx = self._meta_l1b.swir.lon_UL_UR_LL_LR
+        swir_uly, swir_ury, swir_lly, swir_lry = self._meta_l1b.swir.lat_UL_UR_LL_LR
+
+        # use OUTER coordinates
+        return ((min([vnir_ulx, swir_ulx]), max([vnir_uly, swir_uly])),
+                (max([vnir_urx, swir_urx]), max([vnir_ury, swir_ury])),
+                (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
+                (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))

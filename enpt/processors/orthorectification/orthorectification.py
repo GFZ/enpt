@@ -13,6 +13,7 @@ from py_tools_ds.geo.projection import EPSG2WKT, prj_equal
 
 from ...options.config import EnPTConfig
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
+from ...model.metadata import EnMAP_Metadata_L2A_MapGeo
 from ..spatial_transform import \
     Geometry_Transformer, \
     Geometry_Transformer_3D, \
@@ -46,7 +47,7 @@ class Orthorectifier(object):
         enmap_ImageL1.logger.info('Starting orthorectification...')
 
         # get a new instance of EnMAPL2Product_MapGeo
-        L2_obj = EnMAPL2Product_MapGeo(config=self.cfg)
+        L2_obj = EnMAPL2Product_MapGeo(config=self.cfg, logger=enmap_ImageL1.logger)
 
         # geometric transformations #
         #############################
@@ -74,12 +75,18 @@ class Orthorectifier(object):
                                                                  tgt_extent=tgt_extent)
 
         # combine VNIR and SWIR
-        L2_obj.data = self._get_VNIR_SWIR_stack(vnir_mapgeo, swir_mapgeo, vnir_gt, swir_gt, vnir_prj, swir_prj)
+        L2_obj.data = self._get_VNIR_SWIR_stack(vnir_mapgeo, swir_mapgeo, vnir_gt, swir_gt, vnir_prj, swir_prj,
+                                                enmap_ImageL1.meta.vnir.wvl_center, enmap_ImageL1.meta.swir.wvl_center)
 
         # TODO transform mask_clouds, mask_clouds_confidence, ac_errors
 
         # metadata adjustments #
         ########################
+
+        L2_obj.meta = EnMAP_Metadata_L2A_MapGeo(config=self.cfg,
+                                                meta_l1b=enmap_ImageL1.meta,
+                                                dims_mapgeo=L2_obj.data.shape,
+                                                logger=L2_obj.logger)
 
         # TODO ncols, nrows
         # TODO add CWLs and FWHM, nodata value to L2_obj.data.metadata
@@ -121,12 +128,21 @@ class Orthorectifier(object):
         return common_extent
 
     @staticmethod
-    def _get_VNIR_SWIR_stack(vnir_data, swir_data, vnir_gt, swir_gt, vnir_prj, swir_prj):
+    def _get_VNIR_SWIR_stack(vnir_data, swir_data, vnir_gt, swir_gt, vnir_prj, swir_prj, wvls_vnir, wvls_swir):
         """Stack VNIR and SWIR bands with respect to their spectral overlap."""
         if vnir_gt != swir_gt:
             raise ValueError((vnir_gt, swir_gt), 'VNIR and SWIR geoinformation should be equal.')
         if not prj_equal(vnir_prj, swir_prj):
             raise ValueError((vnir_prj, swir_prj), 'VNIR and SWIR projection should be equal.')
 
-        # TODO implement VNIR / SWIR fusion respecting their spectral overlap
-        return GeoArray(np.dstack([vnir_data, swir_data]), geotransform=vnir_gt, projection=vnir_prj)
+        # get band index order
+        wvls_vnir_plus_swir = np.hstack([wvls_vnir, wvls_swir])
+        wvls_sorted = np.array(sorted(wvls_vnir_plus_swir))
+        bandidx_order = np.array([np.argmin(np.abs(wvls_vnir_plus_swir - cwl)) for cwl in wvls_sorted])
+
+        # stack bands ordered by wavelengths
+        data_stacked = np.dstack([vnir_data, swir_data])[:, :, bandidx_order]
+
+        # TODO implement correct for VNIR/SWIR spectral jump
+
+        return GeoArray(data_stacked, geotransform=vnir_gt, projection=vnir_prj)

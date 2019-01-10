@@ -16,8 +16,12 @@ from skimage import exposure  # contained in package requirements as scikit-imag
 from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo, \
-    L1B_product_props, L1B_product_props_DLR
+from ..model.metadata import \
+    EnMAP_Metadata_L1B_SensorGeo, \
+    EnMAP_Metadata_L1B_Detector_SensorGeo, \
+    EnMAP_Metadata_L2A_MapGeo, \
+    L1B_product_props, \
+    L1B_product_props_DLR
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
@@ -926,9 +930,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         if logger:
             self.logger = logger
 
-        # TODO add metadata object here
-        # self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
-        #                                          config=self.cfg, logger=self.logger)
+        self.meta = None  # type: EnMAP_Metadata_L2A_MapGeo
 
         super(EnMAPL2Product_MapGeo, self).__init__()
 
@@ -983,6 +985,13 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
     def log(self, string: str):
         assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
         self.logger.captured_stream = string
+
+    @classmethod
+    def from_L1B_sensorgeo(cls, config: EnPTConfig, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+        from ..processors.orthorectification import Orthorectifier
+        L2_obj = Orthorectifier(config=config).run_transformation(enmap_ImageL1=enmap_ImageL1)
+
+        return L2_obj
 
     def save(self, outdir: str, suffix="") -> str:
         """
