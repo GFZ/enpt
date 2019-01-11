@@ -85,6 +85,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         # These lines are used to load path information
         self.data_filename = None  # type: str # detector data filename
+        self.scene_basename = None  # type: str # basename of the EnMAP image
         self.dead_pixel_filename = None  # type: str # filename of the dead pixel file
         self.quicklook_filename = None  # type: str # filename of the quicklook file
         # FIXME cloud mask of BOTH detectors
@@ -130,8 +131,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             # read data filenames
             all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
-
             self.data_filename = xml.find("product/image/%s/name" % lbl).text
+            self.scene_basename = self.data_filename.split('-SPECTRAL_IMAGE')[0]
             self.dead_pixel_filename = fnmatch.filter(all_filenames, '*QL_PIXELMASK_%s.GEOTIFF' % self.detector_name)[0]
             self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
             # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES.GEOTIFF as combined product?
@@ -207,6 +208,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             # read data filenames
             self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
+            self.scene_basename = os.path.splitext(self.data_filename)[0]
             self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
             self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
             self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
@@ -446,6 +448,15 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
         self.metaxml_filename = None  # type: str # filename of XML metadata file
+
+        self._scene_basename = None  # type: str # basename of the EnMAP image
+
+    @property
+    def scene_basename(self):
+        if self.vnir:
+            self._scene_basename = self.vnir.scene_basename
+
+        return self._scene_basename
 
     # Read common metadata method
     def read_common_meta(self, path_xml):

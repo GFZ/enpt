@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import Tuple  # noqa: F401
 import numpy as np
 from os import path, makedirs
-from xml.etree import ElementTree
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
@@ -17,11 +16,7 @@ from skimage import exposure  # contained in package requirements as scikit-imag
 from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.logging import EnPT_Logger
-from ..model.metadata import \
-    EnMAP_Metadata_L1B_SensorGeo, \
-    EnMAP_Metadata_L1B_Detector_SensorGeo, \
-    L1B_product_props, \
-    L1B_product_props_DLR
+from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ..model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
@@ -646,6 +641,7 @@ class EnMAPL1Product_SensorGeo(object):
         paths = SimpleNamespace()
         paths.vnir = self.vnir.get_paths()
         paths.swir = self.swir.get_paths()
+        paths.root_dir = self.meta.rootdir
         paths.metaxml = self.meta.path_xml
 
         return paths
@@ -766,11 +762,9 @@ class EnMAPL1Product_SensorGeo(object):
         :param suffix: suffix to be appended to the output filename (???)
         :return: root path (root directory) where products were written
         """
-        product_dir = path.join(
-            path.abspath(outdir), "{name}{suffix}".format(
-                name=[ff for ff in self.paths.root_dir.split(path.sep) if ff != ''][-1],
-                suffix=suffix)
-        )
+        product_dir = path.join(path.abspath(outdir),
+                                "{name}{suffix}".format(name=self.meta.scene_basename, suffix=suffix))
+
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
