@@ -699,7 +699,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.fileinfos = []
 
         for i, fp in enumerate(filepaths):
-            ismeta = fp.endswith('METADATA.XML')
+            ismeta = fp.endswith('METADATA.XML') or fp.endswith('_header.xml')  # FIXME
             if not os.path.exists(fp):
                 if ismeta:
                     pass  # does not yet exist
