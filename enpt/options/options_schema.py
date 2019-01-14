@@ -45,6 +45,7 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    enable_ac=dict(type='boolean', required=False),
                     sicor_cache_dir=dict(type='string', required=False),
                     auto_download_ecmwf=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
@@ -68,7 +69,7 @@ enpt_schema_input = dict(
             orthorectification=dict(
                 type='dict', required=False,
                 schema=dict(
-                    resamp_alg=dict(type='integer', required=False),
+                    resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss']),
                 ))
         ))
 )
@@ -102,6 +103,7 @@ parameter_mapping = dict(
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
+    enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
     sicor_cache_dir=('processors', 'atmospheric_correction', 'sicor_cache_dir'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),

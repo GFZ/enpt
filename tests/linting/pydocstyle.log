@@ -64,10 +64,16 @@ enpt/model/metadata.py:578 in public class `EnMAP_Metadata_L2A_MapGeo`:
         D101: Missing docstring in public class
 enpt/model/metadata.py:579 in public method `__init__`:
         D403: First word of the first line should be properly capitalized ('Enmap', not 'EnMAP')
-enpt/model/metadata.py:672 in public method `get_common_UL_UR_LL_LR`:
+enpt/model/metadata.py:677 in public method `get_common_UL_UR_LL_LR`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:684 in public method `to_XML`:
+enpt/model/metadata.py:689 in public method `add_band_statistics`:
         D102: Missing docstring in public method
+enpt/model/metadata.py:695 in public method `add_product_fileinformation`:
+        D102: Missing docstring in public method
+enpt/model/metadata.py:720 in public method `to_XML`:
+        D102: Missing docstring in public method
+enpt/model/metadata.py:865 in public function `xmlSubtree2dict`:
+        D103: Missing docstring in public function
 enpt/model/srf.py:11 in public class `SRF`:
         D101: Missing docstring in public class
 enpt/model/srf.py:96 in public method `instrument`:
@@ -168,41 +174,41 @@ enpt/execution/controller.py:94 in public method `run_geometry_processor`:
         D102: Missing docstring in public method
 enpt/execution/controller.py:106 in public method `write_output`:
         D102: Missing docstring in public method
-enpt/options/config.py:74 in public class `EnPTConfig`:
+enpt/options/config.py:78 in public class `EnPTConfig`:
         D101: Missing docstring in public class
-enpt/options/config.py:75 in public method `__init__`:
+enpt/options/config.py:79 in public method `__init__`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:163 in public method `absPath`:
+enpt/options/config.py:168 in public method `absPath`:
         D102: Missing docstring in public method
-enpt/options/config.py:166 in public method `get_parameter`:
+enpt/options/config.py:171 in public method `get_parameter`:
         D102: Missing docstring in public method
-enpt/options/config.py:229 in public method `to_dict`:
+enpt/options/config.py:234 in public method `to_dict`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/config.py:243 in public method `to_jsonable_dict`:
+enpt/options/config.py:248 in public method `to_jsonable_dict`:
         D102: Missing docstring in public method
-enpt/options/config.py:254 in public method `__repr__`:
+enpt/options/config.py:259 in public method `__repr__`:
         D105: Missing docstring in magic method
-enpt/options/config.py:258 in public function `json_to_python`:
+enpt/options/config.py:263 in public function `json_to_python`:
         D103: Missing docstring in public function
-enpt/options/config.py:291 in public function `python_to_json`:
+enpt/options/config.py:296 in public function `python_to_json`:
         D103: Missing docstring in public function
-enpt/options/config.py:313 in public class `EnPTValidator`:
+enpt/options/config.py:318 in public class `EnPTValidator`:
         D101: Missing docstring in public class
-enpt/options/config.py:314 in public method `__init__`:
+enpt/options/config.py:319 in public method `__init__`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/options/config.py:314 in public method `__init__`:
+enpt/options/config.py:319 in public method `__init__`:
         D400: First line should end with a period (not 'r')
-enpt/options/config.py:322 in public method `validate`:
+enpt/options/config.py:327 in public method `validate`:
         D102: Missing docstring in public method
-enpt/options/config.py:327 in public function `get_options`:
+enpt/options/config.py:332 in public function `get_options`:
         D202: No blank lines allowed after function docstring (found 1)
 enpt/options/__init__.py:1 at module level:
         D104: Missing docstring in public package
-enpt/options/options_schema.py:123 in public function `get_updated_schema`:
+enpt/options/options_schema.py:125 in public function `get_updated_schema`:
         D103: Missing docstring in public function
-enpt/options/options_schema.py:124 in private nested function `deep_update`:
+enpt/options/options_schema.py:126 in private nested function `deep_update`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/options/options_schema.py:124 in private nested function `deep_update`:
+enpt/options/options_schema.py:126 in private nested function `deep_update`:
         D400: First line should end with a period (not 'e')
-enpt/options/options_schema.py:143 in public function `get_param_from_json_config`:
+enpt/options/options_schema.py:145 in public function `get_param_from_json_config`:
         D103: Missing docstring in public function

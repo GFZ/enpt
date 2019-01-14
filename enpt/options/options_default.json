@@ -36,6 +36,8 @@
         },
 
         "atmospheric_correction": {
+            "enable_ac": true,  /*enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A
+                                  output contains top-of-atmosphere reflectance.*/
             "sicor_cache_dir": "",  /*directory to be used to stored sicor cache files
                                       NOTE: SICOR stores intermediate results there that need to computed only once
                                             for atmospheric correction of multiple EnMAP images. (default: 'auto')*/
@@ -58,7 +60,7 @@
         },
 
         "orthorectification": {
-            "resamp_alg": 1  /*resampling algorithm TODO*/
+            "resamp_alg": "bilinear"  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
         }
     }
 

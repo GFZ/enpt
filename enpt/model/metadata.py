@@ -12,7 +12,7 @@ import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
 
-from ..options.config import EnPTConfig
+from ..options.config import EnPTConfig, enmap_xres
 from .srf import SRF
 from ..processors.spatial_transform import RPC_3D_Geolayer_Generator
 
@@ -552,7 +552,10 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.swir = EnMAP_Metadata_L1B_Detector_SensorGeo('SWIR', config=self.cfg, logger=self.logger)
         self.swir.read_metadata(self.path_xml)
 
-    def to_XML(self):
+    def to_XML(self) -> str:
+        """
+        Generate an XML metadata string from the L1B metadata.
+        """
         xml = ElementTree.parse(self.path_xml).getroot()
 
         if self.cfg.is_dlr_dataformat:
@@ -570,7 +573,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
                 xml.find("ProductComponent/%s/Data/Type/UnitCode" % lbl).text = detMeta.unitcode
                 xml.find("ProductComponent/%s/Data/Type/Unit" % lbl).text = detMeta.unit
 
-        xml_string = ElementTree.tostring(xml, encoding='unicode')
+        xml_string = ElementTree.tostring(xml, encoding='unicode', pretty_print=True)
 
         return xml_string
 
@@ -628,8 +631,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         self.wvl_center = np.hstack([meta_l1b.vnir.wvl_center, meta_l1b.swir.wvl_center])[bandidx_order]
         self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]
-        self.gains = np.full((218,), 100)  # implies reflectance scaled between 0 and 10000
-        self.offsets = np.zeros((218,))
+        self.gains = np.full((dims_mapgeo[2],), 100)  # implies reflectance scaled between 0 and 10000
+        self.offsets = np.zeros((dims_mapgeo[2],))
         self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
         self.solar_irrad = np.hstack([meta_l1b.vnir.solar_irrad, meta_l1b.swir.solar_irrad])[bandidx_order]
 
@@ -643,7 +646,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         if self.cfg.is_dlr_dataformat:
             self.rpc_coeffs = OrderedDict(zip(
-                ['band_%d' % (i + 1) for i in range(218)],
+                ['band_%d' % (i + 1) for i in range(dims_mapgeo[2])],
                 [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
                  meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
         else:
@@ -717,11 +720,14 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
             self.fileinfos.append(fileinfo_dict)
 
-    def to_XML(self):
+    def to_XML(self) -> str:
+        """
+        Generate an XML metadata string from the L2A metadata.
+        """
         # use an XML parser that creates properly indented XML files even if new SubElements have been added
         parser = ElementTree.XMLParser(remove_blank_text=True)
 
-        # parse
+        # parse (use L1B metadata as template)
         xml = ElementTree.parse(self._meta_l1b.path_xml, parser).getroot()
 
         if not self.cfg.is_dlr_dataformat:
@@ -767,7 +773,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # xml.find("base/spatialCoverage" % lbl).text =
         xml.find("base/format").text = 'ENMAP_%s' % self.proc_level
         xml.find("base/level").text = self.proc_level
-        xml.find("base/size").text = 'NA'  # FIXME
+        xml.find("base/size").text = 'NA'  # FIXME Size of product. Attribute unit {byte, Kbyte, Mbyte, Gbyte}
 
         ############
         # specific #
@@ -784,41 +790,49 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # product #
         ###########
 
-        for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
-            lbl = L2A_product_props_DLR['xml_detector_label'][detName]
-            # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
-            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.data_filename
-            xml.find("product/image/%s/size" % lbl).text = 'NA'  # FIXME
-            # FIXME DLR data dimensions equal either L2A data nor L1B data
-            xml.find("product/image/%s/channels" % lbl).text = str(detMetaL1B.nwvl)
-            xml.find("product/image/%s/dimension/rows" % lbl).text = str(self.nrows)
-            xml.find("product/image/%s/dimension/columns" % lbl).text = str(self.ncols)
-
-            xml.find("product/quicklook/%s/name" % lbl).text = \
-                self.quicklook_filename_vnir if detName == 'VNIR' else self.quicklook_filename_swir
-            xml.find("product/quicklook/%s/size" % lbl).text = 'NA'  # FIXME
-            xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(self.nrows)
-            xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(self.ncols)
-
-        # productFileInformation
-        ########################
-
         if not self.fileinfos:
             raise ValueError('Product file informations must be added before writing metadata. '
                              'Call add_product_fileinformation() before!')
 
+        for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
+            lbl = L2A_product_props_DLR['xml_detector_label'][detName]
+            # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
+            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.data_filename
+            # FIXME this is the size of the VNIR/SWIR stack
+            size = [F['size'] for F in self.fileinfos if os.path.splitext(F['name'])[0].endswith('-SPECTRAL_IMAGE')][0]
+            xml.find("product/image/%s/size" % lbl).text = str(size)
+            # FIXME DLR data dimensions equal either L2A data nor L1B data
+            xml.find("product/image/%s/channels" % lbl).text = str(detMetaL1B.nwvl)
+            xml.find("product/image/%s/dimension/rows" % lbl).text = str(self.nrows)
+            xml.find("product/image/%s/dimension/columns" % lbl).text = str(self.ncols)
+            # xml.find("product/image/%s/dimension/dimensionGeographic/longitude" % lbl).text = 'NA'  # TODO
+            # xml.find("product/image/%s/dimension/dimensionGeographic/latitude" % lbl).text = 'NA'
+
+            fN_quicklook = self.quicklook_filename_vnir if detName == 'VNIR' else self.quicklook_filename_swir
+            size_quicklook = [F['size'] for F in self.fileinfos
+                              if os.path.splitext(F['name'])[0].endswith('-QL_%s' % detName)][0]
+            xml.find("product/quicklook/%s/name" % lbl).text = fN_quicklook
+            xml.find("product/quicklook/%s/size" % lbl).text = str(size_quicklook)
+            xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(self.nrows)
+            xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(self.ncols)
+            # xml.find("product/quicklook/%s/dimension/dimensionGeographic/longitude" % lbl).text = 'NA'
+            # xml.find("product/quicklook/%s/dimension/dimensionGeographic/latitude" % lbl).text = 'NA'
+
+        # productFileInformation
+        ########################
+
         # get L1B product file information
         l1b_fileinfos = xmlSubtree2dict(xml, 'product/productFileInformation/')
 
-        # clear L1B file information in XML
+        # clear old L1B file information in XML
         pFI_root = xml.findall('product/productFileInformation')[0]
         pFI_root.clear()
 
         # recreate sub-elements for productFileInformation according to L2A file information
         for i, fileInfo in enumerate(self.fileinfos):
             fn_l1b_exp = fileInfo['name'].replace('L2A', '*').replace('-SPECTRAL_IMAGE', '-SPECTRAL_IMAGE_VNIR')
-            l1b_fileInfo = [fI for fI in l1b_fileinfos.values()
-                            if fnmatch.fnmatch(fI['name'], fn_l1b_exp)]
+            l1b_fileInfo = [fI for fI in l1b_fileinfos.values() if fnmatch.fnmatch(fI['name'], fn_l1b_exp)]
+
             if l1b_fileInfo:
                 # TODO update file size of METADATA.XML (has not been written yet)
                 fileInfo['size'] = fileInfo['size'] or l1b_fileInfo[0]['size']
@@ -834,8 +848,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 ele.text = str(fileInfo[k])
 
         # TODO update product/ortho/projection
-        # TODO update product/ortho/resolution
-        # TODO update product/ortho/resampling
+        #      {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}
+        xml.find('product/ortho/resolution').text = str(enmap_xres)
+        xml.find('product/ortho/resampling').text = self.cfg.ortho_resampAlg
 
         # band statistics
         #################

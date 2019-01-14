@@ -58,19 +58,17 @@ class Orthorectifier(object):
         # get target UTM zone and common extent  # TODO add optionally user defined UTM zone?
         tgt_epsg = self._get_tgt_UTMepsg(enmap_ImageL1)
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
+        kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg, nprocs=self.cfg.CPUs)
+        kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
 
         # transform VNIR and SWIR to map geometry
         GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
 
-        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, nprocs=self.cfg.CPUs)
-        vnir_mapgeo, vnir_gt, vnir_prj = GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:],
-                                                                 tgt_prj=tgt_epsg,
-                                                                 tgt_extent=tgt_extent)
+        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, **kw_init)
+        vnir_mapgeo, vnir_gt, vnir_prj = GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:], **kw_trafo)
 
-        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, nprocs=self.cfg.CPUs)
-        swir_mapgeo, swir_gt, swir_prj = GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:],
-                                                                 tgt_prj=tgt_epsg,
-                                                                 tgt_extent=tgt_extent)
+        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, **kw_init)
+        swir_mapgeo, swir_gt, swir_prj = GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:], **kw_trafo)
 
         # combine VNIR and SWIR
         L2_obj.data = self._get_VNIR_SWIR_stack(vnir_mapgeo, swir_mapgeo, vnir_gt, swir_gt, vnir_prj, swir_prj,
@@ -79,12 +77,10 @@ class Orthorectifier(object):
         # TODO allow to set geolayer band to be used for warping of 2D arrays
         GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                                      lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                                     nprocs=self.cfg.CPUs)
+                                     ** kw_init)
 
         # FIXME cloud mask applies to BOTH detectors
-        L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds,
-                                                             tgt_prj=tgt_epsg,
-                                                             tgt_extent=tgt_extent))
+        L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds, **kw_trafo))
 
         # TODO transform mask_clouds_confidence, ac_errors, pixel masks
 

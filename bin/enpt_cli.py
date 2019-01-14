@@ -65,6 +65,9 @@ def get_enpt_argparser():
         help='Enable VNIR/SWIR co-registration')
     add('--path_reference_image', type=str, default=None,
         help='Reference image for co-registration.')
+    add('--enable_ac', type=bool, default=True,
+        help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
+             "top-of-atmosphere reflectance")
     add('--sicor_cache_dir', type=str, default=None,
         help='SICOR cache directory')
     add('--auto_download_ecmwf', type=bool, default=False,
@@ -82,8 +85,8 @@ def get_enpt_argparser():
     add('--deadpix_P_interp', type=str, default="linear",
         help="Interpolation algorithm to be used during dead pixel correction "
              "('linear', 'bilinear', 'cubic', 'spline')")
-    add('--ortho_resampAlg', type=int, default=1,
-        help='Ortho-rectification resampling algorithm')
+    add('--ortho_resampAlg', type=str, default='bilinear',
+        help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')")
 
     # link parser to run function
     parser.set_defaults(func=run_job)

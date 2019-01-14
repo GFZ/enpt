@@ -44,7 +44,8 @@ config_for_testing = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=False
+    is_dlr_dataformat=False,
+    enable_ac=False
 )
 
 
@@ -63,12 +64,15 @@ config_for_testing_dlr = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=True
+    is_dlr_dataformat=True,
+    enable_ac=False
 )
 
 
 enmap_coordinate_grid = dict(x=np.array([0, 30]),
                              y=np.array([0, 30]))
+enmap_xres, enmap_yres = np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['y'])
+assert enmap_xres == enmap_yres, 'Unequal X/Y resolution of the output grid!'
 
 
 class EnPTConfig(object):
@@ -137,6 +141,7 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        self.enable_ac = gp('enable_ac')
         self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_cloud_screening = gp('enable_cloud_screening')

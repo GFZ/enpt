@@ -120,7 +120,12 @@ class EnPT_Controller(object):
                 self.L1_obj.correct_dead_pixels()
             # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
             self.run_dem_processor()
-            # self.run_atmospheric_correction()
+            if self.cfg.enable_ac:
+                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                        'computing top-of-atmosphere reflectance instead.')
+                self.run_atmospheric_correction()
+            else:
+                self.run_toaRad2toaRef()
             self.run_geometry_processor()
             self.run_orthorectification()
             self.write_output()
