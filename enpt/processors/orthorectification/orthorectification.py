@@ -58,7 +58,9 @@ class Orthorectifier(object):
         # get target UTM zone and common extent  # TODO add optionally user defined UTM zone?
         tgt_epsg = self._get_tgt_UTMepsg(enmap_ImageL1)
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
-        kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg, nprocs=self.cfg.CPUs)
+        kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
+                       nprocs=self.cfg.CPUs,
+                       radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45)
         kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
 
         # transform VNIR and SWIR to map geometry

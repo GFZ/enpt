@@ -65,7 +65,8 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=True,
-    enable_ac=False
+    enable_ac=False,
+    ortho_resampAlg='gauss'
 )
 
 
