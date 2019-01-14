@@ -2,7 +2,7 @@
 """EnPT metadata modules. All object and functions regarding EnMAP metadata are implemented here."""
 
 from datetime import datetime
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
@@ -718,7 +718,11 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             self.fileinfos.append(fileinfo_dict)
 
     def to_XML(self):
-        xml = ElementTree.parse(self._meta_l1b.path_xml).getroot()
+        # use an XML parser that creates properly indented XML files even if new SubElements have been added
+        parser = ElementTree.XMLParser(remove_blank_text=True)
+
+        # parse
+        xml = ElementTree.parse(self._meta_l1b.path_xml, parser).getroot()
 
         if not self.cfg.is_dlr_dataformat:
             self.logger.warning('No XML metadata conversion implemented for datasets different to the DLR format.'
@@ -809,8 +813,6 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # clear L1B file information in XML
         pFI_root = xml.findall('product/productFileInformation')[0]
         pFI_root.clear()
-        pFI_root.text = '\n' + ' ' * 6  # TODO switch to lxml to get rid of this?
-        pFI_root.tail = '\n' + ' ' * 4
 
         # recreate sub-elements for productFileInformation according to L2A file information
         for i, fileInfo in enumerate(self.fileinfos):
@@ -826,13 +828,10 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 pass
 
             sub = ElementTree.SubElement(pFI_root, 'file', number=str(i))
-            sub.text = '\n' + ' ' * 8
-            sub.tail = '\n' + ' ' * 6
 
-            for k, kw, tl in zip(['name', 'size', 'version', 'format'], [{}, {'unit': 'kbytes'}, {}, {}], [8, 8, 8, 6]):
+            for k, kw in zip(['name', 'size', 'version', 'format'], [{}, {'unit': 'kbytes'}, {}, {}]):
                 ele = ElementTree.SubElement(sub, k, **kw)
                 ele.text = str(fileInfo[k])
-                ele.tail = '\n' + ' ' * tl
 
         # TODO update product/ortho/projection
         # TODO update product/ortho/resolution
@@ -851,7 +850,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         for ele, std in zip(xml.findall(bs + "stdDeviation"), self.band_stds):
             ele.text = str(std)
 
-        xml_string = ElementTree.tostring(xml, encoding='unicode')
+        xml_string = ElementTree.tostring(xml, encoding='unicode', pretty_print=True)
 
         return xml_string
 
