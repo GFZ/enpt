@@ -95,6 +95,7 @@ class Orthorectifier(object):
                                                 meta_l1b=enmap_ImageL1.meta,
                                                 dims_mapgeo=L2_obj.data.shape,
                                                 logger=L2_obj.logger)
+        L2_obj.meta.add_band_statistics(L2_obj.data)
 
         L2_obj.data.meta.band_meta['wavelength'] = list(L2_obj.meta.wvl_center)
         L2_obj.data.meta.band_meta['bandwidths'] = list(L2_obj.meta.fwhm)

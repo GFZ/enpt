@@ -999,27 +999,34 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
+        # define output paths
+        outpath_data = path.join(product_dir, self.meta.data_filename)
+        outpath_mask_clouds = path.join(product_dir, self.meta.cloud_mask_filename)
+        outpath_quicklook_vnir = path.join(product_dir, self.meta.quicklook_filename_vnir)
+        outpath_quicklook_swir = path.join(product_dir, self.meta.quicklook_filename_swir)
+        outpath_meta = path.join(product_dir, self.meta.metaxml_filename)
+        outpaths = [outpath_data, outpath_mask_clouds, outpath_quicklook_vnir, outpath_quicklook_swir, outpath_meta]
+
         # save raster data
         kwargs_save = dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"])
-        self.data.save(path.join(product_dir, self.meta.data_filename), **kwargs_save)
-        self.mask_clouds.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
+        self.data.save(outpath_data, **kwargs_save)
+        self.mask_clouds.save(outpath_mask_clouds, **kwargs_save)
 
         # TODO VNIR and SWIR
         # self.deadpixelmap.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
         self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
 
-        self.generate_quicklook(bands2use=self.meta.preview_bands_vnir)\
-            .save(path.join(product_dir, self.meta.quicklook_filename_vnir), **kwargs_save)
-        self.generate_quicklook(bands2use=self.meta.preview_bands_swir)\
-            .save(path.join(product_dir, self.meta.quicklook_filename_swir), **kwargs_save)
+        self.generate_quicklook(bands2use=self.meta.preview_bands_vnir).save(outpath_quicklook_vnir, **kwargs_save)
+        self.generate_quicklook(bands2use=self.meta.preview_bands_swir).save(outpath_quicklook_swir, **kwargs_save)
 
         # TODO remove GDAL's *.aux.xml files?
 
         # save metadata
+        self.meta.add_product_fileinformation(filepaths=outpaths)
         metadata_string = self.meta.to_XML()
-        metadata_outpath = path.join(product_dir, self.meta.metaxml_filename)
-        with open(metadata_outpath, 'w') as metaF:
-            self.logger.info("Writing metdata to %s" % metadata_outpath)
+
+        with open(outpath_meta, 'w') as metaF:
+            self.logger.info("Writing metdata to %s" % outpath_meta)
             metaF.write(metadata_string)
 
         self.logger.info("L2A product successfully written!")

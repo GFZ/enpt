@@ -592,6 +592,11 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self._meta_l1b = meta_l1b
         self.logger = logger or logging.getLogger()
 
+        # defaults
+        self.band_means = None  # type: np.ndarray # band-wise means in unscaled values (percent in case of reflectance)
+        self.band_stds = None  # type: np.ndarray # band-wise standard deviations in unscaled values
+        self.fileinfos = []  # type: list # file informations for each file beloning to the EnMAP L2A product
+
         self.proc_level = 'L2A'
         self.observation_datetime = meta_l1b.observation_datetime  # type: datetime  # Date and Time of observation
         # FIXME VZA may be negative in DLR data
@@ -681,6 +686,37 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
                 (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
 
+    def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
+        R, C, B = datastack_vnir_swir.shape
+        # NOTE:  DEVIDE by gains to reflectance in percent
+        self.band_means = np.mean(datastack_vnir_swir.reshape(1, R * C, B), axis=1) / self.gains
+        self.band_stds = np.mean(datastack_vnir_swir.reshape(1, R * C, B), axis=1) / self.gains
+
+    def add_product_fileinformation(self, filepaths: List[str], sizes: List[int] = None, versions: List[str] = None):
+        self.fileinfos = []
+
+        for i, fp in enumerate(filepaths):
+            ismeta = fp.endswith('METADATA.XML')
+            if not os.path.exists(fp):
+                if ismeta:
+                    pass  # does not yet exist
+                else:
+                    raise FileNotFoundError(fp)
+
+            ext = os.path.splitext(fp)[1]
+            fileinfo_dict = dict(
+                name=os.path.basename(fp),
+                size=sizes[i] if sizes else int(os.path.getsize(fp) / 1024) if not ismeta else '',
+                version=versions[i] if versions else '',
+                format='binary' if ext in ['.GEOTIFF',
+                                           '.BSQ',
+                                           '.BIL',
+                                           '.BIP',
+                                           '.JPEG2000'] else 'xml' if ext == '.XML' else 'NA'
+            )
+
+            self.fileinfos.append(fileinfo_dict)
+
     def to_XML(self):
         xml = ElementTree.parse(self._meta_l1b.path_xml).getroot()
 
@@ -692,12 +728,18 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.logger.warning('Currently, the L2A metadata XML file does not contain all relevant keys and contains '
                             'not updated values!')  # FIXME
 
-        # metadata
+        ############
+        # metadata #
+        ############
+
         xml.find("metadata/schema/processingLevel").text = self.proc_level
         xml.find("metadata/name").text = self.metaxml_filename
         # xml.find("metadata/comment").text = 'EnMAP Level 0 Product of datatake 987'  # FIXME hardcoded
 
-        # processing
+        ##############
+        # processing #
+        ##############
+
         xml.find("processing/terrainCorrection").text = 'Yes'  # FIXME hardcoded {Yes, No}
         xml.find("processing/ozoneValue").text = 'NA'  # FIXME {[200-500], NA}
         xml.find("processing/season").text = 'NA'  # FIXME {summer, winter, NA}
@@ -713,19 +755,31 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         xml.find("processing/bandInterpolation").text = 'NA'  # FIXME hardcoded {Yes, No}
         xml.find("processing/waterType").text = 'NA'  # FIXME hardcoded {Clear, Turbid, Highly_Turbid, NA}
 
-        # base
+        ########
+        # base #
+        ########
+
         # TODO update corner coordinates? DLR just uses the same coordinates like in L1B
         # xml.find("base/spatialCoverage" % lbl).text =
         xml.find("base/format").text = 'ENMAP_%s' % self.proc_level
+        xml.find("base/level").text = self.proc_level
         xml.find("base/size").text = 'NA'  # FIXME
-        xml.find("base/size").text = self.proc_level
 
-        # specific
+        ############
+        # specific #
+        ############
+
         xml.find("specific/code").text = self.proc_level
-        # TODO update specific/bandCharacterisation/GainOfBand
-        # TODO update specific/bandCharacterisation/OffsetOfBand
+        bi = "specific/bandCharacterisation/bandID/"
+        for ele, gain in zip(xml.findall(bi + "GainOfBand"), self.gains):
+            ele.text = str(gain)
+        for ele, offset in zip(xml.findall(bi + "OffsetOfBand"), self.offsets):
+            ele.text = str(offset)
 
-        # product
+        ###########
+        # product #
+        ###########
+
         for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
             lbl = L2A_product_props_DLR['xml_detector_label'][detName]
             # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
@@ -741,14 +795,75 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             xml.find("product/quicklook/%s/size" % lbl).text = 'NA'  # FIXME
             xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(self.nrows)
             xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(self.ncols)
-        # TODO update product/productFileInformation/name
-        # TODO update product/productFileInformation/size
+
+        # productFileInformation
+        ########################
+
+        if not self.fileinfos:
+            raise ValueError('Product file informations must be added before writing metadata. '
+                             'Call add_product_fileinformation() before!')
+
+        # get L1B product file information
+        l1b_fileinfos = xmlSubtree2dict(xml, 'product/productFileInformation/')
+
+        # clear L1B file information in XML
+        pFI_root = xml.findall('product/productFileInformation')[0]
+        pFI_root.clear()
+        pFI_root.text = '\n' + ' ' * 6  # TODO switch to lxml to get rid of this?
+        pFI_root.tail = '\n' + ' ' * 4
+
+        # recreate sub-elements for productFileInformation according to L2A file information
+        for i, fileInfo in enumerate(self.fileinfos):
+            fn_l1b_exp = fileInfo['name'].replace('L2A', '*').replace('-SPECTRAL_IMAGE', '-SPECTRAL_IMAGE_VNIR')
+            l1b_fileInfo = [fI for fI in l1b_fileinfos.values()
+                            if fnmatch.fnmatch(fI['name'], fn_l1b_exp)]
+            if l1b_fileInfo:
+                # TODO update file size of METADATA.XML (has not been written yet)
+                fileInfo['size'] = fileInfo['size'] or l1b_fileInfo[0]['size']
+                fileInfo['version'] = fileInfo['version'] or l1b_fileInfo[0]['version']
+            else:
+                # FIXME if no L1B equivalent is found for the file to be written, the file version will be empty ('')
+                pass
+
+            sub = ElementTree.SubElement(pFI_root, 'file', number=str(i))
+            sub.text = '\n' + ' ' * 8
+            sub.tail = '\n' + ' ' * 6
+
+            for k, kw, tl in zip(['name', 'size', 'version', 'format'], [{}, {'unit': 'kbytes'}, {}, {}], [8, 8, 8, 6]):
+                ele = ElementTree.SubElement(sub, k, **kw)
+                ele.text = str(fileInfo[k])
+                ele.tail = '\n' + ' ' * tl
+
         # TODO update product/ortho/projection
         # TODO update product/ortho/resolution
         # TODO update product/ortho/resampling
-        # TODO update product/bandStatistics/meanReflectance
-        # TODO update product/bandStatistics/stdDeviation
+
+        # band statistics
+        #################
+
+        if self.band_means is None or self.band_stds is None:
+            raise ValueError('Band statistics have not yet been computed. Compute them first by calling '
+                             'add_band_statistics()!')
+
+        bs = "specific/bandStatistics/bandID/"
+        for ele, mean in zip(xml.findall(bs + "meanReflectance"), self.band_means):
+            ele.text = str(mean)
+        for ele, std in zip(xml.findall(bs + "stdDeviation"), self.band_stds):
+            ele.text = str(std)
 
         xml_string = ElementTree.tostring(xml, encoding='unicode')
 
         return xml_string
+
+
+def xmlSubtree2dict(xml_root, path_subtree) -> OrderedDict:
+    outDict = OrderedDict()
+    allEle = xml_root.findall(path_subtree)
+
+    for ele in allEle:
+        eleKey = '%s_%s' % (ele.tag, ele.get('number'))
+        outDict[eleKey] = dict()
+        for subele in ele:
+            outDict[eleKey][subele.tag] = subele.text
+
+    return outDict
