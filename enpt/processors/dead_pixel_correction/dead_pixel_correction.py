@@ -4,11 +4,12 @@
 Performs the Dead Pixel Correction using a linear interpolation in spectral dimension.
 """
 from typing import Union
+from numbers import Number  # noqa: F401
 import logging
 from tqdm import tqdm
 
 import numpy as np
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, interp1d
 from geoarray import GeoArray
 
 
@@ -73,7 +74,7 @@ class Dead_Pixel_Corrector(object):
             # spatial interpolation (fallback) #
             ####################################
 
-            # NOTE: this is done first, because spectral interpolation needs the information on the outermost pixels
+            # NOTE: this is done first, because spectral interpolation needs the information of the outermost pixels
 
             for band, column in np.argwhere(deadcolumn_map):
 
@@ -139,16 +140,32 @@ class Dead_Pixel_Corrector(object):
 
         return image2correct
 
+    def _interpolate_nodata_spectrally(self, image2correct: GeoArray, deadpixel_map: GeoArray, progress=False):
+        assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
+        if deadpixel_map.shape != image2correct.shape:
+            raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
+
+        image_corrected = interp_nodata_along_axis(image2correct, axis=2, nodata=deadpixel_map[:],
+                                                   method=self.interp_alg, fill_value='extrapolate',
+                                                   progress=progress)
+
+        return image_corrected
+
     def _correct_using_3D_deadpixelmap(self,
                                        image2correct: GeoArray,
                                        deadpixel_map: GeoArray,
                                        progress=False):
-        # TODO implement that
         assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
+        if deadpixel_map.shape != image2correct.shape:
+            raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
 
-        self.logger.warning('Dead pixel correction skipped. Currently a dead pixel correction based on a 3D dead pixel '
-                            'map has not been implemented.')
-        return image2correct
+        if self.algorithm == 'spectral':
+            image_corrected = interp_nodata_along_axis(image2correct, axis=2, nodata=deadpixel_map[:],
+                                                       method=self.interp_alg, fill_value='extrapolate')
+        else:
+            raise NotImplementedError("Currently only the algorithm 'spectral' is implemented.")
+
+        return image_corrected
 
     def correct(self, image2correct: Union[np.ndarray, GeoArray], deadpixel_map: Union[np.ndarray, GeoArray],
                 progress=False):
@@ -158,10 +175,112 @@ class Dead_Pixel_Corrector(object):
 
         if 1 in list(np.unique(deadpixel_map)):
             if deadpixel_map.ndim == 2:
-                return self._correct_using_2D_deadpixelmap(image2correct, deadpixel_map, progress)
+                deadcolumn_map = deadpixel_map
+
+                # compute dead pixel percentage
+                prop = np.any(deadcolumn_map, axis=0).sum() * image2correct.shape[0] / np.dot(*image2correct.shape[:2])
+
+                # convert 2D deadcolumn_map to 3D deadpixel_map
+                B, C = deadcolumn_map.shape
+                deadpixel_map = np.empty((image2correct.shape[0], C, B), np.bool)
+                deadpixel_map[:, :, :] = deadcolumn_map.T
+
             else:
-                return self._correct_using_3D_deadpixelmap(image2correct, deadpixel_map, progress)
+                # compute dead pixel percentage
+                prop = np.any(deadpixel_map, axis=2).sum() / np.dot(*image2correct.shape[:2])
+
+            self.logger.info('Percentage of defective pixels: %.2f' % (prop * 100))
+
+            # run correction
+            if self.algorithm == 'spectral':
+                return self._interpolate_nodata_spectrally(image2correct, deadpixel_map, progress=progress)
+            else:
+                raise NotImplementedError("Currently only the algorithm 'spectral' is implemented.")
 
         else:
             self.logger.info("Dead pixel correction skipped because dead pixel mask labels no pixels as 'defective'.")
             return image2correct
+
+
+# def interp(data_2d: np.ndarray, badmask_full: np.ndarray, method, fill_value, progress):
+#     for row in tqdm(np.argwhere(np.any(badmask_full, axis=1)).flatten(), disable=False if progress else True):
+#         data_row = data_2d[row, :]
+#         badmask_row = badmask_full[row, :]
+#         goodpos = np.argwhere(~badmask_row).flatten()
+#         badpos = np.argwhere(badmask_row).flatten()
+#         if goodpos.size > 1:
+#             data_2d[row, :][badpos] = interp1d(goodpos, data_row[goodpos],
+#                                                kind=method, fill_value=fill_value, bounds_error=False)(badpos)
+#         else:
+#             pass
+#
+#     return data_2d
+
+
+def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
+                                nodata: Union[np.ndarray, Number] = np.nan,
+                                method='linear', fill_value='extrapolate', progress=False):
+    if data_2d.ndim != 2:
+        raise ValueError('Expected a 2D array. Received a %dD array.' % data_2d.ndim)
+    if axis > data_2d.ndim:
+        raise ValueError("axis=%d is out of bounds for data with %d dimensions." % (axis, data_2d.ndim))
+
+    data_2d = data_2d if axis == 1 else data_2d.T
+
+    if isinstance(nodata, np.ndarray):
+        badmask_full = nodata if axis == 1 else nodata.T
+
+        if badmask_full.shape != data_2d.shape:
+            raise ValueError('No-data mask and data must have the same shape.')
+
+    else:
+        badmask_full = ~np.isfinite(data_2d) if ~np.isfinite(nodata) else data_2d == nodata
+
+    for row in tqdm(np.argwhere(np.any(badmask_full, axis=1)).flatten(), disable=False if progress else True):
+        data_row = data_2d[row, :]
+        badmask_row = badmask_full[row, :]
+        goodpos = np.argwhere(~badmask_row).flatten()
+        badpos = np.argwhere(badmask_row).flatten()
+        if goodpos.size > 1:
+            data_2d[row, :][badpos] = interp1d(goodpos, data_row[goodpos],
+                                               kind=method, fill_value=fill_value, bounds_error=False)(badpos)
+        else:
+            pass
+
+    # data_2d = interp(data_2d, badmask_full, method, fill_value, progress)
+
+    return data_2d if axis == 1 else data_2d.T
+
+
+def interp_nodata_along_axis(data, axis=0, nodata: Union[np.ndarray, Number] = np.nan,
+                             method='linear', fill_value='extrapolate', progress=False):
+    assert axis <= 2
+    if data.ndim not in [2, 3]:
+        raise ValueError('Expected a 2D or 3D array. Received a %dD array.' % data.ndim)
+    if isinstance(nodata, np.ndarray) and nodata.shape != data.shape:
+        raise ValueError('No-data mask and data must have the same shape.')
+
+    kw = dict(method=method, fill_value=fill_value, progress=progress)
+
+    if data.ndim == 2:
+        return interp_nodata_along_axis_2d(data, axis=axis, nodata=nodata, **kw)
+
+    else:
+        def reshape_input(In):
+            R, C, B = In.shape
+            return \
+                In.reshape(C, R * B) if axis == 0 else \
+                np.transpose(In, axes=[1, 0, 2]).reshape(C, R * B).T if axis == 1 else \
+                In.reshape(R * C, B)
+
+        def reshape_output(out):
+            return \
+                out.reshape(data.shape) if axis in [0, 2] else \
+                np.transpose(out.T.reshape(data.shape), axes=[1, 0, 2])
+
+        return \
+            reshape_output(
+                interp_nodata_along_axis_2d(
+                    data_2d=reshape_input(data),
+                    nodata=reshape_input(nodata) if isinstance(nodata, np.ndarray) else nodata,
+                    axis=axis if axis != 2 else 1, **kw))
