@@ -202,21 +202,6 @@ class Dead_Pixel_Corrector(object):
             return image2correct
 
 
-# def interp(data_2d: np.ndarray, badmask_full: np.ndarray, method, fill_value, progress):
-#     for row in tqdm(np.argwhere(np.any(badmask_full, axis=1)).flatten(), disable=False if progress else True):
-#         data_row = data_2d[row, :]
-#         badmask_row = badmask_full[row, :]
-#         goodpos = np.argwhere(~badmask_row).flatten()
-#         badpos = np.argwhere(badmask_row).flatten()
-#         if goodpos.size > 1:
-#             data_2d[row, :][badpos] = interp1d(goodpos, data_row[goodpos],
-#                                                kind=method, fill_value=fill_value, bounds_error=False)(badpos)
-#         else:
-#             pass
-#
-#     return data_2d
-
-
 def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
                                 nodata: Union[np.ndarray, Number] = np.nan,
                                 method='linear', fill_value='extrapolate', progress=False):
@@ -236,18 +221,27 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
     else:
         badmask_full = ~np.isfinite(data_2d) if ~np.isfinite(nodata) else data_2d == nodata
 
-    for row in tqdm(np.argwhere(np.any(badmask_full, axis=1)).flatten(), disable=False if progress else True):
-        data_row = data_2d[row, :]
-        badmask_row = badmask_full[row, :]
-        goodpos = np.argwhere(~badmask_row).flatten()
-        badpos = np.argwhere(badmask_row).flatten()
-        if goodpos.size > 1:
-            data_2d[row, :][badpos] = interp1d(goodpos, data_row[goodpos],
-                                               kind=method, fill_value=fill_value, bounds_error=False)(badpos)
-        else:
-            pass
+    # call 1D interpolation vectorized
+    #   => group the dataset by rows that have nodata at the same column position
+    #   => remember the row positions, call the intpolation for these rows at once (vectorized)
+    #      and substitute the original data  at the previously grouped row positions
+    rowsNrs2interp = np.argwhere(np.any(badmask_full, axis=1)).flatten()
+    badmask_sub2interp = badmask_full[rowsNrs2interp, :]
 
-    # data_2d = interp(data_2d, badmask_full, method, fill_value, progress)
+    for col in range(data_2d.shape[1]):
+        rowNrs_with_nodata_at_col = rowsNrs2interp[badmask_sub2interp[:, col]]  # badmask (bool) -> col works as mask
+
+        # TODO remove those rows that also have nodata in other cols
+
+        data_2d_sub_with_nodata_at_col = data_2d[rowNrs_with_nodata_at_col, :]
+        badpos = col
+        goodpos = np.delete(np.arange(data_2d.shape[1]), badpos)
+
+        data_2d_sub_with_nodata_at_col[:, badpos] = \
+            interp1d(goodpos, data_2d_sub_with_nodata_at_col[:, goodpos],
+                     axis=1, kind=method, fill_value=fill_value, bounds_error=False)(badpos)
+
+        data_2d[rowNrs_with_nodata_at_col, :] = data_2d_sub_with_nodata_at_col
 
     return data_2d if axis == 1 else data_2d.T
 
