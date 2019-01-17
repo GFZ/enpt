@@ -9,6 +9,24 @@ New features:
 * TBD
 
 
+0.7.0 (coming soon)
+-------------------
+
+New features / improvements:
+
+* Added a lot of software tests
+* Added output writer for EnMAP Level-2 data
+* Added metadata class for EnMAP Level-2 data
+* Revised dead pixel corretion (now 40-50 times faster; added spatial interpolation)
+* Added support for dead pixel correction based on 3D dead pixel maps
+* Added orthorectification module
+* Added support for 3D (band-wise) geometry layers
+* Added 3D geolayer generation based on band-wise RPC coefficients.
+* Updated L1B reader to match DLR L1B format
+* Added subsets of official DLR test data
+* Improved DEM processor (added overlap and geographic datum check)
+
+
 0.6.0 (2018-12-13)
 -------------------
 
