@@ -6,7 +6,6 @@ Performs the Dead Pixel Correction using a linear interpolation in spectral dime
 from typing import Union
 from numbers import Number  # noqa: F401
 import logging
-from tqdm import tqdm
 
 import numpy as np
 import numpy_indexed as npi
@@ -17,7 +16,7 @@ from geoarray import GeoArray
 
 
 class Dead_Pixel_Corrector(object):
-    def __init__(self, algorithm: str = 'spectral', interp: str = 'linear', filter_halfwidth: int = 1, CPUs: int = None,
+    def __init__(self, algorithm: str = 'spectral', interp: str = 'linear', CPUs: int = None,
                  logger: logging.Logger = None):
         """Get an instance of Dead_Pixel_Corrector.
 
@@ -25,14 +24,11 @@ class Dead_Pixel_Corrector(object):
                                     'spectral': interpolate in the spectral domain
                                     'spatial':  interpolate in the spatial domain
         :param interp:              interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')
-        :param filter_halfwidth:    half width of interpolation filter
-                                    (determines the number of adjacant pixels to be respected in interpolation)
         :param CPUs:                number of CPUs to use for interpolation (only relevant if algorithm = 'spatial')
         :param logger:
         """
         self.algorithm = algorithm
         self.interp_alg = interp
-        self.fhw = filter_halfwidth
         self.CPUs = CPUs or cpu_count()
         self.logger = logger or logging.getLogger()
 
@@ -50,100 +46,6 @@ class Dead_Pixel_Corrector(object):
                                  'shape. Received %s.' % (image2correct.shape, deadpixel_map.shape))
         else:
             raise ValueError('Unexpected number of dimensions of dead column map.')
-
-    def _correct_using_2D_deadpixelmap(self,
-                                       image2correct: GeoArray,
-                                       deadcolumn_map: GeoArray,
-                                       progress=False):
-        # TODO speed this up
-        """
-
-        NOTE: dead columns in the first or the last band are unmodified.
-
-        :param image2correct:
-        :param deadcolumn_map:
-        :param progress:        whether to show progress bars
-        :return:
-        """
-        assert deadcolumn_map.ndim == 2, "2D dead column map expected."
-
-        #################
-        # Interpolation #
-        #################
-
-        if self.algorithm == 'spectral':
-            # set bands where no spectral interpolation is possible -> spatial interpolation
-            band_nbrs_spatial_interp = \
-                list(range(self.fhw)) + list(range(image2correct.bands - 1, image2correct.bands - self.fhw - 1, -1))
-
-            # spatial interpolation (fallback) #
-            ####################################
-
-            # NOTE: this is done first, because spectral interpolation needs the information of the outermost pixels
-
-            for band, column in np.argwhere(deadcolumn_map):
-
-                # only first or last bands (number depends on filter half width)
-                if band in band_nbrs_spatial_interp:
-                    if column in [0, image2correct.shape[1] - 1]:
-                        # currently, dead pixels in the outermost bands at the outermost columns are not corrected
-                        self.logger.warning('Unable to correct dead column %s in band %s.' % (column, band))
-                    else:
-                        self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
-
-                        band_data_orig = image2correct[:, column - 1:column + 2, band]  # target and adjacent columns
-                        band_data_float = band_data_orig.astype(np.float)
-                        band_data_float[:, 1] = np.NaN
-
-                        x, y = np.indices(band_data_float.shape)
-                        interp = np.array(band_data_float)
-
-                        interp[np.isnan(interp)] = \
-                            griddata(np.array([x[~np.isnan(band_data_float)],
-                                               y[~np.isnan(band_data_float)]]).T,  # points we know
-                                     band_data_float[~np.isnan(band_data_float)],  # values we know
-                                     np.array([x[np.isnan(band_data_float)],
-                                               y[np.isnan(band_data_float)]]).T,  # points to interpolate
-                                     method=self.interp_alg)
-
-                        # copy corrected columns to image2correct
-                        interp[np.isnan(interp)] = band_data_orig[np.isnan(interp)]
-                        image2correct[:, column - 1:column + 2, band] = interp.astype(image2correct.dtype)
-
-            # spectral interpolation #
-            #########################
-
-            for band, column in tqdm(np.argwhere(deadcolumn_map), disable=False if progress else True):
-                if band in band_nbrs_spatial_interp:
-                    continue  # already interpolated spatially above
-
-                # any other band
-                else:
-                    self.logger.debug('Correcting dead column %s in band %s.' % (column, band))
-
-                    column_data_orig = image2correct[:, column, band - self.fhw:band + self.fhw + 1]
-                    column_data_float = column_data_orig.astype(np.float)
-                    column_data_float[:, self.fhw] = np.NaN
-
-                    x, y = np.indices(column_data_float.shape)
-                    interp = np.array(column_data_float)
-
-                    interp[np.isnan(interp)] = \
-                        griddata(np.array([x[~np.isnan(column_data_float)],
-                                           y[~np.isnan(column_data_float)]]).T,  # points we know
-                                 column_data_float[~np.isnan(column_data_float)],  # values we know
-                                 np.array([x[np.isnan(column_data_float)],
-                                           y[np.isnan(column_data_float)]]).T,  # points to interpolate
-                                 method=self.interp_alg)
-
-                    # copy corrected columns to image2correct
-                    interp[np.isnan(interp)] = column_data_orig[np.isnan(interp)]
-                    image2correct[:, column, band - self.fhw:band + self.fhw + 1] = interp.astype(image2correct.dtype)
-
-        else:
-            raise NotImplementedError("Currently only the algorithm 'spectral' is implemented.")
-
-        return image2correct
 
     def _interpolate_nodata_spectrally(self, image2correct: GeoArray, deadpixel_map: GeoArray):
         assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
@@ -184,6 +86,12 @@ class Dead_Pixel_Corrector(object):
         return image2correct
 
     def correct(self, image2correct: Union[np.ndarray, GeoArray], deadpixel_map: Union[np.ndarray, GeoArray]):
+        """Run the dead pixel correction.
+
+        :param image2correct:   image to correct
+        :param deadpixel_map:   dead pixel map (2D (bands x columns) or 3D (rows x columns x bands)
+        :return:    corrected image
+        """
         image2correct = GeoArray(image2correct) if not isinstance(image2correct, GeoArray) else image2correct
 
         self._validate_inputs(image2correct, deadpixel_map)
@@ -193,7 +101,9 @@ class Dead_Pixel_Corrector(object):
                 deadcolumn_map = deadpixel_map
 
                 # compute dead pixel percentage
-                prop = np.any(deadcolumn_map, axis=0).sum() * image2correct.shape[0] / np.dot(*image2correct.shape[:2])
+                prop_dp_anyband = \
+                    np.any(deadcolumn_map, axis=0).sum() * image2correct.shape[0] / np.dot(*image2correct.shape[:2])
+                prop_dp = deadcolumn_map.sum() * image2correct.shape[0] / image2correct.size
 
                 # convert 2D deadcolumn_map to 3D deadpixel_map
                 B, C = deadcolumn_map.shape
@@ -202,9 +112,11 @@ class Dead_Pixel_Corrector(object):
 
             else:
                 # compute dead pixel percentage
-                prop = np.any(deadpixel_map, axis=2).sum() / np.dot(*image2correct.shape[:2])
+                prop_dp_anyband = np.any(deadpixel_map, axis=2).sum() / np.dot(*image2correct.shape[:2])
+                prop_dp = deadpixel_map.sum() / image2correct.size
 
-            self.logger.info('Percentage of defective pixels: %.2f' % (prop * 100))  # TODO
+            self.logger.info('Percentage of defective pixels: %.2f' % (prop_dp * 100))
+            self.logger.debug('Percentage of pixel with a defect in any band: %.2f' % (prop_dp_anyband * 100))
 
             # run correction
             if self.algorithm == 'spectral':
@@ -217,9 +129,32 @@ class Dead_Pixel_Corrector(object):
             return image2correct
 
 
+def _get_baddata_mask(data: np.ndarray, nodata: Union[np.ndarray, Number] = np.nan, transpose_inNodata: bool = False):
+    if isinstance(nodata, np.ndarray):
+        badmask = nodata.T if transpose_inNodata else nodata
+
+        if badmask.shape != data.shape:
+            raise ValueError('No-data mask and data must have the same shape.')
+
+    else:
+        badmask = ~np.isfinite(data) if ~np.isfinite(nodata) else data == nodata
+
+    return badmask
+
+
 def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
                                 nodata: Union[np.ndarray, Number] = np.nan,
-                                method='linear', fill_value='extrapolate'):
+                                method: str = 'linear', fill_value: Union[float, str] = 'extrapolate'):
+    """Interpolate a 2D array along the given axis (based on scipy.interpolate.interp1d).
+
+    :param data_2d:         data to interpolate
+    :param axis:            axis to interpolate (0: along columns; 1: along rows)
+    :param nodata:          nodata array in the shape of data or nodata value
+    :param method:          interpolation method (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
+    :param fill_value:      value to fill into positions where no interpolation is possible
+                            - if 'extrapolate': extrapolate the missing values
+    :return:    interpolated array
+    """
     if data_2d.ndim != 2:
         raise ValueError('Expected a 2D array. Received a %dD array.' % data_2d.ndim)
     if axis > data_2d.ndim:
@@ -227,14 +162,7 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
 
     data_2d = data_2d if axis == 1 else data_2d.T
 
-    if isinstance(nodata, np.ndarray):
-        badmask_full = nodata if axis == 1 else nodata.T
-
-        if badmask_full.shape != data_2d.shape:
-            raise ValueError('No-data mask and data must have the same shape.')
-
-    else:
-        badmask_full = ~np.isfinite(data_2d) if ~np.isfinite(nodata) else data_2d == nodata
+    badmask_full = _get_baddata_mask(data_2d, nodata, transpose_inNodata=axis == 0)
 
     # call 1D interpolation vectorized
     #   => group the dataset by rows that have nodata at the same column position
@@ -262,7 +190,17 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
 
 
 def interp_nodata_along_axis(data, axis=0, nodata: Union[np.ndarray, Number] = np.nan,
-                             method='linear', fill_value='extrapolate'):
+                             method: str = 'linear', fill_value: Union[float, str] = 'extrapolate'):
+    """Interpolate a 2D or 3D array along the given axis (based on scipy.interpolate.interp1d).
+
+    :param data:            data to interpolate
+    :param axis:            axis to interpolate (0: along columns; 1: along rows, 2: along bands)
+    :param nodata:          nodata array in the shape of data or nodata value
+    :param method:          interpolation method (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
+    :param fill_value:      value to fill into positions where no interpolation is possible
+                            - if 'extrapolate': extrapolate the missing values
+    :return:    interpolated array
+    """
     assert axis <= 2
     if data.ndim not in [2, 3]:
         raise ValueError('Expected a 2D or 3D array. Received a %dD array.' % data.ndim)
@@ -294,33 +232,30 @@ def interp_nodata_along_axis(data, axis=0, nodata: Union[np.ndarray, Number] = n
                     method=method, fill_value=fill_value))
 
 
-def interp_nodata_spatially_2d(data_2d: np.ndarray, axis=0, nodata: Union[np.ndarray, Number] = np.nan,
-                               method='linear', fill_value=np.nan, implementation='pandas'):
-    """
+def interp_nodata_spatially_2d(data_2d: np.ndarray, axis: int = 0, nodata: Union[np.ndarray, Number] = np.nan,
+                               method: str = 'linear', fill_value: float = np.nan,
+                               implementation: str = 'pandas') -> np.ndarray:
+    """Interpolate a 2D array spatially.
 
-    NOTE: If data_2d contains NaN values unlabelled by nodata array, they are also overwritten in the pandas
-          implementation.
+    NOTE: If data_2d contains NaN values that are unlabelled by a given nodata array,
+          they are also overwritten in the pandas implementation.
 
-    :param data_2d:
-    :param axis:
-    :param nodata:
-    :param method:
-    :param fill_value:
-    :param implementation:
-    :return:
+    :param data_2d:         data to interpolate
+    :param axis:            axis to interpolate (0: along columns; 1: along rows)
+    :param nodata:          nodata array in the shape of data or nodata value
+    :param method:          interpolation method
+                            - if implementation='scipy': ‘linear’, ‘nearest’, ‘cubic’
+                            - if implementation='pandas': ‘linear’, ‘nearest’, 'slinear’, ‘quadratic’, ‘cubic’, etc.
+    :param fill_value:      value to fill into positions where no interpolation is possible
+    :param implementation:  'scipy': interpolation based on scipy.interpolate.griddata
+                            'pandas': interpolation based on pandas.core.resample.Resampler.interpolate
+    :return:    interpolated array
     """
     assert axis < 2
     if data_2d.ndim != 2:
         raise ValueError('Expected a 2D array. Received a %dD array.' % data_2d.ndim)
 
-    if isinstance(nodata, np.ndarray):
-        badmask_full = nodata
-
-        if badmask_full.shape != data_2d.shape:
-            raise ValueError('No-data mask and data must have the same shape.')
-
-    else:
-        badmask_full = ~np.isfinite(data_2d) if ~np.isfinite(nodata) else data_2d == nodata
+    badmask_full = _get_baddata_mask(data_2d, nodata)
 
     if badmask_full.any():
         if implementation == 'scipy':
@@ -340,7 +275,10 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray, axis=0, nodata: Union[np.nda
             data2int[badmask_full] = np.nan
 
             data_2d = np.array(DataFrame(data2int)
-                               .interpolate(method=method, axis=axis, fill_value=fill_value)).astype(data_2d.dtype)
+                               .interpolate(method=method, axis=axis)).astype(data_2d.dtype)
+
+            if fill_value:
+                data_2d[np.isnan(data_2d)] = fill_value
 
         else:
             raise ValueError(implementation, 'Unknown implementation.')
@@ -348,18 +286,26 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray, axis=0, nodata: Union[np.nda
     return data_2d
 
 
-def interp_nodata_spatially_3d(data_3d: np.ndarray, axis=0, nodata: Union[np.ndarray, Number] = np.nan,
-                               method='linear', fill_value=np.nan, implementation='pandas', CPUs: int = None):
+def interp_nodata_spatially_3d(data_3d: np.ndarray, axis: int = 0, nodata: Union[np.ndarray, Number] = np.nan,
+                               method: str = 'linear', fill_value: float = np.nan, implementation: str = 'pandas',
+                               CPUs: int = None) -> np.ndarray:
+    """Interpolate a 3D array spatially, band-for-band.
+
+    :param data_3d:         data to interpolate
+    :param axis:            axis to interpolate (0: along columns; 1: along rows)
+    :param nodata:          nodata array in the shape of data or nodata value
+    :param method:          interpolation method
+                            - if implementation='scipy': ‘linear’, ‘nearest’, ‘cubic’
+                            - if implementation='pandas': ‘linear’, ‘nearest’, 'slinear’, ‘quadratic’, ‘cubic’, etc.
+    :param fill_value:      value to fill into positions where no interpolation is possible
+    :param implementation:  'scipy': interpolation based on scipy.interpolate.griddata
+                            'pandas': interpolation based on pandas.core.resample.Resampler.interpolate
+    :param CPUs:            number of CPUs to use
+    :return:    interpolated array
+    """
     assert axis < 2
 
-    if isinstance(nodata, np.ndarray):
-        badmask_full = nodata
-
-        if badmask_full.shape != data_3d.shape:
-            raise ValueError('No-data mask and data must have the same shape.')
-
-    else:
-        badmask_full = ~np.isfinite(data_3d) if ~np.isfinite(nodata) else data_3d == nodata
+    badmask_full = _get_baddata_mask(data_3d, nodata)
 
     if CPUs > 1:
         with Pool(CPUs or cpu_count()) as pool:

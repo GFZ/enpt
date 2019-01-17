@@ -51,22 +51,29 @@ class Test_Dead_Pixel_Corrector(TestCase):
         self.assertNotEqual(np.mean(output[:, 2, 87]), 0)  # single dead column, last band
 
     def test_correct_using_2D_deadpixelmap_spectral(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_2D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
 
     def test_correct_using_3D_deadpixelmap_spectral(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_3D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
 
     def test_correct_using_2D_deadpixelmap_spatial(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear', filter_halfwidth=2)
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_2D)
+
+        # output assertions
+        self.validate_output_spectral_interp(corrected)
+
+    def test_correct_using_3D_deadpixelmap_spatial(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear')
+        corrected = DPC.correct(self.im, self.deadpixelmap_3D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
@@ -202,6 +209,6 @@ class Test_interp_nodata_spatially_2d(TestCase):
         with self.assertRaises(ValueError):
             interp_nodata_spatially_2d(np.array([1, 2, 3]))
         with self.assertRaises(ValueError):
-            interp_nodata_spatially_2d(self.get_data2d(), np.array([1, 2, 3]))
+            interp_nodata_spatially_2d(self.get_data2d(), nodata=np.array([1, 2, 3]))
         with self.assertRaises(ValueError):
             interp_nodata_spatially_2d(self.get_data2d(), implementation='invalid')
