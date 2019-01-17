@@ -8,6 +8,7 @@ channels: &id1
 dependencies:
   - python=3.*.*
   - numpy
+  - pandas
 
   # geoarray / py_tools_ds
   - pyqt

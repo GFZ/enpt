@@ -8,17 +8,16 @@ from geoarray import GeoArray
 from enpt.processors.dead_pixel_correction import \
     Dead_Pixel_Corrector, \
     interp_nodata_along_axis_2d, \
-    interp_nodata_along_axis
+    interp_nodata_along_axis, \
+    interp_nodata_spatially_2d
 
 
 class Test_Dead_Pixel_Corrector(TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
-        self.DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
-
         # create test data
-        self.im = np.random.randint(1, 10, (50, 1000, 88), np.int16)  # VNIR test size
+        self.im = np.random.randint(1, 10, (50, 1000, 88)).astype(np.float)  # VNIR test size
 
         # create 2D dead pixel map
         self.deadpixelmap_2D = np.zeros((self.im.shape[2], self.im.shape[1]), np.bool)
@@ -32,41 +31,45 @@ class Test_Dead_Pixel_Corrector(TestCase):
              [86, 50],  # second last band, same column
              [87, 50],  # last band, same column
              [87, 2]]:  # single dead column, last band
-            self.im[:, column, band] = 0
+            self.im[:, column, band] = np.nan
             self.deadpixelmap_2D[band, column] = 1
 
         # create 3D dead pixel map
-        self.deadpixelmap_3D = self.im == 0
+        self.deadpixelmap_3D = np.isnan(self.im)
 
-    def test_correct_using_2D_deadpixelmap(self):
-        corrected = self.DPC.correct(self.im, self.deadpixelmap_2D)
+    def validate_output_spectral_interp(self, output):
+        self.assertIsInstance(output, (GeoArray, np.ndarray))
+        self.assertEqual(self.im.shape, output.shape)
+        self.assertNotEqual(np.mean(output[:, 0, 0]), 0)  # first band, first column
+        self.assertNotEqual(np.mean(output[:, 2, 0]), 0)  # first band, any column
+        self.assertNotEqual(np.mean(output[:, 2, 1]), 0)  # second band, same column
+        self.assertNotEqual(np.mean(output[:, 4, 50]), 0)  # 2 adjacent bands
+        self.assertNotEqual(np.mean(output[:, 4, 10]), 0)  # 2 adjacent bands
+        self.assertNotEqual(np.mean(output[:, 20, 60]), 0)  # single dead column
+        self.assertNotEqual(np.mean(output[:, 50, 86]), 0)  # second last band, same column
+        self.assertNotEqual(np.mean(output[:, 50, 87]), 0)  # last band, same column
+        self.assertNotEqual(np.mean(output[:, 2, 87]), 0)  # single dead column, last band
+
+    def test_correct_using_2D_deadpixelmap_spectral(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
+        corrected = DPC.correct(self.im, self.deadpixelmap_2D)
 
         # output assertions
-        self.assertIsInstance(corrected, (GeoArray, np.ndarray))
-        # self.assertEqual(np.mean(self.im[:, 0, 0]), 0)  # first band, first column (currently not corrected)
-        self.assertNotEqual(np.mean(self.im[:, 2, 0]), 0)  # first band, any column
-        self.assertNotEqual(np.mean(self.im[:, 2, 1]), 0)  # second band, same column
-        self.assertNotEqual(np.mean(self.im[:, 4, 50]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 4, 10]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 20, 60]), 0)  # single dead column
-        self.assertNotEqual(np.mean(self.im[:, 50, 86]), 0)  # second last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 50, 87]), 0)  # last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 2, 87]), 0)  # single dead column, last band
+        self.validate_output_spectral_interp(corrected)
 
-    def test_correct_using_3D_deadpixelmap(self):
-        corrected = self.DPC.correct(self.im, self.deadpixelmap_3D)
+    def test_correct_using_3D_deadpixelmap_spectral(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
+        corrected = DPC.correct(self.im, self.deadpixelmap_3D)
 
         # output assertions
-        self.assertIsInstance(corrected, (GeoArray, np.ndarray))
-        self.assertEqual(self.im.shape, corrected.shape)
-        self.assertNotEqual(np.mean(self.im[:, 2, 0]), 0)  # first band, any column
-        self.assertNotEqual(np.mean(self.im[:, 2, 1]), 0)  # first band, same column
-        self.assertNotEqual(np.mean(self.im[:, 4, 50]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 4, 10]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 20, 60]), 0)  # single dead column
-        self.assertNotEqual(np.mean(self.im[:, 50, 86]), 0)  # second last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 50, 87]), 0)  # last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 2, 87]), 0)  # single dead column, last band
+        self.validate_output_spectral_interp(corrected)
+
+    def test_correct_using_2D_deadpixelmap_spatial(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear', filter_halfwidth=2)
+        corrected = DPC.correct(self.im, self.deadpixelmap_2D)
+
+        # output assertions
+        self.validate_output_spectral_interp(corrected)
 
 
 class Test_interp_nodata_along_axis_2d(TestCase):
@@ -170,3 +173,35 @@ class Test_interp_nodata_along_axis(TestCase):
     def test_bad_args(self):
         with self.assertRaises(ValueError):
             interp_nodata_along_axis(np.array([1, 2, 3]))
+
+
+class Test_interp_nodata_spatially_2d(TestCase):
+    @staticmethod
+    def get_data2d():
+        return np.array([[0, 0, 2, 12],
+                         [3, np.nan, 5, np.nan],
+                         [np.nan, 20, 8, 3]])
+
+    def test_interpolation(self):
+        data_int_scipy = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
+                                                    fill_value=np.nan, implementation='scipy')
+        arr_exp_scipy = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [np.nan, 20, 8, 3]])
+        np.testing.assert_array_equal(data_int_scipy, arr_exp_scipy, 'Computed %s.' % data_int_scipy)
+
+        mask_nodata = ~np.isfinite(self.get_data2d())
+        data_int_scipy = interp_nodata_spatially_2d(self.get_data2d(), nodata=mask_nodata, method='linear',
+                                                    fill_value=np.nan, implementation='scipy')
+        np.testing.assert_array_equal(data_int_scipy, arr_exp_scipy, 'Computed %s.' % data_int_scipy)
+
+        data_int_pandas = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
+                                                     fill_value=np.nan, implementation='pandas')
+        arr_exp_pandas = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [3, 20, 8, 3]])
+        np.testing.assert_array_equal(data_int_pandas, arr_exp_pandas, 'Computed %s.' % data_int_pandas)
+
+    def test_bad_args(self):
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(np.array([1, 2, 3]))
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(self.get_data2d(), np.array([1, 2, 3]))
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(self.get_data2d(), implementation='invalid')
