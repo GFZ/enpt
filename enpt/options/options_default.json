@@ -54,9 +54,11 @@
             "run_processor": true,
             "algorithm": "spectral",  /*algorithm how to correct dead pixels
                                         'spectral': interpolate in the spectral domain
-                                        'spatial':  interpolate in the spatial domain
-                                        NOTE: currently, only the 'spectral' algorithm is implemented*/
-            "interpolation_method": "linear"  /*interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')*/
+                                        'spatial':  interpolate in the spatial domain*/
+            "interp_method_spectral": "linear",  /*spectral interpolation algorithm
+                                                   ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
+            "interp_method_spatial": "linear"  /*spatial interpolation algorithm
+                                                 ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
         },
 
         "orthorectification": {

@@ -17,7 +17,6 @@ from enpt.options.config import config_for_testing, config_for_testing_dlr
 
 class Test_EnPT_Controller(TestCase):
     def setUp(self):
-        config_for_testing['deadpix_P_algorithm'] = 'spatial'
         self.CTR = EnPT_Controller(**config_for_testing)
 
     def tearDown(self):

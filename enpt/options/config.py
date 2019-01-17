@@ -154,7 +154,8 @@ class EnPTConfig(object):
         # dead_pixel
         self.run_deadpix_P = gp('run_deadpix_P')
         self.deadpix_P_algorithm = gp('deadpix_P_algorithm')
-        self.deadpix_P_interp = gp('deadpix_P_interp')
+        self.deadpix_P_interp_spectral = gp('deadpix_P_interp_spectral')
+        self.deadpix_P_interp_spatial = gp('deadpix_P_interp_spatial')
 
         # orthorectification
         self.ortho_resampAlg = gp('ortho_resampAlg')

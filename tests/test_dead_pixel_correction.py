@@ -51,28 +51,28 @@ class Test_Dead_Pixel_Corrector(TestCase):
         self.assertNotEqual(np.mean(output[:, 2, 87]), 0)  # single dead column, last band
 
     def test_correct_using_2D_deadpixelmap_spectral(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear')
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp_spectral='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_2D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
 
     def test_correct_using_3D_deadpixelmap_spectral(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear')
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp_spectral='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_3D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
 
     def test_correct_using_2D_deadpixelmap_spatial(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear')
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp_spatial='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_2D)
 
         # output assertions
         self.validate_output_spectral_interp(corrected)
 
     def test_correct_using_3D_deadpixelmap_spatial(self):
-        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp='linear')
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp_spatial='linear')
         corrected = DPC.correct(self.im, self.deadpixelmap_3D)
 
         # output assertions
@@ -189,7 +189,7 @@ class Test_interp_nodata_spatially_2d(TestCase):
                          [3, np.nan, 5, np.nan],
                          [np.nan, 20, 8, 3]])
 
-    def test_interpolation(self):
+    def test_interpolation_scipy(self):
         data_int_scipy = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
                                                     fill_value=np.nan, implementation='scipy')
         arr_exp_scipy = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [np.nan, 20, 8, 3]])
@@ -200,6 +200,7 @@ class Test_interp_nodata_spatially_2d(TestCase):
                                                     fill_value=np.nan, implementation='scipy')
         np.testing.assert_array_equal(data_int_scipy, arr_exp_scipy, 'Computed %s.' % data_int_scipy)
 
+    def test_interpolation_pandas(self):
         data_int_pandas = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
                                                      fill_value=np.nan, implementation='pandas')
         arr_exp_pandas = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [3, 20, 8, 3]])

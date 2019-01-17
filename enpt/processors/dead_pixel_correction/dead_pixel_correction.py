@@ -16,19 +16,22 @@ from geoarray import GeoArray
 
 
 class Dead_Pixel_Corrector(object):
-    def __init__(self, algorithm: str = 'spectral', interp: str = 'linear', CPUs: int = None,
-                 logger: logging.Logger = None):
+    def __init__(self, algorithm: str = 'spectral', interp_spectral: str = 'linear', interp_spatial: str = 'linear',
+                 CPUs: int = None, logger: logging.Logger = None):
         """Get an instance of Dead_Pixel_Corrector.
 
         :param algorithm:           algorithm how to correct dead pixels
                                     'spectral': interpolate in the spectral domain
                                     'spatial':  interpolate in the spatial domain
-        :param interp:              interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')
+        :param interp_spectral:     spectral interpolation algorithm
+                                    (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
+        :param interp_spatial:      spatial interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')
         :param CPUs:                number of CPUs to use for interpolation (only relevant if algorithm = 'spatial')
         :param logger:
         """
         self.algorithm = algorithm
-        self.interp_alg = interp
+        self.interp_alg_spectral = interp_spectral
+        self.interp_alg_spatial = interp_spatial
         self.CPUs = CPUs or cpu_count()
         self.logger = logger or logging.getLogger()
 
@@ -53,7 +56,7 @@ class Dead_Pixel_Corrector(object):
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
 
         image_corrected = interp_nodata_along_axis(image2correct, axis=2, nodata=deadpixel_map[:],
-                                                   method=self.interp_alg, fill_value='extrapolate')
+                                                   method=self.interp_alg_spectral, fill_value='extrapolate')
 
         return image_corrected
 
@@ -66,7 +69,7 @@ class Dead_Pixel_Corrector(object):
         image_sub = image2correct[:, :, band_indices_with_nodata]
         deadpixel_map_sub = deadpixel_map[:, :, band_indices_with_nodata]
 
-        kw = dict(method=self.interp_alg, fill_value=np.nan, implementation='pandas', CPUs=self.CPUs)
+        kw = dict(method=self.interp_alg_spatial, fill_value=np.nan, implementation='pandas', CPUs=self.CPUs)
 
         # correct dead columns
         image_sub_interp = interp_nodata_spatially_3d(image_sub, axis=1, nodata=deadpixel_map_sub, **kw)
@@ -81,7 +84,7 @@ class Dead_Pixel_Corrector(object):
         # correct remaining nodata by spectral interpolation (e.g., outermost columns)
         if np.isnan(image2correct).any():
             image2correct = interp_nodata_along_axis(image2correct, axis=2, nodata=np.isnan(image2correct),
-                                                     method=self.interp_alg, fill_value='extrapolate')
+                                                     method=self.interp_alg_spectral, fill_value='extrapolate')
 
         return image2correct
 
