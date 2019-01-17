@@ -9,6 +9,7 @@ import logging
 from tqdm import tqdm
 
 import numpy as np
+import numpy_indexed as npi
 from scipy.interpolate import griddata, interp1d
 from geoarray import GeoArray
 
@@ -225,23 +226,23 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
     #   => group the dataset by rows that have nodata at the same column position
     #   => remember the row positions, call the intpolation for these rows at once (vectorized)
     #      and substitute the original data  at the previously grouped row positions
-    rowsNrs2interp = np.argwhere(np.any(badmask_full, axis=1)).flatten()
-    badmask_sub2interp = badmask_full[rowsNrs2interp, :]
+    groups_unique_rows = npi.group_by(badmask_full).split(np.arange(len(badmask_full)))
 
-    for col in range(data_2d.shape[1]):
-        rowNrs_with_nodata_at_col = rowsNrs2interp[badmask_sub2interp[:, col]]  # badmask (bool) -> col works as mask
+    for indices_unique_rows in groups_unique_rows:
+        badmask_grouped_rows = badmask_full[indices_unique_rows, :]
 
-        # TODO remove those rows that also have nodata in other cols
+        if np.any(badmask_grouped_rows[0, :]):
+            badpos = np.argwhere(badmask_grouped_rows[0, :]).flatten()
+            goodpos = np.delete(np.arange(data_2d.shape[1]), badpos)
 
-        data_2d_sub_with_nodata_at_col = data_2d[rowNrs_with_nodata_at_col, :]
-        badpos = col
-        goodpos = np.delete(np.arange(data_2d.shape[1]), badpos)
+            if goodpos.size > 1:
+                data_2d_grouped_rows = data_2d[indices_unique_rows]
 
-        data_2d_sub_with_nodata_at_col[:, badpos] = \
-            interp1d(goodpos, data_2d_sub_with_nodata_at_col[:, goodpos],
-                     axis=1, kind=method, fill_value=fill_value, bounds_error=False)(badpos)
+                data_2d_grouped_rows[:, badpos] = \
+                    interp1d(goodpos, data_2d_grouped_rows[:, goodpos],
+                             axis=1, kind=method, fill_value=fill_value, bounds_error=False)(badpos)
 
-        data_2d[rowNrs_with_nodata_at_col, :] = data_2d_sub_with_nodata_at_col
+                data_2d[indices_unique_rows, :] = data_2d_grouped_rows
 
     return data_2d if axis == 1 else data_2d.T
 

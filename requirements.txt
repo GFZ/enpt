@@ -9,3 +9,4 @@ tqdm
 utm
 git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 lxml
+numpy-indexed

@@ -45,6 +45,7 @@ dependencies:
     - tqdm
     - utm
     - lxml
+    - numpy-indexed
     - sphinx-argparse
     - pycodestyle<2.4.0  # version 2.4.0 causes ImportError: module 'pycodestyle' has no attribute 'break_around_binary_operator'
     - flake8
