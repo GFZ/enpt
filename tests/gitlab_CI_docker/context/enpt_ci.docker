@@ -9,7 +9,7 @@ ENV miniconda_dl 'Miniconda3-latest-Linux-x86_64.sh'
 # use miniconda 4.3.31 as workaround for "IsADirectoryError(21, 'Is a directory')" with version 4.4.10 (currently latest)
 # ENV miniconda_dl 'Miniconda3-4.3.31-Linux-x86_64.sh'
 ENV envconfig 'environment_enpt.yml'
-ENV git_lfs_v='2.4.1'
+ENV git_lfs_v='2.6.1'
 
 RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/miniconda/$miniconda_dl ; \
     bash -i /root/$miniconda_dl -b ; \
@@ -26,9 +26,9 @@ RUN /bin/bash -i -c "source /root/miniconda3/bin/activate ; \
 RUN /bin/bash -i -c "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash"
 
 # install git large file support, see here: https://git-lfs.github.com/
-RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
-    tar -zxvf git-lfs-linux-amd64-${git_lfs_v}.tar.gz; \
-    cd git-lfs-${git_lfs_v}; \
+RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-v${git_lfs_v}.tar.gz; \
+    tar -zxvf git-lfs-linux-amd64-v${git_lfs_v}.tar.gz; \
+    cd git-lfs-v${git_lfs_v}; \
     bash ./install.sh"
 
 # copy sicor code to /tmp
