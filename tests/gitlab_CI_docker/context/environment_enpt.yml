@@ -6,9 +6,10 @@ channels: &id1
   - http://conda.anaconda.org/conda-forge
 
 dependencies:
-  - python=3.6.*
+  - python=3.*.*
   - numpy
   - pandas
+  - lxml
 
   # geoarray / py_tools_ds
   - pyqt
@@ -46,7 +47,6 @@ dependencies:
     - jsmin
     - tqdm
     - utm
-    - lxml
     - numpy-indexed
     - sphinx-argparse
     - pycodestyle
