@@ -18,7 +18,7 @@ git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
 echo "#### Build runner docker image"
 sudo docker rmi ${tag}
 sudo docker build -f ${context_dir}/${dockerfile} -m 20G -t ${tag} ${context_dir}
-sudo docker build -f ./context/enpt_ci.docker -m 20G -t enpt_ci:0.7.0 ./context --no-cache
+# sudo docker build -f ./context/enpt_ci.docker -m 20G -t enpt_ci:0.7.0 ./context --no-cache
 
 echo "#### Create gitlab-runner (daemon) container with tag; ${tag}"
 sudo docker stop ${gitlab_runner}
