@@ -15,7 +15,7 @@ test_enpt:
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
     # update py_tools_ds
-    # - pip install 'py_tools_ds>=0.14.7'
+    - pip install 'py_tools_ds>=0.14.8'
 
     # update sicor
     # - conda install -y -q -c conda-forge basemap
@@ -71,7 +71,7 @@ test_enpt_install:
     - conda install -y -c conda-forge 'icu=58.*'  # fixes bug for conda-forge gdal build
 
     # install py_tools_ds
-    # - pip install 'py_tools_ds>=0.14.7'
+    - pip install 'py_tools_ds>=0.14.8'
 
     # install sicor
     - conda install -y -q -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn

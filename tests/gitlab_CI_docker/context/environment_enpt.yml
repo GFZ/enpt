@@ -44,7 +44,7 @@ dependencies:
   - pip:
     - scipy
     - geoarray>=0.8.9
-    - py_tools_ds>=0.14.7
+    - py_tools_ds>=0.14.8
     - cerberus
     - jsmin
     - tqdm
@@ -52,7 +52,6 @@ dependencies:
     - numpy-indexed
     - sphinx-argparse
     - pycodestyle
-#    - pycodestyle<2.4.0  # version 2.4.0 causes ImportError: module 'pycodestyle' has no attribute 'break_around_binary_operator'
     - flake8
     - pylint
     - pydocstyle
