@@ -31,18 +31,18 @@ RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v
     cd git-lfs-v${git_lfs_v}; \
     bash ./install.sh"
 
-## copy sicor code to /tmp
-#COPY sicor /tmp/sicor
-#
-## install sicor (in pip development mode so that its root directory in /tmp/sicor matching with the subsequent COPY command)
-#RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
-#    cd /tmp/sicor/ ; \
-#    make clean ; \
-#    make requirements ; \
-#    make download-tables ; \
-#    pip install -e . --no-cache-dir"
-#
-## copy sicor cache files to sicor root directory (speeds up SICOR CI tests because table subsets dont have to be created each time)
-## -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
-#COPY *.zip /tmp/sicor/sicor
+# copy sicor code to /tmp
+COPY sicor /tmp/sicor
+
+# install sicor (in pip development mode so that its root directory in /tmp/sicor matching with the subsequent COPY command)
+RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
+    cd /tmp/sicor/ ; \
+    make clean ; \
+    make requirements ; \
+    make download-tables ; \
+    pip install -e . --no-cache-dir"
+
+# copy sicor cache files to sicor root directory (speeds up SICOR CI tests because table subsets dont have to be created each time)
+# -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
+COPY *.zip /tmp/sicor/sicor
 
