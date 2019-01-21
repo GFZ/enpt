@@ -21,7 +21,8 @@ dependencies:
   - geopandas
   - ipython
   - matplotlib
-  - basemap  # pinned due to undefined symbol error with geos<=3.7.0: https://github.com/conda-forge/basemap-feedstock/issues/43
+  - basemap
+  - geos>3.7.0   # pinned due to undefined symbol error with geos<=3.7.0: https://github.com/conda-forge/basemap-feedstock/issues/43
   - shapely
   - holoviews
   - bokeh
