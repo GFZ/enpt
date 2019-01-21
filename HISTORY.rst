@@ -17,7 +17,7 @@ New features / improvements:
 * Added a lot of software tests
 * Added output writer for EnMAP Level-2 data
 * Added metadata class for EnMAP Level-2 data
-* Revised dead pixel corretion (now 40-50 times faster; added spatial interpolation)
+* Revised dead pixel correction (now 40-50 times faster; added spatial interpolation)
 * Added support for dead pixel correction based on 3D dead pixel maps
 * Added orthorectification module
 * Added support for 3D (band-wise) geometry layers
