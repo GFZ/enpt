@@ -6,6 +6,7 @@ History
 -------------------
 
 New features:
+
 * TBD
 
 
@@ -31,6 +32,7 @@ New features / improvements:
 -------------------
 
 New features:
+
 * Updated test datasets (bugfix for wrong corner coordinates)
 * Added dem in map geometry to test data
 * Added spatial_transform module to transform between sensor and map geometry
@@ -43,6 +45,7 @@ New features:
 ------------------
 
 New features:
+
 * Added algorithm to automatically append a second EnMAP image to the main image in order to fill the along-track gap
 * Updated test data (updated metadata header file, now 2 EnMAP subset scenes)
 * Updated metadata reader
@@ -52,6 +55,7 @@ New features:
 0.4.0 (2018-06-01)
 ------------------
 New features:
+
 * Implemented dead pixel corrector
 * Implemented SICOR atmospheric correction
 
@@ -60,6 +64,7 @@ New features:
 ----------
 
 New features:
+
 * TBD
 
 
