@@ -38,6 +38,7 @@ dependencies:
   - h5py
   - pytables
   - llvmlite
+  - numba  # force install via conda-forge to get rid of llvm incompatibilities
   - scikit-learn
 
   - pip:
