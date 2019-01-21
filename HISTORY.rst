@@ -9,8 +9,8 @@ New features:
 * TBD
 
 
-0.7.0 (coming soon)
--------------------
+0.7.0 (2019-01-21)
+------------------
 
 New features / improvements:
 
