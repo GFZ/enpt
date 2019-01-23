@@ -36,6 +36,8 @@
         },
 
         "atmospheric_correction": {
+            "enable_ac": true,  /*enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A
+                                  output contains top-of-atmosphere reflectance.*/
             "sicor_cache_dir": "",  /*directory to be used to stored sicor cache files
                                       NOTE: SICOR stores intermediate results there that need to computed only once
                                             for atmospheric correction of multiple EnMAP images. (default: 'auto')*/
@@ -52,13 +54,15 @@
             "run_processor": true,
             "algorithm": "spectral",  /*algorithm how to correct dead pixels
                                         'spectral': interpolate in the spectral domain
-                                        'spatial':  interpolate in the spatial domain
-                                        NOTE: currently, only the 'spectral' algorithm is implemented*/
-            "interpolation_method": "linear"  /*interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')*/
+                                        'spatial':  interpolate in the spatial domain*/
+            "interp_method_spectral": "linear",  /*spectral interpolation algorithm
+                                                   ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
+            "interp_method_spatial": "linear"  /*spatial interpolation algorithm
+                                                 ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
         },
 
         "orthorectification": {
-            "resamp_alg": 1  /*resampling algorithm TODO*/
+            "resamp_alg": "bilinear"  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
         }
     }
 

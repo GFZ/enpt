@@ -1,47 +1,215 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from unittest import TestCase
 
 import numpy as np
 from geoarray import GeoArray
 
-from enpt.processors.dead_pixel_correction import Dead_Pixel_Corrector
+from enpt.processors.dead_pixel_correction import \
+    Dead_Pixel_Corrector, \
+    interp_nodata_along_axis_2d, \
+    interp_nodata_along_axis, \
+    interp_nodata_spatially_2d
 
 
-class Test_Dead_Pixel_Corrector(unittest.TestCase):
+class Test_Dead_Pixel_Corrector(TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
-        self.DPC = Dead_Pixel_Corrector(algorithm='spectral', interp='linear', filter_halfwidth=2)
-
         # create test data
-        self.im = np.random.randint(0, 10, (50, 1000, 88), np.int16)  # VNIR size
-        self.deadpixelmap = np.zeros((self.im.shape[2], self.im.shape[1]))
+        self.im = np.random.randint(1, 10, (50, 1000, 88)).astype(np.float)  # VNIR test size
 
+        # create 2D dead pixel map
+        self.deadpixelmap_2D = np.zeros((self.im.shape[2], self.im.shape[1]), np.bool)
         for band, column in \
             [[0, 0],  # first band, first column
              [0, 2],  # first band, any column
-             [1, 2],  # first band, same column
+             [1, 2],  # second band, same column
              [50, 4],  # 2 adjacent bands
              [51, 4],  # 2 adjacent bands
              [60, 20],  # single dead column
-             [87, 50],  # second last band, same column
-             [86, 50],  # last band, same column
+             [86, 50],  # second last band, same column
+             [87, 50],  # last band, same column
              [87, 2]]:  # single dead column, last band
-            self.im[:, column, band] = 0
-            self.deadpixelmap[band, column] = 1
+            self.im[:, column, band] = np.nan
+            self.deadpixelmap_2D[band, column] = 1
 
-    def test_correct(self):
-        corrected = self.DPC.correct(self.im, self.deadpixelmap)
+        # create 3D dead pixel map
+        self.deadpixelmap_3D = np.isnan(self.im)
+
+    def validate_output_spectral_interp(self, output):
+        self.assertIsInstance(output, (GeoArray, np.ndarray))
+        self.assertEqual(self.im.shape, output.shape)
+        self.assertNotEqual(np.mean(output[:, 0, 0]), 0)  # first band, first column
+        self.assertNotEqual(np.mean(output[:, 2, 0]), 0)  # first band, any column
+        self.assertNotEqual(np.mean(output[:, 2, 1]), 0)  # second band, same column
+        self.assertNotEqual(np.mean(output[:, 4, 50]), 0)  # 2 adjacent bands
+        self.assertNotEqual(np.mean(output[:, 4, 10]), 0)  # 2 adjacent bands
+        self.assertNotEqual(np.mean(output[:, 20, 60]), 0)  # single dead column
+        self.assertNotEqual(np.mean(output[:, 50, 86]), 0)  # second last band, same column
+        self.assertNotEqual(np.mean(output[:, 50, 87]), 0)  # last band, same column
+        self.assertNotEqual(np.mean(output[:, 2, 87]), 0)  # single dead column, last band
+
+    def test_correct_using_2D_deadpixelmap_spectral(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp_spectral='linear')
+        corrected = DPC.correct(self.im, self.deadpixelmap_2D)
 
         # output assertions
-        self.assertIsInstance(corrected, (GeoArray, np.ndarray))
-        self.assertEqual(np.mean(self.im[:, 0, 0]), 0)  # first band, first column (currently not corrected)
-        self.assertNotEqual(np.mean(self.im[:, 2, 0]), 0)  # first band, any column
-        self.assertNotEqual(np.mean(self.im[:, 2, 1]), 0)  # first band, same column
-        self.assertNotEqual(np.mean(self.im[:, 4, 50]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 4, 10]), 0)  # 2 adjacent bands
-        self.assertNotEqual(np.mean(self.im[:, 20, 60]), 0)  # single dead column
-        self.assertNotEqual(np.mean(self.im[:, 50, 86]), 0)  # second last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 50, 87]), 0)  # last band, same column
-        self.assertNotEqual(np.mean(self.im[:, 2, 87]), 0)  # single dead column, last band
+        self.validate_output_spectral_interp(corrected)
+
+    def test_correct_using_3D_deadpixelmap_spectral(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spectral', interp_spectral='linear')
+        corrected = DPC.correct(self.im, self.deadpixelmap_3D)
+
+        # output assertions
+        self.validate_output_spectral_interp(corrected)
+
+    def test_correct_using_2D_deadpixelmap_spatial(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp_spatial='linear')
+        corrected = DPC.correct(self.im, self.deadpixelmap_2D)
+
+        # output assertions
+        self.validate_output_spectral_interp(corrected)
+
+    def test_correct_using_3D_deadpixelmap_spatial(self):
+        DPC = Dead_Pixel_Corrector(algorithm='spatial', interp_spatial='linear')
+        corrected = DPC.correct(self.im, self.deadpixelmap_3D)
+
+        # output assertions
+        self.validate_output_spectral_interp(corrected)
+
+
+class Test_interp_nodata_along_axis_2d(TestCase):
+    @staticmethod
+    def get_data2d():
+        return np.array([[0, 0, 2],
+                         [3, np.nan, 5],
+                         [np.nan, 10, 8]])
+
+    def test_axis_0(self):
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=0, method='linear')
+        arr_exp = np.array([[0, 0, 2], [3, 5, 5], [6, 10, 8]])
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        mask_nodata = ~np.isfinite(self.get_data2d())
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=0, nodata=mask_nodata, method='linear')
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=0, method='linear', fill_value=-1)
+        arr_exp = np.array([[0, 0, 2], [3, 5, 5], [-1, 10, 8]])
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+    def test_axis_1(self):
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, method='linear')
+        arr_exp = np.array([[0, 0, 2], [3, 4, 5], [12, 10, 8]])
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        mask_nodata = ~np.isfinite(self.get_data2d())
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, nodata=mask_nodata, method='linear')
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, method='linear', fill_value=-1)
+        arr_exp = np.array([[0, 0, 2], [3, 4, 5], [-1, 10, 8]])
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+    def test_bad_args(self):
+        with self.assertRaises(ValueError):
+            interp_nodata_along_axis_2d(self.get_data2d(), axis=3)
+        with self.assertRaises(ValueError):
+            interp_nodata_along_axis_2d(np.dstack([self.get_data2d(), self.get_data2d()]))
+
+
+class Test_interp_nodata_along_axis(TestCase):
+    @staticmethod
+    def get_data3d():
+        data3d = np.zeros((3, 3, 3))
+        data3d[:, :, 0] = [[0, 0, 2],
+                           [3, np.nan, 5],
+                           [np.nan, 10, 8]]
+        data3d[:, :, 1] = [[10, 10, 12],
+                           [13, np.nan, 15],
+                           [16, 110, np.nan]]
+        data3d[:, :, 2] = [[20, 20, 22],
+                           [23, np.nan, 25],
+                           [np.nan, 210, 20]]
+
+        return data3d
+
+    def test_3d_axis_0(self):
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=0, method='linear')
+        arr_exp = np.zeros((3, 3, 3))
+        arr_exp[:, :, 0] = [[0, 0, 2], [3, 5, 5], [6, 10, 8]]
+        arr_exp[:, :, 1] = [[10, 10, 12], [13, 60, 15], [16, 110, 18]]
+        arr_exp[:, :, 2] = [[20, 20, 22], [23, 115, 25], [26, 210, 20]]
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        mask_nodata = ~np.isfinite(self.get_data3d())
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=0, nodata=mask_nodata, method='linear')
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+    def test_3d_axis_1(self):
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=1, method='linear')
+        arr_exp = np.zeros((3, 3, 3))
+        arr_exp[:, :, 0] = [[0, 0, 2], [3, 4, 5], [12, 10, 8]]
+        arr_exp[:, :, 1] = [[10, 10, 12], [13, 14, 15], [16, 110, 204]]
+        arr_exp[:, :, 2] = [[20, 20, 22], [23, 24, 25], [400, 210, 20]]
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+        mask_nodata = ~np.isfinite(self.get_data3d())
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=1, nodata=mask_nodata, method='linear')
+        self.assertTrue(np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int)
+
+    def test_3d_axis_2(self):
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=2, method='linear')
+        arr_exp = np.zeros((3, 3, 3))
+        arr_exp[:, :, 0] = [[0, 0, 2], [3, np.nan, 5], [np.nan, 10, 8]]
+        arr_exp[:, :, 1] = [[10, 10, 12], [13, np.nan, 15], [16, 110, 14]]
+        arr_exp[:, :, 2] = [[20, 20, 22], [23, np.nan, 25], [np.nan, 210, 20]]
+        np.testing.assert_array_equal(data_int, arr_exp, 'Computed %s.' % data_int)
+
+        mask_nodata = ~np.isfinite(self.get_data3d())
+        data_int = interp_nodata_along_axis(self.get_data3d(), axis=2, nodata=mask_nodata, method='linear')
+        np.testing.assert_array_equal(data_int, arr_exp, 'Computed %s.' % data_int)
+
+    def test_2d(self):
+        data_int = interp_nodata_along_axis(Test_interp_nodata_along_axis_2d.get_data2d())
+        self.assertTrue(np.array_equal(data_int, np.array([[0, 0, 2],
+                                                           [3, 5, 5],
+                                                           [6, 10, 8]])), 'Computed %s.' % data_int)
+
+    def test_bad_args(self):
+        with self.assertRaises(ValueError):
+            interp_nodata_along_axis(np.array([1, 2, 3]))
+
+
+class Test_interp_nodata_spatially_2d(TestCase):
+    @staticmethod
+    def get_data2d():
+        return np.array([[0, 0, 2, 12],
+                         [3, np.nan, 5, np.nan],
+                         [np.nan, 20, 8, 3]])
+
+    def test_interpolation_scipy(self):
+        data_int_scipy = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
+                                                    fill_value=np.nan, implementation='scipy')
+        arr_exp_scipy = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [np.nan, 20, 8, 3]])
+        np.testing.assert_array_equal(data_int_scipy, arr_exp_scipy, 'Computed %s.' % data_int_scipy)
+
+        mask_nodata = ~np.isfinite(self.get_data2d())
+        data_int_scipy = interp_nodata_spatially_2d(self.get_data2d(), nodata=mask_nodata, method='linear',
+                                                    fill_value=np.nan, implementation='scipy')
+        np.testing.assert_array_equal(data_int_scipy, arr_exp_scipy, 'Computed %s.' % data_int_scipy)
+
+    def test_interpolation_pandas(self):
+        data_int_pandas = interp_nodata_spatially_2d(self.get_data2d(), nodata=np.nan, method='linear',
+                                                     fill_value=np.nan, implementation='pandas')
+        arr_exp_pandas = np.array([[0, 0, 2, 12], [3, 10, 5, 7.5], [3, 20, 8, 3]])
+        np.testing.assert_array_equal(data_int_pandas, arr_exp_pandas, 'Computed %s.' % data_int_pandas)
+
+    def test_bad_args(self):
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(np.array([1, 2, 3]))
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(self.get_data2d(), nodata=np.array([1, 2, 3]))
+        with self.assertRaises(ValueError):
+            interp_nodata_spatially_2d(self.get_data2d(), implementation='invalid')

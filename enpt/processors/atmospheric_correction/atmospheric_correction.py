@@ -51,8 +51,8 @@ class AtmosphericCorrector(object):
         # run AC
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
-        enmap_l2a_sens_geo, state, cwv_map, ch4_map = sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options,
-                                                                     logger=enmap_ImageL1.logger)
+        enmap_l2a_sens_geo, state = sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options,
+                                                   logger=enmap_ImageL1.logger)
 
         # join results
         enmap_ImageL1.logger.info('Joining results of atmospheric correction.')
@@ -67,5 +67,7 @@ class AtmosphericCorrector(object):
 
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
+
+            # FIXME what about mask_clouds, mask_clouds_confidence, ac_errors?
 
         return enmap_ImageL1

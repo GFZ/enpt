@@ -9,8 +9,8 @@ from scipy import stats
 
 
 class SRF(object):
-    def __init__(self, wvl_unit: str='nanometers', wvl_min: float=400, wvl_max: float=2500, specres_nm: float=1,
-                 format_bandnames: bool=False, v: bool=False):
+    def __init__(self, wvl_unit: str = 'nanometers', wvl_min: float = 400, wvl_max: float = 2500, specres_nm: float = 1,
+                 format_bandnames: bool = False, v: bool = False):
         """SRF instance provides SRF functions, wavelength positions, etc..
 
         :param wvl_unit:            the wavelengths unit to be used within SRF instance ('nanometers' or 'micrometers)
@@ -38,7 +38,7 @@ class SRF(object):
 
     @staticmethod
     def compute_gaussian_srf(cwl: float, fwhm: float, wvl_min: float, wvl_max: float, wvl_res: float,
-                             normalize: bool=True) -> np.ndarray:
+                             normalize: bool = True) -> np.ndarray:
         """Compute a spectral response function based on center wavelength and band width using on a gaussian curve.
 
         :param cwl:         target center wavelength position
@@ -118,7 +118,7 @@ class SRF(object):
         for band in self.bands:
             yield self[band]
 
-    def plot_srfs(self, figsize: tuple=(15, 5), band: Union[str, List[str]]=None, normalize: bool=True):
+    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, List[str]] = None, normalize: bool = True):
         """Show a plot of all spectral response functions.
 
         :param figsize: figure size of the plot

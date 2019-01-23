@@ -3,15 +3,13 @@
 
 import logging
 from types import SimpleNamespace
+from typing import Tuple  # noqa: F401
 import numpy as np
 from os import path, makedirs
-from lxml import etree
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
 
-# Use to generate preview
-import imageio
 # noinspection PyPackageRequirements
 from skimage import exposure  # contained in package requirements as scikit-image
 
@@ -19,9 +17,11 @@ from geoarray import GeoArray, NoDataMask, CloudMask
 
 from ..utils.logging import EnPT_Logger
 from ..model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
+from ..model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ..options.config import EnPTConfig
 from ..processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ..processors.dem_preprocessing import DEM_Processor
+from ..processors.spatial_transform import compute_mapCoords_within_sensorGeoDims
 
 
 ################
@@ -196,7 +196,7 @@ class _EnMAP_Image(object):
 
             self._mask_clouds_confidence = cnfArr
         else:
-            del self._mask_clouds_confidence
+            del self.mask_clouds_confidence
 
     @mask_clouds_confidence.deleter
     def mask_clouds_confidence(self):
@@ -275,25 +275,51 @@ class _EnMAP_Image(object):
         """
         if self._deadpixelmap is not None:
             self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
-            return self._deadpixelmap
+
+        return self._deadpixelmap
 
     @deadpixelmap.setter
     def deadpixelmap(self, *geoArr_initArgs):
         if geoArr_initArgs[0] is not None:
             dpm = GeoArray(*geoArr_initArgs)
 
-            if dpm.shape != (self.data.bands, self.data.cols):
+            if dpm.ndim == 3 and dpm.shape != self.data.shape:
+                raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with a 3D array with the same size "
+                                 "like _EnMAP_Image.arr, i.e.: %s "
+                                 "Received %s." % (str(self.data.shape), str(dpm.shape)))
+            elif dpm.ndim == 2 and dpm.shape != (self.data.bands, self.data.cols):
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with an array with the size "
-                                 "'bands x columns' of the GeoArray _EnMAP_Image.arr. Got %s." % str(dpm.shape))
+                                 "'bands x columns' of the GeoArray _EnMAP_Image.arr. "
+                                 "Received %s. Expected %s" % (str(dpm.shape), str((self.data.bands, self.data.cols))))
 
             self._deadpixelmap = dpm
         else:
-            del self._deadpixelmap
+            del self.deadpixelmap
 
     @deadpixelmap.deleter
     def deadpixelmap(self):
         self._deadpixelmap = None
 
+    def generate_quicklook(self, bands2use: Tuple[int, int, int]) -> GeoArray:
+        """
+        Generate image quicklook and save into a file
+
+        :param bands2use:   (red, green, blue) band indices of self.data to be used for quicklook image, e.g., (3, 2, 1)
+        :return: GeoArray
+        """
+        p2 = np.percentile(self.data[:, :, bands2use[0]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[0]], 98)
+        red_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[0]], (p2, p98))
+        p2 = np.percentile(self.data[:, :, bands2use[1]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[1]], 98)
+        green_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[1]], (p2, p98))
+        p2 = np.percentile(self.data[:, :, bands2use[2]], 2)
+        p98 = np.percentile(self.data[:, :, bands2use[2]], 98)
+        blue_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[2]], (p2, p98))
+        pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
+        pix = np.uint8(pix * 255)
+
+        return GeoArray(pix)
 
 #######################################
 # EnPT EnMAP objects in sensor geometry
@@ -341,60 +367,177 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
     def get_paths(self):
         """
         Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
-        These information are reading from the detector_meta
+        These information are read from the detector_meta.
         :return: paths as SimpleNamespace
         """
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
-        paths.metaxml = glob(path.join(self._root_dir, "*_header.xml"))[0]
         paths.data = path.join(self._root_dir, self.detector_meta.data_filename)
-        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename)
-        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename)
+
+        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename) \
+            if self.detector_meta.cloud_mask_filename else None
+        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename) \
+            if self.detector_meta.dead_pixel_filename else None
+
         paths.quicklook = path.join(self._root_dir, self.detector_meta.quicklook_filename)
+
         return paths
 
     def correct_dead_pixels(self):
         """Correct dead pixels with respect to the dead pixel mask."""
-        self.logger.info("Correcting dead pixels of %s detector..." % self.detector_name)
+        algo = self.cfg.deadpix_P_algorithm
+        method_spectral, method_spatial = self.cfg.deadpix_P_interp_spectral, self.cfg.deadpix_P_interp_spatial
+        self.logger.info("Correcting dead pixels of %s detector...\n"
+                         "Used algorithm / interpolation: %s / %s"
+                         % (self.detector_name, algo, method_spectral if algo == 'spectral' else method_spatial))
 
         self.data = \
-            Dead_Pixel_Corrector(algorithm=self.cfg.deadpix_P_algorithm,
-                                 interp=self.cfg.deadpix_P_interp,
+            Dead_Pixel_Corrector(algorithm=algo,
+                                 interp_spectral=method_spectral,
+                                 interp_spatial=method_spatial,
                                  logger=self.logger)\
-            .correct(self.data, self.deadpixelmap, progress=False if self.cfg.disable_progress_bars else True)
+            .correct(self.data, self.deadpixelmap)
 
     def get_preprocessed_dem(self):
         if self.cfg.path_dem:
             self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
-            DP = DEM_Processor(self.cfg.path_dem, CPUs=self.cfg.CPUs)
-            DP.fill_gaps()
+            DP = DEM_Processor(self.cfg.path_dem, enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
+                                                                                 self.detector_meta.lat_UL_UR_LL_LR)),
+                               CPUs=self.cfg.CPUs)
+            DP.fill_gaps()  # FIXME this will also be needed at other places
 
             R, C = self.data.shape[:2]
             if DP.dem.is_map_geo:
-                # FIXME replace linear interpolation by native geolayers
                 lons = self.detector_meta.lons
                 lats = self.detector_meta.lats
 
-                msg = 'Unable to use the full 3D information of geolayers for transforming the DEM '\
-                      'to sensor geometry. Using first band of %s array.'
-                if self.detector_meta.lons.ndim > 2:
-                    self.logger.warning(msg % 'longitude')
+                if not (lons.ndim == 2 and lats.ndim == 2) and not (lons.ndim == 3 and lats.ndim == 3):
+                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be either 2- or 3-dimensional.')
+
+                msg_bandinfo = ''
+                if lons.ndim == 3:
                     lons = lons[:, :, 0]
-                if self.detector_meta.lats.ndim > 2:
-                    self.logger.warning(msg % 'latitude')
                     lats = lats[:, :, 0]
+                    msg_bandinfo = ' (using first band of %s geolayer)' % self.detector_name
+                else:
+                    # 2D geolayer
+                    # FIXME replace linear interpolation by native geolayers
+                    if lons.shape != self.data.shape:
+                        lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
+                    if lats.shape != self.data.shape:
+                        lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
 
-                if lons.shape != self.data.shape:
-                    lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
-                if lats.shape != self.data.shape:
-                    lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
-
-                self.logger.info(('Transforming %s DEM to sensor geometry...' % self.detector_name))
+                self.logger.info(('Transforming DEM to %s sensor geometry%s...' % (self.detector_name, msg_bandinfo)))
                 self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
             else:
                 self.dem = DP.dem
 
         return self.dem
+
+    def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
+        # TODO convert method to function?
+        """
+        Check if a second image could pass with the first image.
+        In this version we assume that the image will be add below
+        If it is the case, the method will create temporary files that will be used in the following.
+
+        :param img2:
+        :param n_lines: number of line to be added
+        :return: None
+        """
+        if self.cfg.is_dlr_dataformat:
+            basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
+            basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
+        else:
+            basename_img1 = path.basename(self._root_dir)
+            basename_img2 = path.basename(img2._root_dir)
+
+        self.logger.info("Check new image for %s: %s " % (self.detector_name, basename_img2))
+
+        distance_min = 27.0
+        distance_max = 34.0
+
+        # check bottom left
+        x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[2], self.detector_meta.lon_UL_UR_LL_LR[2])
+        x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[0])
+        distance_left = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+        # check bottom right
+        x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[3], self.detector_meta.lon_UL_UR_LL_LR[3])
+        x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[1])
+        distance_right = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
+            self.logger.info("Append new image to %s: %s" % (self.detector_name, basename_img2))
+        else:
+            self.logger.warning("%s and %s don't fit to be appended." % (basename_img1, basename_img2))
+            return
+
+        # set new number of line
+        n_lines = n_lines or img2.detector_meta.nrows
+
+        if n_lines > img2.detector_meta.nrows:
+            self.logger.warning("n_lines (%s) exceeds the total number of line of second image" % n_lines)
+            self.logger.warning("Set to the image number of line")
+            n_lines = img2.detector_meta.nrows
+
+        if n_lines < 50:  # TODO: determine these values
+            self.logger.warning("A minimum of 50 lines is required, only %s were selected" % n_lines)
+            self.logger.warning("Set the number of line to 50")
+            n_lines = 50
+
+        self.detector_meta.nrows += n_lines
+
+        # Create new corner coordinate
+        if self.cfg.is_dlr_dataformat:
+            enmapIm_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
+                                             img2.detector_meta.lat_UL_UR_LL_LR))
+            dem_validated = DEM_Processor(img2.cfg.path_dem,
+                                          enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+            LL, LR = compute_mapCoords_within_sensorGeoDims(
+                rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
+                dem=dem_validated,
+                enmapIm_cornerCoords=enmapIm_cornerCoords,
+                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols),
+                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
+                                    (n_lines - 1, img2.detector_meta.ncols - 1)]  # LR
+            )
+
+            self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
+            self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
+        else:
+            # lats
+            ff = interp2d(x=[0, 1],
+                          y=[0, 1],
+                          z=[[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[1]],
+                             [img2.detector_meta.lat_UL_UR_LL_LR[2], img2.detector_meta.lat_UL_UR_LL_LR[3]]],
+                          kind='linear')
+            self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR,
+                                                                             self.detector_meta.ncols,
+                                                                             self.detector_meta.nrows)
+            # lons
+            ff = interp2d(x=[0, 1],
+                          y=[0, 1],
+                          z=[[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[1]],
+                             [img2.detector_meta.lon_UL_UR_LL_LR[2], img2.detector_meta.lon_UL_UR_LL_LR[3]]],
+                          kind='linear')
+            self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
+                                                                             self.detector_meta.ncols,
+                                                                             self.detector_meta.nrows)
+
+        # append the raster data
+        self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
+        self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
+        if self.cfg.is_dlr_dataformat:
+            self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
+        # TODO append remaining raster layers - additional cloud masks, ...
+
+        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
+        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
 
     def DN2TOARadiance(self):
         """Convert DNs to TOA radiance.
@@ -406,9 +549,32 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         # TODO move to processors.radiometric_transform?
         if self.detector_meta.unitcode == 'DN':
-            self.logger.info('Converting DN values to radiance for %s detector...' % self.detector_name)
-            self.data = (self.detector_meta.l_min + (self.detector_meta.l_max - self.detector_meta.l_min) /
-                         (2 ** 16 - 1) * self.data[:])
+            self.logger.info('Converting DN values to radiance [mW/m^2/sr/nm] for %s detector...' % self.detector_name)
+
+            if self.detector_meta.l_min is not None and self.detector_meta.l_max is not None:
+                # Lλ = (LMINλ + ((LMAXλ - LMINλ)/(QCALMAX-QCALMIN)) * (QCAL-QCALMIN))
+                # FIXME this asserts LMIN and LMAX in mW m^-2 sr^-1 nm^-1
+
+                QCALMIN = 1
+                QCALMAX = 2 ** 16  # 65535 (16-bit maximum value)
+                LMIN = self.detector_meta.l_min
+                LMAX = self.detector_meta.l_max
+                QCAL = self.data[:]
+
+                self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
+
+            elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
+                # Lλ = QCAL / GAIN + OFFSET
+                # FIXME this asserts LMIN and LMAX in mW/cm2/sr/um
+                # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
+                #       - DLR gains / offsets are provided in mW/cm2/sr/um, so we have to multiply by 10 to get
+                #         mW m^-2 sr^-1 nm^-1 as needed later
+                self.data = 10 * (self.data[:] / self.detector_meta.gains + self.detector_meta.offsets)
+
+            else:
+                raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
+                                 "are available for radiance computation.")
+
             self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
             self.detector_meta.unitcode = "TOARad"
         else:
@@ -416,25 +582,6 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 "No DN to Radiance conversion is performed because unitcode is not DN (found: {code}).".format(
                     code=self.detector_meta.unitcode)
             )
-
-    def generate_quicklook(self, filename):
-        """
-        Generate image quicklook and save into a file
-        :param filename: file path to store the image
-        :return: None
-        """
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[0]], 98)
-        red_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[0]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[1]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[1]], 98)
-        green_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[1]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[2]], 2)
-        p98 = np.percentile(self.data[:, :, self.detector_meta.preview_bands[2]], 98)
-        blue_rescaled = exposure.rescale_intensity(self.data[:, :, self.detector_meta.preview_bands[2]], (p2, p98))
-        pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
-        pix = np.uint8(pix * 255)
-        imageio.imwrite(filename, pix)
 
 
 class EnMAPL1Product_SensorGeo(object):
@@ -456,10 +603,11 @@ class EnMAPL1Product_SensorGeo(object):
 
     """
 
-    def __init__(self, root_dir: str, config: EnPTConfig, logger=None, lon_lat_smpl=None):
+    def __init__(self, root_dir: str, config: EnPTConfig, logger=None):
         """Get instance of EnPT EnMAP object in sensor geometry.
 
         :param root_dir:    Root directory of EnMAP Level-1B product
+        :param config:      EnPT configuration object
         :param logger:      None or logging instance to be appended to EnMAPL1Product_SensorGeo instance
                             (If None, a default EnPT_Logger is used).
         """
@@ -472,30 +620,35 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger = logger
 
         # Read metadata here in order to get all information needed by to get paths.
-        self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
-                                                 config=self.cfg, logger=self.logger)
-        self.meta.read_metadata(lon_lat_smpl)
+        if self.cfg.is_dlr_dataformat:
+            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
+                                                     config=self.cfg, logger=self.logger)
+        else:
+            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
+                                                     config=self.cfg, logger=self.logger)
+        self.meta.read_metadata()
 
         # define VNIR and SWIR detector
         self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
         self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
 
         # Get the paths according information delivered in the metadata
-        self.paths = self.get_paths(root_dir)
+        self.paths = self.get_paths()
 
         self.detector_attrNames = ['vnir', 'swir']
 
-    def get_paths(self, root_dir):
+    def get_paths(self):
         """
         Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo
-        :param root_dir: directory where the data are located
+
         :return: paths.SimpleNamespace()
         """
         paths = SimpleNamespace()
         paths.vnir = self.vnir.get_paths()
         paths.swir = self.swir.get_paths()
-        paths.root_dir = root_dir
-        paths.metaxml = glob(path.join(root_dir, "*_header.xml"))[0]
+        paths.root_dir = self.meta.rootdir
+        paths.metaxml = self.meta.path_xml
+
         return paths
 
     @property
@@ -605,159 +758,51 @@ class EnMAPL1Product_SensorGeo(object):
         AC = AtmosphericCorrector(config=self.cfg)
         AC.run_ac(self)
 
-    # Define a new save to take into account the fact that 2 images might be appended
-    # Here we save the radiance and not DN (otherwise there will be a problem with the concatened images)
     def save(self, outdir: str, suffix="") -> str:
-        """
-        Save the product to disk using almost the same input format
+        """Save the product to disk using almost the same input format.
+
+        NOTE: Radiance is saved instead of DNs to avoid a radiometric jump between concatenated images.
+
         :param outdir: path to the output directory
         :param suffix: suffix to be appended to the output filename (???)
         :return: root path (root directory) where products were written
         """
-        product_dir = path.join(
-            path.abspath(outdir), "{name}{suffix}".format(
-                name=[ff for ff in self.paths.root_dir.split(path.sep) if ff != ''][-1],
-                suffix=suffix)
-        )
+        product_dir = path.join(path.abspath(outdir),
+                                "{name}{suffix}".format(name=self.meta.scene_basename, suffix=suffix))
+
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
-        # We can hardcode the detectors (?)
         # write the VNIR
         self.vnir.data.save(product_dir + path.sep + self.meta.vnir.data_filename, fmt="ENVI")
         self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.cloud_mask_filename, fmt="GTiff")
-        self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.dead_pixel_filename, fmt="GTiff")
-        self.vnir.generate_quicklook(product_dir + path.sep + self.meta.vnir.quicklook_filename)
+        if self.vnir.deadpixelmap is not None:
+            self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.dead_pixel_filename, fmt="GTiff")
+        else:
+            self.logger.warning('Could not save VNIR dead pixel map because there is no corresponding attribute.')
+
+        # FIXME we could also write the quicklook included in DLR L1B format
+        self.vnir.generate_quicklook(bands2use=self.vnir.detector_meta.preview_bands) \
+            .save(path.join(product_dir, path.basename(self.meta.vnir.quicklook_filename) + '.png'), fmt='PNG')
 
         # write the SWIR
         self.swir.data.save(product_dir + path.sep + self.meta.swir.data_filename, fmt="ENVI")
         self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.cloud_mask_filename, fmt="GTiff")
-        self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
-        self.swir.generate_quicklook(product_dir + path.sep + self.meta.swir.quicklook_filename)
+        if self.swir.deadpixelmap is not None:
+            self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
+        else:
+            self.logger.warning('Could not save SWIR dead pixel map because there is no corresponding attribute.')
+        self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
+            .save(path.join(product_dir, path.basename(self.meta.swir.quicklook_filename) + '.png'), fmt='PNG')
 
         # Update the xml file
-        xml = etree.parse(self.paths.metaxml)
-        xml.findall("ProductComponent/VNIRDetector/Data/Size/NRows")[0].text = str(self.meta.vnir.nrows)
-        xml.findall("ProductComponent/VNIRDetector/Data/Type/UnitCode")[0].text = self.meta.vnir.unitcode
-        xml.findall("ProductComponent/VNIRDetector/Data/Type/Unit")[0].text = self.meta.vnir.unit
-        xml.findall("ProductComponent/SWIRDetector/Data/Size/NRows")[0].text = str(self.meta.swir.nrows)
-        xml.findall("ProductComponent/SWIRDetector/Data/Type/UnitCode")[0].text = self.meta.swir.unitcode
-        xml.findall("ProductComponent/SWIRDetector/Data/Type/Unit")[0].text = self.meta.swir.unit
-        xml_string = etree.tostring(xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+        metadata_string = self.meta.to_XML()
         with open(product_dir + path.sep + path.basename(self.paths.metaxml), "w") as xml_file:
-            xml_file.write(xml_string.decode("utf-8"))
+            xml_file.write(metadata_string)
+
+        self.logger.info("L1B product successfully written!")
 
         return product_dir
-
-    def append_new_image(self, img2, n_lines: int = None):
-        """
-        Check if a second image could pass with the first image.
-        In this version we assume that the image will be add below
-        If it is the case, the method will create temporary files that will be used in the following.
-        :param img2:
-        :param n_lines: number of line to be added
-        :return: None
-        """
-        self.logger.info("Check new image %s" % img2.paths.root_dir)
-
-        distance_min = 27.0
-        distance_max = 34.0
-        tag_vnir = False
-        tag_swir = False
-
-        # check vnir bottom left
-        x1, y1, _, _ = utm.from_latlon(self.meta.vnir.lat_UL_UR_LL_LR[2], self.meta.vnir.lon_UL_UR_LL_LR[2])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.vnir.lat_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[0])
-        distance_left = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        # check vnir bottom right
-        x1, y1, _, _ = utm.from_latlon(self.meta.vnir.lat_UL_UR_LL_LR[3], self.meta.vnir.lon_UL_UR_LL_LR[3])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.vnir.lat_UL_UR_LL_LR[1], img2.meta.vnir.lon_UL_UR_LL_LR[1])
-        distance_right = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
-            tag_vnir = True
-
-        # check swir bottom left
-        x1, y1, _, _ = utm.from_latlon(self.meta.swir.lat_UL_UR_LL_LR[2], self.meta.swir.lon_UL_UR_LL_LR[2])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.swir.lat_UL_UR_LL_LR[0], img2.meta.swir.lon_UL_UR_LL_LR[0])
-        distance_left = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        # check swir bottom right
-        x1, y1, _, _ = utm.from_latlon(self.meta.swir.lat_UL_UR_LL_LR[3], self.meta.swir.lon_UL_UR_LL_LR[3])
-        x2, y2, _, _ = utm.from_latlon(img2.meta.swir.lat_UL_UR_LL_LR[1], img2.meta.swir.lon_UL_UR_LL_LR[1])
-        distance_right = np.sqrt((x1-x2)**2 + (y1-y2)**2)
-
-        if distance_min < distance_left < distance_max and distance_min < distance_right < distance_max:
-            tag_swir = True
-
-        if tag_vnir is False or tag_swir is False:
-            self.logger.warning("%s and %s don't fit to be appended" % (self.paths.root_dir, img2.paths.root_dir))
-            return
-
-        self.logger.info("Append new image: %s" % img2.paths.root_dir)
-
-        # set new number of line
-        if n_lines is None:
-            n_lines = img2.meta.vnir.nrows
-
-        if n_lines > img2.meta.vnir.nrows:
-            self.logger.warning("n_lines (%s) exceeds the total number of line of second image" % n_lines)
-            self.logger.warning("Set to the image number of line")
-            n_lines = img2.meta.vnir.nrows
-
-        if n_lines < 50:  # TODO: determine these values
-            self.logger.warning("A minimum of 50 lines is required, only %s were selected" % n_lines)
-            self.logger.warning("Set the number of line to 50")
-            n_lines = 50
-
-        self.meta.vnir.nrows += n_lines
-
-        # Create new corner coordinate - VNIR
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lat_UL_UR_LL_LR[0], img2.meta.vnir.lat_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lat_UL_UR_LL_LR[2], img2.meta.vnir.lat_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.vnir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
-        lon_lat_smpl = (15, 15)
-        self.meta.vnir.lats = self.meta.vnir.interpolate_corners(*self.meta.vnir.lat_UL_UR_LL_LR, *lon_lat_smpl)
-
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.vnir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.vnir.nrows))[0]
-        self.meta.vnir.lons = self.meta.vnir.interpolate_corners(*self.meta.vnir.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-        # Create new corner coordinate - SWIR
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.swir.lat_UL_UR_LL_LR[0], img2.meta.swir.lat_UL_UR_LL_LR[1]],
-                                             [img2.meta.swir.lat_UL_UR_LL_LR[2], img2.meta.swir.lat_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.swir.lat_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lat_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
-        lon_lat_smpl = (15, 15)
-        self.meta.swir.lats = self.meta.swir.interpolate_corners(*self.meta.swir.lat_UL_UR_LL_LR, *lon_lat_smpl)
-        ff = interp2d(x=[0, 1], y=[0, 1], z=[[img2.meta.vnir.lon_UL_UR_LL_LR[0], img2.meta.vnir.lon_UL_UR_LL_LR[1]],
-                                             [img2.meta.vnir.lon_UL_UR_LL_LR[2], img2.meta.vnir.lon_UL_UR_LL_LR[3]]],
-                      kind='linear')
-        self.meta.swir.lon_UL_UR_LL_LR[2] = np.array(ff(0, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lon_UL_UR_LL_LR[3] = np.array(ff(1, n_lines/img2.meta.swir.nrows))[0]
-        self.meta.swir.lons = self.meta.swir.interpolate_corners(*self.meta.swir.lon_UL_UR_LL_LR, *lon_lat_smpl)
-
-        # append the vnir/swir image
-        img2.vnir.data = img2.paths.vnir.data
-        img2.vnir.data = img2.vnir.data[0:n_lines, :, :]
-        img2.swir.data = img2.paths.swir.data
-        img2.swir.data = img2.swir.data[0:n_lines, :, :]
-        img2.DN2TOARadiance()
-        self.vnir.data = np.append(self.vnir.data, img2.vnir.data, axis=0)
-        self.swir.data = np.append(self.swir.data, img2.swir.data, axis=0)
-
-        # append the mask cloud
-        self.vnir.mask_clouds = np.append(self.vnir.mask_clouds,
-                                          GeoArray(img2.paths.vnir.mask_clouds)[0:n_lines, :], axis=0)
-        self.swir.mask_clouds = np.append(self.swir.mask_clouds,
-                                          GeoArray(img2.paths.swir.mask_clouds)[0:n_lines, :], axis=0)
 
 
 ####################################
@@ -839,3 +884,156 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
             self.data.calc_mask_nodata(fromBand=fromBand, overwrite=overwrite)
             self.mask_nodata = self.data.mask_nodata
             return self.mask_nodata
+
+
+class EnMAPL2Product_MapGeo(_EnMAP_Image):
+    """Class for EnPT Level-2 EnMAP object in map geometry.
+
+    Attributes:
+        - logger:
+            - logging.Logger instance or subclass instance
+        - paths:
+            - paths belonging to the EnMAP product
+        - meta:
+            - instance of EnMAP_Metadata_SensorGeo class
+    """
+    def __init__(self, config: EnPTConfig, logger=None):
+        # protected attributes
+        self._logger = None
+
+        # populate attributes
+        self.cfg = config
+        if logger:
+            self.logger = logger
+
+        self.meta = None  # type: EnMAP_Metadata_L2A_MapGeo
+        self.paths = None  # type: SimpleNamespace
+
+        super(EnMAPL2Product_MapGeo, self).__init__()
+
+    @property
+    def logger(self) -> EnPT_Logger:
+        """Get a an instance of enpt.utils.logging.EnPT_Logger.
+
+        NOTE:
+            - The logging level will be set according to the user inputs of EnPT.
+            - The path of the log file is directly derived from the attributes of the _EnMAP_Image instance.
+
+        Usage:
+            - get the logger:
+                logger = self.logger
+            - set the logger
+                self.logger = logging.getLogger()  # NOTE: only instances of logging.Logger are allowed here
+            - delete the logger:
+                del self.logger  # or "self.logger = None"
+
+        :return: EnPT_Logger instance
+        """
+        if self._logger and self._logger.handlers[:]:
+            return self._logger
+        else:
+            basename = path.splitext(path.basename(self.cfg.path_l1b_enmap_image))[0]
+            path_logfile = path.join(self.cfg.output_dir, basename + '.log') \
+                if self.cfg.create_logfile and self.cfg.output_dir else ''
+            self._logger = EnPT_Logger('log__' + basename, fmt_suffix=None, path_logfile=path_logfile,
+                                       log_level=self.cfg.log_level, append=False)
+
+            return self._logger
+
+    @logger.setter
+    def logger(self, logger: logging.Logger):
+        assert isinstance(logger, logging.Logger) or logger in ['not set', None], \
+            "%s.logger can not be set to %s." % (self.__class__.__name__, logger)
+
+        # save prior logs
+        # if logger is None and self._logger is not None:
+        #     self.log += self.logger.captured_stream
+        self._logger = logger
+
+    @property
+    def log(self) -> str:
+        """Return a string of all logged messages until now.
+
+        NOTE: self.log can also be set to a string.
+        """
+        return self.logger.captured_stream
+
+    @log.setter
+    def log(self, string: str):
+        assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
+        self.logger.captured_stream = string
+
+    @classmethod
+    def from_L1B_sensorgeo(cls, config: EnPTConfig, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+        from ..processors.orthorectification import Orthorectifier
+        L2_obj = Orthorectifier(config=config).run_transformation(enmap_ImageL1=enmap_ImageL1)
+
+        return L2_obj
+
+    def get_paths(self, l2a_outdir: str):
+        """
+        Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
+        These information are read from the detector_meta.
+
+        :param l2a_outdir:  output directory of EnMAP Level-2A dataset
+        :return: paths as SimpleNamespace
+        """
+        paths = SimpleNamespace()
+        paths.root_dir = l2a_outdir
+        paths.metaxml = path.join(l2a_outdir, self.meta.metaxml_filename)
+        paths.data = path.join(l2a_outdir, self.meta.data_filename)
+        paths.mask_clouds = path.join(l2a_outdir, self.meta.cloud_mask_filename)
+        paths.deadpixelmap_vnir = path.join(l2a_outdir, self.meta.dead_pixel_filename_vnir)
+        paths.deadpixelmap_swir = path.join(l2a_outdir, self.meta.dead_pixel_filename_swir)
+        paths.quicklook_vnir = path.join(l2a_outdir, self.meta.quicklook_filename_vnir)
+        paths.quicklook_swir = path.join(l2a_outdir, self.meta.quicklook_filename_swir)
+
+        return paths
+
+    def save(self, outdir: str, suffix="") -> str:
+        """
+        Save the product to disk using almost the same input format
+        :param outdir: path to the output directory
+        :param suffix: suffix to be appended to the output filename (???)
+        :return: root path (root directory) where products were written
+        """
+        # TODO optionally add more output formats
+        product_dir = path.join(path.abspath(outdir),
+                                "{name}{suffix}".format(name=self.meta.scene_basename, suffix=suffix))
+
+        self.logger.info("Write product to: %s" % product_dir)
+        makedirs(product_dir, exist_ok=True)
+
+        # define output paths
+        outpath_data = path.join(product_dir, self.meta.data_filename)
+        outpath_mask_clouds = path.join(product_dir, self.meta.cloud_mask_filename)
+        outpath_quicklook_vnir = path.join(product_dir, self.meta.quicklook_filename_vnir)
+        outpath_quicklook_swir = path.join(product_dir, self.meta.quicklook_filename_swir)
+        outpath_meta = path.join(product_dir, self.meta.metaxml_filename)
+        outpaths = [outpath_data, outpath_mask_clouds, outpath_quicklook_vnir, outpath_quicklook_swir, outpath_meta]
+
+        # save raster data
+        kwargs_save = dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"])
+        self.data.save(outpath_data, **kwargs_save)
+        self.mask_clouds.save(outpath_mask_clouds, **kwargs_save)
+
+        # TODO VNIR and SWIR
+        # self.deadpixelmap.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
+        self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
+
+        self.generate_quicklook(bands2use=self.meta.preview_bands_vnir).save(outpath_quicklook_vnir, **kwargs_save)
+        self.generate_quicklook(bands2use=self.meta.preview_bands_swir).save(outpath_quicklook_swir, **kwargs_save)
+
+        # TODO remove GDAL's *.aux.xml files?
+
+        # save metadata
+        self.meta.add_product_fileinformation(filepaths=outpaths)
+        metadata_string = self.meta.to_XML()
+
+        with open(outpath_meta, 'w') as metaF:
+            self.logger.info("Writing metdata to %s" % outpath_meta)
+            metaF.write(metadata_string)
+
+        self.logger.info("L2A product successfully written!")
+
+        return product_dir

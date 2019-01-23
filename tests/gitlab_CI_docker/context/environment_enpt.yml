@@ -8,18 +8,21 @@ channels: &id1
 dependencies:
   - python=3.*.*
   - numpy
+  - pandas
+  - lxml
 
   # geoarray / py_tools_ds
   - pyqt
   - gdal
+  - conda-forge::libgdal  # force to use conda-forge for libgdal to avoid package version incompatiblies due to mixed channels
   - scikit-image
   - rasterio
   - pyproj
-  # - lxml
   - geopandas
   - ipython
   - matplotlib
   - basemap
+  # - geos>3.7.0   # pinning should not be needed anymore - https://github.com/conda-forge/basemap-feedstock/issues/43
   - shapely
   - holoviews
   - bokeh
@@ -35,21 +38,20 @@ dependencies:
   - h5py
   - pytables
   - llvmlite
+  - numba  # force install via conda-forge to get rid of llvm incompatibilities
   - scikit-learn
 
   - pip:
     - scipy
     - geoarray>=0.8.9
-    - py_tools_ds>=0.14.2
-    - spectral>=0.16
+    - py_tools_ds>=0.14.8
     - cerberus
     - jsmin
     - tqdm
     - utm
-    - lxml
-    - imageio
+    - numpy-indexed
     - sphinx-argparse
-    - pycodestyle<2.4.0  # version 2.4.0 causes ImportError: module 'pycodestyle' has no attribute 'break_around_binary_operator'
+    - pycodestyle
     - flake8
     - pylint
     - pydocstyle

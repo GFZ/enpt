@@ -45,6 +45,7 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    enable_ac=dict(type='boolean', required=False),
                     sicor_cache_dir=dict(type='string', required=False),
                     auto_download_ecmwf=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
@@ -61,14 +62,16 @@ enpt_schema_input = dict(
                 schema=dict(
                     run_processor=dict(type='boolean', required=False),
                     algorithm=dict(type='string', required=False, allowed=['spectral', 'spatial']),
-                    interpolation_method=dict(type='string', required=False,
-                                              allowed=['linear', 'bilinear', 'cubic', 'spline']),
+                    interp_method_spectral=dict(type='string', required=False,
+                                                allowed=['linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic']),
+                    interp_method_spatial=dict(type='string', required=False,
+                                               allowed=['linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic']),
                 )),
 
             orthorectification=dict(
                 type='dict', required=False,
                 schema=dict(
-                    resamp_alg=dict(type='integer', required=False),
+                    resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss']),
                 ))
         ))
 )
@@ -102,6 +105,7 @@ parameter_mapping = dict(
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
+    enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
     sicor_cache_dir=('processors', 'atmospheric_correction', 'sicor_cache_dir'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
@@ -113,7 +117,8 @@ parameter_mapping = dict(
     # processors > dead_pixel
     run_deadpix_P=('processors', 'dead_pixel', 'run_processor'),
     deadpix_P_algorithm=('processors', 'dead_pixel', 'algorithm'),
-    deadpix_P_interp=('processors', 'dead_pixel', 'interpolation_method'),
+    deadpix_P_interp_spectral=('processors', 'dead_pixel', 'interp_method_spectral'),
+    deadpix_P_interp_spatial=('processors', 'dead_pixel', 'interp_method_spatial'),
 
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),

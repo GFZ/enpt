@@ -15,8 +15,11 @@ from ...options.config import EnPTConfig
 class Radiometric_Transformer(object):
     """Class for performing all kinds of radiometric transformations of EnMAP images."""
 
-    def __init__(self, config: EnPTConfig=None):
-        """Create an instance of Radiometric_Transformer."""
+    def __init__(self, config: EnPTConfig = None):
+        """Create an instance of Radiometric_Transformer.
+
+        :param config: EnPT configuration object
+        """
         self.cfg = config
         self.solarIrr = config.path_solar_irr  # path of model for solar irradiance
         self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
@@ -41,8 +44,7 @@ class Radiometric_Transformer(object):
             constant = \
                 self.cfg.scale_factor_toa_ref * math.pi * enmap_ImageL1.meta.earthSunDist ** 2 / \
                 (math.cos(math.radians(enmap_ImageL1.meta.geom_sun_zenith)))
-            solIrr = np.array([detector.detector_meta.solar_irrad[band] for band in detector.detector_meta.srf.bands])\
-                .reshape(1, 1, detector.data.bands)
+            solIrr = detector.detector_meta.solar_irrad.reshape(1, 1, detector.data.bands)
             toaRef = (constant * detector.data[:] / solIrr).astype(np.int16)
 
             # update EnMAP image
