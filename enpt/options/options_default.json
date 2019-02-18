@@ -38,11 +38,9 @@
         "atmospheric_correction": {
             "enable_ac": true,  /*enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A
                                   output contains top-of-atmosphere reflectance.*/
-            "sicor_cache_dir": "",  /*directory to be used to stored sicor cache files
-                                      NOTE: SICOR stores intermediate results there that need to computed only once
-                                            for atmospheric correction of multiple EnMAP images. (default: 'auto')*/
-            "auto_download_ecmwf": false,
-            "enable_cloud_screening": false,
+            "auto_download_ecmwf": false,  /*FIXME this might be not needed anymore in future*/
+            "enable_ice_retrieval":  true,  /*enable ice retrieval (default); increases accuracy of water vapour retrieval*/
+            "enable_cloud_screening": false,  /*FIXME this is currently not implemented*/
             "scale_factor_boa_ref": 10000  /*scale factor to be applied to BOA reflectance result*/
         },
 

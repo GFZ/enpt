@@ -45,7 +45,7 @@ config_for_testing = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=False,
-    enable_ac=False
+    enable_ac=True
 )
 
 
@@ -143,8 +143,8 @@ class EnPTConfig(object):
 
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
-        self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
+        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
 

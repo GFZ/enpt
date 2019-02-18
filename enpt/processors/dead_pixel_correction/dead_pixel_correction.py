@@ -309,7 +309,7 @@ def interp_nodata_spatially_3d(data_3d: np.ndarray, axis: int = 0, nodata: Union
     assert axis < 2
 
     badmask_full = _get_baddata_mask(data_3d, nodata)
-
+    from multiprocessing.dummy import Pool
     if CPUs > 1:
         with Pool(CPUs or cpu_count()) as pool:
             args = [[data_3d[:, :, band], axis, badmask_full[:, :, band], method, fill_value, implementation]

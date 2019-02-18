@@ -455,6 +455,8 @@ class RPC_3D_Geolayer_Generator(object):
             args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
                     for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
 
+            from multiprocessing.dummy import Pool
+
             with Pool(self.CPUs,
                       initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
                       initargs=(self.dem,)) as pool:
