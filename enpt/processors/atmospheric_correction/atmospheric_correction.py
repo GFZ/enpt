@@ -5,6 +5,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 """
 import pprint
 import numpy as np
+from multiprocessing import cpu_count
 
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
@@ -33,7 +34,10 @@ class AtmosphericCorrector(object):
             # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
             # TODO disable_progress_bars?
 
+            # always use the fast implementation (the slow implementation was only a temporary solution)
+            options["EnMAP"]["Retrieval"]["fast"] = True
             options["EnMAP"]["Retrieval"]["ice"] = self.cfg.enable_ice_retrieval
+            options["EnMAP"]["Retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
 
             return options
 
@@ -51,14 +55,11 @@ class AtmosphericCorrector(object):
         # run SICOR
         # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
         #       - cwv_model, cwc_model, toa_model have the SWIR geometry
-        #       - currently, the slower method is implemented,
-        #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be true  # TODO
-        if self.cfg.enable_ice_retrieval:
-            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model = \
-                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
-        else:
-            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, toa_model = \
-                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+        #       - currently, the fast method is implemented,
+        #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
+        #       - ice_model is None if self.cfg.enable_ice_retrieval is False
+        enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
+            sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
         # join results
         enmap_ImageL1.logger.info('Joining results of atmospheric correction.')

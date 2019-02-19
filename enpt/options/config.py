@@ -17,8 +17,6 @@ from collections import OrderedDict, Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
-import sicor
-
 from .options_schema import \
     enpt_schema_input, \
     enpt_schema_config_output, \
@@ -45,7 +43,9 @@ config_for_testing = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=False,
-    enable_ac=True
+    enable_ac=True,
+    enable_ice_retrieval=False,
+    CPUs=16
 )
 
 
@@ -65,8 +65,10 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=True,
-    enable_ac=False,
-    ortho_resampAlg='gauss'
+    enable_ac=True,
+    enable_ice_retrieval=False,
+    CPUs=32,
+    ortho_resampAlg='gauss',
 )
 
 
