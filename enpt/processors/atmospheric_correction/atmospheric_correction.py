@@ -6,7 +6,9 @@ Performs the atmospheric correction of EnMAP L1B data.
 import pprint
 import numpy as np
 from multiprocessing import cpu_count
+from os import path
 
+import sicor
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
@@ -29,8 +31,9 @@ class AtmosphericCorrector(object):
             options = get_ac_options(path_opts, validation=False)  # FIXME validation is currently not implemented
 
             # adjust options
+            # FIXME this path should be already known to sicor
             options["EnMAP"]["Retrieval"]["fn_LUT"] = \
-                "/home/gfz-fe/scheffler/python_deployed/sicor_aux_data/EnMAP_LUT_MOD5_formatted_1nm"  # FIXME hardcoded
+                path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
             # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
             # TODO disable_progress_bars?
 
