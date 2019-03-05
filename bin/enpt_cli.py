@@ -42,6 +42,9 @@ def get_enpt_argparser():
         help='input path of digital elevation model in map or sensor geometry; GDAL compatible file format '
              '(must cover the EnMAP L1B data completely if given in map geometry or must have the same pixel '
              'dimensions like the EnMAP L1B data if given in sensor geometry)')
+    add('-dummyfmt', '--is_dummy_dataformat', type=bool,  default=False,
+        help='Set to true in case of the preliminary, GFZ-internal dataformat as used for the Alpine test dataset. '
+             '(default: False. Note: This will be removed in future.)')
     add('-ele', '--average_elevation', type=int, default=0,
         help='average elevation in meters above sea level; may be provided if no DEM is available; '
              'ignored if DEM is given')
