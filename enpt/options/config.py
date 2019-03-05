@@ -44,7 +44,7 @@ config_for_testing = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=False,
+    is_dummy_dataformat=True,
     enable_ac=False
 )
 
@@ -64,7 +64,7 @@ config_for_testing_dlr = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=True,
+    is_dummy_dataformat=False,
     enable_ac=False,
     ortho_resampAlg='gauss'
 )
