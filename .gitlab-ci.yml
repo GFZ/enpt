@@ -14,6 +14,9 @@ test_enpt:
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
+    # update geoarray
+    - pip install 'geoarray>=0.8.11'
+
     # update py_tools_ds
     - pip install 'py_tools_ds>=0.14.8'
 
