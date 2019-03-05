@@ -105,10 +105,12 @@ class EnPTConfig(object):
         # general options #
         ###################
 
-        try:
-            self.is_dlr_dataformat = gp('is_dlr_dataformat')
-        except:  # noqa E722  # FIXME
-            self.is_dlr_dataformat = False
+        self.is_dummy_dataformat = gp('is_dummy_dataformat')
+        if 'is_dlr_dataformat' in user_opts:
+            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+                          "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
+            self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
+
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
