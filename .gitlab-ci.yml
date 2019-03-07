@@ -19,8 +19,12 @@ test_enpt:
 
     # switch sicor branch
     - cd /tmp/sicor
-    - git checkout -b feature/improve_speed
-    - git pull origin feature/improve_speed
+    - mv context/sicor/sicor/tables/*.h5 context/sicor_tables
+    - mv context/sicor/sicor/tables/*.pkl context/sicor_tables
+    - rm -rf context/sicor
+    - git clone -b feature/improve_speed https://gitext.gfz-potsdam.de/EnMAP/sicor.git context/sicor
+    - mv context/sicor_tables/* context/sicor/sicor/tables
+    - cd context/sicor
     - pip install -e .
     - cd ../../
 
