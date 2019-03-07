@@ -18,7 +18,7 @@ test_enpt:
     - pip install 'py_tools_ds>=0.14.11'
 
     # switch sicor branch
-    - cd ./context/sicor
+    - cd /tmp/sicor
     - git checkout -b feature/improve_speed
     - git pull origin feature/improve_speed
     - pip install -e .
