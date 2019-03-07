@@ -20,7 +20,7 @@ test_enpt:
     # switch sicor branch
     - mkdir /tmp/sicor_tables
     - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
-    - mv /tmp/sicor/sicor/tables/*.pkl /tmp/sicor_tables
+    - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
     - rm -rf /tmp/sicor
     - git clone -b feature/improve_speed https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
     - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
