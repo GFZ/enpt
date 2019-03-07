@@ -66,13 +66,16 @@ class Orthorectifier(object):
         # transform VNIR and SWIR to map geometry
         GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
 
+        enmap_ImageL1.logger.info('Orthorectifying VNIR data...')
         GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, **kw_init)
         vnir_mapgeo, vnir_gt, vnir_prj = GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:], **kw_trafo)
 
+        enmap_ImageL1.logger.info('Orthorectifying SWIR data...')
         GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, **kw_init)
         swir_mapgeo, swir_gt, swir_prj = GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:], **kw_trafo)
 
         # combine VNIR and SWIR
+        enmap_ImageL1.logger.info('Merging VNIR and SWIR data...')
         L2_obj.data = self._get_VNIR_SWIR_stack(vnir_mapgeo, swir_mapgeo, vnir_gt, swir_gt, vnir_prj, swir_prj,
                                                 enmap_ImageL1.meta.vnir.wvl_center, enmap_ImageL1.meta.swir.wvl_center)
 
@@ -82,6 +85,7 @@ class Orthorectifier(object):
                                      ** kw_init)
 
         # FIXME cloud mask applies to BOTH detectors
+        enmap_ImageL1.logger.info('Orthorectifying cloud mask...')
         L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds, **kw_trafo))
 
         # TODO transform mask_clouds_confidence, ac_errors, pixel masks
@@ -89,6 +93,7 @@ class Orthorectifier(object):
         # metadata adjustments #
         ########################
 
+        enmap_ImageL1.logger.info('Generating L2A metadata...')
         L2_obj.meta = EnMAP_Metadata_L2A_MapGeo(config=self.cfg,
                                                 meta_l1b=enmap_ImageL1.meta,
                                                 dims_mapgeo=L2_obj.data.shape,
