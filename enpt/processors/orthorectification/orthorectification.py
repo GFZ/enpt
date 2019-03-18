@@ -60,6 +60,7 @@ class Orthorectifier(object):
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
         kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
                        nprocs=self.cfg.CPUs,
+                       # nprocs=1,  # FIXME
                        radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45)
         kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
 
