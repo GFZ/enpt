@@ -43,7 +43,7 @@ config_for_testing = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=False,
-    enable_ac=True,
+    enable_ac=False,
     enable_ice_retrieval=False,
     CPUs=16
 )
