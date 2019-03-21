@@ -15,7 +15,7 @@ test_enpt:
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
     # update py_tools_ds
-    # - pip install 'py_tools_ds>=0.14.11'
+    - pip install 'py_tools_ds>=0.14.14'
 
     # switch sicor branch
     - mkdir /tmp/sicor_tables
@@ -83,7 +83,7 @@ test_enpt_install:
 
     # install py_tools_ds
     - conda install -y -c conda-forge pyresample
-    - pip install 'py_tools_ds>=0.14.11'
+    - pip install 'py_tools_ds>=0.14.14'
 
     # install sicor
     - conda install -y -q -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn
