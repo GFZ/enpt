@@ -71,10 +71,10 @@ def get_enpt_argparser():
     add('--enable_ac', type=bool, default=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")
-    add('--sicor_cache_dir', type=str, default=None,
-        help='SICOR cache directory')
     add('--auto_download_ecmwf', type=bool, default=False,
         help='Automatically download ECMWF data for atmospheric correction')
+    add('--enable_ice_retrieval', type=bool, default=True,
+        help='Enable ice retrieval (default); increases accuracy of water vapour retrieval')
     add('--enable_cloud_screening', type=bool, default=False,
         help='Enable cloud screening during atmospheric correction')
     add('--scale_factor_boa_ref', type=int, default=10000,

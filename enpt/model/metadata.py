@@ -801,7 +801,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             # FIXME this is the size of the VNIR/SWIR stack
             size = [F['size'] for F in self.fileinfos if os.path.splitext(F['name'])[0].endswith('-SPECTRAL_IMAGE')][0]
             xml.find("product/image/%s/size" % lbl).text = str(size)
-            # FIXME DLR data dimensions equal either L2A data nor L1B data
+            # FIXME DLR data dimensions equal neither L2A data nor L1B data
             xml.find("product/image/%s/channels" % lbl).text = str(detMetaL1B.nwvl)
             xml.find("product/image/%s/dimension/rows" % lbl).text = str(self.nrows)
             xml.find("product/image/%s/dimension/columns" % lbl).text = str(self.ncols)

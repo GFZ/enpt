@@ -43,8 +43,8 @@ class SRF(object):
 
         :param cwl:         target center wavelength position
         :param fwhm:        target band width (full width half maximum)
-        :param wvl_min:     minimum wavelength to compute spectral respnse for
-        :param wvl_max:     maximum wavelength to compute spectral respnse for
+        :param wvl_min:     minimum wavelength to compute spectral response for
+        :param wvl_max:     maximum wavelength to compute spectral response for
         :param wvl_res:     spectral resolution at which spectral response is to be computed
         :param normalize:   whether to normalize the output spectral response to values between 0 and 1
         :return:            2D numpy.ndarray: rows: response per wavelength; columns: wavelength/response

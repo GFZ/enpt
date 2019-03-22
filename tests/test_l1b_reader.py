@@ -122,7 +122,7 @@ class Test_L1B_Reader(unittest.TestCase):
                                                                n_lines))
                 print("-----------------------------------------------------------------------------------------------")
 
-                if n_lines is "all":
+                if n_lines == "all":
                     n_lines = None
 
                 print("")

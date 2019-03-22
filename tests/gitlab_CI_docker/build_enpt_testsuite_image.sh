@@ -2,7 +2,7 @@
 
 context_dir="./context"
 dockerfile="enpt_ci.docker"
-tag="enpt_ci:0.7.0"
+tag="enpt_ci:0.7.1"
 gitlab_runner="enpt_gitlab_CI_runner"
 
 # get sicor project

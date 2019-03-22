@@ -18,7 +18,17 @@ test_enpt:
     - pip install 'geoarray>=0.8.11'
 
     # update py_tools_ds
-    - pip install 'py_tools_ds>=0.14.8'
+    - pip install 'py_tools_ds>=0.14.14'
+
+    # switch sicor branch
+    - mkdir /tmp/sicor_tables
+    - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
+    - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
+    - rm -rf /tmp/sicor
+    - git clone -b feature/improve_speed https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+    - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
+    - rm -rf /tmp/sicor_tables/
+    - pip install -e /tmp/sicor
 
     # update sicor
     # - conda install -y -q -c conda-forge basemap
@@ -63,6 +73,7 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
+    - conda update -n base -c defaults conda
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
@@ -71,10 +82,11 @@ test_enpt_install:
 
     # install not pip-installable deps of geoarray
     - conda install -y -c conda-forge numpy scikit-image matplotlib pandas gdal rasterio pyproj basemap shapely
-    - conda install -y -c conda-forge 'icu=58.*'  # fixes bug for conda-forge gdal build
+    # - conda install -y -c conda-forge 'icu=58.*'  # fixes bug for conda-forge gdal build
 
     # install py_tools_ds
-    - pip install 'py_tools_ds>=0.14.8'
+    - conda install -y -c conda-forge pyresample
+    - pip install 'py_tools_ds>=0.14.14'
 
     # install sicor
     - conda install -y -q -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn
