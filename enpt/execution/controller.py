@@ -42,7 +42,7 @@ class EnPT_Controller(object):
         :param subdir:          subdirectory name to be created within temporary directory
         :return:                /tmp/tmpk2qp0yri/rootdir/
         """
-        outdir = os.path.join(self.tempDir, subdir) if self.cfg.is_dlr_dataformat else self.tempDir
+        outdir = os.path.join(self.tempDir, subdir) if not self.cfg.is_dummy_dataformat else self.tempDir
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(outdir)
@@ -50,7 +50,7 @@ class EnPT_Controller(object):
         if not os.path.isdir(outdir):
             raise NotADirectoryError(outdir)
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             return outdir
         else:
             return os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])

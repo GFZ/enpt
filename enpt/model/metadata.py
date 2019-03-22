@@ -77,7 +77,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """
         self.cfg = config
         self.detector_name = detector_name  # type: str
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
         else:
             self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
@@ -125,7 +125,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """
         xml = ElementTree.parse(path_xml).getroot()
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             lbl = self.detector_label
             self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
@@ -472,7 +472,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         self.metaxml_filename = os.path.basename(path_xml)
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             # read processing level
             self.proc_level = xml.find("base/level").text
             if self.proc_level != 'L1B':
@@ -558,7 +558,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         xml = ElementTree.parse(self.path_xml).getroot()
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
                 lbl = L1B_product_props_DLR['xml_detector_label'][detName]
                 xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
@@ -611,7 +611,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.earthSunDist = meta_l1b.earthSunDist  # type: float  # earth-sun distance
 
         # generate file names for L2A output
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.scene_basename = meta_l1b.vnir.data_filename.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.data_filename)[0]
@@ -644,7 +644,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.smile_coef = np.vstack([meta_l1b.vnir.smile_coef, meta_l1b.swir.smile_coef])[bandidx_order, :]
         self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.rpc_coeffs = OrderedDict(zip(
                 ['band_%d' % (i + 1) for i in range(dims_mapgeo[2])],
                 [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
@@ -730,7 +730,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # parse (use L1B metadata as template)
         xml = ElementTree.parse(self._meta_l1b.path_xml, parser).getroot()
 
-        if not self.cfg.is_dlr_dataformat:
+        if self.cfg.is_dummy_dataformat:
             self.logger.warning('No XML metadata conversion implemented for datasets different to the DLR format.'
                                 'Metadata XML file will be empty.')
             return ''

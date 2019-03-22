@@ -445,7 +445,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :param n_lines: number of line to be added
         :return: None
         """
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
             basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
         else:
@@ -489,7 +489,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.detector_meta.nrows += n_lines
 
         # Compute new lower coordinates
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                           img2.detector_meta.lat_UL_UR_LL_LR))
             dem_validated = DEM_Processor(img2.cfg.path_dem,
@@ -532,7 +532,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
         self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
         # TODO append remaining raster layers - additional cloud masks, ...
 
@@ -620,7 +620,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger = logger
 
         # Read metadata here in order to get all information needed by to get paths.
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
                                                      config=self.cfg, logger=self.logger)
         else:
