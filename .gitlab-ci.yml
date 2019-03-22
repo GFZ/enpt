@@ -71,6 +71,7 @@ test_enpt_install:
     - conda install -y -c conda-forge 'icu=58.*'  # fixes bug for conda-forge gdal build
 
     # install py_tools_ds
+    - conda install -y -c conda-forge pyresample
     - pip install 'py_tools_ds>=0.14.14'
 
     # install sicor
