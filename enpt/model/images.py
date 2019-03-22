@@ -457,12 +457,12 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         distance_min = 27.0
         distance_max = 34.0
 
-        # check bottom left
+        # compute distance between image1 LL and image2 UL
         x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[2], self.detector_meta.lon_UL_UR_LL_LR[2])
         x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[0])
         distance_left = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-        # check bottom right
+        # compute distance between image1 LR and image2 UR
         x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[3], self.detector_meta.lon_UL_UR_LL_LR[3])
         x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[1])
         distance_right = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
@@ -488,19 +488,19 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         self.detector_meta.nrows += n_lines
 
-        # Create new corner coordinate
+        # Compute new lower coordinates
         if self.cfg.is_dlr_dataformat:
-            enmapIm_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
-                                             img2.detector_meta.lat_UL_UR_LL_LR))
+            img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
+                                          img2.detector_meta.lat_UL_UR_LL_LR))
             dem_validated = DEM_Processor(img2.cfg.path_dem,
-                                          enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+                                          enmapIm_cornerCoords=img2_cornerCoords).dem
             LL, LR = compute_mapCoords_within_sensorGeoDims(
+                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
+                                    (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
                 rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
                 dem=dem_validated,
-                enmapIm_cornerCoords=enmapIm_cornerCoords,
-                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols),
-                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
-                                    (n_lines - 1, img2.detector_meta.ncols - 1)]  # LR
+                enmapIm_cornerCoords=img2_cornerCoords,
+                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
             )
 
             self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL

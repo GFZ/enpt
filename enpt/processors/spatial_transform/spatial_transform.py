@@ -480,19 +480,19 @@ class RPC_3D_Geolayer_Generator(object):
         return lons, lats
 
 
-def compute_mapCoords_within_sensorGeoDims(rpc_coeffs: dict,
+def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float, float]],
+                                           rpc_coeffs: dict,
                                            dem: Union[str, GeoArray],
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
-                                           sensorgeoCoords_YX: List[Tuple[float, float]]
                                            ) -> List[Tuple[float, float]]:
-    """
+    """Compute map coordinates for a given image coordinate pair of an EnMAP image in sensor geometry.
 
-    :param rpc_coeffs:
+    :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
+    :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry
     :param dem:                     digital elevation model in MAP geometry
-    :param enmapIm_cornerCoords:
-    :param enmapIm_dims_sensorgeo:  (rows, columns)
-    :param sensorgeoCoords_YX:
+    :param enmapIm_cornerCoords:    MAP coordinates of the EnMAP image
+    :param enmapIm_dims_sensorgeo:  dimensions of the sensor geometry EnMAP image (rows, columns)
     :return:
     """
     # compute coordinate array
@@ -502,7 +502,7 @@ def compute_mapCoords_within_sensorGeoDims(rpc_coeffs: dict,
                                    enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo)
     lons, lats = RPCGG.compute_geolayer()
 
-    # extract the new corner coordinated from the coordinate arrays computed via RPCs
+    # extract the new corner coordinate from the coordinate arrays computed via RPCs
     rows, cols = enmapIm_dims_sensorgeo
 
     ul, ur, ll, lr = enmapIm_cornerCoords
