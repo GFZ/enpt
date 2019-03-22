@@ -46,3 +46,5 @@ RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
 # -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
 COPY *.zip /tmp/sicor/sicor
 
+# copy AC LUT for EnMAP to SICOR tables directory
+COPY EnMAP_LUT* /tmp/sicor/sicor/tables

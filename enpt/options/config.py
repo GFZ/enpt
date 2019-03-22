@@ -17,8 +17,6 @@ from collections import OrderedDict, Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
-import sicor
-
 from .options_schema import \
     enpt_schema_input, \
     enpt_schema_config_output, \
@@ -45,7 +43,9 @@ config_for_testing = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dlr_dataformat=False,
-    enable_ac=False
+    enable_ac=False,
+    enable_ice_retrieval=False,
+    CPUs=16
 )
 
 
@@ -66,7 +66,9 @@ config_for_testing_dlr = dict(
     disable_progress_bars=True,
     is_dlr_dataformat=True,
     enable_ac=False,
-    ortho_resampAlg='gauss'
+    enable_ice_retrieval=False,
+    CPUs=32,
+    ortho_resampAlg='gauss',
 )
 
 
@@ -143,8 +145,8 @@ class EnPTConfig(object):
 
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
-        self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
+        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
 
