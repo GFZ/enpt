@@ -1,7 +1,7 @@
 numpy
 pandas
 scipy
-geoarray>=0.8.9
+geoarray>=0.8.11
 py_tools_ds>=0.14.14
 cerberus
 jsmin

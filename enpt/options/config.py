@@ -42,7 +42,7 @@ config_for_testing = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=False,
+    is_dummy_dataformat=True,
     enable_ac=False,
     enable_ice_retrieval=False,
     CPUs=16
@@ -64,7 +64,7 @@ config_for_testing_dlr = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=True,
+    is_dummy_dataformat=False,
     enable_ac=False,
     enable_ice_retrieval=False,
     CPUs=32,
@@ -107,10 +107,12 @@ class EnPTConfig(object):
         # general options #
         ###################
 
-        try:
-            self.is_dlr_dataformat = gp('is_dlr_dataformat')
-        except:  # noqa E722  # FIXME
-            self.is_dlr_dataformat = False
+        self.is_dummy_dataformat = gp('is_dummy_dataformat')
+        if 'is_dlr_dataformat' in user_opts:
+            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+                          "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
+            self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
+
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
