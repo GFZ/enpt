@@ -33,6 +33,6 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-.. _documentation: https://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
-.. _coverage: https://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
-.. _nosetests: https://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
+.. _documentation: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
+.. _coverage: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
+.. _nosetests: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
