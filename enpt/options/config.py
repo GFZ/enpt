@@ -52,11 +52,11 @@ config_for_testing = dict(
 config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
                      'rows0-99.zip')),
     path_l1b_enmap_image_gapfill=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
                      'rows100-199.zip')),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'DLR_L2A_DEM_UTM32.bsq')),

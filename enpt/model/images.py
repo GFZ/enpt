@@ -564,12 +564,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
 
             elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
-                # Lλ = QCAL / GAIN + OFFSET
-                # FIXME this asserts LMIN and LMAX in mW/cm2/sr/um
+                # Lλ = QCAL * GAIN + OFFSET
                 # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
-                #       - DLR gains / offsets are provided in mW/cm2/sr/um, so we have to multiply by 10 to get
-                #         mW m^-2 sr^-1 nm^-1 as needed later
-                self.data = 10 * (self.data[:] / self.detector_meta.gains + self.detector_meta.offsets)
+                #       - DLR gains / offsets are provided in W/m2/sr/nm, so we have to multiply by 1000 to get
+                #         mW/m2/sr/nm as needed later
+                self.data = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
 
             else:
                 raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
