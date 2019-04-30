@@ -9,6 +9,9 @@ New features / improvements:
 
 * enhanced AC results due to updated SICOR implementation
   (currently dependent from SICOR branch "feature/three_phases_of_water_retieval")
+* updated DLR test data and revised DN/radiance conversion
+  (fixes negative radiance and BOA reflectance values / saturation)
+* ?
 
 
 0.7.0 (2019-01-21)
