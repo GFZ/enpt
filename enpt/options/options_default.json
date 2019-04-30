@@ -65,16 +65,4 @@
             "resamp_alg": "bilinear"  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }
