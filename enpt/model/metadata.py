@@ -444,6 +444,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
         self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist = None  # type: float  # earth-sun distance
+        self.aot = None  # type: float  # scene aerosol optical thickness
+        self.water_vapour = None  # type: float  # scene water vapour [cm]
         self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
         self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
         self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
@@ -496,6 +498,8 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.geom_sun_zenith = 90 - np.float(xml.find("specific/sunElevationAngle/center").text)
             self.geom_sun_azimuth = np.float(xml.find("specific/sunAzimuthAngle/center").text)
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
+            self.aot = np.float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
+            self.water_vapour = np.float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
         else:
             # read the acquisition time
             self.observation_datetime = \

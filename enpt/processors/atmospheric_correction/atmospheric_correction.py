@@ -24,7 +24,7 @@ class AtmosphericCorrector(object):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
 
-    def get_ac_options(self):
+    def get_ac_options(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> dict:
         path_opts = get_path_ac_options()
 
         try:
@@ -36,6 +36,8 @@ class AtmosphericCorrector(object):
                 path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
             # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
             # TODO disable_progress_bars?
+            if enmap_ImageL1.meta.aot is not None:
+                options["EnMAP"]["FO_settings"]["aot"] = enmap_ImageL1.meta.aot
 
             # always use the fast implementation (the slow implementation was only a temporary solution)
             options["EnMAP"]["Retrieval"]["fast"] = True
@@ -48,7 +50,7 @@ class AtmosphericCorrector(object):
             raise FileNotFoundError('Could not locate options file for atmospheric correction at %s.' % path_opts)
 
     def run_ac(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL1Product_SensorGeo:
-        options = self.get_ac_options()
+        options = self.get_ac_options(enmap_ImageL1)
         enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
         # run AC
