@@ -2,8 +2,8 @@
 """Reader module for reading all kinds of EnMAP images."""
 
 import logging
-import tempfile
-import zipfile
+import os
+from fnmatch import filter
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -20,7 +20,6 @@ class L1B_Reader(object):
                  root_dir_main: str = None,
                  root_dir_ext: str = None,
                  n_line_ext: int = None):
-        # Add option to init as suggested.
         """Get an instance of L1B_Reader.
 
         :param config:  instance of EnPTConfig class
@@ -41,80 +40,28 @@ class L1B_Reader(object):
                        root_dir_main,
                        root_dir_ext: str = None,
                        n_line_ext: int = None,
-                       compute_snr: bool = True):
-        """
-        Read L1B EnMAP data. Extend the image by adding a second image [entire, partial]
+                       compute_snr: bool = True) -> EnMAPL1Product_SensorGeo:
+        """Read L1B EnMAP data. Extend the image by adding a second image [entire, partial]
+
         :param root_dir_main: Root directory of the main EnMAP Level-1B product
         :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product [optional]
         :param n_line_ext:    Number of lines to be added to the main image [if None, use the whole image]
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
         """
-        # TODO add check for valid EnMAP L1B root directory
-
+        self.validate_input(root_dir_main, root_dir_ext)
         self.logger.info("Reading Input Data")
 
-        # Get a new instance of the EnMAPL1Product_SensorGeo for the main image
+        # Get a new instance of the EnMAPL1Product_SensorGeo for the main image (TOA radiance)
         l1b_main_obj = EnMAPL1Product_SensorGeo(root_dir_main, config=self.cfg, logger=self.logger)
 
-        # associate raster attributes with file links (raster data is read lazily / on demand)
-        l1b_main_obj.vnir.data = l1b_main_obj.paths.vnir.data
-        l1b_main_obj.vnir.mask_clouds = l1b_main_obj.paths.vnir.mask_clouds
-        l1b_main_obj.swir.data = l1b_main_obj.paths.swir.data
-        l1b_main_obj.swir.mask_clouds = l1b_main_obj.paths.swir.mask_clouds
-
-        try:
-            l1b_main_obj.vnir.deadpixelmap = l1b_main_obj.paths.vnir.deadpixelmap
-            l1b_main_obj.swir.deadpixelmap = l1b_main_obj.paths.swir.deadpixelmap
-        except ValueError:
-            self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
-            l1b_main_obj.vnir.deadpixelmap = np.zeros(l1b_main_obj.vnir.data.shape)
-            l1b_main_obj.swir.deadpixelmap = np.zeros(l1b_main_obj.swir.data.shape)
-
-        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
-        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
-
-        # compute radiance
-        l1b_main_obj.DN2TOARadiance()
-
-        # in case of a second file, we create new files that will be temporary save into a temporary directory
-        # and their path will be stored into the paths of l1b_main_obj
-        # NOTE: We do the following hypothesis:
-        #         - The dead pixel map will not change when acquiring 2 adjacent images.
+        # append a second EnMAP L1B product below if given
         if root_dir_ext:
-            l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir_ext, config=self.cfg)
-            # TODO simplify redundant code
-            l1b_ext_obj.vnir.data = l1b_ext_obj.paths.vnir.data
-            l1b_ext_obj.vnir.mask_clouds = l1b_ext_obj.paths.vnir.mask_clouds
-            l1b_ext_obj.swir.data = l1b_ext_obj.paths.swir.data
-            l1b_ext_obj.swir.mask_clouds = l1b_ext_obj.paths.swir.mask_clouds
-
-            try:
-                l1b_ext_obj.vnir.deadpixelmap = l1b_ext_obj.paths.vnir.deadpixelmap
-                l1b_ext_obj.swir.deadpixelmap = l1b_ext_obj.paths.swir.deadpixelmap
-            except ValueError:
-                self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
-                l1b_ext_obj.vnir.deadpixelmap = np.zeros(l1b_ext_obj.vnir.data.shape)
-                l1b_ext_obj.swir.deadpixelmap = np.zeros(l1b_ext_obj.swir.data.shape)
-
-            l1b_ext_obj.DN2TOARadiance()
-            l1b_main_obj.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
-            l1b_main_obj.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
-
-            # l1b_main_obj.append_new_image(l1b_ext_obj, n_line_ext)
+            l1b_main_obj.append_new_image(root_dir_ext, n_line_ext)
 
         # compute SNR
         if compute_snr:
-            with tempfile.TemporaryDirectory(dir=self.cfg.working_dir) as tmpDir,\
-                    zipfile.ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
-                zf.extractall(tmpDir)
-
-                if l1b_main_obj.meta.vnir.unitcode == 'TOARad':
-                    l1b_main_obj.vnir.detector_meta.calc_snr_from_radiance(rad_data=l1b_main_obj.vnir.data,
-                                                                           dir_snr_models=tmpDir)
-                if l1b_main_obj.meta.swir.unitcode == 'TOARad':
-                    l1b_main_obj.swir.detector_meta.calc_snr_from_radiance(rad_data=l1b_main_obj.swir.data,
-                                                                           dir_snr_models=tmpDir)
+            l1b_main_obj.calc_snr_from_radiance()
 
         # compute geolayer if not already done
         if l1b_main_obj.meta.vnir.lons is None or l1b_main_obj.meta.vnir.lats is None:
@@ -125,12 +72,48 @@ class L1B_Reader(object):
             l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
                 l1b_main_obj.meta.swir.compute_geolayer_for_cube()
 
-        # Return the l1b_main_obj
+        # Validate and return the l1b_main_obj
+        self.validate_output()
         return l1b_main_obj
 
-    def validate_input(self):
+    def validate_input(self, root_dir_main, root_dir_ext):
         """Validate user inputs."""
-        pass
+        self._validate_enmap_l1b_rootdir(root_dir_main)
+        if root_dir_ext:
+            self._validate_enmap_l1b_rootdir(root_dir_main)
+
+    @staticmethod
+    def _validate_enmap_l1b_rootdir(rootdir_l1b):
+        """Check for valid EnMAP L1B root directory."""
+        if not os.path.isdir(rootdir_l1b):
+            raise NotADirectoryError(rootdir_l1b)
+
+        files = os.listdir(rootdir_l1b)
+
+        if not files:
+            raise RuntimeError("The root directory of the EnMAP image %s is empty." % rootdir_l1b)
+
+        for pattern in ['*-HISTORY.XML',
+                        '*-LOG.XML',
+                        '*-METADATA.XML',
+                        '*-QL_PIXELMASK_SWIR.GEOTIFF',
+                        '*-QL_PIXELMASK_VNIR.GEOTIFF',
+                        '*-QL_QUALITY_CIRRUS.GEOTIFF',
+                        '*-QL_QUALITY_CLASSES.GEOTIFF',
+                        '*-QL_QUALITY_CLOUD.GEOTIFF',
+                        '*-QL_QUALITY_CLOUDSHADOW.GEOTIFF',
+                        '*-QL_QUALITY_HAZE.GEOTIFF',
+                        '*-QL_QUALITY_SNOW.GEOTIFF',
+                        '*-QL_QUALITY_TESTFLAGS_SWIR.GEOTIFF',
+                        '*-QL_QUALITY_TESTFLAGS_VNIR.GEOTIFF',
+                        '*-QL_SWIR.GEOTIFF',
+                        '*-QL_VNIR.GEOTIFF',
+                        '*-SPECTRAL_IMAGE_SWIR.GEOTIFF',
+                        '*-SPECTRAL_IMAGE_VNIR.GEOTIFF',
+                        ]:
+            if not filter(files, pattern):
+                raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern '
+                                        '%s.' % (rootdir_l1b, pattern))
 
     def validate_output(self):
         """Validate outputs of L1B_Reader."""

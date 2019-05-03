@@ -4,6 +4,8 @@
 import logging
 from types import SimpleNamespace
 from typing import Tuple  # noqa: F401
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 import numpy as np
 from os import path, makedirs
 from glob import glob
@@ -416,11 +418,12 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
                 msg_bandinfo = ''
                 if lons.ndim == 3:
+                    # 3D geolayer (the usual case for EnMAP data provided by DLR)
                     lons = lons[:, :, 0]
                     lats = lats[:, :, 0]
                     msg_bandinfo = ' (using first band of %s geolayer)' % self.detector_name
                 else:
-                    # 2D geolayer
+                    # 2D geolayer (GFZ-internal test case)
                     # FIXME replace linear interpolation by native geolayers
                     if lons.shape != self.data.shape:
                         lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
@@ -436,13 +439,13 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
         # TODO convert method to function?
-        """
-        Check if a second image could pass with the first image.
-        In this version we assume that the image will be add below
-        If it is the case, the method will create temporary files that will be used in the following.
+        """Check if a second image matches with the first image and if so, append the given number of lines below.
+
+        In this version we assume that the image will be added below. If it is the case, the method will create
+        temporary files that will be used in the following.
 
         :param img2:
-        :param n_lines: number of line to be added
+        :param n_lines: number of lines to be added from the new image
         :return: None
         """
         if not self.cfg.is_dummy_dataformat:
@@ -628,13 +631,32 @@ class EnMAPL1Product_SensorGeo(object):
         self.meta.read_metadata()
 
         # define VNIR and SWIR detector
+        self.detector_attrNames = ['vnir', 'swir']
         self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
         self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
 
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths()
 
-        self.detector_attrNames = ['vnir', 'swir']
+        # associate raster attributes with file links (raster data is read lazily / on demand)
+        self.vnir.data = self.paths.vnir.data
+        self.vnir.mask_clouds = self.paths.vnir.mask_clouds
+        self.swir.data = self.paths.swir.data
+        self.swir.mask_clouds = self.paths.swir.mask_clouds
+
+        try:
+            self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
+            self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+        except ValueError:
+            self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
+            self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)
+            self.swir.deadpixelmap = np.zeros(self.swir.data.shape)
+
+        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
+        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
+
+        # compute radiance
+        self.DN2TOARadiance()
 
     def get_paths(self):
         """
@@ -742,6 +764,37 @@ class EnMAPL1Product_SensorGeo(object):
             self.swir.DN2TOARadiance()
             self.meta.swir.unitcode = self.swir.detector_meta.unitcode
             self.meta.swir.unit = self.swir.detector_meta.unit
+
+    def append_new_image(self, root_dir, n_line_ext):
+        """Append a second EnMAP Level-1B product below the last line of the current L1B product.
+
+        NOTE:   We create new files that will be saved into a temporary directory and their path will be stored in the
+                paths of self. We assume that the dead pixel map does not change between two adjacent images.
+
+        :param root_dir:    root directory of EnMAP Level-1B product to be appended
+        :param n_line_ext:  number of lines to be added from the new image
+        :return:
+        """
+        l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
+
+        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
+        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
+
+    def calc_snr_from_radiance(self):
+        """Compute EnMAP SNR from radiance data.
+
+        SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].
+        """
+        with TemporaryDirectory(dir=self.cfg.working_dir) as tmpDir, \
+                ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
+
+            zf.extractall(tmpDir)
+
+            if self.meta.vnir.unitcode == 'TOARad':
+                self.vnir.detector_meta.calc_snr_from_radiance(rad_data=self.vnir.data, dir_snr_models=tmpDir)
+
+            if self.meta.swir.unitcode == 'TOARad':
+                self.swir.detector_meta.calc_snr_from_radiance(rad_data=self.swir.data, dir_snr_models=tmpDir)
 
     def correct_dead_pixels(self):
         """Correct dead pixels of both detectors."""

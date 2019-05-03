@@ -105,11 +105,9 @@ class EnPT_Controller(object):
 
     def write_output(self):
         if self.cfg.output_dir:
-            try:
+            if self.L2_obj is not None:
                 self.L2_obj.save(self.cfg.output_dir)
-            except NotImplementedError:
-                self.L2_obj.logger.warning('Currently L2A EnMAP images cannot be written to disk. '
-                                           'Writing level 1 image instead.')
+            else:
                 self.L1_obj.save(self.cfg.output_dir)
 
     def run_all_processors(self):
