@@ -801,6 +801,38 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.correct_dead_pixels()
         self.swir.correct_dead_pixels()
 
+    def correct_VNIR_SWIR_shift(self):
+        # use first geolayer bands for VNIR and SWIR
+        Vlons, Vlats = self.vnir.detector_meta.lons[:, :, 0], self.vnir.detector_meta.lats[:, :, 0]
+        Slons, Slats = self.swir.detector_meta.lons[:, :, 0], self.swir.detector_meta.lats[:, :, 0]
+
+        # get corner coordinates of VNIR and SWIR according to geolayer
+        def get_coords(lons, lats):
+            return tuple([(lons[Y, X], lats[Y, X]) for Y, X in [(0, 0), (0, -1), (-1, 0), (-1, -1)]])
+
+        VUL, VUR, VLL, VLR = get_coords(Vlons, Vlats)
+        SUL, SUR, SLL, SLR = get_coords(Slons, Slats)
+
+        # get map coordinates of VNIR/SWIR overlap
+        ovUL = max(VUL[0], SUL[0]), min(VUL[1], SUL[1])
+        ovUR = min(VUR[0], SUR[0]), min(VUR[1], SUR[1])
+        ovLL = max(VLL[0], SLL[0]), max(VLL[1], SLL[1])
+        ovLR = min(VLR[0], SLR[0]), max(VLR[1], SLR[1])
+
+        # find nearest image positions for VNIR and SWIR to the map coordinates of the VNIR/SWIR overlap
+        def nearest_imCoord(lons_arr, lats_arr, lon, lat):
+            dists = np.sqrt((lons_arr - lon) ** 2 + (lats_arr - lat) ** 2)
+            row, col = np.unravel_index(dists.argmin(), dists.shape)
+
+            return row, col
+
+        overlapImVNIR = tuple([nearest_imCoord(Vlons, Vlats, *ovCoords) for ovCoords in [ovUL, ovUR, ovLL, ovLR]])
+        overlapImSWIR = tuple([nearest_imCoord(Slons, Slats, *ovCoords) for ovCoords in [ovUL, ovUR, ovLL, ovLR]])
+
+        raise NotImplementedError()  # FIXME
+        # a=1
+        # self.vnir.data.get_mapPos()  # FIXME
+
     def get_preprocessed_dem(self):
         self.vnir.get_preprocessed_dem()
         self.swir.get_preprocessed_dem()

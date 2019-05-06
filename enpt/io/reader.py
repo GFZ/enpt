@@ -72,15 +72,18 @@ class L1B_Reader(object):
             l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
                 l1b_main_obj.meta.swir.compute_geolayer_for_cube()
 
+        # l1b_main_obj.correct_VNIR_SWIR_shift()
+
         # Validate and return the l1b_main_obj
         self.validate_output()
         return l1b_main_obj
 
     def validate_input(self, root_dir_main, root_dir_ext):
         """Validate user inputs."""
-        self._validate_enmap_l1b_rootdir(root_dir_main)
-        if root_dir_ext:
+        if not self.cfg.is_dummy_dataformat:
             self._validate_enmap_l1b_rootdir(root_dir_main)
+            if root_dir_ext:
+                self._validate_enmap_l1b_rootdir(root_dir_main)
 
     @staticmethod
     def _validate_enmap_l1b_rootdir(rootdir_l1b):
