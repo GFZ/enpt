@@ -1,40 +1,36 @@
 enpt/version.py:1 at module level:
         D100: Missing docstring in public module
-enpt/io/reader.py:40 in public method `read_inputdata`:
-        D205: 1 blank line required between summary line and description (found 0)
-enpt/io/reader.py:40 in public method `read_inputdata`:
+enpt/io/reader.py:39 in public method `read_inputdata`:
         D400: First line should end with a period (not ']')
-enpt/model/images.py:303 in private method `generate_quicklook`:
+enpt/model/images.py:305 in private method `generate_quicklook`:
         D400: First line should end with a period (not 'e')
-enpt/model/images.py:367 in public method `get_paths`:
+enpt/model/images.py:369 in public method `get_paths`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:367 in public method `get_paths`:
+enpt/model/images.py:369 in public method `get_paths`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:401 in public method `get_preprocessed_dem`:
+enpt/model/images.py:403 in public method `get_preprocessed_dem`:
         D102: Missing docstring in public method
-enpt/model/images.py:437 in public method `append_new_image`:
-        D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:640 in public method `get_paths`:
+enpt/model/images.py:661 in public method `get_paths`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:752 in public method `get_preprocessed_dem`:
+enpt/model/images.py:835 in public method `get_preprocessed_dem`:
         D102: Missing docstring in public method
-enpt/model/images.py:756 in public method `run_AC`:
+enpt/model/images.py:839 in public method `run_AC`:
         D102: Missing docstring in public method
-enpt/model/images.py:889 in public class `EnMAPL2Product_MapGeo`:
+enpt/model/images.py:972 in public class `EnMAPL2Product_MapGeo`:
         D204: 1 blank line required after class docstring (found 0)
-enpt/model/images.py:889 in public class `EnMAPL2Product_MapGeo`:
+enpt/model/images.py:972 in public class `EnMAPL2Product_MapGeo`:
         D413: Missing blank line after last section ('Attributes')
-enpt/model/images.py:900 in public method `__init__`:
+enpt/model/images.py:983 in public method `__init__`:
         D102: Missing docstring in public method
-enpt/model/images.py:967 in public method `from_L1B_sensorgeo`:
+enpt/model/images.py:1050 in public method `from_L1B_sensorgeo`:
         D102: Missing docstring in public method
-enpt/model/images.py:973 in public method `get_paths`:
+enpt/model/images.py:1056 in public method `get_paths`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:973 in public method `get_paths`:
+enpt/model/images.py:1056 in public method `get_paths`:
         D400: First line should end with a period (not 'o')
-enpt/model/images.py:993 in public method `save`:
+enpt/model/images.py:1076 in public method `save`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/images.py:993 in public method `save`:
+enpt/model/images.py:1076 in public method `save`:
         D400: First line should end with a period (not 't')
 enpt/model/metadata.py:119 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
@@ -44,35 +40,35 @@ enpt/model/metadata.py:392 in public method `calc_solar_irradiance_CWL_FWHM_per_
         D102: Missing docstring in public method
 enpt/model/metadata.py:410 in public class `EnMAP_Metadata_L1B_SensorGeo`:
         D413: Missing blank line after last section ('Attributes')
-enpt/model/metadata.py:455 in public method `scene_basename`:
+enpt/model/metadata.py:457 in public method `scene_basename`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:462 in public method `read_common_meta`:
+enpt/model/metadata.py:464 in public method `read_common_meta`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:462 in public method `read_common_meta`:
+enpt/model/metadata.py:464 in public method `read_common_meta`:
         D205: 1 blank line required between summary line and description (found 0)
-enpt/model/metadata.py:462 in public method `read_common_meta`:
+enpt/model/metadata.py:464 in public method `read_common_meta`:
         D400: First line should end with a period (not 'o')
-enpt/model/metadata.py:515 in public method `get_earth_sun_distance`:
+enpt/model/metadata.py:519 in public method `get_earth_sun_distance`:
         D400: First line should end with a period (not ')')
-enpt/model/metadata.py:537 in public method `read_metadata`:
+enpt/model/metadata.py:541 in public method `read_metadata`:
         D202: No blank lines allowed after function docstring (found 1)
-enpt/model/metadata.py:537 in public method `read_metadata`:
+enpt/model/metadata.py:541 in public method `read_metadata`:
         D400: First line should end with a period (not 'y')
-enpt/model/metadata.py:555 in public method `to_XML`:
+enpt/model/metadata.py:559 in public method `to_XML`:
         D200: One-line docstring should fit on one line with quotes (found 3)
-enpt/model/metadata.py:581 in public class `EnMAP_Metadata_L2A_MapGeo`:
+enpt/model/metadata.py:585 in public class `EnMAP_Metadata_L2A_MapGeo`:
         D101: Missing docstring in public class
-enpt/model/metadata.py:582 in public method `__init__`:
+enpt/model/metadata.py:586 in public method `__init__`:
         D403: First word of the first line should be properly capitalized ('Enmap', not 'EnMAP')
-enpt/model/metadata.py:680 in public method `get_common_UL_UR_LL_LR`:
+enpt/model/metadata.py:684 in public method `get_common_UL_UR_LL_LR`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:692 in public method `add_band_statistics`:
+enpt/model/metadata.py:696 in public method `add_band_statistics`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:698 in public method `add_product_fileinformation`:
+enpt/model/metadata.py:702 in public method `add_product_fileinformation`:
         D102: Missing docstring in public method
-enpt/model/metadata.py:723 in public method `to_XML`:
+enpt/model/metadata.py:727 in public method `to_XML`:
         D200: One-line docstring should fit on one line with quotes (found 3)
-enpt/model/metadata.py:873 in public function `xmlSubtree2dict`:
+enpt/model/metadata.py:877 in public function `xmlSubtree2dict`:
         D103: Missing docstring in public function
 enpt/model/srf.py:11 in public class `SRF`:
         D101: Missing docstring in public class
@@ -124,10 +120,6 @@ enpt/processors/spatial_transform/spatial_transform.py:399 in public class `RPC_
         D204: 1 blank line required after class docstring (found 0)
 enpt/processors/spatial_transform/spatial_transform.py:444 in public method `compute_geolayer`:
         D102: Missing docstring in public method
-enpt/processors/spatial_transform/spatial_transform.py:483 in public function `compute_mapCoords_within_sensorGeoDims`:
-        D205: 1 blank line required between summary line and description (found 0)
-enpt/processors/spatial_transform/spatial_transform.py:483 in public function `compute_mapCoords_within_sensorGeoDims`:
-        D400: First line should end with a period (not ':')
 enpt/processors/spatial_transform/spatial_transform.py:524 in public function `get_UTMEPSG_from_LonLat`:
         D103: Missing docstring in public function
 enpt/processors/spatial_transform/spatial_transform.py:531 in public function `get_center_coord`:
@@ -150,7 +142,7 @@ enpt/processors/dead_pixel_correction/dead_pixel_correction.py:18 in public clas
         D101: Missing docstring in public class
 enpt/processors/atmospheric_correction/atmospheric_correction.py:27 in public method `get_ac_options`:
         D102: Missing docstring in public method
-enpt/processors/atmospheric_correction/atmospheric_correction.py:50 in public method `run_ac`:
+enpt/processors/atmospheric_correction/atmospheric_correction.py:52 in public method `run_ac`:
         D102: Missing docstring in public method
 enpt/processors/orthorectification/__init__.py:1 at module level:
         D205: 1 blank line required between summary line and description (found 0)
