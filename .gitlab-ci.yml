@@ -29,6 +29,7 @@ test_enpt:
     # run nosetests
     - make nosetests  # test are called here
     # create the docs
+    - pip install sphinx_rtd_theme  # Read-the-docs theme for SPHINX documentation
     - make docs
   artifacts:
     paths:

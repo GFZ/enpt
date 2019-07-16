@@ -12,5 +12,5 @@ Contributors
 
 * Daniel Scheffler
 * André Hollstein
-* Stephane Guillaso
+* Stéphane Guillaso
 * Niklas Bohn

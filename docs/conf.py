@@ -40,12 +40,19 @@ import enpt
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.todo', 'sphinxarg.ext']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'sphinxarg.ext'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # The suffix of source filenames.
+# source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
 # The encoding of source files.
@@ -56,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'EnPT'
-copyright = u"2017, Karl Segl"
+copyright = u"2019, Karl Segl, Daniel Scheffler, André Hollstein, Stéphane Guillaso, Niklas Bohn"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -79,7 +86,8 @@ release = enpt.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+# This pattern also affects html_static_path and html_extra_path .
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -111,7 +119,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+# html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'  # The one installed via pip install sphinx_rtd_theme in the .gitlab.yml
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
