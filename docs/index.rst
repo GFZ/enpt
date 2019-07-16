@@ -1,7 +1,5 @@
-.. image:: img/logo3.jpeg
-
-Welcome to EnPT's documentation!
-======================================
+EnPT documentation
+==================
 
 
 Contents:
