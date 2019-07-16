@@ -2,7 +2,7 @@ EnPT documentation
 ==================
 
 
-Contents:
+**This documentation is structured as follows:**
 
 .. toctree::
    :maxdepth: 2
