@@ -91,6 +91,9 @@ test_enpt_install:
     # test importability
     - python -c "import enpt; print(enpt)"
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+  only:
+    - master
+    - dev
 
 
 pages:
@@ -121,3 +124,4 @@ pages:
     expire_in: 30 days
   only:
     - master
+    - enhancement/improve_docs
