@@ -16,6 +16,18 @@ from geoarray import GeoArray
 
 
 class Dead_Pixel_Corrector(object):
+    """
+    The EnPT dead pixel correction uses the pixel masks provided by DLR and interpolates the EnMAP image
+    data at the indicated dead pixel positions. It supports two interpolation algorithms:
+
+    1. spectral interpolation
+        * Interpolates the data in the spectral domain.
+        * Points outside the data range are extrapolated.
+    2. spatial interpolation
+        * Interpolates the data spatially.
+        * Remaining missing data positions (e.g., outermost columns) are spectrally interpolated.
+    """
+
     def __init__(self, algorithm: str = 'spectral', interp_spectral: str = 'linear', interp_spatial: str = 'linear',
                  CPUs: int = None, logger: logging.Logger = None):
         """Get an instance of Dead_Pixel_Corrector.
