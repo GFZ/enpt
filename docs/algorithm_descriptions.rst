@@ -95,7 +95,7 @@ For detailed algorithm description and use cases refer to the corresponding (ope
 `Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`_.
 
 In EnPT, AROSICS is used to automacially compute thousands of tie points between a selected EnMAP band the
-user-provided reference image.
+user-provided reference image. The computed shifts are later respected in the orthorectification step.
 
 .. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics
 .. _`Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`: http://www.mdpi.com/2072-4292/9/7/676
@@ -109,11 +109,13 @@ coordinates. For the geo-rectification of the data EnPT uses a set of Rational P
 for each band of the two EnMAP subsystems (VNIR and SWIR). Together with a user provided digital elevation model these
 RPC coefficients enable a highly accurate assignment of map coordinates to each pixel of the EnMAP Level-1B images.
 Resampling is done using a fast KDTree gaussian weighting neighbour approach implemented in the Python library
-`pyresample`_. The spatial shifts computed during the co-registration step are respected here.
+`pyresample`_ (`find the documentation here`_). The spatial shifts computed during the co-registration step are
+respected here.
 
 In this processing step, the EnMAP VNIR is merged with the SWIR subsystem and from now on stored in a single 3D array.
 
-.. _pyresample: https://pyresample.readthedocs.io/en/latest/
+.. _pyresample: https://github.com/pytroll/pyresample
+.. _find the documentation here: https://pyresample.readthedocs.io/en/latest/
 
 EnMAP Level 2A data writer
 **************************
@@ -133,19 +135,19 @@ below:
     |ENMAP*L2A*-METADATA.XML                        | yes | yes     |             |
     +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_PIXELMASK_SWIR.GEOTIFF           | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_PIXELMASK_VNIR.GEOTIFF           | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_CIRRUS.GEOTIFF           | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_CLASSES.GEOTIFF          | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_CLOUD.GEOTIFF            | yes | yes     |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_CLOUDSHADOW.GEOTIFF      | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_HAZE.GEOTIFF             | yes | planned |             |
-    +-----------------------------------------------+---------------+-------------+
+    +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_QUALITY_SNOW.GEOTIFF             | yes | planned |             |
     +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-QL_SWIR.GEOTIFF                     | yes | yes     |             |
