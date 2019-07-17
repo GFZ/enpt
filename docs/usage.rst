@@ -1,9 +1,15 @@
 Usage
 =====
 
+Usage of the Python API
+***********************
+
 To use EnPT in a project::
 
     import enpt
+
+Further documentation will come soon.
+
 
 Command line utilities
 **********************

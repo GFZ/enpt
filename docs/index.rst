@@ -11,6 +11,7 @@ EnPT documentation
    installation
    usage
    modules
+   algorithm_descriptions.rst
    contributing
    development
    authors
