@@ -10,8 +10,8 @@ EnPT documentation
    readme
    installation
    usage
-   api/modules.rst
    algorithm_descriptions.rst
+   modules
    contributing
    development
    authors
