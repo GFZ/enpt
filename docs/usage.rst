@@ -15,8 +15,8 @@ To start run whole EnPT processing pipeline via the Python API::
     CTR = EnPT_Controller(**config_minimal)
     CTR.run_all_processors()
 
-Further configuration parameters are here_. Note that the class 'EnPT_Config' takes the same keyword arguments like the
-'EnPT_Controller' class.
+Further configuration parameters are documented here_.
+Note that the class 'EnPT_Config' takes the same keyword arguments like the 'EnPT_Controller' class.
 
 .. _here: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig
 
