@@ -84,7 +84,7 @@ TBD
 Atmospheric correction
 **********************
 
-.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/blob/master/docs/figs/sicor_logo_lr.png
+.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/raw/master/docs/figs/sicor_logo_lr.png
    :width: 150px
    :alt: SICOR Logo
 
@@ -101,7 +101,7 @@ German Research Centre for Geosciences (GFZ) Potsdam. For details on the underly
 Spatial Co-Registration
 ***********************
 
-.. image:: https://gitext.gfz-potsdam.de/danschef/arosics/blob/master/docs/images/arosics_logo.png
+.. image:: https://gitext.gfz-potsdam.de/danschef/arosics/raw/master/docs/images/arosics_logo.png
    :width: 150px
    :alt: AROSICS Logo
 
