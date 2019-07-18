@@ -7,7 +7,7 @@ EnPT documentation
 .. toctree::
    :maxdepth: 2
 
-   readme
+   about
    installation
    usage
    algorithm_descriptions.rst
