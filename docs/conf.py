@@ -114,6 +114,10 @@ pygments_style = 'sphinx'
 # documents.
 # keep_warnings = False
 
+# Define how to document class docstrings
+# '__init__' documents only the __init__ methods, 'class' documents only the class methods and 'both' documents both
+autoclass_content = 'both'
+
 
 # -- Options for HTML output -------------------------------------------
 
