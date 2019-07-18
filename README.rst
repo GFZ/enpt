@@ -1,5 +1,6 @@
 .. image:: docs/img/EnPT_Logo_clipped.png
-    :scale: 60 %
+   :width: 180
+   :alt: EnPT Logo
 
 =============================
 EnPT - EnMAP Processing Tools
@@ -9,7 +10,7 @@ The EnPT Python package is an automated pre-processing pipeline for the new EnMA
 It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed
 at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the original DLR processing chain.
 
-Please check the documentation_ for usage and in depth information.
+Please check the **documentation_** for usage and in depth information.
 
 License
 -------
