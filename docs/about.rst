@@ -21,3 +21,6 @@ Features
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
 * write EnMAP Level-2 output data
+
+.. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
+.. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics

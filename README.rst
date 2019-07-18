@@ -1,5 +1,6 @@
+
 .. image:: docs/img/EnPT_Logo_clipped.png
-   :width: 100px
+   :width: 150px
    :alt: EnPT Logo
 
 =============================

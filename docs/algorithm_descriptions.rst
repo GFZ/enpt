@@ -48,8 +48,17 @@ After extraction EnPT expects a folder with the following files:
 EnPT reads the raster files lazily / on-demand to save memory during execution. Metadata read from the
 `ENMAP*-METADATA.XML` file are stored in memory and used at multiple stages of the pre-processing pipeline.
 
+**Conversion to top-of-atmosphere radiance**
+
 The image data is directly transformed from digital numbers (DNs, as provided by the DLR) to top-of-atmosphere radiance
 in mW/m2/sr/nm.
+
+**Filling the gap between adjacent EnMAP images**
+
+There is a gap of 20 pixels between adjacent EnMAP Level-1B images provided by the DLR. To fill this gap, EnPT offers
+the opportunity to provide the neighboring image which is then appended to the actual EnMAP image to be processed.
+
+
 
 
 Dead pixel correction
@@ -75,6 +84,10 @@ TBD
 Atmospheric correction
 **********************
 
+.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/blob/master/docs/figs/sicor_logo_lr.png
+   :width: 150px
+   :alt: SICOR Logo
+
 EnPT uses `SICOR`_ (Sensor Independent Atmosperic Correction of optical Earth observation data from multi- and
 hyperspectral instruments) for atmospheric correction. SICOR is a Python based open-source package developed at the
 German Research Centre for Geosciences (GFZ) Potsdam. For details on the underlying algorithm, please refer to the
@@ -87,6 +100,10 @@ German Research Centre for Geosciences (GFZ) Potsdam. For details on the underly
 
 Spatial Co-Registration
 ***********************
+
+.. image:: https://gitext.gfz-potsdam.de/danschef/arosics/blob/master/docs/images/arosics_logo.png
+   :width: 150px
+   :alt: AROSICS Logo
 
 For the detection of spatial misregistrations with regard to a user-provided spatial reference EnPT builds on the
 open-source Python package `AROSICS`_ (An Automated and Robust Open-Source Image Co-Registration Software for
