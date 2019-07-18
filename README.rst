@@ -1,4 +1,5 @@
 .. image:: docs/img/EnPT_Logo_clipped.png
+    :scale: 60 %
 
 =============================
 EnPT - EnMAP Processing Tools
@@ -30,8 +31,10 @@ Status
 ------
 
 |badge1| |badge2|
-.. |badge1| figure:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/build.svg
-.. |badge2| figure:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
+
+.. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/build.svg
+
+.. |badge2| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 
