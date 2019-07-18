@@ -4,11 +4,21 @@ Usage
 Usage of the Python API
 ***********************
 
-To use EnPT in a project::
+To start run whole EnPT processing pipeline via the Python API::
 
-    import enpt
+    from enpt.execution.controller import EnPT_Controller
 
-Further documentation will come soon.
+    config_minimal = dict(
+        path_l1b_enmap_image='/path/ENMAP*L1B*.zip',
+        path_dem='/path/to/overlapping/DEM.bsq'
+    )
+    CTR = EnPT_Controller(**config_minimal)
+    CTR.run_all_processors()
+
+Further configuration parameters are here_. Note that the class 'EnPT_Config' takes the same keyword arguments like the
+'EnPT_Controller' class.
+
+.. _here: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig
 
 
 Command line utilities

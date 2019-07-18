@@ -126,13 +126,13 @@ coordinates. For the geo-rectification of the data EnPT uses a set of Rational P
 for each band of the two EnMAP subsystems (VNIR and SWIR). Together with a user provided digital elevation model these
 RPC coefficients enable a highly accurate assignment of map coordinates to each pixel of the EnMAP Level-1B images.
 Resampling is done using a fast KDTree gaussian weighting neighbour approach implemented in the Python library
-`pyresample`_ (`find the documentation here`_). The spatial shifts computed during the co-registration step are
+`pyresample`_ (find the `documentation here`_). The spatial shifts computed during the co-registration step are
 respected here.
 
 In this processing step, the EnMAP VNIR is merged with the SWIR subsystem and from now on stored in a single 3D array.
 
 .. _pyresample: https://github.com/pytroll/pyresample
-.. _find the documentation here: https://pyresample.readthedocs.io/en/latest/
+.. _documentation here: https://pyresample.readthedocs.io/en/latest/
 
 EnMAP Level 2A data writer
 **************************
