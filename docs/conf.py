@@ -119,6 +119,11 @@ pygments_style = 'sphinx'
 autoclass_content = 'both'
 
 
+# Increase content width of generated docs
+def setup(app):
+    app.add_stylesheet('wider_theme.css')
+
+
 # -- Options for HTML output -------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
