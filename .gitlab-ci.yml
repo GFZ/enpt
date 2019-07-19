@@ -29,6 +29,7 @@ test_enpt:
     # run nosetests
     - make nosetests  # test are called here
     # create the docs
+    - pip install sphinx_rtd_theme  # Read-the-docs theme for SPHINX documentation
     - make docs
   artifacts:
     paths:
@@ -91,6 +92,9 @@ test_enpt_install:
     # test importability
     - python -c "import enpt; print(enpt)"
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+  only:
+    - master
+    - dev
 
 
 pages:
@@ -121,3 +125,4 @@ pages:
     expire_in: 30 days
   only:
     - master
+    - enhancement/improve_docs
