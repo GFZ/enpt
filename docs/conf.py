@@ -63,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'EnPT'
-copyright = u"2019, Karl Segl, Daniel Scheffler, André Hollstein, Stéphane Guillaso, Niklas Bohn"
+copyright = u"2019, Karl Segl, Daniel Scheffler, Niklas Bohn, André Hollstein, Stéphane Guillaso"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
