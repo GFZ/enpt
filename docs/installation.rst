@@ -1,5 +1,3 @@
-.. highlight:: shell
-
 ============
 Installation
 ============
@@ -11,7 +9,7 @@ Using conda_, the recommended approach is:
 
 .. _conda: https://conda.io/docs/
 
-.. code-block:: console
+.. code-block:: bash
 
     # create virtual environment for enpt, this is optional but recommended
     conda create --name enpt python=3

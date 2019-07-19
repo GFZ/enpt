@@ -19,12 +19,11 @@ To run the whole EnPT processing pipeline via the Python API:
     CTR = EnPT_Controller(**config_minimal)
     CTR.run_all_processors()
 
-Further configuration parameters are documented here__.
+Further *configuration parameters* are documented
+`here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig>`__.
 Note that the class `EnPTConfig` takes the same keyword arguments like the `EnPT_Controller` class.
 
-__ http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig
-
-You can also pass a JSON-File with your EnPT configuration to the `EnPT_Controller` class. This allows you to easily
+You can also pass a *JSON-File with your EnPT configuration* to the `EnPT_Controller` class. This allows you to easily
 copy and reuse configuration files. A template with all possible options and defaults can be found in
 `enpt/options/options_default.json`_.
 
@@ -45,67 +44,67 @@ The corresponding Python call looks like this:
 To run the different processor modules separately, follow the instructions below.
 Note, that the processors are built on each other, so the order must be unchanged.
 
-To get an instance of EnPT_Controller:
+1. To get an instance of *EnPT_Controller*:
 
 .. code-block:: python
 
     CTR = EnPT_Controller(**your_config_parameters)  # config parameters are described above
 
-Read the EnMAP Level-1B data into memory, convert DNs to radiance and compute coordiante layers:
+2. *Read the EnMAP Level-1B data* into memory, convert DNs to radiance and compute coordiante layers:
 
 .. code-block:: python
 
     CTR.read_L1B_data()
 
 Get the in-memory Python object representing the Level-1 dataset (NOTE: the attributes and methods of this
-Python object are documented here__):
-
-__ http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL1Product_SensorGeo
+Python object are documented
+`here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL1Product_SensorGeo>`__):
 
 .. code-block:: python
 
     L1_obj = CTR.L1_obj
 
-To correct dead pixels:
+3. To correct *dead pixels*:
 
 .. code-block:: python
 
     CTR.L1_obj.correct_dead_pixels()
 
-To run the atmospheric correction using SICOR_:
+4. *reflectance* conversion
+
+To run the *atmospheric correction* using SICOR_:
 
 .. code-block:: python
 
     CTR.run_atmospheric_correction()
 
-To run convert top-of-atmosphere radiance to top-of-atmosphere reflectance (as an alternative to atmospheric correction):
+To run convert top-of-atmosphere radiance to *top-of-atmosphere reflectance* (as an alternative to atmospheric correction):
 
 .. code-block:: python
 
-    CTR.run_toaRad2toaRef()
+        CTR.run_toaRad2toaRef()
 
-To compute spatial misregistration with respect to a user-provided reference dataset
-(NOTE: This feature is yet implemented):
+5. To compute *spatial misregistration* with respect to a user-provided reference dataset
+   (NOTE: This feature is yet implemented):
 
 .. code-block:: python
 
     CTR.run_geometry_processor()
 
-To run the orthorectification:
+6. To run the *orthorectification*:
 
 .. code-block:: python
 
     self.run_orthorectification()
 
-From now on, you may get the in-memory EnMAP Level-2 Python object (attributes and methods are documented here__):
-
-__http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL2Product_MapGeo
+From now on, you may get the in-memory EnMAP Level-2 Python object (attributes and methods are documented
+`here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL2Product_MapGeo>`__):
 
 .. code-block:: python
 
     L2_obj = CTR.L2_obj
 
-To write the EnMAP Level-2 data to disk:
+7. To *write the EnMAP Level-2 data* to disk:
 
 .. code-block:: python
 
