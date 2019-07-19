@@ -63,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'EnPT'
-copyright = u"2019, Karl Segl, Daniel Scheffler, André Hollstein, Stéphane Guillaso, Niklas Bohn"
+copyright = u"2019, Karl Segl, Daniel Scheffler, Niklas Bohn, André Hollstein, Stéphane Guillaso"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -117,6 +117,11 @@ pygments_style = 'sphinx'
 # Define how to document class docstrings
 # '__init__' documents only the __init__ methods, 'class' documents only the class methods and 'both' documents both
 autoclass_content = 'both'
+
+
+# Increase content width of generated docs
+def setup(app):
+    app.add_stylesheet('wider_theme.css')
 
 
 # -- Options for HTML output -------------------------------------------
