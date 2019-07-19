@@ -76,10 +76,8 @@ the indicated dead pixel positions. It supports two interpolation algorithms:
         * Remaining missing data positions (e.g., outermost columns) are spectrally interpolated.
         * possible interpolation methods: `linear`, `bilinear`, `cubic`, `spline`
 
-Import of an overlapping digital elevation model
-************************************************
 
-TBD
+
 
 Atmospheric correction
 **********************
@@ -89,12 +87,20 @@ Atmospheric correction
    :alt: SICOR Logo
 
 EnPT uses `SICOR`_ (Sensor Independent Atmosperic Correction of optical Earth observation data from multi- and
-hyperspectral instruments) for atmospheric correction. SICOR is a Python based open-source package developed at the
+hyperspectral instruments) for atmospheric correction, i.e., for the conversion of TOA-(top-of-atmosphere) radiance
+to BOA- (bottom-of-atmosphere / surface) reflectance. SICOR is a Python based open-source package developed at the
 German Research Centre for Geosciences (GFZ) Potsdam. For details on the underlying algorithm, please refer to the
 `documentation pages of SICOR`_.
 
-.. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
-.. _`documentation pages of SICOR`: http://enmap.gitext.gfz-potsdam.de/sicor/doc/
+
+
+Conversion of TOA-radiance to TOA-reflectance
+*********************************************
+
+As an alternative to the atmospheric correction, your EnMAP Level-1B data can also be converted from
+TOA-radiance to TOA-reflectance. This is useful to normalize unequal acquisition- and illumination geometries of
+multiple EnMAP datasets but will not correct for atmospheric effects.
+
 
 
 
@@ -109,13 +115,15 @@ For the detection of spatial misregistrations with regard to a user-provided spa
 open-source Python package `AROSICS`_ (An Automated and Robust Open-Source Image Co-Registration Software for
 Multi-Sensor Satellite Data). It has been developed at the German Research Centre for Geosciences (GFZ) Potsdam.
 For detailed algorithm description and use cases refer to the corresponding (open-access) paper that can be found here:
-`Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`_.
+`Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image
+Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`__.
 
 In EnPT, AROSICS is used to automacially compute thousands of tie points between a selected EnMAP band the
 user-provided reference image. The computed shifts are later respected in the orthorectification step.
 
-.. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics
-.. _`Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`: http://www.mdpi.com/2072-4292/9/7/676
+__ http://www.mdpi.com/2072-4292/9/7/676
+
+
 
 
 Orthorectification
@@ -126,13 +134,15 @@ coordinates. For the geo-rectification of the data EnPT uses a set of Rational P
 for each band of the two EnMAP subsystems (VNIR and SWIR). Together with a user provided digital elevation model these
 RPC coefficients enable a highly accurate assignment of map coordinates to each pixel of the EnMAP Level-1B images.
 Resampling is done using a fast KDTree gaussian weighting neighbour approach implemented in the Python library
-`pyresample`_ (find the `documentation here`_). The spatial shifts computed during the co-registration step are
+`pyresample`_ (find the documentation here__). The spatial shifts computed during the co-registration step are
 respected here.
 
 In this processing step, the EnMAP VNIR is merged with the SWIR subsystem and from now on stored in a single 3D array.
 
-.. _pyresample: https://github.com/pytroll/pyresample
-.. _documentation here: https://pyresample.readthedocs.io/en/latest/
+__ https://pyresample.readthedocs.io/en/latest/
+
+
+
 
 EnMAP Level 2A data writer
 **************************
@@ -173,3 +183,9 @@ below:
     +-----------------------------------------------+-----+---------+-------------+
     |ENMAP*L2A*-SPECTRAL_IMAGE.GEOTIFF              | yes | yes     |             |
     +-----------------------------------------------+-----+---------+-------------+
+
+
+.. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
+.. _`documentation pages of SICOR`: http://enmap.gitext.gfz-potsdam.de/sicor/doc/
+.. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics
+.. _pyresample: https://github.com/pytroll/pyresample
