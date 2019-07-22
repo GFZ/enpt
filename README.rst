@@ -44,8 +44,9 @@ See also the latest coverage_ report and the nosetests_ HTML report.
 Credits
 -------
 
-The development of the gms_preprocessing package was funded by the German Federal Ministry of Education and Research
-(BMBF).
+This software was developed within the context of the EnMAP project supported by the DLR Space Administration with
+funds of the German Federal Ministry of Economic Affairs and Energy (on the basis of a decision by the German
+Bundestag: 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
