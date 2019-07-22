@@ -126,3 +126,4 @@ pages:
   only:
     - master
     - enhancement/improve_docs
+    - enhancement/add_license_texts
