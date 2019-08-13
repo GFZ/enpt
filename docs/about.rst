@@ -7,8 +7,8 @@ About
    :alt: EnPT Logo
 
 The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data.
-It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed
-at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the original DLR processing chain.
+It provides free and open-source features for users to transform EnMAP Level-1B data themselves to Level-2A products.
+The package has been developed at the German Research Centre for Geosciences Potsdam (GFZ).
 
 Feature overview
 ----------------
@@ -17,7 +17,6 @@ Feature overview
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
 * atmospheric correction (based on SICOR_)
-* conversion of top-of-atmosphere-radiance to top-of-atmosphere-reflectance
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
 * write EnMAP Level-2 output data
