@@ -80,17 +80,19 @@ test_enpt_install:
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
+    - conda install -y -c conda-forge numpy pandas lxml pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample pyfftw pykrige glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+
     # install some dependencies that cause trouble when installed via pip
-    - conda install -y -c conda-forge numpy pandas lxml  # scikit-image, matplotlib
+#    - conda install -y -c conda-forge numpy pandas lxml  # scikit-image, matplotlib
 
     # install not pip-installable deps of py_tools_ds / geoarray
-    - conda install -y -c conda-forge numpy scikit-image pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample
+#    - conda install -y -c conda-forge pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample
 
     # install not pip-installable deps of arosics
-    - conda install -y -c conda-forge pyfftw pykrige
+#    - conda install -y -c conda-forge pyfftw pykrige
 
     # install sicor
-    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+#    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
     - rm -rf context/sicor
     - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     - cd ./context/sicor
