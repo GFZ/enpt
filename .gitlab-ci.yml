@@ -75,8 +75,8 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
-    - conda update -n base -c defaults conda
-    - conda create -y -q --name enpt_test python=3.6
+    - conda update -n base -c defaults conda conda-build
+    - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
     # install some dependencies that cause trouble when installed via pip
