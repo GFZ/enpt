@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="StyleLint">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="StyleLint" />
+              <option name="relativePathToSchema" value="http://json.schemastore.org/stylelintrc" />
+              <option name="applicationDefined" value="true" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="tests/gitlab_CI_docker/context/environment_enpt.yml" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
