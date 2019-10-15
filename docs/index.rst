@@ -1,17 +1,16 @@
-.. image:: img/logo3.jpeg
-
-Welcome to EnPT's documentation!
-======================================
+EnPT documentation
+==================
 
 
-Contents:
+**This documentation is structured as follows:**
 
 .. toctree::
    :maxdepth: 2
 
-   readme
+   about
    installation
    usage
+   algorithm_descriptions.rst
    modules
    contributing
    development

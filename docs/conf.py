@@ -40,12 +40,19 @@ import enpt
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.todo', 'sphinxarg.ext']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'sphinxarg.ext'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # The suffix of source filenames.
+# source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
 # The encoding of source files.
@@ -56,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'EnPT'
-copyright = u"2017, Karl Segl"
+copyright = u"2019, Karl Segl, Daniel Scheffler, Niklas Bohn, André Hollstein, Stéphane Guillaso"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -79,7 +86,8 @@ release = enpt.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+# This pattern also affects html_static_path and html_extra_path .
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -106,17 +114,41 @@ pygments_style = 'sphinx'
 # documents.
 # keep_warnings = False
 
+# Define how to document class docstrings
+# '__init__' documents only the __init__ methods, 'class' documents only the class methods and 'both' documents both
+autoclass_content = 'both'
+
+
+# Increase content width of generated docs
+def setup(app):
+    app.add_stylesheet('wider_theme.css')
+
 
 # -- Options for HTML output -------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+# html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'  # The one installed via pip install sphinx_rtd_theme in the .gitlab.yml
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    'canonical_url': '',
+    'analytics_id': '',
+    'logo_only': False,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'vcs_pageview_mode': 'view',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -131,7 +163,7 @@ html_theme = 'default'
 
 # The name of an image file (relative to this directory) to place at the
 # top of the sidebar.
-# html_logo = None
+html_logo = 'img/EnPT_Logo_transparent.png'
 
 # The name of an image file (within the static path) to use as favicon
 # of the docs.  This file should be a Windows icon file (.ico) being

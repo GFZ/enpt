@@ -1,3 +1,27 @@
+# -*- coding: utf-8 -*-
+
+# EnPT, EnMAP Processing Tools - A Python package for pre-processing of EnMAP Level-1B data
+#
+# Copyright (C) 2019  Daniel Scheffler (GFZ Potsdam, daniel.scheffler@gfz-potsdam.de)
+#
+# This software was developed within the context of the EnMAP project supported
+# by the DLR Space Administration with funds of the German Federal Ministry of
+# Economic Affairs and Energy (on the basis of a decision by the German Bundestag:
+# 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """EnPT configuration module.
 
 Provides the configuration that is later passed to individual submodules.
@@ -82,8 +106,92 @@ class EnPTConfig(object):
     def __init__(self, json_config='', **user_opts):
         """Create a job configuration.
 
-        :param json_config  path to JSON file containing configuration parameters or a string in JSON format
-        :param user_opts    keyword arguments
+        :arg json_config:
+             path to JSON file containing configuration parameters or a string in JSON format
+
+        :key CPUs:
+             number of CPU cores to be used for processing (default: "None" -> use all available
+
+        :key path_l1b_enmap_image:
+            input path of the EnMAP L1B image to be processed
+            (zip-archive or root directory; must be given if not contained in --json-config.)
+
+        :key path_l1b_enmap_image_gapfill:
+            input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)
+
+        :key path_dem:
+            input path of digital elevation model in map or sensor geometry; GDAL compatible file format (must cover
+            the EnMAP L1B data completely if given in map geometry or must have the same pixel dimensions like the
+            EnMAP L1B data if given in sensor geometry)
+
+        :key average_elevation:
+            average elevation in meters above sea level; may be provided if no DEM is available; ignored if DEM is given
+
+        :key output_dir:
+            output directory where processed data and log files are saved
+
+        :key working_dir:
+            directory to be used for temporary files
+
+        :key n_lines_to_append:
+            number of lines to be added to the main image [if None, use the whole imgap].
+            Requires 'path_l1b_enmap_image_gapfill' to be set.
+
+        :key disable_progress_bars:
+            whether to disable all progress bars during processing
+
+        :key path_earthSunDist:
+             input path of the earth sun distance model
+
+        :key path_solar_irr:
+            input path of the solar irradiance model
+
+        :key scale_factor_toa_ref:
+            scale factor to be applied to TOA reflectance result
+
+        :key enable_keystone_correction:
+            Enable keystone correction
+
+        :key enable_vnir_swir_coreg:
+            Enable VNIR/SWIR co-registration
+
+        :key path_reference_image:
+            Reference image for co-registration.
+
+        :key enable_ac:
+            Enable atmospheric correction using SICOR algorithm (default: True).
+            If False, the L2A output contains top-of-atmosphere reflectance.
+
+        :key sicor_cache_dir:
+            SICOR cache directory
+
+        :key auto_download_ecmwf:
+            Automatically download ECMWF data for atmospheric correction
+
+        :key enable_cloud_screening:
+            Enable cloud screening during atmospheric correction
+
+        :key scale_factor_boa_ref:
+            Scale factor to be applied to BOA reflectance result
+
+        :key run_smile_P:
+            Enable extra smile detection and correction (provider smile coefficients are ignored)
+
+        :key run_deadpix_P:
+            Enable dead pixel correction
+
+        :key deadpix_P_algorithm:
+            Algorithm for dead pixel correction ('spectral' or 'spatial')
+
+        :key deadpix_P_interp_spectral:
+            Spectral interpolation algorithm to be used during dead pixel correction
+             ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
+
+        :key deadpix_P_interp_spatial:
+            Spatial interpolation algorithm to be used during dead pixel correction
+             ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
+        :key ortho_resampAlg:
+            Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')
         """
 
         # fixed attributes
