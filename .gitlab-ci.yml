@@ -95,7 +95,8 @@ test_enpt_install:
     - rm -rf context/sicor
     - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     - cd ./context/sicor
-    - make install
+    - pip install -e .
+#    - make install
     - cd ../../
 
     # install enpt
