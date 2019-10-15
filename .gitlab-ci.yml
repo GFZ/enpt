@@ -75,8 +75,8 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
-    - conda update -n base -c defaults conda
-    - conda update -n base -c defaults conda-build
+    - conda update conda
+    - conda install conda-build
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
