@@ -7,11 +7,22 @@ History
 
 New features / improvements:
 
-* enhanced AC results due to updated SICOR implementation
-  (currently dependent from SICOR branch "feature/three_phases_of_water_retieval")
-* updated DLR test data and revised DN/radiance conversion
+* Fixed issue 29 (static TLS)
+* Set DLR test data as default test data
+* Enhanced logging in orthorectifier module
+* Enhanced AC results due to updated SICOR implementation
+  (currently dependent from SICOR branch "master")
+* Fixed loggers failing to deserialize
+* GitLab Pages are now working properly (documentation hosting)
+* Fixed issue 28 (cutoff effect of orthorectification results)
+* Fixed dead documentation links
+* Updated DLR test data and revised DN/radiance conversion
   (fixes negative radiance and BOA reflectance values / saturation)
-* ?
+* AOT value is now read from metadata and passed to SICOR
+* Added validation of EnMAP root directory
+* Added documentation including algorithm descriptions, installation instructions usage examples and auto-generated docs
+* Added license texts
+
 
 
 0.7.0 (2019-01-21)
