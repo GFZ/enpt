@@ -197,5 +197,5 @@ fabric.properties
 
 
 .gitignore
-.idea/
+.idea/**
 tests/data/test_outputs/
