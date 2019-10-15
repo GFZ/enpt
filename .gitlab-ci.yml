@@ -85,6 +85,9 @@ test_enpt_install:
     # install not pip-installable deps of py_tools_ds / geoarray
     - conda install -y -c conda-forge numpy scikit-image pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample
 
+    # install not pip-installable deps of arosics
+    - conda install -y -c conda-forge pyfftw pykrige
+
     # install sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
     - rm -rf context/sicor
