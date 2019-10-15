@@ -27,6 +27,8 @@
 import logging
 from types import SimpleNamespace
 from typing import Tuple  # noqa: F401
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 import numpy as np
 from os import path, makedirs
 from glob import glob
@@ -411,7 +413,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         algo = self.cfg.deadpix_P_algorithm
         method_spectral, method_spatial = self.cfg.deadpix_P_interp_spectral, self.cfg.deadpix_P_interp_spatial
         self.logger.info("Correcting dead pixels of %s detector...\n"
-                         "Used algorithm / interpolation: %s / %s"
+                         "Used algorithm: %s interpolation in the %s domain"
                          % (self.detector_name, algo, method_spectral if algo == 'spectral' else method_spatial))
 
         self.data = \
@@ -439,11 +441,12 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
                 msg_bandinfo = ''
                 if lons.ndim == 3:
+                    # 3D geolayer (the usual case for EnMAP data provided by DLR)
                     lons = lons[:, :, 0]
                     lats = lats[:, :, 0]
                     msg_bandinfo = ' (using first band of %s geolayer)' % self.detector_name
                 else:
-                    # 2D geolayer
+                    # 2D geolayer (GFZ-internal test case)
                     # FIXME replace linear interpolation by native geolayers
                     if lons.shape != self.data.shape:
                         lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
@@ -459,16 +462,16 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
         # TODO convert method to function?
-        """
-        Check if a second image could pass with the first image.
-        In this version we assume that the image will be add below
-        If it is the case, the method will create temporary files that will be used in the following.
+        """Check if a second image matches with the first image and if so, append the given number of lines below.
+
+        In this version we assume that the image will be added below. If it is the case, the method will create
+        temporary files that will be used in the following.
 
         :param img2:
-        :param n_lines: number of line to be added
+        :param n_lines: number of lines to be added from the new image
         :return: None
         """
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
             basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
         else:
@@ -480,12 +483,12 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         distance_min = 27.0
         distance_max = 34.0
 
-        # check bottom left
+        # compute distance between image1 LL and image2 UL
         x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[2], self.detector_meta.lon_UL_UR_LL_LR[2])
         x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[0])
         distance_left = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-        # check bottom right
+        # compute distance between image1 LR and image2 UR
         x1, y1, _, _ = utm.from_latlon(self.detector_meta.lat_UL_UR_LL_LR[3], self.detector_meta.lon_UL_UR_LL_LR[3])
         x2, y2, _, _ = utm.from_latlon(img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[1])
         distance_right = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
@@ -511,19 +514,19 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         self.detector_meta.nrows += n_lines
 
-        # Create new corner coordinate
-        if self.cfg.is_dlr_dataformat:
-            enmapIm_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
-                                             img2.detector_meta.lat_UL_UR_LL_LR))
+        # Compute new lower coordinates
+        if not self.cfg.is_dummy_dataformat:
+            img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
+                                          img2.detector_meta.lat_UL_UR_LL_LR))
             dem_validated = DEM_Processor(img2.cfg.path_dem,
-                                          enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+                                          enmapIm_cornerCoords=img2_cornerCoords).dem
             LL, LR = compute_mapCoords_within_sensorGeoDims(
+                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
+                                    (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
                 rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
                 dem=dem_validated,
-                enmapIm_cornerCoords=enmapIm_cornerCoords,
-                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols),
-                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
-                                    (n_lines - 1, img2.detector_meta.ncols - 1)]  # LR
+                enmapIm_cornerCoords=img2_cornerCoords,
+                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
             )
 
             self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
@@ -555,7 +558,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
         self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
         # TODO append remaining raster layers - additional cloud masks, ...
 
@@ -587,12 +590,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
 
             elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
-                # Lλ = QCAL / GAIN + OFFSET
-                # FIXME this asserts LMIN and LMAX in mW/cm2/sr/um
+                # Lλ = QCAL * GAIN + OFFSET
                 # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
-                #       - DLR gains / offsets are provided in mW/cm2/sr/um, so we have to multiply by 10 to get
-                #         mW m^-2 sr^-1 nm^-1 as needed later
-                self.data = 10 * (self.data[:] / self.detector_meta.gains + self.detector_meta.offsets)
+                #       - DLR gains / offsets are provided in W/m2/sr/nm, so we have to multiply by 1000 to get
+                #         mW/m2/sr/nm as needed later
+                self.data = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
 
             else:
                 raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
@@ -643,7 +645,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger = logger
 
         # Read metadata here in order to get all information needed by to get paths.
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
                                                      config=self.cfg, logger=self.logger)
         else:
@@ -652,13 +654,32 @@ class EnMAPL1Product_SensorGeo(object):
         self.meta.read_metadata()
 
         # define VNIR and SWIR detector
+        self.detector_attrNames = ['vnir', 'swir']
         self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
         self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
 
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths()
 
-        self.detector_attrNames = ['vnir', 'swir']
+        # associate raster attributes with file links (raster data is read lazily / on demand)
+        self.vnir.data = self.paths.vnir.data
+        self.vnir.mask_clouds = self.paths.vnir.mask_clouds
+        self.swir.data = self.paths.swir.data
+        self.swir.mask_clouds = self.paths.swir.mask_clouds
+
+        try:
+            self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
+            self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+        except ValueError:
+            self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
+            self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)
+            self.swir.deadpixelmap = np.zeros(self.swir.data.shape)
+
+        # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
+        #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
+
+        # compute radiance
+        self.DN2TOARadiance()
 
     def get_paths(self):
         """
@@ -767,10 +788,72 @@ class EnMAPL1Product_SensorGeo(object):
             self.meta.swir.unitcode = self.swir.detector_meta.unitcode
             self.meta.swir.unit = self.swir.detector_meta.unit
 
+    def append_new_image(self, root_dir, n_line_ext):
+        """Append a second EnMAP Level-1B product below the last line of the current L1B product.
+
+        NOTE:   We create new files that will be saved into a temporary directory and their path will be stored in the
+                paths of self. We assume that the dead pixel map does not change between two adjacent images.
+
+        :param root_dir:    root directory of EnMAP Level-1B product to be appended
+        :param n_line_ext:  number of lines to be added from the new image
+        :return:
+        """
+        l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
+
+        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
+        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
+
+    def calc_snr_from_radiance(self):
+        """Compute EnMAP SNR from radiance data.
+
+        SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].
+        """
+        with TemporaryDirectory(dir=self.cfg.working_dir) as tmpDir, \
+                ZipFile(self.cfg.path_l1b_snr_model, "r") as zf:
+
+            zf.extractall(tmpDir)
+
+            if self.meta.vnir.unitcode == 'TOARad':
+                self.vnir.detector_meta.calc_snr_from_radiance(rad_data=self.vnir.data, dir_snr_models=tmpDir)
+
+            if self.meta.swir.unitcode == 'TOARad':
+                self.swir.detector_meta.calc_snr_from_radiance(rad_data=self.swir.data, dir_snr_models=tmpDir)
+
     def correct_dead_pixels(self):
         """Correct dead pixels of both detectors."""
         self.vnir.correct_dead_pixels()
         self.swir.correct_dead_pixels()
+
+    # def correct_VNIR_SWIR_shift(self):
+    #     # use first geolayer bands for VNIR and SWIR
+    #     Vlons, Vlats = self.vnir.detector_meta.lons[:, :, 0], self.vnir.detector_meta.lats[:, :, 0]
+    #     Slons, Slats = self.swir.detector_meta.lons[:, :, 0], self.swir.detector_meta.lats[:, :, 0]
+    #
+    #     # get corner coordinates of VNIR and SWIR according to geolayer
+    #     def get_coords(lons, lats):
+    #         return tuple([(lons[Y, X], lats[Y, X]) for Y, X in [(0, 0), (0, -1), (-1, 0), (-1, -1)]])
+    #
+    #     VUL, VUR, VLL, VLR = get_coords(Vlons, Vlats)
+    #     SUL, SUR, SLL, SLR = get_coords(Slons, Slats)
+    #
+    #     # get map coordinates of VNIR/SWIR overlap
+    #     ovUL = max(VUL[0], SUL[0]), min(VUL[1], SUL[1])
+    #     ovUR = min(VUR[0], SUR[0]), min(VUR[1], SUR[1])
+    #     ovLL = max(VLL[0], SLL[0]), max(VLL[1], SLL[1])
+    #     ovLR = min(VLR[0], SLR[0]), max(VLR[1], SLR[1])
+    #
+    #     # find nearest image positions for VNIR and SWIR to the map coordinates of the VNIR/SWIR overlap
+    #     def nearest_imCoord(lons_arr, lats_arr, lon, lat):
+    #         dists = np.sqrt((lons_arr - lon) ** 2 + (lats_arr - lat) ** 2)
+    #         row, col = np.unravel_index(dists.argmin(), dists.shape)
+    #
+    #         return row, col
+    #
+    #     overlapImVNIR = tuple([nearest_imCoord(Vlons, Vlats, *ovCoords) for ovCoords in [ovUL, ovUR, ovLL, ovLR]])
+    #     overlapImSWIR = tuple([nearest_imCoord(Slons, Slats, *ovCoords) for ovCoords in [ovUL, ovUR, ovLL, ovLR]])
+    #
+    #     raise NotImplementedError()  # FIXME
+    #     self.vnir.data.get_mapPos()  # FIXME
 
     def get_preprocessed_dem(self):
         self.vnir.get_preprocessed_dem()

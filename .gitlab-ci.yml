@@ -14,8 +14,22 @@ test_enpt:
     - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
     - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
+    # update geoarray
+    - pip install 'geoarray>=0.8.11'
+
     # update py_tools_ds
     - pip install 'py_tools_ds>=0.14.14'
+
+    # switch sicor branch
+    - mkdir /tmp/sicor_tables
+    - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
+    - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
+    - rm -rf /tmp/sicor
+    - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+#    - git clone -b feature/improve_speed https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+    - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
+    - rm -rf /tmp/sicor_tables/
+    - pip install -e /tmp/sicor
 
     # update sicor
     # - conda install -y -q -c conda-forge basemap
@@ -61,30 +75,31 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
+    - conda update conda
+    - conda install conda-build
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
     # install some dependencies that cause trouble when installed via pip
-    - conda install -y -c conda-forge scipy  # scikit-image, matplotlib
+    - conda install -y -c conda-forge numpy pandas lxml  # scikit-image, matplotlib
 
-    # install not pip-installable deps of geoarray
-    - conda install -y -c conda-forge numpy scikit-image matplotlib pandas gdal rasterio pyproj basemap shapely
-    - conda install -y -c conda-forge 'icu=58.*'  # fixes bug for conda-forge gdal build
+    # install not pip-installable deps of py_tools_ds / geoarray
+    - conda install -y -c conda-forge pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample
 
-    # install py_tools_ds
-    - conda install -y -c conda-forge pyresample
-    - pip install 'py_tools_ds>=0.14.14'
+    # install not pip-installable deps of arosics
+    - conda install -y -c conda-forge pyfftw pykrige
 
     # install sicor
-    - conda install -y -q -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn
+    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
     - rm -rf context/sicor
     - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     - cd ./context/sicor
-    - make install
+    - pip install -e .
+#    - make install
     - cd ../../
 
     # install enpt
-    - make install
+    - pip install -e .
     - cd ..
     - pwd
     - ls

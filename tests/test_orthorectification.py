@@ -44,7 +44,7 @@ from enpt.model.images import EnMAPL2Product_MapGeo
 
 class Test_Orthorectifier(TestCase):
     def setUp(self):
-        self.config = EnPTConfig(**config_for_testing)
+        self.config = EnPTConfig(**config_for_testing)  # FIXME still the Alpine dataset
 
         # create a temporary directory
         # NOTE: This must exist during the whole runtime of Test_Orthorectifier, otherwise

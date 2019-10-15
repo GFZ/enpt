@@ -49,6 +49,12 @@ class EnPT_Logger(logging.Logger):
         # private attributes
         self._captured_stream = ''
 
+        # attributes that need to be present in order to unpickle the logger via __setstate_
+        self.name_logfile = name_logfile
+        self.fmt_suffix = fmt_suffix
+        self.path_logfile = path_logfile
+        self.log_level = log_level
+
         super(EnPT_Logger, self).__init__(name_logfile)
 
         self.path_logfile = path_logfile
@@ -77,9 +83,9 @@ class EnPT_Logger(logging.Logger):
 
         # create StreamHandler
         self.streamObj = StringIO()
-        self.streamHandler = logging.StreamHandler(stream=self.streamObj)
-        self.streamHandler.setFormatter(self.formatter_fileH)
-        self.streamHandler.set_name('StringIO handler')
+        streamHandler = logging.StreamHandler(stream=self.streamObj)
+        streamHandler.setFormatter(self.formatter_fileH)
+        streamHandler.set_name('StringIO handler')
 
         # create ConsoleHandler for logging levels DEGUG and INFO -> logging to sys.stdout
         consoleHandler_out = logging.StreamHandler(stream=sys.stdout)  # by default it would go to sys.stderr
@@ -99,7 +105,7 @@ class EnPT_Logger(logging.Logger):
         if not self.handlers:
             if fileHandler:
                 self.addHandler(fileHandler)
-            self.addHandler(self.streamHandler)
+            self.addHandler(streamHandler)
             self.addHandler(consoleHandler_out)
             self.addHandler(consoleHandler_err)
 
@@ -141,17 +147,14 @@ class EnPT_Logger(logging.Logger):
             try:
                 if handler.get_name() == 'StringIO handler':
                     self.streamObj.flush()
-                    self.streamHandler.flush()
                 self.removeHandler(handler)  # if not called with '[:]' the StreamHandlers are left open
-                # handler.flush()
+                handler.flush()
                 handler.close()
             except PermissionError:
                 warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
 
         if self.handlers[:]:
             warnings.warn('Not all logging handlers could be closed. Remaining handlers: %s' % self.handlers[:])
-
-        # print('sh', self.streamHandler)
 
     def view_logfile(self):
         """View the log file written to disk."""

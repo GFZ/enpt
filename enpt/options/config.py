@@ -41,8 +41,6 @@ from collections import OrderedDict, Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
-import sicor
-
 from .options_schema import \
     enpt_schema_input, \
     enpt_schema_config_output, \
@@ -68,19 +66,21 @@ config_for_testing = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=False,
-    enable_ac=False
+    is_dummy_dataformat=True,
+    enable_ac=False,
+    enable_ice_retrieval=False,
+    CPUs=16
 )
 
 
 config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
                      'rows0-99.zip')),
     path_l1b_enmap_image_gapfill=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000003_20181214T160003Z__'
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
                      'rows100-199.zip')),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'DLR_L2A_DEM_UTM32.bsq')),
@@ -88,9 +88,11 @@ config_for_testing_dlr = dict(
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=True,
-    is_dlr_dataformat=True,
+    is_dummy_dataformat=False,
     enable_ac=False,
-    ortho_resampAlg='gauss'
+    enable_ice_retrieval=False,
+    CPUs=32,
+    ortho_resampAlg='gauss',
 )
 
 
@@ -213,10 +215,12 @@ class EnPTConfig(object):
         # general options #
         ###################
 
-        try:
-            self.is_dlr_dataformat = gp('is_dlr_dataformat')
-        except:  # noqa E722  # FIXME
-            self.is_dlr_dataformat = False
+        self.is_dummy_dataformat = gp('is_dummy_dataformat')
+        if 'is_dlr_dataformat' in user_opts:
+            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+                          "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
+            self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
+
         self.CPUs = gp('CPUs', fallback=cpu_count())
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
@@ -251,8 +255,8 @@ class EnPTConfig(object):
 
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
-        self.sicor_cache_dir = gp('sicor_cache_dir', fallback=sicor.__path__[0])
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
+        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
 

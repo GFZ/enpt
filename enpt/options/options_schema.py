@@ -36,6 +36,7 @@ enpt_schema_input = dict(
             path_l1b_enmap_image=dict(type='string', required=False),
             path_l1b_enmap_image_gapfill=dict(type='string', required=False),
             path_dem=dict(type='string', required=False),
+            is_dummy_dataformat=dict(type='boolean', required=False),
             average_elevation=dict(type='integer', required=False),
             path_l1b_snr_model=dict(type='string', required=False),
             working_dir=dict(type='string', required=False, nullable=True),
@@ -72,8 +73,8 @@ enpt_schema_input = dict(
                 type='dict', required=False,
                 schema=dict(
                     enable_ac=dict(type='boolean', required=False),
-                    sicor_cache_dir=dict(type='string', required=False),
                     auto_download_ecmwf=dict(type='boolean', required=False),
+                    enable_ice_retrieval=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
                 )),
 
@@ -111,6 +112,7 @@ parameter_mapping = dict(
     path_l1b_enmap_image=('general_opts', 'path_l1b_enmap_image'),
     path_l1b_enmap_image_gapfill=('general_opts', 'path_l1b_enmap_image_gapfill'),
     path_dem=('general_opts', 'path_dem'),
+    is_dummy_dataformat=('general_opts', 'is_dummy_dataformat'),
     average_elevation=('general_opts', 'average_elevation'),
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
     working_dir=('general_opts', 'working_dir'),
@@ -132,8 +134,8 @@ parameter_mapping = dict(
 
     # processors > atmospheric_correction
     enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
-    sicor_cache_dir=('processors', 'atmospheric_correction', 'sicor_cache_dir'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
+    enable_ice_retrieval=('processors', 'atmospheric_correction', 'enable_ice_retrieval'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
     scale_factor_boa_ref=('processors', 'atmospheric_correction', 'scale_factor_boa_ref'),
 

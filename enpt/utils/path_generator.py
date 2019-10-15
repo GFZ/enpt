@@ -81,6 +81,8 @@ class PathGenL1BProduct(object):
 def get_path_ac_options() -> str:
     """Returns the path of the options json file needed for atmospheric correction."""
     from sicor import options
-    path_ac = os.path.join(os.path.dirname(options.__file__), 'sicor_enmap_user_options.json')
+    path_ac = os.path.join(os.path.dirname(options.__file__), 'enmap_options.json')
+    # FIXME temporarily disabled because not implemented at the moment:
+    # path_ac = os.path.join(os.path.dirname(options.__file__), 'sicor_enmap_user_options.json')
 
     return path_ac

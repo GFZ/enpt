@@ -65,7 +65,7 @@ class EnPT_Controller(object):
         :param subdir:          subdirectory name to be created within temporary directory
         :return:                /tmp/tmpk2qp0yri/rootdir/
         """
-        outdir = os.path.join(self.tempDir, subdir) if self.cfg.is_dlr_dataformat else self.tempDir
+        outdir = os.path.join(self.tempDir, subdir) if not self.cfg.is_dummy_dataformat else self.tempDir
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(outdir)
@@ -73,7 +73,7 @@ class EnPT_Controller(object):
         if not os.path.isdir(outdir):
             raise NotADirectoryError(outdir)
 
-        if self.cfg.is_dlr_dataformat:
+        if not self.cfg.is_dummy_dataformat:
             return outdir
         else:
             return os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
@@ -128,11 +128,9 @@ class EnPT_Controller(object):
 
     def write_output(self):
         if self.cfg.output_dir:
-            try:
+            if self.L2_obj is not None:
                 self.L2_obj.save(self.cfg.output_dir)
-            except NotImplementedError:
-                self.L2_obj.logger.warning('Currently L2A EnMAP images cannot be written to disk. '
-                                           'Writing level 1 image instead.')
+            else:
                 self.L1_obj.save(self.cfg.output_dir)
 
     def run_all_processors(self):
@@ -144,10 +142,10 @@ class EnPT_Controller(object):
             # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
             self.run_dem_processor()
             if self.cfg.enable_ac:
-                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                        'computing top-of-atmosphere reflectance instead.')
                 self.run_atmospheric_correction()
             else:
+                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                        'computing top-of-atmosphere reflectance instead.')
                 self.run_toaRad2toaRef()
             self.run_geometry_processor()
             self.run_orthorectification()
