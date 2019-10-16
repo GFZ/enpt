@@ -31,7 +31,6 @@ Tests for `processors.spatial_transform.spatial_transform` module.
 """
 
 import os
-from typing import Tuple  # noqa: F401
 from unittest import TestCase
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -140,7 +139,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
     def test_transform_sensorgeo_SWIR_to_VNIR_3DInput_2DGeolayer(self):
         data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
-        GeoArray(data_vnir_sensorgeo).save('/home/gfz-fe/scheffler/temp/enpt_3Ddata_vnir_sensorgeo_nearest.bsq')
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEquals(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
 
     def test_3D_geolayer(self):
         with self.assertRaises(NotImplementedError):
@@ -163,7 +163,7 @@ class Test_RPC_Geolayer_Generator(TestCase):
         # bounding polygon DLR test data
         self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
         self.lons = np.array([10.7966311, 11.1693436, 10.7111131, 11.0815993])
-        corner_coords = tuple(zip(self.lons, self.lats))  # type: Tuple[Tuple[float, float]]
+        corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
 
         # spatial coverage of datatake DLR test data
         # self.lats = np.array([47.7870358956, 47.723060779, 46.9808418244, 46.9174014681])
@@ -194,9 +194,13 @@ class Test_RPC_Geolayer_Generator(TestCase):
         )
 
         rows, cols = self.RPCGG._denormalize_image_coordinates(row_norm, col_norm)
+        self.assertIsInstance(rows, np.ndarray)
+        self.assertIsInstance(cols, np.ndarray)
 
     def test_transform_LonLatHeight_to_RowCol(self):
         rows, cols = self.RPCGG.transform_LonLatHeight_to_RowCol(lon=self.lons, lat=self.lats, height=self.heights)
+        self.assertIsInstance(rows, np.ndarray)
+        self.assertIsInstance(cols, np.ndarray)
 
     def test_compute_geolayer(self):
         lons_interp, lats_interp = self.RPCGG.compute_geolayer()
