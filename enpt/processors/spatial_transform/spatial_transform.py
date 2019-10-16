@@ -152,6 +152,8 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
 
 
 class VNIR_SWIR_SensorGeometryTransformer(object):
+    """Class to transform between EnMAP VNIR and SWIR sensor geometry."""
+
     def __init__(self,
                  lons_vnir: np.ndarray,
                  lats_vnir: np.ndarray,
@@ -369,7 +371,7 @@ class RPC_Geolayer_Generator(object):
 
         :param row_norm:    normalized rows
         :param col_norm:    normalized columns
-        :return:
+        :return:    de-normalized rows array,  de-normalized columns array,
         """
         rows = row_norm * self.row_scale + self.row_off
         cols = col_norm * self.col_scale + self.col_off
@@ -385,7 +387,7 @@ class RPC_Geolayer_Generator(object):
         :param lon:     longitude array
         :param lat:     latitude array
         :param height:  elevation array
-        :return:
+        :return:    rows array, columns array
         """
         # TODO add reshaping
 
