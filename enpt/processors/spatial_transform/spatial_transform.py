@@ -61,7 +61,7 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
             src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
 
     def to_map_geometry(self,
-                        path_or_geoarray_sensorgeo: Union[str, GeoArray],
+                        path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
                         tgt_res: Tuple[float, float] = None,
@@ -118,7 +118,7 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
             src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
 
     def to_map_geometry(self,
-                        path_or_geoarray_sensorgeo: Union[str, GeoArray],
+                        path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
                         tgt_res: Tuple[float, float] = None):
@@ -149,6 +149,87 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
                                                                  tgt_extent=tgt_extent, tgt_res=tgt_res)
 
         return out_data, out_gt, out_prj
+
+
+class VNIR_SWIR_SensorGeometryTransformer(object):
+    def __init__(self,
+                 lons_vnir: np.ndarray,
+                 lats_vnir: np.ndarray,
+                 lons_swir: np.ndarray,
+                 lats_swir: np.ndarray,
+                 prj_vnir: Union[str, int],
+                 prj_swir: Union[str, int],
+                 res_vnir: Tuple[float, float],
+                 res_swir: Tuple[float, float],
+                 resamp_alg: str = 'nearest') -> None:
+        """Get an instance of VNIR_SWIR_SensorGeometryTransformer.
+
+        :param lons_vnir:   2D or 3D VNIR longitude array corresponding to the sensor geometry arrays passed later
+        :param lats_vnir:   2D or 3D VNIR latitude array corresponding to the sensor geometry arrays passed later
+        :param lons_swir:   2D or 3D SWIR longitude array corresponding to the sensor geometry arrays passed later
+        :param lats_swir:   2D or 3D SWIR latitude array corresponding to the sensor geometry arrays passed later
+        :param prj_vnir:    projection of the VNIR if it would be transformed to map geometry (WKT string or EPSG code)
+        :param prj_swir:    projection of the SWIR if it would be transformed to map geometry (WKT string or EPSG code)
+        :param res_vnir:    pixel dimensions of the VNIR if it would be transformed to map geometry (X, Y)
+        :param res_swir:    pixel dimensions of the SWIR if it would be transformed to map geometry (X, Y)
+        :param resamp_alg:  resampling algorithm ('nearest', 'gauss')
+        """
+        [self._validate_lonlat_ndim(ll) for ll in [lons_vnir, lats_vnir, lons_swir, lats_swir]]
+
+        self.vnir_meta = dict(
+            lons=lons_vnir,
+            lats=lats_vnir,
+            prj=prj_vnir,
+            res=res_vnir
+        )
+        self.swir_meta = dict(
+            lons=lons_swir,
+            lats=lats_swir,
+            prj=prj_swir,
+            res=res_swir
+        )
+        self.resamp_alg = resamp_alg
+
+    def _validate_lonlat_ndim(self, coord_array):
+        if coord_array.ndim > 2:
+            raise NotImplementedError("%dD longitude/latitude array are currently not supported.")
+
+    def transform_sensorgeo_VNIR_to_SWIR(self, data_vnirsensorgeo: np.ndarray) -> np.ndarray:
+        """Transform any array in VNIR sensor geometry to SWIR sensor geometry to remove geometric shifts.
+
+        :param data_vnirsensorgeo:      input array in VNIR sensor geometry
+        :return:    input array resampled to SWIR sensor geometry
+        """
+        return self._transform_sensorgeo(data_vnirsensorgeo, inputgeo='vnir')
+
+    def transform_sensorgeo_SWIR_to_VNIR(self, data_swirsensorgeo: np.ndarray) -> np.ndarray:
+        """Transform any array in SWIR sensor geometry to VNIR sensor geometry to remove geometric shifts.
+
+        :param data_swirsensorgeo:      input array in SWIR sensor geometry
+        :return:    input array resampled to VNIR sensor geometry
+        """
+        return self._transform_sensorgeo(data_swirsensorgeo, inputgeo='swir')
+
+    def _transform_sensorgeo(self,
+                             data2transform: np.ndarray,
+                             inputgeo: str = 'vnir') -> np.ndarray:
+        if inputgeo not in ['vnir', 'swir']:
+            raise ValueError(inputgeo)
+
+        src, tgt = (self.vnir_meta, self.swir_meta) if inputgeo == 'vnir' else (self.swir_meta, self.vnir_meta)
+
+        # compute area definition of target geometry
+        GT_tgt = Geometry_Transformer(lons=tgt['lons'], lats=tgt['lats'], resamp_alg=self.resamp_alg)
+        areadef_tgt = GT_tgt.compute_areadefinition_sensor2map(data2transform, tgt['prj'], tgt_res=tgt['res'])
+
+        # temporarily transform the input sensor geometry array to map geometry
+        GT_src = Geometry_Transformer(lons=src['lons'], lats=src['lats'], resamp_alg=self.resamp_alg)
+        gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj'], area_definition=areadef_tgt))
+
+        # generate the target sensor geometry array
+        tgt_data_sensorgeo = GT_src.to_sensor_geometry(gA_mapgeo)
+
+        return tgt_data_sensorgeo
 
 
 def move_extent_to_EnMAP_grid(extent_utm: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:

@@ -18,7 +18,7 @@ test_enpt:
     - pip install 'geoarray>=0.8.11'
 
     # update py_tools_ds
-    - pip install 'py_tools_ds>=0.14.14'
+    - pip install 'py_tools_ds>=0.14.22'
 
     # switch sicor branch
     - mkdir /tmp/sicor_tables

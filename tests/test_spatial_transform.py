@@ -41,8 +41,9 @@ import numpy as np
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_grid import is_point_on_grid
 
-from enpt.processors.spatial_transform import Geometry_Transformer, RPC_Geolayer_Generator
-from enpt.options.config import config_for_testing, EnPTConfig
+from enpt.processors.spatial_transform import \
+    Geometry_Transformer, RPC_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
+from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid
 
@@ -95,6 +96,63 @@ class Test_Geometry_Transformer(TestCase):
         data_sensorgeo = GT.to_sensor_geometry(self.gA2transform_mapgeo)
 
         self.assertEqual(data_sensorgeo.shape, self.gA2transform_sensorgeo.shape)
+
+
+class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        config = EnPTConfig(**config_for_testing_dlr)
+
+        # get lons / lats
+        with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
+            zf.extractall(td)
+            cls.L1_obj = L1B_Reader(config=config).read_inputdata(
+                root_dir_main=td,
+                compute_snr=False)
+
+        cls.data2transform_vnir_sensorgeo = cls.L1_obj.vnir.data[:, :, 50]  # a single VNIR band in sensor geometry
+        cls.gA2transform_vnir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
+        cls.data2transform_swir_sensorgeo = cls.L1_obj.swir.data[:, :, 50]  # a single SWIR band in sensor geometry
+        cls.gA2transform_swir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
+
+        cls.VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=cls.L1_obj.meta.vnir.lons[:, :, 0],
+                                                         lats_vnir=cls.L1_obj.meta.vnir.lats[:, :, 0],
+                                                         lons_swir=cls.L1_obj.meta.swir.lons[:, :, 0],
+                                                         lats_swir=cls.L1_obj.meta.swir.lats[:, :, 0],
+                                                         prj_vnir=32632,
+                                                         prj_swir=32632,
+                                                         res_vnir=(30, 30),
+                                                         res_swir=(30, 30),
+                                                         resamp_alg='nearest'
+                                                         )
+
+    def test_transform_sensorgeo_VNIR_to_SWIR(self):
+        data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo)
+        self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
+        self.assertEquals(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+
+    def test_transform_sensorgeo_SWIR_to_VNIR(self):
+        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEquals(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        # GeoArray(data_vnir_sensorgeo).save('enpt_data_vnir_sensorgeo_nearest.bsq')
+
+    def test_transform_sensorgeo_SWIR_to_VNIR_3DInput_2DGeolayer(self):
+        data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)
+        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
+        GeoArray(data_vnir_sensorgeo).save('/home/gfz-fe/scheffler/temp/enpt_3Ddata_vnir_sensorgeo_nearest.bsq')
+
+    def test_3D_geolayer(self):
+        with self.assertRaises(NotImplementedError):
+            VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons,
+                                                lats_vnir=self.L1_obj.meta.vnir.lats,
+                                                lons_swir=self.L1_obj.meta.swir.lons,
+                                                lats_swir=self.L1_obj.meta.swir.lats,
+                                                prj_vnir=32632,
+                                                prj_swir=32632,
+                                                res_vnir=(30, 30),
+                                                res_swir=(30, 30),
+                                                )
 
 
 class Test_RPC_Geolayer_Generator(TestCase):
