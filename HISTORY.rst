@@ -2,8 +2,18 @@
 History
 =======
 
-0.8.x (coming soon)
+
+0.9.0 (coming soon)
 -------------------
+
+New features / improvements:
+
+* added functionality to transform between EnMAP VNIR aand SWIR sensor geometry
+  (improves accuracy of atmospheric correction and solves reflectance spikes within the VNIR / SWIR spectral overlap)
+
+
+0.8.0 (2019-10-15)
+------------------
 
 New features / improvements:
 
@@ -22,7 +32,6 @@ New features / improvements:
 * Added validation of EnMAP root directory
 * Added documentation including algorithm descriptions, installation instructions usage examples and auto-generated docs
 * Added license texts
-
 
 
 0.7.0 (2019-01-21)
