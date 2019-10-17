@@ -28,7 +28,7 @@ Using conda_, the recommended approach is:
 
     # install py_tools_ds
     conda install -c conda-forge pyresample
-    pip install 'py_tools_ds>=0.14.14'
+    pip install 'py_tools_ds>=0.14.23'
 
     # install sicor
     conda install -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn

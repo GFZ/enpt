@@ -31,7 +31,6 @@ Tests for `processors.spatial_transform.spatial_transform` module.
 """
 
 import os
-from typing import Tuple  # noqa: F401
 from unittest import TestCase
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -41,8 +40,9 @@ import numpy as np
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_grid import is_point_on_grid
 
-from enpt.processors.spatial_transform import Geometry_Transformer, RPC_Geolayer_Generator
-from enpt.options.config import config_for_testing, EnPTConfig
+from enpt.processors.spatial_transform import \
+    Geometry_Transformer, RPC_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
+from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid
 
@@ -97,6 +97,72 @@ class Test_Geometry_Transformer(TestCase):
         self.assertEqual(data_sensorgeo.shape, self.gA2transform_sensorgeo.shape)
 
 
+class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        config = EnPTConfig(**config_for_testing_dlr)
+
+        # get lons / lats
+        with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
+            zf.extractall(td)
+            cls.L1_obj = L1B_Reader(config=config).read_inputdata(
+                root_dir_main=td,
+                compute_snr=False)
+
+        cls.data2transform_vnir_sensorgeo = cls.L1_obj.vnir.data[:, :, 0]  # a single VNIR band in sensor geometry
+        cls.gA2transform_vnir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
+        cls.data2transform_swir_sensorgeo = cls.L1_obj.swir.data[:, :, -1]  # a single SWIR band in sensor geometry
+        cls.gA2transform_swir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
+
+        cls.VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=cls.L1_obj.meta.vnir.lons[:, :, 0],
+                                                         lats_vnir=cls.L1_obj.meta.vnir.lats[:, :, 0],
+                                                         lons_swir=cls.L1_obj.meta.swir.lons[:, :, 0],
+                                                         lats_swir=cls.L1_obj.meta.swir.lats[:, :, 0],
+                                                         prj_vnir=32632,
+                                                         prj_swir=32632,
+                                                         res_vnir=(30, 30),
+                                                         res_swir=(30, 30),
+                                                         resamp_alg='nearest',
+                                                         # radius_of_influence=45
+                                                         )
+
+    def test_transform_sensorgeo_VNIR_to_SWIR(self):
+        data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo)
+        self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
+        self.assertEquals(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        # GeoArray(data_swir_sensorgeo, nodata=0)\
+        #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
+        # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
+        #     .save('enpt_testing/enpt_swir_sensorgeo.bsq')
+
+    def test_transform_sensorgeo_SWIR_to_VNIR(self):
+        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEquals(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        GeoArray(data_vnir_sensorgeo, nodata=0)\
+            .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
+        # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
+        #     .save('enpt_vnir_sensorgeo.bsq')
+
+    def test_transform_sensorgeo_SWIR_to_VNIR_3DInput_2DGeolayer(self):
+        data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)
+        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEquals(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
+
+    def test_3D_geolayer(self):
+        with self.assertRaises(RuntimeError):
+            VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons,
+                                                lats_vnir=self.L1_obj.meta.vnir.lats,
+                                                lons_swir=self.L1_obj.meta.swir.lons,
+                                                lats_swir=self.L1_obj.meta.swir.lats,
+                                                prj_vnir=32632,
+                                                prj_swir=32632,
+                                                res_vnir=(30, 30),
+                                                res_swir=(30, 30),
+                                                )
+
+
 class Test_RPC_Geolayer_Generator(TestCase):
     def setUp(self):
         with open(os.path.join(path_testdata, 'rpc_coeffs_B200.pkl'), 'rb') as pklF:
@@ -105,7 +171,7 @@ class Test_RPC_Geolayer_Generator(TestCase):
         # bounding polygon DLR test data
         self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
         self.lons = np.array([10.7966311, 11.1693436, 10.7111131, 11.0815993])
-        corner_coords = tuple(zip(self.lons, self.lats))  # type: Tuple[Tuple[float, float]]
+        corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
 
         # spatial coverage of datatake DLR test data
         # self.lats = np.array([47.7870358956, 47.723060779, 46.9808418244, 46.9174014681])
@@ -136,9 +202,13 @@ class Test_RPC_Geolayer_Generator(TestCase):
         )
 
         rows, cols = self.RPCGG._denormalize_image_coordinates(row_norm, col_norm)
+        self.assertIsInstance(rows, np.ndarray)
+        self.assertIsInstance(cols, np.ndarray)
 
     def test_transform_LonLatHeight_to_RowCol(self):
         rows, cols = self.RPCGG.transform_LonLatHeight_to_RowCol(lon=self.lons, lat=self.lats, height=self.heights)
+        self.assertIsInstance(rows, np.ndarray)
+        self.assertIsInstance(cols, np.ndarray)
 
     def test_compute_geolayer(self):
         lons_interp, lats_interp = self.RPCGG.compute_geolayer()
