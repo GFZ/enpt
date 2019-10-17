@@ -176,7 +176,8 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         :param res_vnir:    pixel dimensions of the VNIR if it would be transformed to map geometry (X, Y)
         :param res_swir:    pixel dimensions of the SWIR if it would be transformed to map geometry (X, Y)
         :param resamp_alg:  resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
-        :param gt_opts:     additional options to be passed to the Geometric_Transformer class
+        :param gt_opts:     additional options to be passed to the Geometric_Transformer class,
+                            e.g., 'fill_value', 'radius_of_influence', ...
         """
         [self._validate_lonlat_ndim(ll) for ll in [lons_vnir, lats_vnir, lons_swir, lats_swir]]
 
