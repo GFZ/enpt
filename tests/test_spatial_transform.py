@@ -109,9 +109,9 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
                 root_dir_main=td,
                 compute_snr=False)
 
-        cls.data2transform_vnir_sensorgeo = cls.L1_obj.vnir.data[:, :, 50]  # a single VNIR band in sensor geometry
+        cls.data2transform_vnir_sensorgeo = cls.L1_obj.vnir.data[:, :, 0]  # a single VNIR band in sensor geometry
         cls.gA2transform_vnir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
-        cls.data2transform_swir_sensorgeo = cls.L1_obj.swir.data[:, :, 50]  # a single SWIR band in sensor geometry
+        cls.data2transform_swir_sensorgeo = cls.L1_obj.swir.data[:, :, -1]  # a single SWIR band in sensor geometry
         cls.gA2transform_swir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
 
         cls.VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=cls.L1_obj.meta.vnir.lons[:, :, 0],
@@ -129,12 +129,19 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo)
         self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
         self.assertEquals(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        # GeoArray(data_swir_sensorgeo, nodata=0)\
+        #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
+        # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
+        #     .save('enpt_swir_sensorgeo.bsq')
 
     def test_transform_sensorgeo_SWIR_to_VNIR(self):
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
         self.assertEquals(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
-        # GeoArray(data_vnir_sensorgeo).save('enpt_data_vnir_sensorgeo_nearest.bsq')
+        # GeoArray(data_vnir_sensorgeo, nodata=0)\
+        #     .save('enpt_swir_transformed_to_vnir_sensorgeo_nearest.bsq')
+        # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
+        #     .save('enpt_vnir_sensorgeo.bsq')
 
     def test_transform_sensorgeo_SWIR_to_VNIR_3DInput_2DGeolayer(self):
         data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)

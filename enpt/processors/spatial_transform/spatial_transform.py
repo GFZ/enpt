@@ -229,7 +229,7 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj'], area_definition=areadef_tgt))
 
         # generate the target sensor geometry array
-        tgt_data_sensorgeo = GT_src.to_sensor_geometry(gA_mapgeo)
+        tgt_data_sensorgeo = GT_tgt.to_sensor_geometry(gA_mapgeo)
 
         return tgt_data_sensorgeo
 
