@@ -122,7 +122,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
                                                          prj_swir=32632,
                                                          res_vnir=(30, 30),
                                                          res_swir=(30, 30),
-                                                         resamp_alg='nearest'
+                                                         resamp_alg='nearest',
+                                                         # radius_of_influence=45
                                                          )
 
     def test_transform_sensorgeo_VNIR_to_SWIR(self):
@@ -132,14 +133,14 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         # GeoArray(data_swir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
         # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
-        #     .save('enpt_swir_sensorgeo.bsq')
+        #     .save('enpt_testing/enpt_swir_sensorgeo.bsq')
 
     def test_transform_sensorgeo_SWIR_to_VNIR(self):
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
         self.assertEquals(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
-        # GeoArray(data_vnir_sensorgeo, nodata=0)\
-        #     .save('enpt_swir_transformed_to_vnir_sensorgeo_nearest.bsq')
+        GeoArray(data_vnir_sensorgeo, nodata=0)\
+            .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
         # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_sensorgeo.bsq')
 
@@ -150,7 +151,7 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         self.assertEquals(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
 
     def test_3D_geolayer(self):
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(RuntimeError):
             VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons,
                                                 lats_vnir=self.L1_obj.meta.vnir.lats,
                                                 lons_swir=self.L1_obj.meta.swir.lons,
