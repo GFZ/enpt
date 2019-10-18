@@ -2,9 +2,16 @@
 History
 =======
 
+0.10.0 (coming soon)
+--------------------
 
-0.9.0 (coming soon)
--------------------
+New features / improvements:
+
+* TBD
+
+
+0.9.0 (2019-10-18)
+------------------
 
 New features / improvements:
 
