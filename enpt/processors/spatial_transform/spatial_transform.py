@@ -167,10 +167,10 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  **gt_opts) -> None:
         """Get an instance of VNIR_SWIR_SensorGeometryTransformer.
 
-        :param lons_vnir:   2D or 3D VNIR longitude array corresponding to the sensor geometry arrays passed later
-        :param lats_vnir:   2D or 3D VNIR latitude array corresponding to the sensor geometry arrays passed later
-        :param lons_swir:   2D or 3D SWIR longitude array corresponding to the sensor geometry arrays passed later
-        :param lats_swir:   2D or 3D SWIR latitude array corresponding to the sensor geometry arrays passed later
+        :param lons_vnir:   2D VNIR longitude array corresponding to the sensor geometry arrays passed later
+        :param lats_vnir:   2D VNIR latitude array corresponding to the sensor geometry arrays passed later
+        :param lons_swir:   2D SWIR longitude array corresponding to the sensor geometry arrays passed later
+        :param lats_swir:   2D SWIR latitude array corresponding to the sensor geometry arrays passed later
         :param prj_vnir:    projection of the VNIR if it would be transformed to map geometry (WKT string or EPSG code)
         :param prj_swir:    projection of the SWIR if it would be transformed to map geometry (WKT string or EPSG code)
         :param res_vnir:    pixel dimensions of the VNIR if it would be transformed to map geometry (X, Y)
@@ -198,11 +198,11 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
     @staticmethod
     def _validate_lonlat_ndim(coord_array):
-        assert coord_array.ndim in [2, 3], 'Only 2- or 3-dimensional coordinate arrays are supported.'
-
         if coord_array.ndim == 3:
             raise RuntimeError("3D longitude/latitude array are not supported because they model keystone effects "
                                "which cannot be transferred between VNIR and SWIR.")
+        else:
+            assert coord_array.ndim == 2, 'Only 2D coordinate arrays are supported.'
 
     def transform_sensorgeo_VNIR_to_SWIR(self, data_vnirsensorgeo: np.ndarray) -> np.ndarray:
         """Transform any array in VNIR sensor geometry to SWIR sensor geometry to remove geometric shifts.
