@@ -21,5 +21,5 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.9.1'
-__versionalias__ = '20181018.02'
+__version__ = '0.9.2'
+__versionalias__ = '20181021.01'
