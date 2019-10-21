@@ -86,7 +86,8 @@ EnMAP image data at the indicated dead pixel positions. It supports two interpol
 Atmospheric correction
 **********************
 
-.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/raw/master/docs/figs/sicor_logo_lr.png
+.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/raw/master/docs/images/sicor_logo_lr.png
+   :target: https://gitext.gfz-potsdam.de/EnMAP/sicor
    :width: 150px
    :alt: SICOR Logo
 
@@ -103,6 +104,7 @@ Spatial Co-Registration
 ***********************
 
 .. image:: https://gitext.gfz-potsdam.de/danschef/arosics/raw/master/docs/images/arosics_logo.png
+   :target: https://gitext.gfz-potsdam.de/danschef/arosics
    :width: 150px
    :alt: AROSICS Logo
 
