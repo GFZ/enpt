@@ -2,7 +2,9 @@
 
 # EnPT, EnMAP Processing Tools - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2019  Daniel Scheffler (GFZ Potsdam, daniel.scheffler@gfz-potsdam.de)
+# Copyright (C) 2019  Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
+# Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
 # This software was developed within the context of the EnMAP project supported
 # by the DLR Space Administration with funds of the German Federal Ministry of
@@ -42,6 +44,8 @@ from ..spatial_transform import \
     Geometry_Transformer_3D, \
     move_extent_to_EnMAP_grid, \
     get_UTMEPSG_from_LonLat_cornersXY
+
+__author__ = 'Daniel Scheffler'
 
 
 class Orthorectifier(object):

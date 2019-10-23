@@ -2,7 +2,9 @@
 
 # EnPT, EnMAP Processing Tools - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2019  Daniel Scheffler (GFZ Potsdam, daniel.scheffler@gfz-potsdam.de)
+# Copyright (C) 2019  Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
+# Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
 # This software was developed within the context of the EnMAP project supported
 # by the DLR Space Administration with funds of the German Federal Ministry of
@@ -50,6 +52,8 @@ from ..version import \
     __version__, \
     __versionalias__
 
+__author__ = 'Daniel Scheffler'
+
 
 path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
@@ -89,7 +93,7 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dummy_dataformat=False,
-    enable_ac=False,
+    enable_ac=True,
     enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
