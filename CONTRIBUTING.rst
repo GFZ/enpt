@@ -53,8 +53,11 @@ If you are proposing a feature:
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-Get Started!
-------------
+Commit Changes
+--------------
+
+How to
+~~~~~~
 
 Ready to contribute? Here's how to set up `enpt` for local development.
 
@@ -93,6 +96,50 @@ Ready to contribute? Here's how to set up `enpt` for local development.
 
 7. Submit a merge request through the GitLab website.
 
+
+Sign your commits
+~~~~~~~~~~~~~~~~~
+
+Please note that our license terms only allow signed commits.
+A guideline how to sign your work can be found here: https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work
+
+If you are using the PyCharm IDE, the `Commit changes` dialog has an option called `Sign-off commit` to
+automatically sign your work.
+
+
+License header
+~~~~~~~~~~~~~~
+
+If you commit new Python files, please note that they have to contain the following license header:
+
+.. code:: bash
+
+    # EnPT, EnMAP Processing Tools - A Python package for pre-processing of EnMAP Level-1B data
+    #
+    # Copyright (C) 2019  Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
+# Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
+#
+    # This software was developed within the context of the EnMAP project supported
+    # by the DLR Space Administration with funds of the German Federal Ministry of
+    # Economic Affairs and Energy (on the basis of a decision by the German Bundestag:
+    # 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
+    #
+    # This program is free software: you can redistribute it and/or modify it under
+    # the terms of the GNU Lesser General Public License as published by the Free
+    # Software Foundation, either version 3 of the License, or (at your option) any
+    # later version.
+    #
+    # This program is distributed in the hope that it will be useful, but WITHOUT
+    # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    # FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+    # details.
+    #
+    # You should have received a copy of the GNU Lesser General Public License along
+    # with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
 Pull Request Guidelines
 -----------------------
 
@@ -102,7 +149,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the merge request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The merge request should work for Python 2.6, 2.7, 3.4, 3.5, 3.6 and 3.7. Check
+3. The merge request should work for Python 2.6, 2.7, 3.4, 3.5, 3.6, 3.7 and 3.8. Check
    https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/merge_requests
    and make sure that the tests pass for all supported Python versions.
 
@@ -113,3 +160,4 @@ To run a subset of tests::
 
 
     $ python -m unittest tests.test_enpt
+
