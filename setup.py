@@ -53,8 +53,9 @@ setup(
     version=version['__version__'],
     description="EnMAP Processing Tools",
     long_description=readme + '\n\n' + history,
-    author="Karl Segl",
-    author_email='segl@gfz-potsdam.de',
+    author=["Karl Segl", "Daniel Scheffler", "Niklas Bohn", "Stéphane Guillaso"],
+    author_email=['segl@gfz-potsdam.de', 'danschef@gfz-potsdam.de', 'nbohn@gfz-potsdam.de',
+                  'stephane.guillaso@gfz-potsdam.de'],
     url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     packages=find_packages(exclude=['tests*']),
     package_dir={'enpt':
@@ -73,6 +74,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     test_suite='tests',
     tests_require=test_requirements
