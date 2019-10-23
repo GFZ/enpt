@@ -17,6 +17,9 @@ License
 -------
 Free software: GNU General Public License v3
 
+All images contained in any (sub-)directory of this repository are licensed under the CC0 license which can be found
+`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`_.
+
 Feature overview
 ----------------
 
