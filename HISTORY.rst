@@ -7,7 +7,8 @@ History
 
 New features / improvements:
 
-* TBD
+* Added source code repository link to table of contents of documentation.
+* Updated license notes, copyright info, contributor guidelines and logos.
 
 
 0.9.0 (2019-10-18)
