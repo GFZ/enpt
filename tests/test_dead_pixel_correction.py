@@ -1,8 +1,11 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# EnPT, EnMAP Processing Tools - A Python package for pre-processing of EnMAP Level-1B data
+# EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2019  Daniel Scheffler (GFZ Potsdam, daniel.scheffler@gfz-potsdam.de)
+# Copyright (C) 2019  Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
+# Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
 # This software was developed within the context of the EnMAP project supported
 # by the DLR Space Administration with funds of the German Federal Ministry of
@@ -32,6 +35,8 @@ from enpt.processors.dead_pixel_correction import \
     interp_nodata_along_axis_2d, \
     interp_nodata_along_axis, \
     interp_nodata_spatially_2d
+
+__author__ = 'Daniel Scheffler'
 
 
 class Test_Dead_Pixel_Corrector(TestCase):

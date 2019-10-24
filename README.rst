@@ -1,6 +1,6 @@
 
-.. image:: docs/img/EnPT_Logo_clipped.png
-   :width: 150px
+.. image:: docs/img/EnPT_logo_final.svg
+   :width: 300px
    :alt: EnPT Logo
 
 =============================
@@ -16,6 +16,9 @@ Please check the documentation_ for usage and in depth information.
 License
 -------
 Free software: GNU General Public License v3
+
+All images contained in any (sub-)directory of this repository are licensed under the CC0 license which can be found
+`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`_.
 
 Feature overview
 ----------------

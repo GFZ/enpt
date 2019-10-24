@@ -63,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'EnPT'
-copyright = u"2019, Karl Segl, Daniel Scheffler, Niklas Bohn, André Hollstein, Stéphane Guillaso"
+copyright = u"2019, Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -163,7 +163,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the
 # top of the sidebar.
-html_logo = 'img/EnPT_Logo_transparent.png'
+html_logo = 'img/EnPT_logo_final_clipped_doubleSize.png'
 
 # The name of an image file (within the static path) to use as favicon
 # of the docs.  This file should be a Windows icon file (.ico) being
