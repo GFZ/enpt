@@ -163,7 +163,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the
 # top of the sidebar.
-html_logo = 'img/EnPT_Logo_transparent.png'
+html_logo = 'img/EnPT_logo_final.png'
 
 # The name of an image file (within the static path) to use as favicon
 # of the docs.  This file should be a Windows icon file (.ico) being

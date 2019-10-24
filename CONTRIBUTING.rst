@@ -117,9 +117,9 @@ If you commit new Python files, please note that they have to contain the follow
     # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
     #
     # Copyright (C) 2019  Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
-# (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
-# Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
-#
+    # (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
+    # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
+    #
     # This software was developed within the context of the EnMAP project supported
     # by the DLR Space Administration with funds of the German Federal Ministry of
     # Economic Affairs and Energy (on the basis of a decision by the German Bundestag:
