@@ -1,6 +1,6 @@
 
 .. image:: docs/img/EnPT_logo_final.svg
-   :width: 150px
+   :width: 300px
    :alt: EnPT Logo
 
 =============================
