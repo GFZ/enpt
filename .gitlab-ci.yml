@@ -98,6 +98,9 @@ test_enpt_install:
 #    - make install
     - cd ../../
 
+    # install sensormapgeo
+    - pip install git+ssh://git@gitext.gfz-potsdam.de:EnMAP/sensormapgeo.git
+
     # install enpt
     - pip install -e .
     - cd ..
@@ -110,6 +113,7 @@ test_enpt_install:
   only:
     - master
     - dev
+    - enhancement/implement_sensormapgeo
 
 
 pages:

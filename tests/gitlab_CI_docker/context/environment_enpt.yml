@@ -26,6 +26,8 @@ dependencies:
   - shapely
   - holoviews
   - bokeh
+
+  # sensormapgeo
   - pyresample
 
   # arosics
@@ -46,6 +48,7 @@ dependencies:
     - scipy
     - geoarray>=0.8.11
     - py_tools_ds>=0.14.23
+    - git+ssh://git@gitext.gfz-potsdam.de:EnMAP/sensormapgeo.git  # TODO: replace when published
     - cerberus
     - jsmin
     - tqdm
