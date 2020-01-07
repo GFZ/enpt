@@ -19,6 +19,9 @@ Using conda_, the recommended approach is:
     git clone https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT.git
     cd EnPT
 
+    # avoid package incompatibilities
+    - conda config --set channel_priority strict
+
     # install some enpt dependencies that may cause trouble when installed via pip
     conda install -c conda-forge scipy
 
@@ -26,9 +29,8 @@ Using conda_, the recommended approach is:
     conda install -c conda-forge numpy scikit-image matplotlib pandas gdal rasterio pyproj basemap shapely
     conda install -c conda-forge 'icu=58.*'
 
-    # install py_tools_ds
+    # install not pip-installable deps of sensormapgeo
     conda install -c conda-forge pyresample
-    pip install 'py_tools_ds>=0.14.23'
 
     # install sicor
     conda install -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn

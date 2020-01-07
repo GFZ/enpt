@@ -33,7 +33,7 @@ import numpy as np
 from scipy.interpolate import griddata as interpolate_griddata, interp1d
 from geoarray import GeoArray
 
-from py_tools_ds.geo.raster.reproject import \
+from sensormapgeo.sensormapgeo import \
     SensorMapGeometryTransformer, \
     SensorMapGeometryTransformer3D, \
     AreaDefinition
@@ -318,7 +318,8 @@ class RPC_Geolayer_Generator(object):
 
         msg = 'Coordinate normalization yields significantly out-of-range values for %s. ' \
               'Check the coordinates and RPC coefficients.'
-        for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes', 'heights']):
+        # for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes', 'heights']):
+        for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes']):
             if llh.min() < -1.1 or llh.max() > 1.1:
                 raise RuntimeError((llh.min(), llh.max()), msg % name)
 

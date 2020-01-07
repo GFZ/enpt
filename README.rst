@@ -37,7 +37,7 @@ Status
 
 |badge1| |badge2|
 
-.. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/build.svg
+.. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
 
 .. |badge2| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
 

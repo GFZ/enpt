@@ -37,12 +37,12 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 version = {}
-with open("enpt/version.py") as version_file:
+with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
-    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'cerberus', 'jsmin',
-    'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed'
+    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo',
+    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed'
     # 'sicor', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 ]
 
