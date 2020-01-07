@@ -37,12 +37,12 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 version = {}
-with open("enpt/version.py") as version_file:
+with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
     'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo',
-    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed',
+    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed'
     # 'sicor', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 ]
 
@@ -77,5 +77,5 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=test_requirements
 )
