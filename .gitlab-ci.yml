@@ -85,7 +85,7 @@ test_enpt_install:
 
     # update conda and python
     - conda update -n base -c defaults conda
-    - conda update -c conda-forge python
+#    - conda update -c conda-forge python
 
     # avoid package incompatibilities
     - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
