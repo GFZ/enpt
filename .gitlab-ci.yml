@@ -83,6 +83,10 @@ test_enpt_install:
     - conda create -y -q --name enpt_test python=3
     - source activate enpt_test
 
+    # update conda and python
+    - conda update -n base -c defaults conda
+    - conda update -c conda-forge python
+
     # avoid package incompatibilities
     - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
 
