@@ -12,14 +12,11 @@ dependencies:
   - lxml
 
   # geoarray / py_tools_ds
-  - pyqt
   - gdal
   - conda-forge::libgdal  # force to use conda-forge for libgdal to avoid package version incompatiblies due to mixed channels
   - scikit-image
-  - rasterio
   - pyproj
   - geopandas
-  - ipython
   - matplotlib
   - basemap
   # - geos>3.7.0   # pinning should not be needed anymore - https://github.com/conda-forge/basemap-feedstock/issues/43
@@ -47,7 +44,7 @@ dependencies:
   - pip:
     - scipy
     - geoarray>=0.8.11
-    - py_tools_ds>=0.14.23
+    - py_tools_ds>=0.14.25
     - sensormapgeo
     - cerberus
     - jsmin

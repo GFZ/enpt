@@ -93,8 +93,8 @@ test_enpt_install:
     # install some dependencies that cause trouble when installed via pip
     - conda install -y -c conda-forge numpy pandas lxml  # scikit-image, matplotlib
 
-    # install not pip-installable deps of py_tools_ds / geoarray
-    - conda install -y -c conda-forge pyqt gdal libgdal scikit-image rasterio pyproj geopandas matplotlib basemap shapely pyresample
+    # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
+    - conda install -y -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
 
     # install not pip-installable deps of arosics
     - conda install -y -c conda-forge pyfftw pykrige
