@@ -61,6 +61,7 @@ enpt_schema_input = dict(
                 schema=dict(
                     path_earthSunDist=dict(type='string', required=False),
                     path_solar_irr=dict(type='string', required=False),
+                    scale_factor_toa_ref=dict(type='int', required=False),
                 )),
 
             geometry=dict(
@@ -78,6 +79,7 @@ enpt_schema_input = dict(
                     auto_download_ecmwf=dict(type='boolean', required=False),
                     enable_ice_retrieval=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
+                    scale_factor_boa_ref=dict(type='int', required=False),
                 )),
 
             smile=dict(

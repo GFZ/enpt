@@ -166,11 +166,11 @@ class EnPTConfig(object):
             Enable atmospheric correction using SICOR algorithm (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
 
-        :key sicor_cache_dir:
-            SICOR cache directory
-
         :key auto_download_ecmwf:
             Automatically download ECMWF data for atmospheric correction
+
+        :key enable_ice_retrieval:
+            Enable ice retrieval (default); increases accuracy of water vapour retrieval
 
         :key enable_cloud_screening:
             Enable cloud screening during atmospheric correction
