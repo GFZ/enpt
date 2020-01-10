@@ -89,9 +89,9 @@ def get_enpt_argparser():
         help='input path of the solar irradiance model')
     add('--scale_factor_toa_ref', type=int, default=None,
         help='scale factor to be applied to TOA reflectance result')
-    add('--enable_keystone_correction', type=int, default=False,
+    add('--enable_keystone_correction', type=bool, default=False,
         help='Enable keystone correction')
-    add('--enable_vnir_swir_coreg', type=int, default=False,
+    add('--enable_vnir_swir_coreg', type=bool, default=False,
         help='Enable VNIR/SWIR co-registration')
     add('--path_reference_image', type=str, default=None,
         help='Reference image for co-registration.')
