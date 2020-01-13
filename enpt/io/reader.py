@@ -110,7 +110,7 @@ class L1B_Reader(object):
         if not self.cfg.is_dummy_dataformat:
             self._validate_enmap_l1b_rootdir(root_dir_main)
             if root_dir_ext:
-                self._validate_enmap_l1b_rootdir(root_dir_main)
+                self._validate_enmap_l1b_rootdir(root_dir_ext)
 
     @staticmethod
     def _validate_enmap_l1b_rootdir(rootdir_l1b):
