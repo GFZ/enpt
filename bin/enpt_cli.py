@@ -69,7 +69,7 @@ def get_enpt_argparser():
         help='input path of digital elevation model in map or sensor geometry; GDAL compatible file format '
              '(must cover the EnMAP L1B data completely if given in map geometry or must have the same pixel '
              'dimensions like the EnMAP L1B data if given in sensor geometry)')
-    add('-dummyfmt', '--is_dummy_dataformat', type=bool,  default=False,
+    add('-dummyfmt', '--is_dummy_dataformat', type=_false_or_true,  default=False,
         help='Set to true in case of the preliminary, GFZ-internal dataformat as used for the Alpine test dataset. '
              '(default: False. Note: This will be removed in future.)')
     add('-ele', '--average_elevation', type=int, default=0,
@@ -81,7 +81,7 @@ def get_enpt_argparser():
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,
         help='number of lines to be added to the main image [if None, use the whole imgap]. Requires --imgap to be set')
-    add('-dpb', '--disable_progress_bars', type=bool, default=False,
+    add('-dpb', '--disable_progress_bars', type=_false_or_true, default=False,
         help='whether to disable all progress bars during processing')
     add('--path_earthSunDist', type=str, default=None,
         help='input path of the earth sun distance model')
@@ -89,26 +89,26 @@ def get_enpt_argparser():
         help='input path of the solar irradiance model')
     add('--scale_factor_toa_ref', type=int, default=None,
         help='scale factor to be applied to TOA reflectance result')
-    add('--enable_keystone_correction', type=bool, default=False,
+    add('--enable_keystone_correction', type=_false_or_true, default=False,
         help='Enable keystone correction')
-    add('--enable_vnir_swir_coreg', type=bool, default=False,
+    add('--enable_vnir_swir_coreg', type=_false_or_true, default=False,
         help='Enable VNIR/SWIR co-registration')
     add('--path_reference_image', type=str, default=None,
         help='Reference image for co-registration.')
-    add('--enable_ac', type=bool, default=True,
+    add('--enable_ac', type=_false_or_true, default=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")
-    add('--auto_download_ecmwf', type=bool, default=False,
+    add('--auto_download_ecmwf', type=_false_or_true, default=False,
         help='Automatically download ECMWF data for atmospheric correction')
-    add('--enable_ice_retrieval', type=bool, default=True,
+    add('--enable_ice_retrieval', type=_false_or_true, default=True,
         help='Enable ice retrieval (default); increases accuracy of water vapour retrieval')
-    add('--enable_cloud_screening', type=bool, default=False,
+    add('--enable_cloud_screening', type=_false_or_true, default=False,
         help='Enable cloud screening during atmospheric correction')
     add('--scale_factor_boa_ref', type=int, default=10000,
         help='Scale factor to be applied to BOA reflectance result')
-    add('--run_smile_P', type=bool, default=False,
+    add('--run_smile_P', type=_false_or_true, default=False,
         help='Enable extra smile detection and correction (provider smile coefficients are ignored)')
-    add('--run_deadpix_P', type=bool, default=True,
+    add('--run_deadpix_P', type=_false_or_true, default=True,
         help='Enable dead pixel correction')
     add('--deadpix_P_algorithm', type=str, default="spectral",
         help="Algorithm for dead pixel correction ('spectral' or 'spatial')")
@@ -165,8 +165,13 @@ def run_job(config: EnPTConfig):
     CTR.run_all_processors()
 
 
+def _false_or_true(val):
+    return val.lower() in ("yes", "true", "t", "1")
+
+
 if __name__ == '__main__':
     parsed_args = get_enpt_argparser().parse_args()
-    parsed_args.func(get_config(parsed_args))
+    print(parsed_args)
+    # parsed_args.func(get_config(parsed_args))
 
     print('\nready.')

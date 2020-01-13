@@ -65,6 +65,13 @@ class Test_CLIParser(TestCase):
         self.assertNotIsInstance(config.CPUs, str)
         self.assertEqual(config.CPUs, cpu_count())
 
+    def test_param_boolean(self):
+        parsed_args = self.parser_run.parse_args(self.baseargs +
+                                                 ['--enable_ac', 'false'])
+        config = self.get_config(parsed_args)
+        self.assertIsInstance(config.enable_ac, bool)
+        self.assertEqual(config.enable_ac, False)
+
     def test_json_opts(self):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": 10}}'])
