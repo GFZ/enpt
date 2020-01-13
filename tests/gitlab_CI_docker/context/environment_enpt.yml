@@ -41,7 +41,6 @@ dependencies:
   - llvmlite
   - numba  # force install via conda-forge to get rid of llvm incompatibilities
   - scikit-learn
-  - netCDF4  # might be removed in future (https://gitext.gfz-potsdam.de/EnMAP/sicor/issues/41)
 
   - pip:
     - scipy
