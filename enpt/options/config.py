@@ -262,7 +262,7 @@ class EnPTConfig(object):
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
-        self.scale_factor_boa_ref = gp('scale_factor_boa_ref'),
+        self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
 
         # smile
         self.run_smile_P = gp('run_smile_P')
