@@ -33,6 +33,7 @@ Tests for enpt.bin.enpt_cli.py
 """
 
 from unittest import TestCase
+from argparse import ArgumentError
 import os
 from runpy import run_path
 from multiprocessing import cpu_count
@@ -67,10 +68,29 @@ class Test_CLIParser(TestCase):
 
     def test_param_boolean(self):
         parsed_args = self.parser_run.parse_args(self.baseargs +
+                                                 ['--enable_ac', 'True'])
+        config = self.get_config(parsed_args)
+        self.assertIsInstance(config.enable_ac, bool)
+        self.assertEqual(config.enable_ac, True)
+
+        parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'false'])
         config = self.get_config(parsed_args)
         self.assertIsInstance(config.enable_ac, bool)
         self.assertEqual(config.enable_ac, False)
+
+        parsed_args = self.parser_run.parse_args(self.baseargs +
+                                                 ['--enable_ac', '0'])
+        config = self.get_config(parsed_args)
+        self.assertIsInstance(config.enable_ac, bool)
+        self.assertEqual(config.enable_ac, False)
+
+        try:
+            self.parser_run.parse_args(self.baseargs + ['--enable_ac', 'treu'])
+        except SystemExit as e:
+            assert isinstance(e.__context__, ArgumentError)
+        else:
+            raise ValueError("Exception not raised")
 
     def test_json_opts(self):
         parsed_args = self.parser_run.parse_args(
