@@ -1,3 +1,14 @@
 .wy-nav-content {
 max-width: 1200px !important;
 }
+
+/* inline markups*/
+.menuselection {
+  border:1px dashed #7fbbe366;
+  background:#f1f9ff;
+  font-size:95%;
+  font-weight:700;
+  border-radius:1px;
+  padding:0px 3px;
+  margin:auto 2px
+}
