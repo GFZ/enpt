@@ -145,7 +145,7 @@ Load the :file:`ENMAP*L2A*-SPECTRAL_IMAGE.GEOTIFF` into
 the EnMAP-Box_. Unfold the entry in the **Data sources** panel to explore some metadata of the Level-2A EnMAP-image.
 The image has a dimension of 959 x 311 pixels in x- and y-direction and contains 218 bands. The different image
 dimensions compared with Level-1B data are due to the geometric correction / orthorectification applied by EnPT.
-Furthermore, the image is projected in WGS84 / UTM zone 32N.
+Furthermore, the image is now projected in WGS84 / UTM zone 32N.
 
 Visualize the first band of the image and open a Spectral Library window as described above. The spectral information
 now contains atmospherically corrected bottom-of-atmosphere reflectance data. The two detector images have been merged
