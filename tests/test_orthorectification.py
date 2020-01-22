@@ -37,9 +37,10 @@ from unittest import TestCase
 from zipfile import ZipFile
 import tempfile
 import shutil
+import numpy as np
 
 from enpt.processors.orthorectification import Orthorectifier
-from enpt.options.config import config_for_testing, EnPTConfig
+from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.model.images import EnMAPL2Product_MapGeo
 
@@ -67,9 +68,49 @@ class Test_Orthorectifier(TestCase):
         shutil.rmtree(self.tmpdir)
 
     def test_run_transformation(self):
-        # FIXME td does not exist here anymore
         OR = Orthorectifier(config=self.config)
         L2_obj = OR.run_transformation(self.L1_obj)
 
         self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
         self.assertTrue(L2_obj.data.is_map_geo)
+        self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
+        self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
+        self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
+        self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
+                                   np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
+                                   rtol=0.01
+                                   ))
+
+
+class Test_Orthorectifier_DLR(TestCase):
+    def setUp(self):
+        self.config = EnPTConfig(**config_for_testing_dlr)
+
+        # create a temporary directory
+        # NOTE: This must exist during the whole runtime of Test_Orthorectifier, otherwise
+        #       Orthorectifier.run_transformation will fail to read some files.
+        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
+
+        # get lons / lats
+        with ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
+            zf.extractall(self.tmpdir)
+            self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
+                root_dir_main=self.tmpdir,
+                compute_snr=False)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir)
+
+    def test_run_transformation(self):
+        OR = Orthorectifier(config=self.config)
+        L2_obj = OR.run_transformation(self.L1_obj)
+
+        self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
+        self.assertTrue(L2_obj.data.is_map_geo)
+        self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
+        self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
+        self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
+        self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
+                                   np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
+                                   rtol=0.01
+                                   ))
