@@ -116,7 +116,8 @@ class L1B_Reader(object):
     def _validate_enmap_l1b_rootdir(rootdir_l1b):
         """Check for valid EnMAP L1B root directory."""
         if not os.path.isdir(rootdir_l1b):
-            raise NotADirectoryError(rootdir_l1b)
+            raise NotADirectoryError(rootdir_l1b, 'EnMAP images have to be provided either as zip-archives or as '
+                                                  'a directory containing all extracted files.')
 
         files = os.listdir(rootdir_l1b)
 
