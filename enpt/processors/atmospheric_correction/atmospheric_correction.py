@@ -94,8 +94,9 @@ class AtmosphericCorrector(object):
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
         # validate results
-        for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir]):
-            if np.mean(detectordata[:, :, 0]) == 0 or np.std(detectordata[:, :, 0]) == 0:
+        for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
+            mean0, std0 = np.nanmean(detectordata[:, :, 0]), np.nanstd(detectordata[:, :, 0])
+            if np.isnan(mean0) or mean0 == 0 or std0 == 0:
                 enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
 
         # join results
