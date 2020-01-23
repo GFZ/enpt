@@ -20,7 +20,7 @@ test_enpt:
     # update py_tools_ds
     - pip install 'py_tools_ds>=0.14.23'
 
-    # switch sicor branch
+    # install sicor and perhaps switch sicor branch
     - mkdir /tmp/sicor_tables
     - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
     - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
@@ -155,4 +155,4 @@ pages:
   only:
     - master
     - enhancement/improve_docs
-    - enhancement/add_license_texts
+    - feature/add_tutorial

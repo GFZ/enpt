@@ -1,5 +1,7 @@
+.. _usage:
+
 Usage
------
+=====
 
 Usage of the Python API
 ***********************
@@ -139,7 +141,7 @@ To install it in QGIS, please refer to the separate repository enpt_enmapboxapp_
 
 Here is screenshot of the current version:
 
-.. image:: img/screenshot_enpt_enmapboxapp_874x1047.png
+.. image:: img/screenshot_enpt_enmapboxapp_874x1267.png
 
 .. _enpt_enmapboxapp: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _enpt/options/options_default.json: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/blob/master/enpt/options/options_default.json
