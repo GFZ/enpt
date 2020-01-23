@@ -58,7 +58,7 @@ is given `here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw
 
 .. note::
 
-    The contents this zip-archive may change in future.
+    The contents of this zip-archive may change in future.
 
 
 Open QGIS_, start the EnMAP-Box_ and load the :file:`ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.GEOTIFF` and
@@ -67,15 +67,14 @@ general handling instructions regarding the EnMAP-Box_ are given in `Exercise A 
 
 .. _`Exercise A of the EnMAP-Box tutorials`: https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html#exercise-a-urban-land-cover
 
-Unfold the respective entries in the **Data sources** panel to explore some metadata of both images. As apparent from
-there, both images have 1000 x 100 pixels in x- and y-direction. The VNIR image contains 88 and the SWIR contains 130
-spectral bands. Both images have no coordinate reference system (CRS). This is because EnMAP Level-1B data are provided
-in sensor geometry.
+Unfold the respective entries in the **Data sources** panel to explore some metadata of both images. Both images have
+1000 x 100 pixels in x- and y-direction. The VNIR image contains 88 and the SWIR contains 130 spectral bands. Both
+images have no coordinate reference system (CRS). This is because EnMAP Level-1B data are provided in sensor geometry.
 
 To visualize the first spectral band of the VNIR hyperspectral image, unfold the **Bands** entry of the VNIR image in
 the **Data sources** tab, right-click on **Band 01:B1** and press **Open in new map**. Then click the Spectral Library
 icon in the EnMAP-Box toolbar to open a new Spectral Library window and click somewhere into the visualized image in
-the Map window. This makes the corresponding spectral signature show up in the Spectral Library window.
+the **Map** window. This makes the corresponding spectral signature show up in the **Spectral Library** window.
 
 .. image:: img/tut__enmapbox_l1b_vnir.png
 
@@ -83,10 +82,10 @@ Open the first band of the SWIR image and visualize any SWIR spectral signature 
 
 .. image:: img/tut__enmapbox_l1b_swir.png
 
-With regard to the spectral signature plot, it is noted that EnMAP Level-1B data contain top-of atmosphere radiance
-spectra whereas each spectral band is scaled according to specific gain and offset values given in the image metadata.
-The visualized spectra can therefore NOT directly be interpreted as top-of-atmosphere radiance but have to be converted
-first. Even if all bands were equally scaled, the spectra would not be comparable to other hyperspectral EO data
+With regard to the spectral signature plot, it is noted that EnMAP Level-1B data contain top-of-atmosphere radiance
+spectra, with each spectral band scaled according to specific gain and offset values given in the image metadata.
+The visualized spectra can therefore NOT directly be interpreted as top-of-atmosphere radiance but must first be
+converted. Even if all bands were equally scaled, the spectra would not be comparable to other hyperspectral EO data
 because they are still affected by numerous spatio-temporal varying effects, e.g., originating from the atmospheric
 state at the acquisition time.
 
@@ -97,8 +96,8 @@ vertical striping effects, i.e., dead image columns.
 
 .. image:: img/tut__enmapbox_l1b_vnir_swir_shift_deadpix.png
 
-To sum up, EnMAP Level-1B data cannot directly be used for downstream remote sensing applications due to the following
-characteristics:
+To sum up, EnMAP Level-1B data cannot be directly used for downstream remote sensing applications due to the following
+reasons:
 
     - separate VNIR and SWIR detector images
     - images provided in sensor geometry, i.e., without coordinate reference system (CRS)
@@ -106,6 +105,7 @@ characteristics:
     - VNIR and SWIR images do not show the same spatial extent (offsets in along- and across-track direction)
     - image artefacts such as vertical striping due to dead pixels
     - spectral information is affected by various spatio-temporal effects, e.g., originating from the atmospheric state
+    - some sensor-induced effects that are not directly visible (spectral smile, keystone, ...)
 
 
 Generate Level-2A data using EnPT
@@ -116,7 +116,7 @@ raw format to geometrically and atmospherically corrected bottom-of-atmosphere r
 :ref:`algorithm_description` section of this documentation for more information on the underlying algorithms.
 
 Open the EnPT GUI to run the processing chain. You can find it here:
-:menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> Pre-Processing --> EnMAP processing tools algorithm`.
+:menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> EnMAP-Box --> Pre-Processing --> EnMAP processing tools algorithm`.
 
 .. image:: img/tut__screenshot_enpt_enmapboxapp.png
 
@@ -125,8 +125,8 @@ above at the parameter **L1B EnMAP image** and check that the **Anaconda root di
 Anaconda directory which contains the `enpt` Python environment (see :ref:`installation`). All other parameters are
 set to a default or not strictly needed to generate Level-2A data. However, they may improve the output quality.
 
-Press the **Run** button to start the processing. The current status is shown in the **Log** panel. After processing,
-the output directory is also indicated there.
+Press the **Run** button to start the processing. The current status is shown in the **Log** panel and the QGIS Python
+console. After processing, the output directory is indicated in the Log panel.
 
 
 Inspect the Level-2A data and compare them with Level-1B
@@ -143,15 +143,15 @@ other files, such as metadata, quality layers, etc.:
 
 Load the :file:`ENMAP*L2A*-SPECTRAL_IMAGE.GEOTIFF` into
 the EnMAP-Box_. Unfold the entry in the **Data sources** panel to explore some metadata of the Level-2A EnMAP-image.
-The image has a dimension of 959 x 311 pixels in x- and y-direction and contains 218 bands. The different image
+The image has a dimension of 972 x 378 pixels in x- and y-direction and contains 218 bands. The different image
 dimensions compared with Level-1B data are due to the geometric correction / orthorectification applied by EnPT.
 Furthermore, the image is now projected in WGS84 / UTM zone 32N.
 
 Visualize the first band of the image and open a Spectral Library window as described above. The spectral information
 now contains atmospherically corrected bottom-of-atmosphere reflectance data. The two detector images have been merged
-so that their spectral information can now be used together. Spatio-temporal variable disturbances to the spectra have
+so that their spectral information can now be used together. Spatio-temporal varying interferences on the spectra have
 been corrected as far as possible.
 
-.. image:: img/PLACEHOLDER
+.. image:: img/tut__enmapbox_l2a_output.png
 
 The generated EnMAP Level-2A data can now be used for subsequent remote sensing applications.
