@@ -72,7 +72,6 @@ config_for_testing = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=True,
     enable_ac=False,
-    enable_ice_retrieval=False,
     CPUs=16
 )
 
@@ -91,10 +90,9 @@ config_for_testing_dlr = dict(
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
-    disable_progress_bars=True,
+    disable_progress_bars=False,
     is_dummy_dataformat=False,
     enable_ac=True,
-    enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
 )
@@ -168,9 +166,6 @@ class EnPTConfig(object):
 
         :key auto_download_ecmwf:
             Automatically download ECMWF data for atmospheric correction
-
-        :key enable_ice_retrieval:
-            Enable ice retrieval (default); increases accuracy of water vapour retrieval
 
         :key enable_cloud_screening:
             Enable cloud screening during atmospheric correction
@@ -260,7 +255,6 @@ class EnPTConfig(object):
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
-        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
 

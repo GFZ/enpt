@@ -43,7 +43,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
 requirements = [  # put package requirements here
     'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo',
     'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed'
-    # 'sicor', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
+    # 'sicor>=0.15.0', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 ]
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']

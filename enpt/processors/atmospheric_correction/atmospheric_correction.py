@@ -59,17 +59,14 @@ class AtmosphericCorrector(object):
 
             # adjust options
             # FIXME this path should be already known to sicor
-            options["EnMAP"]["Retrieval"]["fn_LUT"] = \
+            options["retrieval"]["fn_LUT"] = \
                 path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
             # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
-            # TODO disable_progress_bars?
             if enmap_ImageL1.meta.aot is not None:
-                options["EnMAP"]["FO_settings"]["aot"] = enmap_ImageL1.meta.aot
+                options["metadata"]["aot"] = enmap_ImageL1.meta.aot
 
-            # always use the fast implementation (the slow implementation was only a temporary solution)
-            options["EnMAP"]["Retrieval"]["fast"] = True
-            options["EnMAP"]["Retrieval"]["ice"] = self.cfg.enable_ice_retrieval
-            options["EnMAP"]["Retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
+            options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
+            options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
             return options
 
@@ -86,11 +83,10 @@ class AtmosphericCorrector(object):
 
         # run SICOR
         # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
-        #       - cwv_model, cwc_model, toa_model have the SWIR geometry
-        #       - currently, the fast method is implemented,
-        #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
-        #       - ice_model is None if self.cfg.enable_ice_retrieval is False
-        enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
+        #       - res: a dictionary containing path lengths of three water phases, error matrices, ...
+        #              -> cwv_model, slope_model, jacobian, averaging_kernel, information_content, smoothing_error
+        #              -> SWIR geometry (?)  # FIXME
+        enmap_l2a_vnir, enmap_l2a_swir, res = \
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
         # validate results

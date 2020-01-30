@@ -25,8 +25,8 @@ test_enpt:
     - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
     - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
     - rm -rf /tmp/sicor
-    - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
-#    - git clone -b feature/improve_speed https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+#    - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+    - git clone -b dev https://gitext.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor  # FIXME use master as soon as its merged
     - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
     - rm -rf /tmp/sicor_tables/
     - pip install -e /tmp/sicor
