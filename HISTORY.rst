@@ -9,6 +9,26 @@ New features / improvements:
 
 * Added source code repository link to table of contents of documentation.
 * Updated license notes, copyright info, contributor guidelines and logos.
+* Updated author info.
+* Revised package short description.
+* Added arosics to requirements.
+* SensorMapGeometryTransformer is now imported from new library sensormapgeo.
+* Updated dependencies and added pip to environment_enpt.yml.
+* Boolean values are now correctly passed from the command line interface to EnPT.
+* Added a tutorial to the docs.
+* Some code improvements.
+* Added output validation to AC.
+* The parameter 'disable_progressbars' is now correctly passed to SICOR.
+
+Bug fixes:
+
+* Fixed "Encoding error: 'ascii' codec can't decode byte 0xc3 in position 320: ordinal not in range(128)".
+* Fixed unexpected title exception during 'make docs'.
+* Fixed broken badge. Removed ssh links.
+* Fixed UTF-8 error when running setup.py. Updated installation instructions.
+* Fix for wrong input parameter data types at 'enable_keystone_correction' and 'enable_vnir_swir_coreg'.
+* Fixed scheme error: 'scale_factor_boa_ref must be of integer type'.
+* Fix for not validating the input data for enmap_image_gapfill
 
 
 0.9.0 (2019-10-18)

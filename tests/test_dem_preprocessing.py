@@ -99,4 +99,4 @@ class Test_DEM_Processor(TestCase):
     def test_to_sensor_geometry(self):
         dem_sensor_geo = self.DP_mapgeo.to_sensor_geometry(lons=self.lons, lats=self.lats)
 
-        self.assertEquals(dem_sensor_geo.shape, (100, 1000))
+        self.assertEqual(dem_sensor_geo.shape, (100, 1000))

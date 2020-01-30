@@ -133,7 +133,7 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
     def test_transform_sensorgeo_VNIR_to_SWIR(self):
         data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo)
         self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
-        self.assertEquals(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
         # GeoArray(data_swir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
         # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
@@ -142,7 +142,7 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
     def test_transform_sensorgeo_SWIR_to_VNIR(self):
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEquals(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        self.assertEqual(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
         GeoArray(data_vnir_sensorgeo, nodata=0)\
             .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
         # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
@@ -152,7 +152,7 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEquals(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
+        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
 
     def test_3D_geolayer(self):
         with self.assertRaises(RuntimeError):
@@ -194,9 +194,9 @@ class Test_RPC_Geolayer_Generator(TestCase):
     def test_normalize_coordinates(self):
         lon_norm, lat_norm, height_norm = \
             self.RPCGG._normalize_map_coordinates(lon=self.lons, lat=self.lats, height=self.heights)
-        self.assertEquals(lon_norm.shape, self.lons.shape)
-        self.assertEquals(lat_norm.shape, self.lats.shape)
-        self.assertEquals(height_norm.shape, self.heights.shape)
+        self.assertEqual(lon_norm.shape, self.lons.shape)
+        self.assertEqual(lat_norm.shape, self.lats.shape)
+        self.assertEqual(height_norm.shape, self.heights.shape)
 
     def test_compute_normalized_image_coordinates(self):
         row_norm, col_norm = self.RPCGG._compute_normalized_image_coordinates(
@@ -216,7 +216,7 @@ class Test_RPC_Geolayer_Generator(TestCase):
 
     def test_compute_geolayer(self):
         lons_interp, lats_interp = self.RPCGG.compute_geolayer()
-        self.assertEquals(lons_interp.shape, lats_interp.shape)
-        self.assertEquals(lons_interp.shape, self.dims_sensorgeo)
+        self.assertEqual(lons_interp.shape, lats_interp.shape)
+        self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
         self.assertFalse(np.isnan(lons_interp).any())
         self.assertFalse(np.isnan(lats_interp).any())

@@ -62,7 +62,7 @@ class AtmosphericCorrector(object):
             options["EnMAP"]["Retrieval"]["fn_LUT"] = \
                 path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
             # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
-            # TODO disable_progress_bars?
+
             if enmap_ImageL1.meta.aot is not None:
                 options["EnMAP"]["FO_settings"]["aot"] = enmap_ImageL1.meta.aot
 
@@ -70,6 +70,7 @@ class AtmosphericCorrector(object):
             options["EnMAP"]["Retrieval"]["fast"] = True
             options["EnMAP"]["Retrieval"]["ice"] = self.cfg.enable_ice_retrieval
             options["EnMAP"]["Retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
+            options["EnMAP"]["Retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
             return options
 
