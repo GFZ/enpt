@@ -100,6 +100,8 @@ def get_enpt_argparser():
              "top-of-atmosphere reflectance")
     add('--auto_download_ecmwf', type=_str2bool, default=False, nargs='?', const=True,
         help='Automatically download ECMWF data for atmospheric correction')
+    add('--enable_ice_retrieval', type=_str2bool, default=True, nargs='?', const=True,
+        help='Enable ice retrieval (default); increases accuracy of water vapour retrieval')
     add('--enable_cloud_screening', type=_str2bool, default=False, nargs='?', const=True,
         help='Enable cloud screening during atmospheric correction')
     add('--scale_factor_boa_ref', type=int, default=10000,

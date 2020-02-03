@@ -167,6 +167,9 @@ class EnPTConfig(object):
         :key auto_download_ecmwf:
             Automatically download ECMWF data for atmospheric correction
 
+        :key enable_ice_retrieval:
+            Enable ice retrieval (default); increases accuracy of water vapour retrieval (DEPRECATED)
+
         :key enable_cloud_screening:
             Enable cloud screening during atmospheric correction
 
@@ -253,6 +256,10 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        if 'enable_ice_retrieval' in user_opts:
+            warnings.warn("The parameter 'enable_ice_retrieval' is deprecated and will be removed in future versions."
+                          "Ice retireval is now always turned on during atmospheric correction.", DeprecationWarning)
+
         self.enable_ac = gp('enable_ac')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_cloud_screening = gp('enable_cloud_screening')
