@@ -13,9 +13,12 @@
 # 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 #
 # This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version. Please note the following exception: `EnPT` depends on tqdm, which
+# is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
+# "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
+# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -99,4 +102,4 @@ class Test_DEM_Processor(TestCase):
     def test_to_sensor_geometry(self):
         dem_sensor_geo = self.DP_mapgeo.to_sensor_geometry(lons=self.lons, lats=self.lats)
 
-        self.assertEquals(dem_sensor_geo.shape, (100, 1000))
+        self.assertEqual(dem_sensor_geo.shape, (100, 1000))

@@ -12,9 +12,12 @@
 # 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 #
 # This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version. Please note the following exception: `EnPT` depends on tqdm, which
+# is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
+# "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
+# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -24,6 +27,6 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.9.13'
-__versionalias__ = '20200113.05'
+__version__ = '0.10.0'
+__versionalias__ = '20200303.01'
 __author__ = 'Daniel Scheffler'

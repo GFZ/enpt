@@ -61,8 +61,8 @@ is given `here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw
     The contents of this zip-archive may change in future.
 
 
-Open QGIS_, start the EnMAP-Box_ and load the :file:`ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.GEOTIFF` and
-:file:`ENMAP*L1B*-SPECTRAL_IMAGE_SWIR.GEOTIFF` image datasets. Some
+Open QGIS_, start the EnMAP-Box_ and load the :file:`ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.TIF` and
+:file:`ENMAP*L1B*-SPECTRAL_IMAGE_SWIR.TIF` image datasets. Some
 general handling instructions regarding the EnMAP-Box_ are given in `Exercise A of the EnMAP-Box tutorials`_.
 
 .. _`Exercise A of the EnMAP-Box tutorials`: https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html#exercise-a-urban-land-cover
@@ -132,7 +132,7 @@ console. After processing, the output directory is indicated in the Log panel.
 Inspect the Level-2A data and compare them with Level-1B
 --------------------------------------------------------
 
-The output folder contains the EnMAP Level-2A image data :file:`ENMAP*L2A*-SPECTRAL_IMAGE.GEOTIFF` and a couple of
+The output folder contains the EnMAP Level-2A image data :file:`ENMAP*L2A*-SPECTRAL_IMAGE.TIF` and a couple of
 other files, such as metadata, quality layers, etc.:
 
 .. image:: img/tut__contents_l2a_output.png
@@ -141,7 +141,7 @@ other files, such as metadata, quality layers, etc.:
 
     The output directory will contain additional layers in future.
 
-Load the :file:`ENMAP*L2A*-SPECTRAL_IMAGE.GEOTIFF` into
+Load the :file:`ENMAP*L2A*-SPECTRAL_IMAGE.TIF` into
 the EnMAP-Box_. Unfold the entry in the **Data sources** panel to explore some metadata of the Level-2A EnMAP-image.
 The image has a dimension of 972 x 378 pixels in x- and y-direction and contains 218 bands. The different image
 dimensions compared with Level-1B data are due to the geometric correction / orthorectification applied by EnPT.

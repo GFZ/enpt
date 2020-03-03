@@ -12,9 +12,12 @@
 # 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 #
 # This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version. Please note the following exception: `EnPT` depends on tqdm, which
+# is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
+# "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
+# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -48,6 +51,7 @@ class DEM_Processor(object):
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.CPUs = CPUs or cpu_count()
 
+        self._set_nodata_if_not_provided()
         self._validate_input()
 
     def _validate_input(self):
@@ -77,6 +81,11 @@ class DEM_Processor(object):
             raise ValueError('The provided digital elevation model covers %.1f percent of the EnMAP image. It must '
                              'cover it completely. The minimal needed extent in the provided projection is: \n'
                              'xmin: %s, xmax: %s, ymin: %s, ymax: %s.' % (overlap_perc, xmin, xmax, ymin, ymax))
+
+    def _set_nodata_if_not_provided(self):
+        # noinspection PyProtectedMember
+        if self.dem._nodata is None:
+            self.dem.nodata = -9999
 
     def fill_gaps(self):
         pass

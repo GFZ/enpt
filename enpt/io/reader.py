@@ -12,9 +12,12 @@
 # 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 #
 # This program is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version. Please note the following exception: `EnPT` depends on tqdm, which
+# is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
+# "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
+# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -127,24 +130,24 @@ class L1B_Reader(object):
         for pattern in ['*-HISTORY.XML',
                         '*-LOG.XML',
                         '*-METADATA.XML',
-                        '*-QL_PIXELMASK_SWIR.GEOTIFF',
-                        '*-QL_PIXELMASK_VNIR.GEOTIFF',
-                        '*-QL_QUALITY_CIRRUS.GEOTIFF',
-                        '*-QL_QUALITY_CLASSES.GEOTIFF',
-                        '*-QL_QUALITY_CLOUD.GEOTIFF',
-                        '*-QL_QUALITY_CLOUDSHADOW.GEOTIFF',
-                        '*-QL_QUALITY_HAZE.GEOTIFF',
-                        '*-QL_QUALITY_SNOW.GEOTIFF',
-                        '*-QL_QUALITY_TESTFLAGS_SWIR.GEOTIFF',
-                        '*-QL_QUALITY_TESTFLAGS_VNIR.GEOTIFF',
-                        '*-QL_SWIR.GEOTIFF',
-                        '*-QL_VNIR.GEOTIFF',
-                        '*-SPECTRAL_IMAGE_SWIR.GEOTIFF',
-                        '*-SPECTRAL_IMAGE_VNIR.GEOTIFF',
+                        '*-QL_PIXELMASK_SWIR.TIF',
+                        '*-QL_PIXELMASK_VNIR.TIF',
+                        '*-QL_QUALITY_CIRRUS.TIF',
+                        '*-QL_QUALITY_CLASSES.TIF',
+                        '*-QL_QUALITY_CLOUD.TIF',
+                        '*-QL_QUALITY_CLOUDSHADOW.TIF',
+                        '*-QL_QUALITY_HAZE.TIF',
+                        '*-QL_QUALITY_SNOW.TIF',
+                        '*-QL_QUALITY_TESTFLAGS_SWIR.TIF',
+                        '*-QL_QUALITY_TESTFLAGS_VNIR.TIF',
+                        '*-QL_SWIR.TIF',
+                        '*-QL_VNIR.TIF',
+                        '*-SPECTRAL_IMAGE_SWIR.TIF',
+                        '*-SPECTRAL_IMAGE_VNIR.TIF',
                         ]:
-            if not filter(files, pattern):
-                raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern '
-                                        '%s.' % (rootdir_l1b, pattern))
+            if not filter(files, pattern) and not filter(files, pattern.replace('.TIF', '.GEOTIFF')):
+                raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern %s.'
+                                        % (rootdir_l1b, pattern))
 
     def validate_output(self):
         """Validate outputs of L1B_Reader."""
