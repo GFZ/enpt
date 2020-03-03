@@ -130,24 +130,24 @@ class L1B_Reader(object):
         for pattern in ['*-HISTORY.XML',
                         '*-LOG.XML',
                         '*-METADATA.XML',
-                        '*-QL_PIXELMASK_SWIR.GEOTIFF',
-                        '*-QL_PIXELMASK_VNIR.GEOTIFF',
-                        '*-QL_QUALITY_CIRRUS.GEOTIFF',
-                        '*-QL_QUALITY_CLASSES.GEOTIFF',
-                        '*-QL_QUALITY_CLOUD.GEOTIFF',
-                        '*-QL_QUALITY_CLOUDSHADOW.GEOTIFF',
-                        '*-QL_QUALITY_HAZE.GEOTIFF',
-                        '*-QL_QUALITY_SNOW.GEOTIFF',
-                        '*-QL_QUALITY_TESTFLAGS_SWIR.GEOTIFF',
-                        '*-QL_QUALITY_TESTFLAGS_VNIR.GEOTIFF',
-                        '*-QL_SWIR.GEOTIFF',
-                        '*-QL_VNIR.GEOTIFF',
-                        '*-SPECTRAL_IMAGE_SWIR.GEOTIFF',
-                        '*-SPECTRAL_IMAGE_VNIR.GEOTIFF',
+                        '*-QL_PIXELMASK_SWIR.TIF',
+                        '*-QL_PIXELMASK_VNIR.TIF',
+                        '*-QL_QUALITY_CIRRUS.TIF',
+                        '*-QL_QUALITY_CLASSES.TIF',
+                        '*-QL_QUALITY_CLOUD.TIF',
+                        '*-QL_QUALITY_CLOUDSHADOW.TIF',
+                        '*-QL_QUALITY_HAZE.TIF',
+                        '*-QL_QUALITY_SNOW.TIF',
+                        '*-QL_QUALITY_TESTFLAGS_SWIR.TIF',
+                        '*-QL_QUALITY_TESTFLAGS_VNIR.TIF',
+                        '*-QL_SWIR.TIF',
+                        '*-QL_VNIR.TIF',
+                        '*-SPECTRAL_IMAGE_SWIR.TIF',
+                        '*-SPECTRAL_IMAGE_VNIR.TIF',
                         ]:
-            if not filter(files, pattern):
-                raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern '
-                                        '%s.' % (rootdir_l1b, pattern))
+            if not filter(files, pattern) and not filter(files, pattern.replace('.TIF', '.GEOTIFF')):
+                raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern %s.'
+                                        % (rootdir_l1b, pattern))
 
     def validate_output(self):
         """Validate outputs of L1B_Reader."""

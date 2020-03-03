@@ -83,22 +83,39 @@ config_for_testing = dict(
 config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
-                     'rows0-99.zip')),
+                     # Alps
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip'
+
+                     # Arcachon
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
+
+                     # Arcachon 1000x30
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
+                     )),
     path_l1b_enmap_image_gapfill=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__'
-                     'rows100-199.zip')),
+                     # Alps
+                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+
+                     # Arcachon
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+                     )),
     path_dem=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'DLR_L2A_DEM_UTM32.bsq')),
+        os.path.join(path_enptlib, '..', 'tests', 'data',
+                     # Alps
+                     'DLR_L2A_DEM_UTM32.bsq'
+
+                     # Arcachon
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__DEM_ASTER.bsq'
+                     )),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
-    disable_progress_bars=True,
+    disable_progress_bars=False,
     is_dummy_dataformat=False,
     enable_ac=True,
     enable_ice_retrieval=False,
-    CPUs=32,
+    CPUs=1,
     ortho_resampAlg='gauss',
 )
 
