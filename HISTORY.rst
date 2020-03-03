@@ -2,8 +2,8 @@
 History
 =======
 
-0.10.0 (coming soon)
---------------------
+0.10.0 (2020-03-03)
+-------------------
 
 New features / improvements:
 
@@ -19,6 +19,8 @@ New features / improvements:
 * Some code improvements.
 * Added output validation to AC.
 * The parameter 'disable_progressbars' is now correctly passed to SICOR.
+* Added tqdm exception to license file and license headers.
+* Adapted code to the current EnMAP format.
 
 Bug fixes:
 
