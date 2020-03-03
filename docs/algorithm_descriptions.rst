@@ -18,33 +18,33 @@ Segment. After data extraction EnPT expects a folder that includes the following
     +-----------------------------------------------+-----------------+
     |ENMAP*L1B*-METADATA.XML                        |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_PIXELMASK_SWIR.GEOTIFF           |                 |
+    |ENMAP*L1B*-QL_PIXELMASK_SWIR.TIF               |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_PIXELMASK_VNIR.GEOTIFF           |                 |
+    |ENMAP*L1B*-QL_PIXELMASK_VNIR.TIF               |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_CIRRUS.GEOTIFF           |                 |
+    |ENMAP*L1B*-QL_QUALITY_CIRRUS.TIF               |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_CLASSES.GEOTIFF          |                 |
+    |ENMAP*L1B*-QL_QUALITY_CLASSES.TIF              |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_CLOUD.GEOTIFF            |                 |
+    |ENMAP*L1B*-QL_QUALITY_CLOUD.TIF                |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_CLOUDSHADOW.GEOTIFF      |                 |
+    |ENMAP*L1B*-QL_QUALITY_CLOUDSHADOW.TIF          |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_HAZE.GEOTIFF             |                 |
+    |ENMAP*L1B*-QL_QUALITY_HAZE.TIF                 |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_SNOW.GEOTIFF             |                 |
+    |ENMAP*L1B*-QL_QUALITY_SNOW.TIF                 |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_TESTFLAGS_SWIR.GEOTIFF   |                 |
+    |ENMAP*L1B*-QL_QUALITY_TESTFLAGS_SWIR.TIF       |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_QUALITY_TESTFLAGS_VNIR.GEOTIFF   |                 |
+    |ENMAP*L1B*-QL_QUALITY_TESTFLAGS_VNIR.TIF       |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_SWIR.GEOTIFF                     |                 |
+    |ENMAP*L1B*-QL_SWIR.TIF                         |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-QL_VNIR.GEOTIFF                     |                 |
+    |ENMAP*L1B*-QL_VNIR.TIF                         |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-SPECTRAL_IMAGE_SWIR.GEOTIFF         |                 |
+    |ENMAP*L1B*-SPECTRAL_IMAGE_SWIR.TIF             |                 |
     +-----------------------------------------------+-----------------+
-    |ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.GEOTIFF         |                 |
+    |ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.TIF             |                 |
     +-----------------------------------------------+-----------------+
 
 EnPT reads the raster files lazily / on-demand to save memory during execution. Metadata read from the

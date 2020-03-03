@@ -148,7 +148,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     def read_metadata(self, path_xml):
         """
-        Read the meadata of a specific EnMAP detector in sensor geometry
+        Read the metadata of a specific EnMAP detector in sensor geometry
 
         :param path_xml: file path of the metadata file
         :return: None
@@ -161,18 +161,29 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             # read data filenames
             all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
+
+            def get_filename(matching_exp: str):
+                matches = fnmatch.filter(all_filenames, '%s.GEOTIFF' % matching_exp)
+                if not matches:
+                    matches = fnmatch.filter(all_filenames, '%s.TIF' % matching_exp)
+                if not matches:
+                    raise FileNotFoundError("Could not find a file that matches the expression '%s'." % matching_exp)
+
+                return matches[0]
+
             self.data_filename = xml.find("product/image/%s/name" % lbl).text
             self.scene_basename = self.data_filename.split('-SPECTRAL_IMAGE')[0]
-            self.dead_pixel_filename = fnmatch.filter(all_filenames, '*QL_PIXELMASK_%s.GEOTIFF' % self.detector_name)[0]
+            self.dead_pixel_filename = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
             self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
-            # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES.GEOTIFF as combined product?
-            #   - QL_QUALITY_CLOUD.GEOTIFF
-            #   - QL_QUALITY_CIRRUS.GEOTIFF
-            #   - QL_QUALITY_SNOW.GEOTIFF
-            #   - QL_QUALITY_CLOUDSHADOW.GEOTIFF
-            #   - QL_QUALITY_HAZE.GEOTIFF
-            self.logger.warning('DLR test data provide multiple cloud masks. Added only *QUALITY_CLOUD.GEOTIFF!')
-            self.cloud_mask_filename = fnmatch.filter(all_filenames, '*QUALITY_CLOUD.GEOTIFF')[0]
+            # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES as combined product?
+            #   - QL_QUALITY_CLOUD
+            #   - QL_QUALITY_CIRRUS
+            #   - QL_QUALITY_SNOW
+            #   - QL_QUALITY_CLOUDSHADOW
+            #   - QL_QUALITY_HAZE
+            self.cloud_mask_filename = get_filename('*-QL_QUALITY_CLOUD')
+            self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
+                                % self.cloud_mask_filename.split(self.scene_basename)[1])
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
@@ -746,6 +757,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 size=sizes[i] if sizes else int(os.path.getsize(fp) / 1024) if not ismeta else '',
                 version=versions[i] if versions else '',
                 format='binary' if ext in ['.GEOTIFF',
+                                           '.TIF',
+                                           '.TIFF',
+                                           '.GTIFF',
                                            '.BSQ',
                                            '.BIL',
                                            '.BIP',
