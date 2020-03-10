@@ -52,6 +52,7 @@ dependencies:
     - tqdm
     - utm
     - numpy-indexed
+    - mvgavg
     - sphinx-argparse
     - pycodestyle
     - flake8

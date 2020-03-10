@@ -32,9 +32,10 @@ EnPT module 'orthorectification' for transforming an EnMAP image from sensor to 
 based on a pixel- and band-wise coordinate-layer (geolayer).
 """
 
-from typing import Tuple  # noqa: F401
+from typing import Tuple, Union  # noqa: F401
 
 import numpy as np
+from mvgavg import mvgavg
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import transform_any_prj
 from py_tools_ds.geo.projection import EPSG2WKT, prj_equal
@@ -150,7 +151,7 @@ class Orthorectifier(object):
                            enmap_grid: bool = True) -> Tuple[float, float, float, float]:
         """Get common target extent for VNIR and SWIR.
 
-        :param enmap_ImageL1:
+        :para enmap_ImageL1:
         :param tgt_epsg:
         :param enmap_grid:
         :return:
@@ -173,22 +174,81 @@ class Orthorectifier(object):
 
         return common_extent
 
-    @staticmethod
-    def _get_VNIR_SWIR_stack(vnir_data, swir_data, vnir_gt, swir_gt, vnir_prj, swir_prj, wvls_vnir, wvls_swir):
-        """Stack VNIR and SWIR bands with respect to their spectral overlap."""
+    def _get_VNIR_SWIR_stack(self,
+                             vnir_data: Union[np.ndarray, GeoArray],
+                             swir_data: Union[np.ndarray, GeoArray],
+                             vnir_gt: tuple,
+                             swir_gt: tuple,
+                             vnir_prj: str,
+                             swir_prj: str,
+                             wvls_vnir: np.ndarray,
+                             wvls_swir: np.ndarray
+                             ) -> GeoArray:
+        """Stack VNIR and SWIR bands with respect to their spectral overlap.
+
+        :param vnir_data:
+        :param swir_data:
+        :param vnir_gt:
+        :param swir_gt:
+        :param vnir_prj:
+        :param swir_prj:
+        :param wvls_vnir:
+        :param wvls_swir:
+        :return:
+        """
         if vnir_gt != swir_gt:
             raise ValueError((vnir_gt, swir_gt), 'VNIR and SWIR geoinformation should be equal.')
         if not prj_equal(vnir_prj, swir_prj):
             raise ValueError((vnir_prj, swir_prj), 'VNIR and SWIR projection should be equal.')
 
-        # get band index order
-        wvls_vnir_plus_swir = np.hstack([wvls_vnir, wvls_swir])
-        wvls_sorted = np.array(sorted(wvls_vnir_plus_swir))
-        bandidx_order = np.array([np.argmin(np.abs(wvls_vnir_plus_swir - cwl)) for cwl in wvls_sorted])
+        if self.cfg.vswir_overlap_algorithm in ['order_by_wvl', 'average']:
+            # get band index order
+            wvls_vswir = np.hstack([wvls_vnir, wvls_swir])
+            wvls_vswir_sorted = np.array(sorted(wvls_vswir))
+            bandidx_order = np.array([np.argmin(np.abs(wvls_vswir - cwl))
+                                      for cwl in wvls_vswir_sorted])
 
-        # stack bands ordered by wavelengths
-        data_stacked = np.dstack([vnir_data, swir_data])[:, :, bandidx_order]
+            # stack bands ordered by wavelengths
+            data_stacked = np.dstack([vnir_data, swir_data])[:, :, bandidx_order]
 
-        # TODO implement correction for VNIR/SWIR spectral jump
+            if self.cfg.vswir_overlap_algorithm == 'average':
+                # get wavelenghts and indices of overlapping bands
+                wvls_overlap_vnir = wvls_vnir[wvls_vnir > wvls_swir.min()]
+                wvls_overlap_swir = wvls_swir[wvls_swir < wvls_vnir.max()]
+                wvls_overlap_all = np.array(sorted(np.hstack([wvls_overlap_vnir,
+                                                              wvls_overlap_swir])))
+                bandidxs_overlap = np.array([np.argmin(np.abs(wvls_vswir_sorted - cwl))
+                                             for cwl in wvls_overlap_all])
+
+                # apply a spectral moving average to the overlapping VNIR/SWIR bands
+                filterwidth = 3  # number of bands to be included in the averaging - must be an uneven number
+                bandidxs2average = np.array([bandidxs_overlap.min() - int((filterwidth - 1) / 2)] +
+                                            list(bandidxs_overlap) +
+                                            [bandidxs_overlap.max() + int((filterwidth - 1) / 2)])
+                data2average = data_stacked[:, :, bandidxs2average]
+                data_stacked[:, :, bandidxs_overlap] = mvgavg(data2average,
+                                                              n=filterwidth,
+                                                              axis=2).astype(data_stacked.dtype)
+
+        elif self.cfg.vswir_overlap_algorithm == 'vnir_only':
+            # get band index order
+            wvls_swir_cut = wvls_swir[wvls_swir > wvls_vnir.max()]
+            # wvls_vswir_sorted = np.hstack([wvls_vnir, wvls_swir_cut])
+            idx_swir_firstband = np.argmin(np.abs(wvls_swir - wvls_swir_cut.min()))
+
+            # stack bands while removing overlapping SWIR bands
+            data_stacked = np.dstack([vnir_data, swir_data[:, :, idx_swir_firstband:]])
+
+        elif self.cfg.vswir_overlap_algorithm == 'swir_only':
+            # get band index order
+            wvls_vnir_cut = wvls_vnir[wvls_vnir < wvls_swir.min()]
+            # wvls_vswir_sorted = np.hstack([wvls_vnir_cut, wvls_swir])
+            idx_vnir_lastband = np.argmin(np.abs(wvls_vnir - wvls_vnir_cut.max()))
+
+            # stack bands while removing overlapping VNIR bands
+            data_stacked = np.dstack([vnir_data[:, :, :idx_vnir_lastband], swir_data])
+
+        else:
+            raise ValueError(self.cfg.vswir_overlap_algorithm)
 
         return GeoArray(data_stacked, geotransform=vnir_gt, projection=vnir_prj)

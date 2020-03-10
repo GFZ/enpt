@@ -293,8 +293,9 @@ class EnPTConfig(object):
         self.deadpix_P_interp_spectral = gp('deadpix_P_interp_spectral')
         self.deadpix_P_interp_spatial = gp('deadpix_P_interp_spatial')
 
-        # orthorectification
+        # orthorectification / VSWIR fusion
         self.ortho_resampAlg = gp('ortho_resampAlg')
+        self.vswir_overlap_algorithm = gp('vswir_overlap_algorithm')
 
         #########################
         # validate final config #
