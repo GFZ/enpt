@@ -269,6 +269,7 @@ class VNIR_SWIR_Stacker(object):
                             'swir_only':    only use the SWIR bands (cut overlapping VNIR bands)
         :return:    the stacked data cube as GeoArray instance
         """
+        # TODO: This should also set an output nodata value.
         if algorithm == 'order_by_wvl':
             data_stacked, wvls = self._get_stack_order_by_wvl()
         elif algorithm == 'average':

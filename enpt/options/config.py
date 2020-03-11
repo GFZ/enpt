@@ -117,6 +117,7 @@ config_for_testing_dlr = dict(
     enable_ice_retrieval=False,
     CPUs=1,
     ortho_resampAlg='gauss',
+    vswir_overlap_algorithm='swir_only'
 )
 
 
