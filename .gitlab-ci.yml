@@ -41,7 +41,7 @@ test_enpt:
     # - cd ../../
 
     # install sensormapgeo
-    - pip install sensormapgeo  # TODO: remove when included in docker container
+    - pip install sensormapgeo>=0.2.1  # TODO: remove when included in docker container
 
     # run nosetests
     - make nosetests  # test are called here
@@ -109,7 +109,7 @@ test_enpt_install:
     - cd ../../
 
     # install sensormapgeo
-    - pip install sensormapgeo  # TODO: remove when included in docker container
+    - pip install sensormapgeo>=0.2.1  # TODO: remove when included in docker container
 
     # install enpt
     - pip install -e .
@@ -123,7 +123,6 @@ test_enpt_install:
   only:
     - master
     - dev
-    - enhancement/implement_sensormapgeo
 
 
 pages:

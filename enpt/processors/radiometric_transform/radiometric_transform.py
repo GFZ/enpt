@@ -55,7 +55,7 @@ class Radiometric_Transformer(object):
         self.earthSunDist = config.path_earthSunDist  # path of model for earth sun distance
 
     def transform_TOARad2TOARef(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
-        """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance.
+        """Transform top-of-atmosphere radiance to top-of-atmosphere reflectance (16-bit signed-integer).
 
         NOTE: The following formula is used:
                 toaRef = (scale_factor * math.pi * toaRad * earthSunDist**2) /
