@@ -199,3 +199,4 @@ fabric.properties
 .gitignore
 .idea/**
 tests/data/test_outputs/
+tests/linting/

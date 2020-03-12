@@ -674,7 +674,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # get band index order
         wvls_sorted = np.array(sorted(np.hstack([self._meta_l1b.vnir.wvl_center,
                                                  self._meta_l1b.swir.wvl_center])))
-        bandidx_order = np.array([np.argmin(np.abs(wvls_l2a - cwl)) for cwl in wvls_sorted])
+        bandidx_order = np.array([np.argmin(np.abs(wvls_sorted - cwl)) for cwl in wvls_l2a])
 
         self.wvl_center = np.hstack([meta_l1b.vnir.wvl_center, meta_l1b.swir.wvl_center])[bandidx_order]
         self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]
