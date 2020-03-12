@@ -223,6 +223,7 @@ class VNIR_SWIR_Stacker(object):
 
         :param filterwidth:     number of bands to be included in the averaging - must be an uneven number
         """
+        # FIXME this has to respect nodata values - especially for pixels where one detector has no data.
         data_stacked = self._get_stack_order_by_wvl()[0]
 
         # get wavelenghts and indices of overlapping bands
