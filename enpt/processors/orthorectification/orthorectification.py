@@ -210,6 +210,12 @@ class VNIR_SWIR_Stacker(object):
             raise ValueError((self.vnir.gt, self.swir.gt), 'VNIR and SWIR geoinformation should be equal.')
         if not prj_equal(self.vnir.prj, self.swir.prj):
             raise ValueError((self.vnir.prj, self.swir.prj), 'VNIR and SWIR projection should be equal.')
+        if self.vnir.bands != len(self.wvls.vnir):
+            raise ValueError("The number of VNIR bands must be equal to the number of elements in 'vnir_wvls': "
+                             "%d != %d" % (self.vnir.bands, len(self.wvls.vnir)))
+        if self.swir.bands != len(self.wvls.swir):
+            raise ValueError("The number of SWIR bands must be equal to the number of elements in 'swir_wvls': "
+                             "%d != %d" % (self.swir.bands, len(self.wvls.swir)))
 
     def _get_stack_order_by_wvl(self) -> Tuple[np.ndarray, np.ndarray]:
         """Stack bands ordered by wavelengths."""
@@ -259,7 +265,7 @@ class VNIR_SWIR_Stacker(object):
         wvls_vswir_sorted = np.hstack([wvls_vnir_cut, self.wvls.swir])
         idx_vnir_lastband = np.argmin(np.abs(self.wvls.vnir - wvls_vnir_cut.max()))
 
-        return np.dstack([self.vnir[:, :, :idx_vnir_lastband], self.swir[:]]), wvls_vswir_sorted
+        return np.dstack([self.vnir[:, :, :idx_vnir_lastband + 1], self.swir[:]]), wvls_vswir_sorted
 
     def compute_stack(self, algorithm: str) -> GeoArray:
         """Stack VNIR and SWIR bands with respect to their spectral overlap.
