@@ -123,7 +123,7 @@ def get_enpt_argparser():
              "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")
     add('--ortho_resampAlg', type=str, default='bilinear',
         help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')")
-    add('--vswir_overlap_algorithm', type=str, default='average',
+    add('--vswir_overlap_algorithm', type=str, default='swir_only',
         help="Algorithm specifying how to deal with the spectral bands in the VNIR/SWIR spectral overlap region "
              "('order_by_wvl', 'average', 'vnir_only', 'swir_only')")
 
