@@ -2,6 +2,20 @@
 History
 =======
 
+0.11.0 (coming soon)
+--------------------
+
+New features / improvements:
+
+* Added parameter 'vswir_overlap_algorithm' that provides 4 different algorithms how to deal with the VNIR/SWIR overlap.
+* Revised orthorecifier module.
+* Added GitLab-Pages badge.
+
+Bug fixes:
+
+* Fixed issue 45 "Band central wavelength positions of L2A product cannot be read by ENVI."
+
+
 0.10.0 (2020-03-03)
 -------------------
 

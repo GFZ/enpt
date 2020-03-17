@@ -35,11 +35,14 @@ Feature overview
 Status
 ------
 
-|badge1| |badge2|
+|badge1| |badge2| |badge3|
 
 .. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
 
 .. |badge2| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
+
+.. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
+    :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 
