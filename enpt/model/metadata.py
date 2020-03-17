@@ -627,12 +627,14 @@ class EnMAP_Metadata_L2A_MapGeo(object):
     def __init__(self,
                  config: EnPTConfig,
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
+                 wvls_l2a: Union[List, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
         :param config:              EnPT configuration object
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
+        :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
         :param logger:              instance of logging.logger or subclassed
         """
@@ -670,9 +672,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
         # get band index order
-        wvls_vnir_plus_swir = np.hstack([self._meta_l1b.vnir.wvl_center, self._meta_l1b.swir.wvl_center])
-        wvls_sorted = np.array(sorted(wvls_vnir_plus_swir))
-        bandidx_order = np.array([np.argmin(np.abs(wvls_vnir_plus_swir - cwl)) for cwl in wvls_sorted])
+        wvls_sorted = np.array(sorted(np.hstack([self._meta_l1b.vnir.wvl_center,
+                                                 self._meta_l1b.swir.wvl_center])))
+        bandidx_order = np.array([np.argmin(np.abs(wvls_sorted - cwl)) for cwl in wvls_l2a])
 
         self.wvl_center = np.hstack([meta_l1b.vnir.wvl_center, meta_l1b.swir.wvl_center])[bandidx_order]
         self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]

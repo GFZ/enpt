@@ -32,10 +32,11 @@ EnPT module 'orthorectification' for transforming an EnMAP image from sensor to 
 based on a pixel- and band-wise coordinate-layer (geolayer).
 """
 
-from .orthorectification import Orthorectifier
+from .orthorectification import Orthorectifier, VNIR_SWIR_Stacker
 
 __author__ = 'Daniel Scheffler'
 __all__ = [
     '__author__',
-    'Orthorectifier'
+    'Orthorectifier',
+    'VNIR_SWIR_Stacker'
 ]

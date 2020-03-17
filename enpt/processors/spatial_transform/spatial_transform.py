@@ -128,7 +128,8 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple[float, float] = None):
+                        tgt_res: Tuple[float, float] = None
+                        ) -> Tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo:

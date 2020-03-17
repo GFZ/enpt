@@ -106,6 +106,8 @@ enpt_schema_input = dict(
                 type='dict', required=False,
                 schema=dict(
                     resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss']),
+                    vswir_overlap_algorithm=dict(type='string', required=False,
+                                                 allowed=['order_by_wvl', 'average', 'vnir_only', 'swir_only']),
                 ))
         ))
 )
@@ -157,6 +159,7 @@ parameter_mapping = dict(
 
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),
+    vswir_overlap_algorithm=('processors', 'orthorectification', 'vswir_overlap_algorithm'),
 )
 
 

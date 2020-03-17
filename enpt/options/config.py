@@ -117,6 +117,7 @@ config_for_testing_dlr = dict(
     enable_ice_retrieval=False,
     CPUs=1,
     ortho_resampAlg='gauss',
+    vswir_overlap_algorithm='swir_only'
 )
 
 
@@ -293,8 +294,9 @@ class EnPTConfig(object):
         self.deadpix_P_interp_spectral = gp('deadpix_P_interp_spectral')
         self.deadpix_P_interp_spatial = gp('deadpix_P_interp_spatial')
 
-        # orthorectification
+        # orthorectification / VSWIR fusion
         self.ortho_resampAlg = gp('ortho_resampAlg')
+        self.vswir_overlap_algorithm = gp('vswir_overlap_algorithm')
 
         #########################
         # validate final config #
