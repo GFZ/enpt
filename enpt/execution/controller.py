@@ -169,7 +169,7 @@ class EnPT_Controller(object):
             if not os.path.isdir(self.cfg.output_dir):
                 raise NotADirectoryError(self.cfg.output_dir)
 
-            with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl')) as outF:
+            with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl'), 'wb') as outF:
                 pickle.dump(
                     dict(
                         json_config=self.cfg.json_config,
