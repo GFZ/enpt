@@ -35,6 +35,7 @@ import zipfile
 import shutil
 import weakref
 import warnings
+import pickle
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
@@ -142,23 +143,39 @@ class EnPT_Controller(object):
 
     def run_all_processors(self):
         """Run all processors at once."""
-        try:
-            self.read_L1B_data()
-            if self.cfg.run_deadpix_P:
-                self.L1_obj.correct_dead_pixels()
-            # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
-            self.run_dem_processor()
-            if self.cfg.enable_ac:
-                self.run_atmospheric_correction()
-            else:
-                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                        'computing top-of-atmosphere reflectance instead.')
-                self.run_toaRad2toaRef()
-            self.run_geometry_processor()
-            self.run_orthorectification()
-            self.write_output()
-        finally:
-            self.cleanup()
+        if os.getenv('IS_ENPT_GUI_TEST') != "1":
+            try:
+                self.read_L1B_data()
+                if self.cfg.run_deadpix_P:
+                    self.L1_obj.correct_dead_pixels()
+                # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                self.run_dem_processor()
+                if self.cfg.enable_ac:
+                    self.run_atmospheric_correction()
+                else:
+                    self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                            'computing top-of-atmosphere reflectance instead.')
+                    self.run_toaRad2toaRef()
+                self.run_geometry_processor()
+                self.run_orthorectification()
+                self.write_output()
+            finally:
+                self.cleanup()
+
+        else:
+            print('EnPT Controller received the following configuration:')
+            print(repr(self.cfg))
+
+            if not os.path.isdir(self.cfg.output_dir):
+                raise NotADirectoryError(self.cfg.output_dir)
+
+            with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl')) as outF:
+                pickle.dump(
+                    dict(
+                        json_config=self.cfg.json_config,
+                        kwargs=self.cfg.kwargs
+                    ),
+                    outF)
 
     @classmethod
     def _cleanup(cls, tempDir, warn_message):

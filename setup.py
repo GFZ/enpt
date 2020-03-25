@@ -69,7 +69,7 @@ setup(
     zip_safe=False,
     scripts=['bin/enpt_cli.py'],
     data=[],  # TODO
-    keywords='enpt',
+    keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
