@@ -76,7 +76,7 @@ setup(
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
     scripts=['bin/enpt_cli.py'],
     setup_requires=setup_requirements,
     test_suite='tests',

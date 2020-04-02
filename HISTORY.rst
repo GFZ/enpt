@@ -3,6 +3,12 @@ History
 =======
 
 
+0.11.2 (2020-04-02)
+-------------------
+
+* Updated setup.py and MANIFEST.in to exclude tests and examples directories from PyPI upload.
+
+
 0.11.1 (2020-04-02)
 -------------------
 
