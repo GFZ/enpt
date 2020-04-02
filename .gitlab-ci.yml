@@ -154,3 +154,18 @@ pages:
     - master
     - enhancement/improve_docs
     - feature/add_tutorial
+
+
+deploy_pypi:
+  stage: deploy
+  dependencies:
+    - test_enpt
+  script:
+    - source /root/miniconda3/bin/activate enpt
+    - pip install -U twine
+    - python setup.py sdist
+    - twine upload dist/*  # requires creds as environment variables
+  only:
+    - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
+  except:
+    - dev

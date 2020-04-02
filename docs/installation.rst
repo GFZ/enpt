@@ -29,7 +29,6 @@ Using conda_, the recommended approach is:
 
     # install not pip-installable deps of geoarray
     conda install -c conda-forge numpy scikit-image matplotlib pandas gdal pyproj basemap shapely
-    conda install -c conda-forge 'icu=58.*'
 
     # install not pip-installable deps of sensormapgeo
     conda install -c conda-forge pyresample
