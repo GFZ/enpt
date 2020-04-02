@@ -2,14 +2,20 @@
 History
 =======
 
-0.11.0 (coming soon)
---------------------
+0.11.0 (2020-04-02)
+-------------------
 
 New features / improvements:
 
 * Added parameter 'vswir_overlap_algorithm' that provides 4 different algorithms how to deal with the VNIR/SWIR overlap.
 * Revised orthorecifier module.
-* Added GitLab-Pages badge.
+* Updated badges in README.rst.
+* Added a GUI test mode to EnPTController.
+* Added keywords to setup.py.
+* Added 'deploy_pypi' CI job.
+* Revised setup.py for a proper PyPI upload.
+* Removed installation of 'icu=58.*' from installation.rst.
+
 
 Bug fixes:
 
