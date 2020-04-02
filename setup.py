@@ -54,9 +54,8 @@ setup_requirements = ['setuptools-git']  # needed for package_data version contr
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 
 setup(
-    author=["Karl Segl", "Daniel Scheffler", "Niklas Bohn", "Stéphane Guillaso"],
-    author_email=['segl@gfz-potsdam.de', 'danschef@gfz-potsdam.de', 'nbohn@gfz-potsdam.de',
-                  'stephane.guillaso@gfz-potsdam.de'],
+    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso",
+    author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, stephane.guillaso@gfz-potsdam.de",
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -73,8 +72,7 @@ setup(
     license="GNU General Public License v3",
     long_description=readme + '\n\n' + history,
     name='enpt',
-    package_dir={'enpt':
-                     'enpt'},
+    package_dir={'enpt': 'enpt'},
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},

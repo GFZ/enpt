@@ -2,6 +2,13 @@
 History
 =======
 
+
+0.11.1 (2020-04-02)
+-------------------
+
+* Fixed invalid syntax for multiple authors and email addresses in setup.py.
+
+
 0.11.0 (2020-04-02)
 -------------------
 
@@ -15,7 +22,6 @@ New features / improvements:
 * Added 'deploy_pypi' CI job.
 * Revised setup.py for a proper PyPI upload.
 * Removed installation of 'icu=58.*' from installation.rst.
-
 
 Bug fixes:
 
