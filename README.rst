@@ -46,7 +46,7 @@ Status
 .. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
     :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
 
-.. |badge4| image:: https://img.shields.io/enpt/v/pyrsr.svg
+.. |badge4| image:: https://img.shields.io/pypi/v/enpt.svg
     :target: https://pypi.python.org/pypi/enpt
 
 .. |badge5| image:: https://img.shields.io/pypi/l/enpt.svg
