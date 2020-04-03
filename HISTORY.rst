@@ -3,6 +3,13 @@ History
 =======
 
 
+0.11.3 (2020-04-03)
+-------------------
+
+* Fixed broken badge4.
+* Replaced logo relative link in README.rst with URL.
+
+
 0.11.2 (2020-04-02)
 -------------------
 
