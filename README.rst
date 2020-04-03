@@ -1,5 +1,5 @@
 
-.. image:: docs/img/EnPT_logo_final.svg
+.. image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/docs/img/EnPT_logo_final.svg
    :width: 300px
    :alt: EnPT Logo
 
