@@ -36,7 +36,7 @@ Feature overview
 Status
 ------
 
-|badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7|
+|badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8|
 
 .. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
     :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
@@ -58,6 +58,9 @@ Status
 
 .. |badge7| image:: https://img.shields.io/pypi/dm/enpt.svg
     :target: https://pypi.python.org/pypi/enpt
+
+.. |badge8| image:: https://zenodo.org/badge/253474970.svg
+   :target: https://zenodo.org/badge/latestdoi/253474970
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 
