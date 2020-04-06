@@ -116,7 +116,7 @@ raw format to geometrically and atmospherically corrected bottom-of-atmosphere r
 :ref:`algorithm_description` section of this documentation for more information on the underlying algorithms.
 
 Open the EnPT GUI to run the processing chain. You can find it here:
-:menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> EnMAP-Box --> Pre-Processing --> EnMAP processing tools algorithm`.
+:menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> EnMAP-Box --> Pre-Processing --> EnMAP processing tool algorithm`.
 
 .. image:: img/tut__screenshot_enpt_enmapboxapp.png
 

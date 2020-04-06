@@ -48,7 +48,7 @@ def get_enpt_argparser():
 
     parser = argparse.ArgumentParser(
         prog='enpt_cli.py',
-        description='=' * 70 + '\n' + 'EnMAP Processing Tools console argument parser. ',
+        description='=' * 70 + '\n' + 'EnMAP Processing Tool console argument parser. ',
         epilog="use '>>> enpt_cli.py -h' for detailed documentation and usage hints.")
 
     add = parser.add_argument

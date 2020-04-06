@@ -1,24 +1,25 @@
 
-.. image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/docs/img/EnPT_logo_final.svg
+.. image:: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/img/EnPT_logo_final.svg
    :width: 300px
    :alt: EnPT Logo
 
-=============================
-EnPT - EnMAP Processing Tools
-=============================
+============================
+EnPT - EnMAP Processing Tool
+============================
 
 The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data.
 It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed
-at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the original DLR processing chain.
+at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the processing chain of the EnMAP
+Ground Segment.
 
-Please check the documentation_ for usage and in depth information.
+Please check the documentation_ for installation and usage instructions and in depth information.
 
 License
 -------
 Free software: GNU General Public License v3
 
 All images contained in any (sub-)directory of this repository are licensed under the CC0 license which can be found
-`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`_.
+`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`__.
 
 Feature overview
 ----------------
@@ -60,6 +61,11 @@ Status
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 
+History / Changelog
+-------------------
+
+You can find the protocol of recent changes in the EnPT package
+`here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/HISTORY.rst>`__.
 
 Credits
 -------

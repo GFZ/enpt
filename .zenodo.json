@@ -1,0 +1,55 @@
+{
+    "title": "EnPT - EnMAP Processing Tool",
+    "description": "The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data. It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the processing chain of the EnMAP Ground Segment.",
+    "license": "GPL-3.0+",
+    "upload_type": "software",
+    "keywords": [
+        "EnPT",
+        "EnMAP",
+        "EnMAP-Box",
+        "hyperspectral",
+        "remote sensing",
+        "satellite",
+        "processing chain"
+    ],
+    "creators": [
+        {
+            "name": "Scheffler, Daniel",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "orcid": "0000-0003-4106-8928"
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Scheffler, Daniel",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "orcid": "0000-0003-4106-8928"
+        },
+        {
+            "name": "Segl, Karl",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics"
+        },
+        {
+            "name": "Bohn, Niklas",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "orcid": "0000-0003-4078-886X"
+        },
+        {
+            "name": "Guillaso, Stéphane",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "orcid": "0000-0001-9805-9390"
+        }
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
+            "relation": "isSupplementTo"
+        },
+        {
+            "scheme": "url",
+            "identifier": "http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc",
+            "relation": "isDocumentedBy"
+        }
+    ]
+}

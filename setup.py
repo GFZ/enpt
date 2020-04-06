@@ -36,9 +36,6 @@ __author__ = 'Daniel Scheffler'
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 version = {}
 with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
@@ -65,12 +62,12 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="EnMAP Processing Tools",
+    description="EnMAP Processing Tool",
     keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
     include_package_data=True,
     install_requires=requirements,
     license="GNU General Public License v3",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     name='enpt',
     package_dir={'enpt': 'enpt'},
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,

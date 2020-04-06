@@ -129,12 +129,17 @@ pages:
     - mkdir -p public/doc
     - mkdir -p public/coverage
     - mkdir -p public/nosetests_reports
+
     # Copy over the docs
     - cp -r docs/_build/html/* public/doc/
+    - cp -r docs/img/* public/img/
+
     # Copy over the coverage reports
     - cp -r htmlcov/* public/coverage/
+
     # Copy over the nosetests reports
     - cp nosetests.* public/nosetests_reports/
+
     # Check if everything is working great
     - ls -al public
     - ls -al public/doc
@@ -143,11 +148,10 @@ pages:
   artifacts:
     paths:
       - public
-    expire_in: 30 days
+    expire_in: 10 days
   only:
     - master
     - enhancement/improve_docs
-    - feature/add_tutorial
 
 
 deploy_pypi:

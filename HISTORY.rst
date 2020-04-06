@@ -2,6 +2,15 @@
 History
 =======
 
+0.11.5 (2020-04-06)
+-------------------
+
+* Fixed EnPT logo in README.rst.
+* Updated README.rst text.
+* Pages now expire after 10 days instead of 30 days.
+* Added .zenodo.json.
+
+
 0.11.4 (2020-04-06)
 -------------------
 
