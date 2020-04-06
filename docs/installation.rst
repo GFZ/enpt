@@ -17,35 +17,23 @@ Using conda_, the recommended approach is:
     conda create --name enpt python=3
     source activate enpt
 
-    # clone the source code of enpt
-    git clone https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT.git
-    cd EnPT
-
     # avoid package incompatibilities
-    - conda config --set channel_priority strict
+    conda config --set channel_priority strict
 
-    # install some enpt dependencies that may cause trouble when installed via pip
-    conda install -c conda-forge scipy
+    # install some dependencies that cause trouble when installed via pip
+    conda install -c conda-forge numpy pandas lxml
 
-    # install not pip-installable deps of geoarray
-    conda install -c conda-forge numpy scikit-image matplotlib pandas gdal pyproj basemap shapely
+    # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
+    conda install -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
 
-    # install not pip-installable deps of sensormapgeo
-    conda install -c conda-forge pyresample
+    # install not pip-installable deps of arosics
+    conda install -c conda-forge pyfftw pykrige
 
-    # install sicor
-    conda install -c conda-forge pygrib h5py pytables pyfftw numba llvmlite scikit-learn
-    rm -rf context/sicor
-    git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-    cd ./context/sicor
-    make install
-    cd ../../
+    # install not pip-installable deps of sicor
+    conda install -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
 
     # install enpt
-    make install
-    cd ..
-    pwd
-    ls
+    pip install enpt
 
 
 This is the preferred method to install EnPT, as it will always install the most recent stable release. 

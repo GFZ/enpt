@@ -2,6 +2,14 @@
 History
 =======
 
+0.11.4 (2020-04-06)
+-------------------
+
+* Removed deprecated channels from environment_enpt.yml.
+* Simplified test_enpt_install.
+* Added SICOR to setup.py requirements.
+* Updated installation instructions.
+
 
 0.11.3 (2020-04-03)
 -------------------
