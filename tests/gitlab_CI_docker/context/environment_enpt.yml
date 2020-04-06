@@ -1,8 +1,6 @@
 name: enpt
 
 channels: &id1
-  - http://conda.anaconda.org/ccpi  # only for pyfftw under windows
-  - http://conda.anaconda.org/ioam  # only for holoviews
   - http://conda.anaconda.org/conda-forge
 
 dependencies:
@@ -20,7 +18,6 @@ dependencies:
   - geopandas
   - matplotlib
   - basemap
-  # - geos>3.7.0   # pinning should not be needed anymore - https://github.com/conda-forge/basemap-feedstock/issues/43
   - shapely
   - holoviews
   - bokeh

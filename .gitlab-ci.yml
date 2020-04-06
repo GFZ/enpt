@@ -103,12 +103,7 @@ test_enpt_install:
 
     # install sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
-    - rm -rf context/sicor
-    - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-    - cd ./context/sicor
-    - pip install -e .
-#    - make install
-    - cd ../../
+    - pip install -e git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 
     # install enpt
     - pip install -e .
