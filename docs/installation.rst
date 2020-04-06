@@ -18,19 +18,19 @@ Using conda_, the recommended approach is:
     source activate enpt
 
     # avoid package incompatibilities
-    - conda config --set channel_priority strict
+    conda config --set channel_priority strict
 
     # install some dependencies that cause trouble when installed via pip
-    - conda install -c conda-forge numpy pandas lxml
+    conda install -c conda-forge numpy pandas lxml
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    - conda install -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
+    conda install -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
 
     # install not pip-installable deps of arosics
-    - conda install -c conda-forge pyfftw pykrige
+    conda install -c conda-forge pyfftw pykrige
 
     # install not pip-installable deps of sicor
-    - conda install -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+    conda install -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
 
     # install enpt
     pip install enpt
