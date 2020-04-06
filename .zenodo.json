@@ -23,21 +23,25 @@
         {
             "name": "Scheffler, Daniel",
             "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
-            "orcid": "0000-0003-4106-8928"
-        },
-        {
-            "name": "Segl, Karl",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics"
+            "orcid": "0000-0003-4106-8928",
+            "type": "Researcher"
         },
         {
             "name": "Bohn, Niklas",
             "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
-            "orcid": "0000-0003-4078-886X"
+            "orcid": "0000-0003-4078-886X",
+            "type": "Researcher"
         },
         {
             "name": "Guillaso, Stéphane",
             "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
-            "orcid": "0000-0001-9805-9390"
+            "orcid": "0000-0001-9805-9390",
+            "type": "Researcher"
+        },
+        {
+            "name": "Segl, Karl",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "type": "WorkPackageLeader"
         }
     ],
     "related_identifiers": [
@@ -50,6 +54,13 @@
             "scheme": "url",
             "identifier": "http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc",
             "relation": "isDocumentedBy"
+        }
+    ],
+    "grants": [
+        {
+            "code": "50 EE 1529",
+            "funder": "German Federal Ministry of Economic Affairs and Energy (on the basis of a decision by the German Bundestag)",
+            "title": "EnMAP"
         }
     ]
 }
