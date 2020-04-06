@@ -93,7 +93,7 @@ test_enpt_install:
     - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
 
     # install some dependencies that cause trouble when installed via pip
-    - conda install -y -c conda-forge numpy pandas lxml  # scikit-image, matplotlib
+    - conda install -y -c conda-forge numpy pandas lxml
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
     - conda install -y -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
@@ -101,9 +101,8 @@ test_enpt_install:
     # install not pip-installable deps of arosics
     - conda install -y -c conda-forge pyfftw pykrige
 
-    # install sicor
+    # install not pip-installable deps of sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
-    - pip install -e git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
 
     # install enpt
     - pip install -e .
