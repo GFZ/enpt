@@ -12,7 +12,10 @@ It provides free and open-source features to transform EnMAP Level-1B data to Le
 at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the processing chain of the EnMAP
 Ground Segment.
 
-Please check the documentation_ for installation and usage instructions and in depth information.
+* Please check the documentation_ for installation and usage instructions and in depth information.
+* Information on how to **cite the EnPT Python package** can be found in the
+  `CITATION <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/CITATION>`__ file.
+
 
 License
 -------

@@ -3,6 +3,14 @@ History
 =======
 
 
+0.11.7 (2020-04-07)
+-------------------
+
+* Updated .zenodo.json.
+* Added CITATION file.
+* Added hint regarding citation to README.rst.
+
+
 0.11.6 (2020-04-06)
 -------------------
 

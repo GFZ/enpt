@@ -56,18 +56,26 @@
             "name": "Segl, Karl",
             "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "type": "WorkPackageLeader"
+        },
+        {
+            "name": "Guanter, Luis",
+            "affiliation": "Universitat Politècnica de València",
+            "orcid": "0000-0002-8389-5764",
+            "type": "Researcher"
         }
     ],
     "related_identifiers": [
         {
             "scheme": "url",
             "identifier": "https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
-            "relation": "isSupplementTo"
+            "relation": "isSupplementTo",
+            "resource_type": "software"
         },
         {
             "scheme": "url",
             "identifier": "http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc",
-            "relation": "isDocumentedBy"
+            "relation": "isDocumentedBy",
+            "resource_type": "publication-softwaredocumentation"
         },
         {
             "scheme": "url",
