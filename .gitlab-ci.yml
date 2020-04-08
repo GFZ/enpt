@@ -11,13 +11,9 @@ test_enpt:
   stage: test
   script:
     - source /root/miniconda3/bin/activate enpt
-    - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
-    - export PYTHONPATH=$PYTHONPATH:/root  # /root <- here are the sicor tables
 
-    # update geoarray
+    # update geoarray and py_tools_ds
     - pip install 'geoarray>=0.8.11'
-
-    # update py_tools_ds
     - pip install 'py_tools_ds>=0.14.23'
 
     # install sicor and perhaps switch sicor branch
@@ -47,6 +43,7 @@ test_enpt:
 
     # run nosetests
     - make nosetests  # test are called here
+
     # create the docs
     - pip install sphinx_rtd_theme  # Read-the-docs theme for SPHINX documentation
     - make docs
@@ -64,8 +61,6 @@ test_styles:
   stage: test
   script:
     - source /root/miniconda3/bin/activate enpt
-    - export GDAL_DATA=/root/miniconda3/envs/enpt/share/gdal
-    - export PYTHONPATH=$PYTHONPATH:/root  # /root <- directory needed later
     - make lint
   artifacts:
     paths:
@@ -81,8 +76,7 @@ test_enpt_install:
   script:
     - source /root/miniconda3/bin/activate
     - conda update conda
-    - conda install conda-build
-    - conda create -y -q --name enpt_test python=3
+    - conda create -y -q -c conda-forge --name enpt_test python=3
     - source activate enpt_test
 
     # update conda and python
@@ -90,13 +84,13 @@ test_enpt_install:
 #    - conda update -c conda-forge python
 
     # avoid package incompatibilities
-    - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
+    # - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
 
     # install some dependencies that cause trouble when installed via pip
     - conda install -y -c conda-forge numpy pandas lxml
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    - conda install -y -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
+    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
 
     # install not pip-installable deps of arosics
     - conda install -y -c conda-forge pyfftw pykrige
