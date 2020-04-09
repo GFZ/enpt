@@ -175,13 +175,14 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.scene_basename = self.data_filename.split('-SPECTRAL_IMAGE')[0]
             self.dead_pixel_filename = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
             self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
-            # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES as combined product?
-            #   - QL_QUALITY_CLOUD
-            #   - QL_QUALITY_CIRRUS
-            #   - QL_QUALITY_SNOW
-            #   - QL_QUALITY_CLOUDSHADOW
-            #   - QL_QUALITY_HAZE
+            self.landwater_mask_filename = get_filename('*QL_QUALITY_CLASSES')
+            self.snow_mask_filename = get_filename('*QL_QUALITY_SNOW')
+            self.cloudshadow_mask_filename = get_filename('*QL_QUALITY_CLOUDSHADOW')
             self.cloud_mask_filename = get_filename('*-QL_QUALITY_CLOUD')
+            self.haze_mask_filename = get_filename('*QL_QUALITY_HAZE')
+            self.cirrus_mask_filename = get_filename('*QL_QUALITY_CIRRUS')
+            # FIXME combine different cloud masks?
+
             self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
                                 % self.cloud_mask_filename.split(self.scene_basename)[1])
 
