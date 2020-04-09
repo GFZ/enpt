@@ -84,10 +84,10 @@ config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
                      # Alps
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip'
+                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip'
 
                      # Arcachon
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
 
                      # Arcachon 1000x30
                      # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
@@ -95,18 +95,18 @@ config_for_testing_dlr = dict(
     path_l1b_enmap_image_gapfill=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
                      # Alps
-                     'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
 
                      # Arcachon
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
                      )),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data',
                      # Alps
-                     'DLR_L2A_DEM_UTM32.bsq'
+                     # 'DLR_L2A_DEM_UTM32.bsq'
 
                      # Arcachon
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__DEM_ASTER.bsq'
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__DEM_ASTER.bsq'
                      )),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
