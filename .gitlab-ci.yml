@@ -162,3 +162,15 @@ deploy_pypi:
     - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
   except:
     - dev
+
+
+create_github_release:
+    stage: deploy
+    dependencies:
+        - test_enpt
+    script:
+        - bash create_release_from_gitlab_ci.sh  # uses environment variables set in the UI
+    only:
+        - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
+    except:
+        - dev
