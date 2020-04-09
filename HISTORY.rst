@@ -2,6 +2,13 @@
 History
 =======
 
+0.12.0 (2020-04-09)
+-------------------
+
+* Added new L1B EnMAP test datasets for Arcachon, France (status 14.02.2020) + corresponding DEM.
+* BSQ files now use Git LFS.
+
+
 0.11.8 (2020-04-09)
 -------------------
 
