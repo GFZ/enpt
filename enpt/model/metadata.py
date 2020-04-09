@@ -114,12 +114,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.data_filename = None  # type: str # detector data filename
+        self.filename_data = None  # type: str # detector data filename
         self.scene_basename = None  # type: str # basename of the EnMAP image
-        self.dead_pixel_filename = None  # type: str # filename of the dead pixel file
-        self.quicklook_filename = None  # type: str # filename of the quicklook file
+        self.filename_mask_deadpixel = None  # type: str # filename of the dead pixel file
+        self.filename_quicklook = None  # type: str # filename of the quicklook file
         # FIXME cloud mask of BOTH detectors
-        self.cloud_mask_filename = None  # type: str # filename of the cloud mask file
+        self.filename_mask_cloud = None  # type: str # filename of the cloud mask file
 
         self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
         self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
@@ -171,20 +171,20 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
                 return matches[0]
 
-            self.data_filename = xml.find("product/image/%s/name" % lbl).text
-            self.scene_basename = self.data_filename.split('-SPECTRAL_IMAGE')[0]
-            self.dead_pixel_filename = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
-            self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
-            self.landwater_mask_filename = get_filename('*QL_QUALITY_CLASSES')
-            self.snow_mask_filename = get_filename('*QL_QUALITY_SNOW')
-            self.cloudshadow_mask_filename = get_filename('*QL_QUALITY_CLOUDSHADOW')
-            self.cloud_mask_filename = get_filename('*-QL_QUALITY_CLOUD')
-            self.haze_mask_filename = get_filename('*QL_QUALITY_HAZE')
-            self.cirrus_mask_filename = get_filename('*QL_QUALITY_CIRRUS')
-            # FIXME combine different cloud masks?
+            self.filename_data = xml.find("product/image/%s/name" % lbl).text
+            self.scene_basename = self.filename_data.split('-SPECTRAL_IMAGE')[0]
+            self.filename_quicklook = xml.find("product/quicklook/%s/name" % lbl).text
+            self.filename_mask_deadpixel = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
+            self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
+            self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
+            self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
+            self.filename_mask_cloud = get_filename('*-QL_QUALITY_CLOUD')
+            self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
+            self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
 
+            # FIXME combine different cloud masks?
             self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
-                                % self.cloud_mask_filename.split(self.scene_basename)[1])
+                                % self.filename_mask_cloud.split(self.scene_basename)[1])
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
@@ -249,11 +249,11 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
             # read data filenames
-            self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
-            self.scene_basename = os.path.splitext(self.data_filename)[0]
-            self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
-            self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
-            self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+            self.filename_data = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
+            self.scene_basename = os.path.splitext(self.filename_data)[0]
+            self.filename_mask_deadpixel = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
+            self.filename_quicklook = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
+            self.filename_mask_cloud = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
 
             # read preview bands
             self.preview_bands = np.zeros(3, dtype=np.int)
@@ -660,15 +660,15 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # generate file names for L2A output
         if not self.cfg.is_dummy_dataformat:
-            self.scene_basename = meta_l1b.vnir.data_filename.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
+            self.scene_basename = meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
         else:
-            self.scene_basename = os.path.splitext(meta_l1b.vnir.data_filename)[0]
-        self.data_filename = meta_l1b.vnir.data_filename.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.dead_pixel_filename_vnir = meta_l1b.vnir.dead_pixel_filename.replace('L1B-', 'L2A-')
-        self.dead_pixel_filename_swir = meta_l1b.swir.dead_pixel_filename.replace('L1B-', 'L2A-')
-        self.quicklook_filename_vnir = meta_l1b.vnir.quicklook_filename.replace('L1B-', 'L2A-')
-        self.quicklook_filename_swir = meta_l1b.swir.quicklook_filename.replace('L1B-', 'L2A-')
-        self.cloud_mask_filename = meta_l1b.vnir.cloud_mask_filename.replace('L1B-', 'L2A-')
+            self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
+        self.data_filename = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
+        self.dead_pixel_filename_vnir = meta_l1b.vnir.filename_mask_deadpixel.replace('L1B-', 'L2A-')
+        self.dead_pixel_filename_swir = meta_l1b.swir.filename_mask_deadpixel.replace('L1B-', 'L2A-')
+        self.quicklook_filename_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
+        self.quicklook_filename_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
+        self.cloud_mask_filename = meta_l1b.vnir.filename_mask_cloud.replace('L1B-', 'L2A-')
         self.metaxml_filename = meta_l1b.metaxml_filename.replace('L1B-', 'L2A-')
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
@@ -848,7 +848,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
             lbl = L2A_product_props_DLR['xml_detector_label'][detName]
             # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
-            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.data_filename
+            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.filename_data
             # FIXME this is the size of the VNIR/SWIR stack
             size = [F['size'] for F in self.fileinfos if os.path.splitext(F['name'])[0].endswith('-SPECTRAL_IMAGE')][0]
             xml.find("product/image/%s/size" % lbl).text = str(size)

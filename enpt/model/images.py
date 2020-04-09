@@ -404,14 +404,14 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         paths = SimpleNamespace()
         paths.root_dir = self._root_dir
-        paths.data = path.join(self._root_dir, self.detector_meta.data_filename)
+        paths.data = path.join(self._root_dir, self.detector_meta.filename_data)
 
-        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.cloud_mask_filename) \
-            if self.detector_meta.cloud_mask_filename else None
-        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.dead_pixel_filename) \
-            if self.detector_meta.dead_pixel_filename else None
+        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.filename_mask_cloud) \
+            if self.detector_meta.filename_mask_cloud else None
+        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.filename_mask_deadpixel) \
+            if self.detector_meta.filename_mask_deadpixel else None
 
-        paths.quicklook = path.join(self._root_dir, self.detector_meta.quicklook_filename)
+        paths.quicklook = path.join(self._root_dir, self.detector_meta.filename_quicklook)
 
         return paths
 
@@ -479,8 +479,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :return: None
         """
         if not self.cfg.is_dummy_dataformat:
-            basename_img1 = self.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
-            basename_img2 = img2.detector_meta.data_filename.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
+            basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
+            basename_img2 = img2.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
         else:
             basename_img1 = path.basename(self._root_dir)
             basename_img2 = path.basename(img2._root_dir)
@@ -887,26 +887,26 @@ class EnMAPL1Product_SensorGeo(object):
         makedirs(product_dir, exist_ok=True)
 
         # write the VNIR
-        self.vnir.data.save(product_dir + path.sep + self.meta.vnir.data_filename, fmt="ENVI")
-        self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.cloud_mask_filename, fmt="GTiff")
+        self.vnir.data.save(product_dir + path.sep + self.meta.vnir.filename_data, fmt="ENVI")
+        self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.filename_mask_cloud, fmt="GTiff")
         if self.vnir.deadpixelmap is not None:
-            self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.dead_pixel_filename, fmt="GTiff")
+            self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.filename_mask_deadpixel, fmt="GTiff")
         else:
             self.logger.warning('Could not save VNIR dead pixel map because there is no corresponding attribute.')
 
         # FIXME we could also write the quicklook included in DLR L1B format
         self.vnir.generate_quicklook(bands2use=self.vnir.detector_meta.preview_bands) \
-            .save(path.join(product_dir, path.basename(self.meta.vnir.quicklook_filename) + '.png'), fmt='PNG')
+            .save(path.join(product_dir, path.basename(self.meta.vnir.filename_quicklook) + '.png'), fmt='PNG')
 
         # write the SWIR
-        self.swir.data.save(product_dir + path.sep + self.meta.swir.data_filename, fmt="ENVI")
-        self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.cloud_mask_filename, fmt="GTiff")
+        self.swir.data.save(product_dir + path.sep + self.meta.swir.filename_data, fmt="ENVI")
+        self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.filename_mask_cloud, fmt="GTiff")
         if self.swir.deadpixelmap is not None:
-            self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.dead_pixel_filename, fmt="GTiff")
+            self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.filename_mask_deadpixel, fmt="GTiff")
         else:
             self.logger.warning('Could not save SWIR dead pixel map because there is no corresponding attribute.')
         self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
-            .save(path.join(product_dir, path.basename(self.meta.swir.quicklook_filename) + '.png'), fmt='PNG')
+            .save(path.join(product_dir, path.basename(self.meta.swir.filename_quicklook) + '.png'), fmt='PNG')
 
         # Update the xml file
         metadata_string = self.meta.to_XML()
@@ -1131,7 +1131,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         self.mask_clouds.save(outpath_mask_clouds, **kwargs_save)
 
         # TODO VNIR and SWIR
-        # self.deadpixelmap.save(path.join(product_dir, self.meta.cloud_mask_filename), **kwargs_save)
+        # self.deadpixelmap.save(path.join(product_dir, self.meta.filename_mask_cloud), **kwargs_save)
         self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
 
         self.generate_quicklook(bands2use=self.meta.preview_bands_vnir).save(outpath_quicklook_vnir, **kwargs_save)
