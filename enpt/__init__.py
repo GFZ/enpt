@@ -27,7 +27,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""EnMAP processing tools (EnPT) software package developed by GFZ."""
+"""EnMAP processing tool (EnPT) software package developed by GFZ."""
 
 from .version import __version__, __versionalias__   # noqa (E402 + F401)
 

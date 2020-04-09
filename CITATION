@@ -1,0 +1,37 @@
+You are welcome to use and modify the `enpt` project.
+See the README.rst and LICENSE files for details.
+
+If you use this software for research we would appreciate appropriate citation.
+This may be prepared using the bibliographic metadata contained in our DOI, accessible through the DOI system and at
+https://doi.org/10.5281/zenodo.3742344
+
+To cite the `enpt` Python package in your publication, please use (modify the version number if needed):
+
+  Scheffler, Daniel, Bohn, Niklas, Guillaso, Stéphane, & Segl, Karl. (2020, April 7). EnPT - EnMAP Processing Tool (Version v0.11.6b1). Zenodo. https://doi.org/10.5281/zenodo.3742344
+
+This may need modification for the citation style of your publication.
+You are encouraged to include the version number of the software.
+
+A BibTeX entry for LaTeX users should look like this
+(find the one for the latest version here: https://zenodo.org/record/3742883/export/hx):
+
+@software{scheffler_daniel_2020_3742883,
+  author       = {Scheffler, Daniel and
+                  Bohn, Niklas and
+                  Guillaso, Stéphane and
+                  Segl, Karl},
+  title        = {EnPT - EnMAP Processing Tool},
+  month        = apr,
+  year         = 2020,
+  publisher    = {Zenodo},
+  version      = {v0.11.6b1},
+  doi          = {10.5281/zenodo.3742883},
+  url          = {https://doi.org/10.5281/zenodo.3742883}
+}
+
+For information on citing software products generally, see the
+FORCE11 document [*].
+
+
+[*] FORCE11 Software Citation Working Group (2016), "Software Citation Principles", (Editors: Arfon M. Smith, Daniel S. Katz, Kyle E. Niemeyer).
+    Accessed 2017-08-08 at https://www.force11.org/sites/default/files/shared-documents/software-citation-principles.pdf

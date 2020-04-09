@@ -2,6 +2,84 @@
 History
 =======
 
+0.11.8 (2020-04-09)
+-------------------
+
+* Releases in the GitHub-Mirror-Repository are now created automatically
+  (added create_release_from_gitlab_ci.sh and create_github_release CI job).
+* Added GitHub issue template.
+
+
+0.11.7 (2020-04-07)
+-------------------
+
+* Updated .zenodo.json.
+* Added CITATION file.
+* Added hint regarding citation to README.rst.
+
+
+0.11.6 (2020-04-06)
+-------------------
+
+* Updated .zenodo.json.
+
+
+0.11.5 (2020-04-06)
+-------------------
+
+* Fixed EnPT logo in README.rst.
+* Updated README.rst text.
+* Pages now expire after 10 days instead of 30 days.
+* Added .zenodo.json.
+
+
+0.11.4 (2020-04-06)
+-------------------
+
+* Removed deprecated channels from environment_enpt.yml.
+* Simplified test_enpt_install.
+* Added SICOR to setup.py requirements.
+* Updated installation instructions.
+
+
+0.11.3 (2020-04-03)
+-------------------
+
+* Fixed broken badge4.
+* Replaced logo relative link in README.rst with URL.
+
+
+0.11.2 (2020-04-02)
+-------------------
+
+* Updated setup.py and MANIFEST.in to exclude tests and examples directories from PyPI upload.
+
+
+0.11.1 (2020-04-02)
+-------------------
+
+* Fixed invalid syntax for multiple authors and email addresses in setup.py.
+
+
+0.11.0 (2020-04-02)
+-------------------
+
+New features / improvements:
+
+* Added parameter 'vswir_overlap_algorithm' that provides 4 different algorithms how to deal with the VNIR/SWIR overlap.
+* Revised orthorecifier module.
+* Updated badges in README.rst.
+* Added a GUI test mode to EnPTController.
+* Added keywords to setup.py.
+* Added 'deploy_pypi' CI job.
+* Revised setup.py for a proper PyPI upload.
+* Removed installation of 'icu=58.*' from installation.rst.
+
+Bug fixes:
+
+* Fixed issue 45 "Band central wavelength positions of L2A product cannot be read by ENVI."
+
+
 0.10.0 (2020-03-03)
 -------------------
 

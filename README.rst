@@ -1,24 +1,28 @@
 
-.. image:: docs/img/EnPT_logo_final.svg
+.. image:: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/img/EnPT_logo_final.svg
    :width: 300px
    :alt: EnPT Logo
 
-=============================
-EnPT - EnMAP Processing Tools
-=============================
+============================
+EnPT - EnMAP Processing Tool
+============================
 
 The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data.
 It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed
-at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the original DLR processing chain.
+at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the processing chain of the EnMAP
+Ground Segment.
 
-Please check the documentation_ for usage and in depth information.
+* Please check the documentation_ for installation and usage instructions and in depth information.
+* Information on how to **cite the EnPT Python package** can be found in the
+  `CITATION <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/CITATION>`__ file.
+
 
 License
 -------
 Free software: GNU General Public License v3
 
 All images contained in any (sub-)directory of this repository are licensed under the CC0 license which can be found
-`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`_.
+`here <https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt>`__.
 
 Feature overview
 ----------------
@@ -35,14 +39,39 @@ Feature overview
 Status
 ------
 
-|badge1| |badge2|
+|badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8|
 
 .. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
+    :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
 
 .. |badge2| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
+    :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
+
+.. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
+    :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
+
+.. |badge4| image:: https://img.shields.io/pypi/v/enpt.svg
+    :target: https://pypi.python.org/pypi/enpt
+
+.. |badge5| image:: https://img.shields.io/pypi/l/enpt.svg
+    :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/LICENSE
+
+.. |badge6| image:: https://img.shields.io/pypi/pyversions/enpt.svg
+    :target: https://img.shields.io/pypi/pyversions/enpt.svg
+
+.. |badge7| image:: https://img.shields.io/pypi/dm/enpt.svg
+    :target: https://pypi.python.org/pypi/enpt
+
+.. |badge8| image:: https://zenodo.org/badge/253474970.svg
+   :target: https://zenodo.org/badge/latestdoi/253474970
 
 See also the latest coverage_ report and the nosetests_ HTML report.
 
+History / Changelog
+-------------------
+
+You can find the protocol of recent changes in the EnPT package
+`here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/HISTORY.rst>`__.
 
 Credits
 -------

@@ -36,42 +36,25 @@ __author__ = 'Daniel Scheffler'
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 version = {}
 with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 requirements = [  # put package requirements here
-    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo',
-    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed'
-    # 'sicor>=0.15.0', # pip install git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git
+    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo>=0.2.1',
+    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed', 'mvgavg',
+    'sicor @ git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git#egg=sicor'
 ]
+
+setup_requirements = ['setuptools-git']  # needed for package_data version controlled by GIT
 
 test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
 
 setup(
-    name='enpt',
-    version=version['__version__'],
-    description="EnMAP Processing Tools",
-    long_description=readme + '\n\n' + history,
-    author=["Karl Segl", "Daniel Scheffler", "Niklas Bohn", "Stéphane Guillaso"],
-    author_email=['segl@gfz-potsdam.de', 'danschef@gfz-potsdam.de', 'nbohn@gfz-potsdam.de',
-                  'stephane.guillaso@gfz-potsdam.de'],
-    url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
-    packages=find_packages(exclude=['tests*']),
-    package_dir={'enpt':
-                 'enpt'},
-    include_package_data=True,
-    install_requires=requirements,
-    license="GNU General Public License v3",
-    zip_safe=False,
-    scripts=['bin/enpt_cli.py'],
-    data=[],  # TODO
-    keywords='enpt',
+    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso",
+    author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, stephane.guillaso@gfz-potsdam.de",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.5',
@@ -79,6 +62,23 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
+    description="EnMAP Processing Tool",
+    keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
+    include_package_data=True,
+    install_requires=requirements,
+    license="GNU General Public License v3",
+    long_description=readme,
+    name='enpt',
+    package_dir={'enpt': 'enpt'},
+    # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
+    #       otherwise they are not included in the PyPi upload content
+    package_data={"enpt": ["resources/**/**/*"]},
+    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
+    scripts=['bin/enpt_cli.py'],
+    setup_requires=setup_requirements,
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
+    version=version['__version__'],
+    zip_safe=False
 )
