@@ -339,16 +339,14 @@ class _EnMAP_Image(object):
         :param bands2use:   (red, green, blue) band indices of self.data to be used for quicklook image, e.g., (3, 2, 1)
         :return: GeoArray
         """
-        p2 = np.percentile(self.data[:, :, bands2use[0]], 2)
-        p98 = np.percentile(self.data[:, :, bands2use[0]], 98)
-        red_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[0]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, bands2use[1]], 2)
-        p98 = np.percentile(self.data[:, :, bands2use[1]], 98)
-        green_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[1]], (p2, p98))
-        p2 = np.percentile(self.data[:, :, bands2use[2]], 2)
-        p98 = np.percentile(self.data[:, :, bands2use[2]], 98)
-        blue_rescaled = exposure.rescale_intensity(self.data[:, :, bands2use[2]], (p2, p98))
-        pix = np.dstack((red_rescaled, green_rescaled, blue_rescaled))
+        red, green, blue = [self.data[:, :, bandidx] for bandidx in bands2use]
+
+        def rescale(bandarray):
+            p2 = np.percentile(bandarray, 2)
+            p98 = np.percentile(bandarray, 98)
+            return exposure.rescale_intensity(bandarray, (p2, p98))
+
+        pix = np.dstack((rescale(red), rescale(green), rescale(blue)))
         pix = np.uint8(pix * 255)
 
         return GeoArray(pix)
@@ -396,24 +394,23 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         else:
             self.detector_meta: EnMAP_Metadata_L1B_Detector_SensorGeo = meta
 
-    def get_paths(self):
+    def get_paths(self) -> SimpleNamespace:
         """
         Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
         These information are read from the detector_meta.
-        :return: paths as SimpleNamespace
+        :return: paths
         """
-        paths = SimpleNamespace()
-        paths.root_dir = self._root_dir
-        paths.data = path.join(self._root_dir, self.detector_meta.filename_data)
+        self.paths.root_dir = self._root_dir
+        self.paths.data = path.join(self._root_dir, self.detector_meta.filename_data)
 
-        paths.mask_clouds = path.join(self._root_dir, self.detector_meta.filename_mask_cloud) \
+        self.paths.mask_clouds = path.join(self._root_dir, self.detector_meta.filename_mask_cloud) \
             if self.detector_meta.filename_mask_cloud else None
-        paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.filename_mask_deadpixel) \
+        self.paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.filename_mask_deadpixel) \
             if self.detector_meta.filename_mask_deadpixel else None
 
-        paths.quicklook = path.join(self._root_dir, self.detector_meta.filename_quicklook)
+        self.paths.quicklook = path.join(self._root_dir, self.detector_meta.filename_quicklook)
 
-        return paths
+        return self.paths
 
     def correct_dead_pixels(self):
         """Correct dead pixels with respect to the dead pixel mask."""
@@ -672,7 +669,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.data = self.paths.vnir.data
         self.vnir.mask_clouds = self.paths.vnir.mask_clouds
         self.swir.data = self.paths.swir.data
-        self.swir.mask_clouds = self.paths.swir.mask_clouds
+        self.swir.mask_clouds = self.paths.swir.mask_clouds  # FIXME has VNIR geometry
 
         try:
             self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
