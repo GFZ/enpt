@@ -29,7 +29,7 @@
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
-from typing import Union, Tuple, List  # noqa: F401
+from typing import Union, Tuple, List, Optional  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -508,7 +508,7 @@ class RPC_Geolayer_Generator(object):
         return self.compute_geolayer()
 
 
-global_dem_sensorgeo = None  # type: GeoArray
+global_dem_sensorgeo: Optional[GeoArray] = None
 
 
 def mp_initializer_for_RPC_3D_Geolayer_Generator(dem_sensorgeo):

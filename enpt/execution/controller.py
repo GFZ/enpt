@@ -36,6 +36,7 @@ import shutil
 import weakref
 import warnings
 import pickle
+from typing import Optional
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
@@ -53,7 +54,7 @@ class EnPT_Controller(object):
         :param config:          an instance of the EnPTConfig class (overrides config_kwargs)
         :param config_kwargs:   configuration parameters to be passed to EnPTConfig class
         """
-        self.cfg = config or EnPTConfig(**config_kwargs)  # type: EnPTConfig
+        self.cfg: EnPTConfig = config or EnPTConfig(**config_kwargs)
 
         # generate temporary directory (must be deleted at the end of the pipeline)
         self.tempDir = tempfile.mkdtemp()
@@ -63,8 +64,8 @@ class EnPT_Controller(object):
                                            warn_message="Implicitly cleaning up {!r}".format(self))
 
         # defaults
-        self.L1_obj = None  # type: EnMAPL1Product_SensorGeo
-        self.L2_obj = None  # type: EnMAPL2Product_MapGeo
+        self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
+        self.L2_obj: Optional[EnMAPL2Product_MapGeo] = None
 
     def extract_zip_archive(self, path_zipfile: str, subdir: str = '') -> str:
         """Extract the given EnMAP image zip archive and return the L1B image root directory path.

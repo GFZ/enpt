@@ -65,7 +65,7 @@ class Radiometric_Transformer(object):
         :return:
         """
         for detectorName in enmap_ImageL1.detector_attrNames:
-            detector = getattr(enmap_ImageL1, detectorName)  # type: EnMAP_Detector_SensorGeo
+            detector: EnMAP_Detector_SensorGeo = getattr(enmap_ImageL1, detectorName)
 
             enmap_ImageL1.logger.info('Converting TOA radiance to TOA reflectance for %s detector...'
                                       % detector.detector_name)

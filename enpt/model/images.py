@@ -31,7 +31,7 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple  # noqa: F401
+from typing import Tuple, Optional  # noqa: F401
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import numpy as np
@@ -370,7 +370,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     """
 
-    def __init__(self, detector_name: str, root_dir: str, config: EnPTConfig, logger=None, meta=None):
+    def __init__(self, detector_name: str, root_dir: str, config: EnPTConfig, logger=None, meta=None) -> None:
         """Get an instance of _EnMAP_Detector_SensorGeo.
 
         :param detector_name:   'VNIR' or 'SWIR'
@@ -391,10 +391,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         # instance an empty metadata object
         if meta is None:
-            self.detector_meta = \
+            self.detector_meta: EnMAP_Metadata_L1B_Detector_SensorGeo = \
                 EnMAP_Metadata_L1B_Detector_SensorGeo(self.detector_name, config=self.cfg, logger=self.logger)
         else:
-            self.detector_meta = meta  # type: EnMAP_Metadata_L1B_Detector_SensorGeo
+            self.detector_meta: EnMAP_Metadata_L1B_Detector_SensorGeo = meta
 
     def get_paths(self):
         """
@@ -1019,8 +1019,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         if logger:
             self.logger = logger
 
-        self.meta = None  # type: EnMAP_Metadata_L2A_MapGeo
-        self.paths = None  # type: SimpleNamespace
+        self.meta: Optional[EnMAP_Metadata_L2A_MapGeo] = None
+        self.paths: Optional[SimpleNamespace] = None
 
         super(EnMAPL2Product_MapGeo, self).__init__()
 

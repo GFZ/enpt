@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple  # noqa: F401
+from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -106,7 +106,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param logger:          instance of logging.logger or subclassed
         """
         self.cfg = config
-        self.detector_name = detector_name  # type: str
+        self.detector_name: str = detector_name
         if not self.cfg.is_dummy_dataformat:
             self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
         else:
@@ -114,37 +114,43 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.filename_data = None  # type: str # detector data filename
-        self.scene_basename = None  # type: str # basename of the EnMAP image
-        self.filename_mask_deadpixel = None  # type: str # filename of the dead pixel file
-        self.filename_quicklook = None  # type: str # filename of the quicklook file
-        # FIXME cloud mask of BOTH detectors
-        self.filename_mask_cloud = None  # type: str # filename of the cloud mask file
+        self.filename_data: Optional[str] = None  # detector data filename
+        self.scene_basename: Optional[str] = None  # basename of the EnMAP image
+        self.filename_mask_deadpixel: Optional[str] = None  # filename of the dead pixel file
+        self.filename_quicklook: Optional[str] = None  # filename of the quicklook file
+        # FIXME masks of BOTH detectors
+        self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
+        self.filename_mask_snow: Optional[str] = None  # filename of the snow mask file
+        self.filename_mask_cloudshadow: Optional[str] = None  # filename of the cloud shadow mask file
+        self.filename_mask_cloud: Optional[str] = None  # filename of the cloud mask file
+        self.filename_mask_haze: Optional[str] = None  # filename of the haze mask file
+        self.filename_mask_cirrus: Optional[str] = None  # filename of the cirrus mask file
 
-        self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
-        self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
-        self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
-        self.solar_irrad = None  # type: np.array  # solar irradiance in [W/m2/nm] for each band
-        self.nwvl = None  # type: int  # Number of wave bands
-        self.nrows = None  # type: int  # number of rows
-        self.ncols = None  # type: int  # number of columns
-        self.smile_coef = None  # type: np.ndarray  # smile coefficients needed for smile computation
-        self.nsmile_coef = None  # type: int  # number of smile coefficients
-        self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
-        self.gains = None  # type: np.ndarray  # band-wise gains for computing radiance from DNs
-        self.offsets = None  # type: np.ndarray  # band-wise offsets for computing radiance from DNs
-        self.l_min = None  # type: np.ndarray  # band-wise l-min for computing radiance from DNs
-        self.l_max = None  # type: np.ndarray  # band-wise l-max for computing radiance from DNs
-        self.lat_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # latitude coords for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # longitude coords for UL, UR, LL, LR
-        self.rpc_coeffs = OrderedDict()  # type: OrderedDict  # RPC coefficients for geolayer computation
-        self.ll_mapPoly = None  # type: Polygon  # footprint polygon in longitude/latitude map coordinates
-        self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
-        self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
-        self.unit = ''  # type: str  # radiometric unit of pixel values
-        self.unitcode = ''  # type: str  # code of radiometric unit
+        self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
+        self.fwhm: Optional[np.ndarray] = None  # Full width half maximmum for each EnMAP band
+        self.srf: Optional[SRF] = None  # SRF object holding the spectral response functions for each EnMAP band
+        self.solar_irrad: Optional[np.ndarray] = None  # solar irradiance in [W/m2/nm] for each band
+        self.nwvl: Optional[int] = None  # Number of wave bands
+        self.nrows: Optional[int] = None  # number of rows
+        self.ncols: Optional[int] = None  # number of columns
+        self.smile_coef: Optional[np.ndarray] = None  # smile coefficients needed for smile computation
+        self.nsmile_coef: Optional[int] = None  # number of smile coefficients
+        self.smile: Optional[np.ndarray] = None  # smile for each EnMAP image column
+        self.gains: Optional[np.ndarray] = None  # band-wise gains for computing radiance from DNs
+        self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
+        self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
+        self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
+        self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
+        self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
+        self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
+        self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
+        self.lats: Optional[np.ndarray] = None  # 2D array of latitude coordinates according to given lon/lat sampling
+        self.lons: Optional[np.ndarray] = None  # 2D array of longitude coordinates according to given lon/lat sampling
+        self.unit: str = ''  # radiometric unit of pixel values
+        self.unitcode: str = ''  # code of radiometric unit
         self.preview_bands = None
-        self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
+        self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
         """
@@ -237,13 +243,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                     self.rpc_coeffs[bN]['%s_coeffs' % n.lower()] = \
                         np.array([v for k, v in tmp.items() if k.startswith(n)])
 
-            # compute metadata derived from read data
-            self.smile = self.calc_smile()
-            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
-                                                              self.lat_UL_UR_LL_LR)), fix_invalid=True)
-
         else:
             lbl = self.detector_label
             self.logger.info("Reading metadata for %s detector..." % self.detector_name)
@@ -302,13 +301,18 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 scl = bi.findall("Smile/Coefficient")
                 for sc in scl:
                     self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
-            self.smile = self.calc_smile()
-            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
-                                                    fix_invalid=True)
+
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
+
+        # compute metadata derived from read data
+        self.smile = self.calc_smile()
+        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+        self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
+        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
+                                                          self.lat_UL_UR_LL_LR)), fix_invalid=True)
+        from ..processors.spatial_transform import get_UTMEPSG_from_LonLat_cornersXY
+        self.epsg_ortho = get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -478,22 +482,22 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.rootdir = os.path.dirname(path_metaxml)
 
         # defaults - Common
-        self.proc_level = None  # type: str  # Dataset processing level
-        self.observation_datetime = None  # type: datetime  # Date and Time of image observation
-        self.geom_view_zenith = None  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = None  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist = None  # type: float  # earth-sun distance
-        self.aot = None  # type: float  # scene aerosol optical thickness
-        self.water_vapour = None  # type: float  # scene water vapour [cm]
-        self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
-        self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
-        self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
-        self.metaxml_filename = None  # type: str # filename of XML metadata file
+        self.proc_level: Optional[str] = None   # Dataset processing level
+        self.observation_datetime: Optional[datetime] = None  # Date and Time of image observation
+        self.geom_view_zenith: Optional[float] = None  # viewing zenith angle
+        self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
+        self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
+        self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
+        self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
+        self.earthSunDist: Optional[float] = None  # earth-sun distance
+        self.aot: Optional[float] = None  # scene aerosol optical thickness
+        self.water_vapour: Optional[float] = None  # scene water vapour [cm]
+        self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
+        self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
+        self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
+        self.metaxml_filename: Optional[str] = None  # filename of XML metadata file
 
-        self._scene_basename = None  # type: str # basename of the EnMAP image
+        self._scene_basename: Optional[str] = None  # basename of the EnMAP image
 
     @property
     def scene_basename(self):
@@ -644,19 +648,19 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.logger = logger or logging.getLogger()
 
         # defaults
-        self.band_means = None  # type: np.ndarray # band-wise means in unscaled values (percent in case of reflectance)
-        self.band_stds = None  # type: np.ndarray # band-wise standard deviations in unscaled values
-        self.fileinfos = []  # type: list # file informations for each file beloning to the EnMAP L2A product
+        self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
+        self.band_stds: Optional[np.ndarray] = None  # band-wise standard deviations in unscaled values
+        self.fileinfos: list = []  # file informations for each file beloning to the EnMAP L2A product
 
         self.proc_level = 'L2A'
-        self.observation_datetime = meta_l1b.observation_datetime  # type: datetime  # Date and Time of observation
+        self.observation_datetime: datetime = meta_l1b.observation_datetime  # Date and Time of observation
         # FIXME VZA may be negative in DLR data
-        self.geom_view_zenith = meta_l1b.geom_view_zenith  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = meta_l1b.geom_view_azimuth  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = meta_l1b.geom_sun_zenith  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = meta_l1b.geom_sun_azimuth  # type: float  # sun azimuth angle
-        self.mu_sun = meta_l1b.mu_sun  # type: float  # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist = meta_l1b.earthSunDist  # type: float  # earth-sun distance
+        self.geom_view_zenith: float = meta_l1b.geom_view_zenith  # viewing zenith angle
+        self.geom_view_azimuth: float = meta_l1b.geom_view_azimuth  # viewing azimuth angle
+        self.geom_sun_zenith: float = meta_l1b.geom_sun_zenith  # sun zenith angle
+        self.geom_sun_azimuth: float = meta_l1b.geom_sun_azimuth  # sun azimuth angle
+        self.mu_sun: float = meta_l1b.mu_sun  # needed by SICOR for TOARad > TOARef conversion
+        self.earthSunDist: float = meta_l1b.earthSunDist  # earth-sun distance
 
         # generate file names for L2A output
         if not self.cfg.is_dummy_dataformat:
