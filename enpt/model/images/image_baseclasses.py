@@ -36,7 +36,7 @@ import numpy as np
 # noinspection PyPackageRequirements
 from skimage import exposure  # contained in package requirements as scikit-image
 
-from geoarray import GeoArray, CloudMask
+from geoarray import GeoArray
 
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 
@@ -73,12 +73,9 @@ class _EnMAP_Image(object):
         self._data = None
         self._mask_nodata = None
         self._mask_clouds = None
-        self._mask_clouds_confidence = None
         self._dem = None
         self._deadpixelmap = None
-        self._ac_options = {}
-        self._ac_errors = None
-        self._subset = None  # FIXME(Stephane) how is _subset to be set?
+        self._subset = None  # FIXME how is _subset to be set?
 
         # defaults
         self.entity_ID = ''
@@ -154,67 +151,17 @@ class _EnMAP_Image(object):
     def mask_clouds(self) -> GeoArray:
         """Return the cloud mask.
 
-        Bundled with all the corresponding metadata.
-
-        For usage instructions and a list of attributes refer to help(self.data).
-        self.mask_clouds works in the same way.
-
-        :return: instance of geoarray.CloudMask
+        :return: geoarray.GeoArray
         """
         return self._mask_clouds
 
     @mask_clouds.setter
     def mask_clouds(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            cm = CloudMask(*geoArr_initArgs)
-            if cm.shape[:2] != self.data.shape[:2]:
-                raise ValueError("The 'mask_clouds' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(cm.shape))
-            cm.nodata = 0
-            cm.gt = self.data.gt
-            cm.prj = self.data.prj
-            self._mask_clouds = cm
-        else:
-            del self.mask_clouds
+        self._mask_clouds = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_clouds', nodataVal=0)
 
     @mask_clouds.deleter
     def mask_clouds(self):
         self._mask_clouds = None
-
-    @property
-    def mask_clouds_confidence(self) -> GeoArray:
-        """Return pixelwise information on the cloud mask confidence.
-
-        Bundled with all the corresponding metadata.
-
-        For usage instructions and a list of attributes refer to help(self.data).
-        self.mask_clouds_confidence works in the same way.
-
-        :return: instance of geoarray.GeoArray
-        """
-        return self._mask_clouds_confidence
-
-    @mask_clouds_confidence.setter
-    def mask_clouds_confidence(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            cnfArr = GeoArray(*geoArr_initArgs)
-
-            if not cnfArr.shape == self.data.shape[:2]:
-                raise ValueError("The 'mask_clouds_confidence' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(cnfArr.shape))
-
-            if cnfArr._nodata is None:
-                cnfArr.nodata = 0  # DEF_D.get_outFillZeroSaturated(cnfArr.dtype)[0] # TODO
-            cnfArr.gt = self.data.gt
-            cnfArr.prj = self.data.prj
-
-            self._mask_clouds_confidence = cnfArr
-        else:
-            del self.mask_clouds_confidence
-
-    @mask_clouds_confidence.deleter
-    def mask_clouds_confidence(self):
-        self._mask_clouds_confidence = None
 
     @property
     def dem(self) -> GeoArray:
@@ -228,64 +175,17 @@ class _EnMAP_Image(object):
 
     @dem.setter
     def dem(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            dem = GeoArray(*geoArr_initArgs)
-
-            if not dem.shape == self.data.shape[:2]:
-                raise ValueError("The 'dem' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(dem.shape))
-            self._dem = dem
-            self._dem.nodata = 0  # FIXME
-            self._dem.gt = self.data.gt
-            self._dem.prj = self.data.prj
-        else:
-            del self.dem
+        self._dem = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'dem', nodataVal=0)  # FIXME 0?
 
     @dem.deleter
     def dem(self):
         self._dem = None
 
     @property
-    def ac_errors(self) -> GeoArray:
-        """Return error information calculated by the atmospheric correction.
-
-        :return: geoarray.GeoArray
-        """
-        return self._ac_errors  # FIXME should give a warning if None
-
-    @ac_errors.setter
-    def ac_errors(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            errArr = GeoArray(*geoArr_initArgs)
-
-            if errArr.shape != self.data.shape:
-                raise ValueError("The 'ac_errors' GeoArray can only be instanced with an array of "
-                                 "the same dimensions like _EnMAP_Image.arr. Got %s." % str(errArr.shape))
-
-            if errArr._nodata is None:
-                errArr.nodata = 0  # DEF_D.get_outFillZeroSaturated(errArr.dtype)[0] # TODO
-            errArr.gt = self.data.gt
-            errArr.prj = self.data.prj
-            # errArr.bandnames = self.LBA2bandnames(self.LayerBandsAssignment)
-
-            self._ac_errors = errArr
-        else:
-            del self.ac_errors
-
-    @ac_errors.deleter
-    def ac_errors(self):
-        self._ac_errors = None
-
-    @property
     def deadpixelmap(self) -> GeoArray:
         """Return the dead pixel map.
 
-        Bundled with all the corresponding metadata. Dimensions: (bands x columns).
-
-        For usage instructions and a list of attributes refer to help(self.data).
-        self.mask_clouds_confidence works in the same way.
-
-        :return: instance of geoarray.GeoArray
+        :return: geoarray.GeoArray
         """
         if self._deadpixelmap is not None:
             self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
@@ -299,12 +199,12 @@ class _EnMAP_Image(object):
 
             if dpm.ndim == 3 and dpm.shape != self.data.shape:
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with a 3D array with the same size "
-                                 "like _EnMAP_Image.arr, i.e.: %s "
-                                 "Received %s." % (str(self.data.shape), str(dpm.shape)))
+                                 "like %s.data, i.e.: %s Received %s."
+                                 % (self.__class__.__name__, str(self.data.shape), str(dpm.shape)))
             elif dpm.ndim == 2 and dpm.shape != (self.data.bands, self.data.cols):
                 raise ValueError("The 'deadpixelmap' GeoArray can only be instanced with an array with the size "
-                                 "'bands x columns' of the GeoArray _EnMAP_Image.arr. "
-                                 "Received %s. Expected %s" % (str(dpm.shape), str((self.data.bands, self.data.cols))))
+                                 "'bands x columns' of the GeoArray %s.data. Received %s. Expected %s"
+                                 % (self.__class__.__name__, str(dpm.shape), str((self.data.bands, self.data.cols))))
 
             self._deadpixelmap = dpm
         else:
@@ -313,6 +213,30 @@ class _EnMAP_Image(object):
     @deadpixelmap.deleter
     def deadpixelmap(self):
         self._deadpixelmap = None
+
+    def _get_geoarray_with_datalike_geometry(self,
+                                             geoArr_initArgs: tuple,
+                                             attrName: str,
+                                             nodataVal: int = None,
+                                             specialclass=None) -> Optional[GeoArray]:
+        if geoArr_initArgs[0] is None:
+            return None
+        else:
+            GeoArrayOrSubclass = GeoArray if not specialclass else specialclass
+            gA = GeoArrayOrSubclass(*geoArr_initArgs)
+
+            if gA.shape[:2] != self.data.shape[:2]:
+                raise ValueError("The '%s' GeoArray can only be instanced with an array with "
+                                 "the same X/Y dimensions like %s.data %s. Got %s." %
+                                 (attrName, self.__class__.__name__, str(self.data.shape[:2]), str(gA.shape[:2])))
+
+            # noinspection PyProtectedMember
+            if gA._nodata is None and nodataVal is not None:
+                gA.nodata = nodataVal
+            gA.gt = self.data.gt
+            gA.prj = self.data.prj
+
+            return gA
 
     def generate_quicklook(self, bands2use: Tuple[int, int, int]) -> GeoArray:
         """

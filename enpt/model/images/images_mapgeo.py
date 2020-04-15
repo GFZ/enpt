@@ -90,17 +90,8 @@ class EnMAP_Detector_MapGeo(_EnMAP_Image):
 
     @mask_nodata.setter
     def mask_nodata(self, *geoArr_initArgs):
-        if geoArr_initArgs[0] is not None:
-            nd = NoDataMask(*geoArr_initArgs)
-            if nd.shape[:2] != self.data.shape[:2]:
-                raise ValueError("The 'mask_nodata' GeoArray can only be instanced with an array of the "
-                                 "same dimensions like _EnMAP_Image.arr. Got %s." % str(nd.shape))
-            nd.nodata = False
-            nd.gt = self.data.gt
-            nd.prj = self.data.prj
-            self._mask_nodata.prj = nd
-        else:
-            del self.mask_nodata
+        self._mask_nodata = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_nodata',
+                                                                      nodataVal=False, specialclass=NoDataMask)
 
     @mask_nodata.deleter
     def mask_nodata(self):

@@ -576,7 +576,8 @@ class EnMAPL1Product_SensorGeo(object):
                                                      res_vnir=(30, 30),
                                                      res_swir=(30, 30),
                                                      resamp_alg='nearest',
-                                                     # radius_of_influence=45
+                                                     # radius_of_influence=45,
+                                                     nprocs=self.cfg.CPUs
                                                      )
         array_swirsensorgeo = VS_SGT.transform_sensorgeo_VNIR_to_SWIR(geoarray_vnirsensorgeo[:])
 
