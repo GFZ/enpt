@@ -36,8 +36,8 @@ from os import path, makedirs
 
 from geoarray import GeoArray, NoDataMask
 
-from .baseclasses import _EnMAP_Image
-from .sensorgeo import EnMAPL1Product_SensorGeo
+from .image_baseclasses import _EnMAP_Image
+from .images_sensorgeo import EnMAPL1Product_SensorGeo
 from ...utils.logging import EnPT_Logger
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ...options.config import EnPTConfig

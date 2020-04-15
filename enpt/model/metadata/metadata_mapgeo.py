@@ -40,7 +40,7 @@ import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
 
-from .sensorgeo import EnMAP_Metadata_L1B_SensorGeo
+from .metadata_sensorgeo import EnMAP_Metadata_L1B_SensorGeo
 from ...options.config import EnPTConfig, enmap_xres
 from ..srf import SRF
 

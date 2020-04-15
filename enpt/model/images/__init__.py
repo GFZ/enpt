@@ -29,7 +29,7 @@
 
 """EnPT images module. All EnMAP image objects are defined here."""
 
-from .sensorgeo import EnMAP_Detector_SensorGeo, EnMAPL1Product_SensorGeo  # noqa: F401
-from .mapgeo import EnMAP_Detector_MapGeo, EnMAPL2Product_MapGeo  # noqa: F401
+from .images_sensorgeo import EnMAP_Detector_SensorGeo, EnMAPL1Product_SensorGeo  # noqa: F401
+from .images_mapgeo import EnMAP_Detector_MapGeo, EnMAPL2Product_MapGeo  # noqa: F401
 
 __author__ = 'Daniel Scheffler'

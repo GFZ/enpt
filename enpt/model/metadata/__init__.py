@@ -29,8 +29,8 @@
 
 """EnPT metadata modules. All objects and functions regarding EnMAP metadata are implemented here."""
 
-from .sensorgeo import EnMAP_Metadata_L1B_Detector_SensorGeo, EnMAP_Metadata_L1B_SensorGeo  # noqa: F401
-from .mapgeo import EnMAP_Metadata_L2A_MapGeo  # noqa: F401
+from .metadata_sensorgeo import EnMAP_Metadata_L1B_Detector_SensorGeo, EnMAP_Metadata_L1B_SensorGeo  # noqa: F401
+from .metadata_mapgeo import EnMAP_Metadata_L2A_MapGeo  # noqa: F401
 
 
 __author__ = 'Daniel Scheffler'

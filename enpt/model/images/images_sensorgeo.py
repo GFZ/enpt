@@ -39,9 +39,10 @@ from os import path, makedirs
 from glob import glob
 import utm
 from scipy.interpolate import interp2d
+from geoarray import GeoArray
 
 from ...utils.logging import EnPT_Logger
-from .baseclasses import _EnMAP_Image
+from .image_baseclasses import _EnMAP_Image
 from ...model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_Detector_SensorGeo
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ...options.config import EnPTConfig
@@ -558,6 +559,28 @@ class EnMAPL1Product_SensorGeo(object):
     def get_preprocessed_dem(self):
         self.vnir.get_preprocessed_dem()
         self.swir.get_preprocessed_dem()
+
+    def transform_VNIR_to_SWIR_sensorgeo(self, geoarray_vnirsensorgeo: GeoArray) -> GeoArray:
+        if self.meta.vnir.lons is None or self.meta.vnir.lats is None or \
+           self.meta.swir.lons is None or self.meta.swir.lats is None:
+            raise RuntimeError('The geolayer must be computed first '
+                               'to transform arrays from vnir to SWIR sensor geometry.')
+
+        from ...processors.spatial_transform import VNIR_SWIR_SensorGeometryTransformer
+        VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.meta.vnir.lons[:, :, 0],
+                                                     lats_vnir=self.meta.vnir.lons[:, :, 0],
+                                                     lons_swir=self.meta.swir.lons[:, :, 0],
+                                                     lats_swir=self.meta.swir.lons[:, :, 0],
+                                                     prj_vnir=self.meta.vnir.epsg_ortho,
+                                                     prj_swir=self.meta.swir.epsg_ortho,
+                                                     res_vnir=(30, 30),
+                                                     res_swir=(30, 30),
+                                                     resamp_alg='nearest',
+                                                     # radius_of_influence=45
+                                                     )
+        array_swirsensorgeo = VS_SGT.transform_sensorgeo_VNIR_to_SWIR(geoarray_vnirsensorgeo[:])
+
+        return GeoArray(array_swirsensorgeo, geotransform=self.swir.data.gt, projection=self.swir.data.prj)
 
     def run_AC(self):
         from ...processors.atmospheric_correction import AtmosphericCorrector
