@@ -91,7 +91,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.dead_pixel_filename_swir = meta_l1b.swir.filename_mask_deadpixel.replace('L1B-', 'L2A-')
         self.quicklook_filename_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
         self.quicklook_filename_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.cloud_mask_filename = meta_l1b.vnir.filename_mask_cloud.replace('L1B-', 'L2A-')
+        self.cloud_mask_filename = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')
         self.metaxml_filename = meta_l1b.metaxml_filename.replace('L1B-', 'L2A-')
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)

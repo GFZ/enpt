@@ -80,7 +80,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
         self.filename_mask_snow: Optional[str] = None  # filename of the snow mask file
         self.filename_mask_cloudshadow: Optional[str] = None  # filename of the cloud shadow mask file
-        self.filename_mask_cloud: Optional[str] = None  # filename of the cloud mask file
+        self.filename_mask_clouds: Optional[str] = None  # filename of the cloud mask file
         self.filename_mask_haze: Optional[str] = None  # filename of the haze mask file
         self.filename_mask_cirrus: Optional[str] = None  # filename of the cirrus mask file
 
@@ -142,13 +142,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
             self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
             self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
-            self.filename_mask_cloud = get_filename('*-QL_QUALITY_CLOUD')
+            self.filename_mask_clouds = get_filename('*-QL_QUALITY_CLOUD')
             self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
             self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
 
             # FIXME combine different cloud masks?
             self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
-                                % self.filename_mask_cloud.split(self.scene_basename)[1])
+                                % self.filename_mask_clouds.split(self.scene_basename)[1])
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
@@ -210,7 +210,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.scene_basename = os.path.splitext(self.filename_data)[0]
             self.filename_mask_deadpixel = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
             self.filename_quicklook = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
-            self.filename_mask_cloud = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+            self.filename_mask_clouds = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
 
             # read preview bands
             self.preview_bands = np.zeros(3, dtype=np.int)

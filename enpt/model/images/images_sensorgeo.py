@@ -100,12 +100,18 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.paths.root_dir = self._root_dir
         self.paths.data = path.join(self._root_dir, self.detector_meta.filename_data)
 
-        self.paths.mask_clouds = path.join(self._root_dir, self.detector_meta.filename_mask_cloud) \
-            if self.detector_meta.filename_mask_cloud else None
-        self.paths.deadpixelmap = path.join(self._root_dir, self.detector_meta.filename_mask_deadpixel) \
-            if self.detector_meta.filename_mask_deadpixel else None
+        def path_or_None(filename):
+            return path.join(self._root_dir, filename) if filename else None
 
-        self.paths.quicklook = path.join(self._root_dir, self.detector_meta.filename_quicklook)
+        self.paths.mask_water = path_or_None(self.detector_meta.filename_mask_landwater)
+        self.paths.mask_land = path_or_None(self.detector_meta.filename_mask_landwater)
+        self.paths.mask_clouds = path_or_None(self.detector_meta.filename_mask_clouds)
+        self.paths.mask_cloudshadow = path_or_None(self.detector_meta.filename_mask_cloudshadow)
+        self.paths.mask_haze = path_or_None(self.detector_meta.filename_mask_haze)
+        self.paths.mask_snow = path_or_None(self.detector_meta.filename_mask_snow)
+        self.paths.mask_cirrus = path_or_None(self.detector_meta.filename_mask_cirrus)
+        self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_mask_deadpixel)
+        self.paths.quicklook = path_or_None(self.detector_meta.filename_quicklook)
 
         return self.paths
 
@@ -234,34 +240,41 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
         else:
             # lats
-            ff = interp2d(x=[0, 1],
-                          y=[0, 1],
-                          z=[[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[1]],
-                             [img2.detector_meta.lat_UL_UR_LL_LR[2], img2.detector_meta.lat_UL_UR_LL_LR[3]]],
-                          kind='linear')
-            self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            interp_lats = interp2d(x=[0, 1],
+                                   y=[0, 1],
+                                   z=[[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[1]],
+                                      [img2.detector_meta.lat_UL_UR_LL_LR[2], img2.detector_meta.lat_UL_UR_LL_LR[3]]],
+                                   kind='linear')
+            self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(interp_lats(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(interp_lats(1, int(n_lines / img2.detector_meta.nrows)))[0]
             self.detector_meta.lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR,
                                                                              self.detector_meta.ncols,
                                                                              self.detector_meta.nrows)
             # lons
-            ff = interp2d(x=[0, 1],
-                          y=[0, 1],
-                          z=[[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[1]],
-                             [img2.detector_meta.lon_UL_UR_LL_LR[2], img2.detector_meta.lon_UL_UR_LL_LR[3]]],
-                          kind='linear')
-            self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(ff(0, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(ff(1, int(n_lines / img2.detector_meta.nrows)))[0]
+            interp_lons = interp2d(x=[0, 1],
+                                   y=[0, 1],
+                                   z=[[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[1]],
+                                      [img2.detector_meta.lon_UL_UR_LL_LR[2], img2.detector_meta.lon_UL_UR_LL_LR[3]]],
+                                   kind='linear')
+            self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(interp_lons(0, int(n_lines / img2.detector_meta.nrows)))[0]
+            self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(interp_lons(1, int(n_lines / img2.detector_meta.nrows)))[0]
             self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
                                                                              self.detector_meta.ncols,
                                                                              self.detector_meta.nrows)
 
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
-        self.mask_clouds = np.append(self.mask_clouds, img2.mask_clouds[0:n_lines, :], axis=0)
+
+        # only append masks for the VNIR as they are only provided in VNIR sensor geometry
+        if self.detector_name == 'VNIR':
+            for attrName in ['mask_water', 'mask_land', 'mask_clouds', 'mask_cloudshadow',
+                             'mask_haze', 'mask_snow', 'mask_cirrus']:
+                setattr(self, attrName, np.append(getattr(self, attrName),
+                                                  getattr(img2, attrName)[0:n_lines, :],
+                                                  axis=0))
+
         if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
-        # TODO append remaining raster layers - additional cloud masks, ...
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
@@ -310,6 +323,81 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             )
 
 
+class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
+    def __init__(self, root_dir: str, config: EnPTConfig, logger=None, meta=None) -> None:
+        super().__init__(detector_name='VNIR', root_dir=root_dir, config=config, logger=logger, meta=meta)
+
+    def read_masks(self):
+        """
+        Read the L1B masks.
+        """
+        # water mask (0=backgr.; 1=land; 2=water)
+        self.mask_water = GeoArray(self.paths.mask_water)[:] == 2
+
+        # land mask (0=backgr.; 1=land; 2=water)
+        self.mask_land = GeoArray(self.paths.mask_water)[:] == 1
+
+        # cloud mask (0=none; 1=cloud)
+        self.mask_clouds = GeoArray(self.paths.mask_clouds)[:] == 1
+
+        # cloud shadow mask (0=none; 1=cloud shadow)
+        self.mask_cloudshadow = GeoArray(self.paths.mask_cloudshadow)[:] == 1
+
+        # haze mask (0=none; 1=haze)
+        self.mask_haze = GeoArray(self.paths.mask_haze)[:] == 1
+
+        # snow mask (0=none; 1=snow)
+        self.mask_snow = GeoArray(self.paths.mask_snow)[:] == 1
+
+        # cirrus mask (0=none; 1=thin, 2=medium, 3=thick)
+        self.mask_cirrus = GeoArray(self.paths.mask_cirrus)[:]
+
+
+class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
+    def __init__(self, root_dir: str, config: EnPTConfig, logger=None, meta=None) -> None:
+        super().__init__(detector_name='SWIR', root_dir=root_dir, config=config, logger=logger, meta=meta)
+
+    def __getattribute__(self, item):  # called whenever an instance attribute is accessed
+        if item in ['mask_water', 'mask_land', 'mask_clouds', 'mask_cloudshadow',
+                    'mask_haze', 'mask_snow', 'mask_cirrus'] \
+                and getattr(self, '_%s' % item) is None:
+            self.logger.warning('The %s is not yet available in SWIR sensor geometry. '
+                                'Use EnMAP_SWIR_SensorGeo.transform_vnir_to_swir_raster() to set it with a '
+                                'transformed version of the one provided in VNIR sensor geometry.' % item)
+        return super().__getattribute__(item)
+
+    def transform_vnir_to_swir_raster(self,
+                                      array_vnirsensorgeo: np.ndarray,
+                                      vnir_lons: np.ndarray,
+                                      vnir_lats: np.ndarray,
+                                      vnir_epsg: int) -> np.ndarray:
+        """Set a SWIR raster attribute with a VNIR attribute transformed to SWIR sensor geometry.
+
+        :param array_vnirsensorgeo: source array in VNIR sensor geometry wo be transformed
+        :param vnir_lons:           longitude geolayer array of the VNIR
+        :param vnir_lats:           latitude geolayer array of the VNIR
+        :param vnir_epsg:           EPSG code of the VNIR when transformed to map geometry
+        """
+        if self.detector_meta.lons is None or self.detector_meta.lats is None:
+            raise RuntimeError('The SWIR geolayer must be computed first '
+                               'to transform arrays from VNIR to SWIR sensor geometry.')
+
+        from ...processors.spatial_transform import VNIR_SWIR_SensorGeometryTransformer
+        VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=vnir_lons[:, :, 0],
+                                                     lats_vnir=vnir_lats[:, :, 0],
+                                                     lons_swir=self.detector_meta.lons[:, :, 0],
+                                                     lats_swir=self.detector_meta.lats[:, :, 0],
+                                                     prj_vnir=vnir_epsg,
+                                                     prj_swir=self.detector_meta.epsg_ortho,
+                                                     res_vnir=(30, 30),
+                                                     res_swir=(30, 30),
+                                                     resamp_alg='nearest',
+                                                     # radius_of_influence=45,
+                                                     nprocs=self.cfg.CPUs
+                                                     )
+        return VS_SGT.transform_sensorgeo_VNIR_to_SWIR(array_vnirsensorgeo)
+
+
 class EnMAPL1Product_SensorGeo(object):
     """Class for EnPT EnMAP object in sensor geometry.
 
@@ -356,17 +444,16 @@ class EnMAPL1Product_SensorGeo(object):
 
         # define VNIR and SWIR detector
         self.detector_attrNames = ['vnir', 'swir']
-        self.vnir = EnMAP_Detector_SensorGeo('VNIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
-        self.swir = EnMAP_Detector_SensorGeo('SWIR', root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
+        self.vnir = EnMAP_VNIR_SensorGeo(root_dir, config=self.cfg, logger=self.logger, meta=self.meta.vnir)
+        self.swir = EnMAP_SWIR_SensorGeo(root_dir, config=self.cfg, logger=self.logger, meta=self.meta.swir)
 
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths()
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
         self.vnir.data = self.paths.vnir.data
-        self.vnir.mask_clouds = self.paths.vnir.mask_clouds
+        self.vnir.read_masks()
         self.swir.data = self.paths.swir.data
-        self.swir.mask_clouds = self.paths.swir.mask_clouds  # FIXME has VNIR geometry
 
         try:
             self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
@@ -560,28 +647,26 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.get_preprocessed_dem()
         self.swir.get_preprocessed_dem()
 
-    def transform_VNIR_to_SWIR_sensorgeo(self, geoarray_vnirsensorgeo: GeoArray) -> GeoArray:
+    def transform_vnir_to_swir_raster(self, attrName):
+        """Set the specified SWIR raster attribute with a VNIR attribute transformed to SWIR sensor geometry.
+
+        :param attrName:    name of the attribute to be set
+        """
+        vnir_rasterAttr = getattr(self.vnir, attrName)
+
         if self.meta.vnir.lons is None or self.meta.vnir.lats is None or \
            self.meta.swir.lons is None or self.meta.swir.lats is None:
-            raise RuntimeError('The geolayer must be computed first '
-                               'to transform arrays from vnir to SWIR sensor geometry.')
+            raise RuntimeError('The VNIR/SWIR geolayers must be computed first '
+                               'to transform arrays from VNIR to SWIR sensor geometry.')
 
-        from ...processors.spatial_transform import VNIR_SWIR_SensorGeometryTransformer
-        VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.meta.vnir.lons[:, :, 0],
-                                                     lats_vnir=self.meta.vnir.lons[:, :, 0],
-                                                     lons_swir=self.meta.swir.lons[:, :, 0],
-                                                     lats_swir=self.meta.swir.lons[:, :, 0],
-                                                     prj_vnir=self.meta.vnir.epsg_ortho,
-                                                     prj_swir=self.meta.swir.epsg_ortho,
-                                                     res_vnir=(30, 30),
-                                                     res_swir=(30, 30),
-                                                     resamp_alg='nearest',
-                                                     # radius_of_influence=45,
-                                                     nprocs=self.cfg.CPUs
-                                                     )
-        array_swirsensorgeo = VS_SGT.transform_sensorgeo_VNIR_to_SWIR(geoarray_vnirsensorgeo[:])
+        if vnir_rasterAttr is None:
+            raise RuntimeError("%s.vnir.%s has not yet been set." % (self.__class__.__name__, attrName))
 
-        return GeoArray(array_swirsensorgeo, geotransform=self.swir.data.gt, projection=self.swir.data.prj)
+        attr_transformed = self.swir.transform_vnir_to_swir_raster(array_vnirsensorgeo=np.array(vnir_rasterAttr),
+                                                                   vnir_lons=self.meta.vnir.lons,
+                                                                   vnir_lats=self.meta.vnir.lats,
+                                                                   vnir_epsg=self.meta.vnir.epsg_ortho)
+        setattr(self.swir, attrName, attr_transformed)
 
     def run_AC(self):
         from ...processors.atmospheric_correction import AtmosphericCorrector
@@ -605,7 +690,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the VNIR
         self.vnir.data.save(product_dir + path.sep + self.meta.vnir.filename_data, fmt="ENVI")
-        self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.filename_mask_cloud, fmt="GTiff")
+        self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.filename_mask_clouds, fmt="GTiff")
         if self.vnir.deadpixelmap is not None:
             self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.filename_mask_deadpixel, fmt="GTiff")
         else:
@@ -617,7 +702,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the SWIR
         self.swir.data.save(product_dir + path.sep + self.meta.swir.filename_data, fmt="ENVI")
-        self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.filename_mask_cloud, fmt="GTiff")
+        self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.filename_mask_clouds, fmt="GTiff")
         if self.swir.deadpixelmap is not None:
             self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.filename_mask_deadpixel, fmt="GTiff")
         else:

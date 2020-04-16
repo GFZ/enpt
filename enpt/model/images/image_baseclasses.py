@@ -71,8 +71,13 @@ class _EnMAP_Image(object):
 
         # protected attributes
         self._data = None
-        self._mask_nodata = None
+        self._mask_water = None
+        self._mask_land = None
         self._mask_clouds = None
+        self._mask_cloudshadow = None
+        self._mask_haze = None
+        self._mask_snow = None
+        self._mask_cirrus = None
         self._dem = None
         self._deadpixelmap = None
         self._subset = None  # FIXME how is _subset to be set?
@@ -148,6 +153,38 @@ class _EnMAP_Image(object):
         self._data = None
 
     @property
+    def mask_water(self) -> GeoArray:
+        """Return the water mask (0=no water, 1=water).
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_water
+
+    @mask_water.setter
+    def mask_water(self, *geoArr_initArgs):
+        self._mask_water = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_water')
+
+    @mask_water.deleter
+    def mask_water(self):
+        self._mask_water = None
+
+    @property
+    def mask_land(self) -> GeoArray:
+        """Return the land mask (0=no land, 1=land).
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_land
+
+    @mask_land.setter
+    def mask_land(self, *geoArr_initArgs):
+        self._mask_land = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_land')
+
+    @mask_land.deleter
+    def mask_land(self):
+        self._mask_land = None
+
+    @property
     def mask_clouds(self) -> GeoArray:
         """Return the cloud mask.
 
@@ -157,15 +194,79 @@ class _EnMAP_Image(object):
 
     @mask_clouds.setter
     def mask_clouds(self, *geoArr_initArgs):
-        self._mask_clouds = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_clouds', nodataVal=0)
+        self._mask_clouds = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_clouds')
 
     @mask_clouds.deleter
     def mask_clouds(self):
         self._mask_clouds = None
 
     @property
+    def mask_cloudshadow(self) -> GeoArray:
+        """Return the cloud shadow mask (0=no cloud shadow, 1=cloud shadow)..
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_cloudshadow
+
+    @mask_cloudshadow.setter
+    def mask_cloudshadow(self, *geoArr_initArgs):
+        self._mask_cloudshadow = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cloudshadow')
+
+    @mask_cloudshadow.deleter
+    def mask_cloudshadow(self):
+        self._mask_cloudshadow = None
+
+    @property
+    def mask_haze(self) -> GeoArray:
+        """Return the haze mask (0=no haze, 1=haze)..
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_haze
+
+    @mask_haze.setter
+    def mask_haze(self, *geoArr_initArgs):
+        self._mask_haze = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_haze')
+
+    @mask_haze.deleter
+    def mask_haze(self):
+        self._mask_haze = None
+
+    @property
+    def mask_snow(self) -> GeoArray:
+        """Return the snow mask (0=no snow, 1=snow)..
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_snow
+
+    @mask_snow.setter
+    def mask_snow(self, *geoArr_initArgs):
+        self._mask_snow = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_snow')
+
+    @mask_snow.deleter
+    def mask_snow(self):
+        self._mask_snow = None
+
+    @property
+    def mask_cirrus(self) -> GeoArray:
+        """Return the cirrus mask (0=none, 1=thin, 2=medium, 3=thick)..
+
+        :return: geoarray.GeoArray
+        """
+        return self._mask_cirrus
+
+    @mask_cirrus.setter
+    def mask_cirrus(self, *geoArr_initArgs):
+        self._mask_cirrus = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cirrus')
+
+    @mask_cirrus.deleter
+    def mask_cirrus(self):
+        self._mask_cirrus = None
+
+    @property
     def dem(self) -> GeoArray:
-        """Return a DEM in the exact dimension and pixel grid of self.arr.
+        """Return a DEM in the exact dimension and pixel grid of self.data.
 
         :return: geoarray.GeoArray
         """

@@ -244,7 +244,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         self.mask_clouds.save(outpath_mask_clouds, **kwargs_save)
 
         # TODO VNIR and SWIR
-        # self.deadpixelmap.save(path.join(product_dir, self.meta.filename_mask_cloud), **kwargs_save)
+        # self.deadpixelmap.save(path.join(product_dir, self.meta.filename_mask_clouds), **kwargs_save)
         self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
 
         self.generate_quicklook(bands2use=self.meta.preview_bands_vnir).save(outpath_quicklook_vnir, **kwargs_save)
