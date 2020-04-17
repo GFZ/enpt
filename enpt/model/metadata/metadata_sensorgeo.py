@@ -147,8 +147,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
 
             # FIXME combine different cloud masks?
-            self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
-                                % self.filename_mask_clouds.split(self.scene_basename)[1])
+            # TODO: Add test flags layer.
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
