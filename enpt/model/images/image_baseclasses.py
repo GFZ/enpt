@@ -71,8 +71,7 @@ class _EnMAP_Image(object):
 
         # protected attributes
         self._data = None
-        self._mask_water = None
-        self._mask_land = None
+        self._mask_landwater = None
         self._mask_clouds = None
         self._mask_cloudshadow = None
         self._mask_haze = None
@@ -153,36 +152,20 @@ class _EnMAP_Image(object):
         self._data = None
 
     @property
-    def mask_water(self) -> GeoArray:
-        """Return the water mask (0=no water, 1=water).
+    def mask_landwater(self) -> GeoArray:
+        """Return the water mask (0=background, 1=no water, 2=water).
 
         :return: geoarray.GeoArray
         """
-        return self._mask_water
+        return self._mask_landwater
 
-    @mask_water.setter
-    def mask_water(self, *geoArr_initArgs):
-        self._mask_water = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_water')
+    @mask_landwater.setter
+    def mask_landwater(self, *geoArr_initArgs):
+        self._mask_landwater = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_landwater')
 
-    @mask_water.deleter
-    def mask_water(self):
-        self._mask_water = None
-
-    @property
-    def mask_land(self) -> GeoArray:
-        """Return the land mask (0=no land, 1=land).
-
-        :return: geoarray.GeoArray
-        """
-        return self._mask_land
-
-    @mask_land.setter
-    def mask_land(self, *geoArr_initArgs):
-        self._mask_land = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_land')
-
-    @mask_land.deleter
-    def mask_land(self):
-        self._mask_land = None
+    @mask_landwater.deleter
+    def mask_landwater(self):
+        self._mask_landwater = None
 
     @property
     def mask_clouds(self) -> GeoArray:

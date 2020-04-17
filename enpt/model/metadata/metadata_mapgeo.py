@@ -87,8 +87,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
         self.data_filename = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.dead_pixel_filename_vnir = meta_l1b.vnir.filename_mask_deadpixel.replace('L1B-', 'L2A-')
-        self.dead_pixel_filename_swir = meta_l1b.swir.filename_mask_deadpixel.replace('L1B-', 'L2A-')
+        self.dead_pixel_filename_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
+        self.dead_pixel_filename_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
         self.quicklook_filename_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
         self.quicklook_filename_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
         self.cloud_mask_filename = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')

@@ -25,6 +25,9 @@ History
 * Added subclasses EnMAP_VNIR_SensorGeo and EnMAP_SWIR_SensorGeo.
 * Added functionality to set SWIR raster attributes with VNIR raster attributes tranformed to SWIR sensor geometry.
 * The enmap_ImageL1 instance passed to SICOR now features a 'mask_water' attribute.
+* Revised test_l1b_reader.py.
+* Combined 'mask_water' and 'mask_land' attributes to 'mask_landwater'.
+* Renamed metadata attribute 'filename_mask_deadpixel' to 'filename_deadpixelmap' for consistency.
 
 0.12.0 (2020-04-09)
 -------------------

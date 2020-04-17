@@ -31,7 +31,7 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple, Optional  # noqa: F401
+from typing import Tuple, Optional, List  # noqa: F401
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import numpy as np
@@ -103,14 +103,13 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         def path_or_None(filename):
             return path.join(self._root_dir, filename) if filename else None
 
-        self.paths.mask_water = path_or_None(self.detector_meta.filename_mask_landwater)
-        self.paths.mask_land = path_or_None(self.detector_meta.filename_mask_landwater)
+        self.paths.mask_landwater = path_or_None(self.detector_meta.filename_mask_landwater)
         self.paths.mask_clouds = path_or_None(self.detector_meta.filename_mask_clouds)
         self.paths.mask_cloudshadow = path_or_None(self.detector_meta.filename_mask_cloudshadow)
         self.paths.mask_haze = path_or_None(self.detector_meta.filename_mask_haze)
         self.paths.mask_snow = path_or_None(self.detector_meta.filename_mask_snow)
         self.paths.mask_cirrus = path_or_None(self.detector_meta.filename_mask_cirrus)
-        self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_mask_deadpixel)
+        self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_deadpixelmap)
         self.paths.quicklook = path_or_None(self.detector_meta.filename_quicklook)
 
         return self.paths
@@ -267,7 +266,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         # only append masks for the VNIR as they are only provided in VNIR sensor geometry
         if self.detector_name == 'VNIR':
-            for attrName in ['mask_water', 'mask_land', 'mask_clouds', 'mask_cloudshadow',
+            for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow',
                              'mask_haze', 'mask_snow', 'mask_cirrus']:
                 arr_img1 = getattr(self, attrName)
                 arr_img2 = getattr(img2, attrName)
@@ -328,6 +327,22 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     code=self.detector_meta.unitcode)
             )
 
+    def save_raster_attributes(self, attrNames: List[str], outputDir: str):
+        """Save the specified raster attributes to the given output directory.
+
+        :param attrNames:   list of attribute names to be saved
+        :param outputDir:   output directory
+        """
+        for attrName in attrNames:
+            attr = getattr(self, attrName)  # type: GeoArray
+            fN = getattr(self.detector_meta, 'filename_%s' % attrName)
+
+            if attr is not None:
+                attr.save(path.join(outputDir, fN), fmt="GTiff")
+            else:
+                self.logger.warning("Could not save the %s attribute '%s' as it does not exist in the current image."
+                                    % (self.detector_name, attrName))
+
 
 class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
     def __init__(self, root_dir: str, config: EnPTConfig, logger=None, meta=None) -> None:
@@ -340,12 +355,8 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
         self.logger.info('Reading image masks in VNIR sensor geometry.')
 
         # water mask (0=backgr.; 1=land; 2=water)
-        if self.paths.mask_water:
-            self.mask_water = GeoArray(self.paths.mask_water)[:] == 2
-
-        # land mask (0=backgr.; 1=land; 2=water)
-        if self.paths.mask_land:
-            self.mask_land = GeoArray(self.paths.mask_water)[:] == 1
+        if self.paths.mask_landwater:
+            self.mask_landwater = GeoArray(self.paths.mask_landwater)[:]
 
         # cloud mask (0=none; 1=cloud)
         if self.paths.mask_clouds:
@@ -356,7 +367,7 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
             self.mask_cloudshadow = GeoArray(self.paths.mask_cloudshadow)[:] == 1
 
         # haze mask (0=none; 1=haze)
-        if self.paths.mask_water:
+        if self.paths.mask_landwater:
             self.mask_haze = GeoArray(self.paths.mask_haze)[:] == 1
 
         # snow mask (0=none; 1=snow)
@@ -373,7 +384,7 @@ class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
         super().__init__(detector_name='SWIR', root_dir=root_dir, config=config, logger=logger, meta=meta)
 
     def __getattribute__(self, item):  # called whenever an instance attribute is accessed
-        if item in ['mask_water', 'mask_land', 'mask_clouds', 'mask_cloudshadow',
+        if item in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow',
                     'mask_haze', 'mask_snow', 'mask_cirrus'] \
                 and getattr(self, '_%s' % item) is None:
             self.logger.warning('The %s is not yet available in SWIR sensor geometry. '
@@ -706,26 +717,20 @@ class EnMAPL1Product_SensorGeo(object):
         makedirs(product_dir, exist_ok=True)
 
         # write the VNIR
-        self.vnir.data.save(product_dir + path.sep + self.meta.vnir.filename_data, fmt="ENVI")
-        self.vnir.mask_clouds.save(product_dir + path.sep + self.meta.vnir.filename_mask_clouds, fmt="GTiff")
-        if self.vnir.deadpixelmap is not None:
-            self.vnir.deadpixelmap.save(product_dir + path.sep + self.meta.vnir.filename_mask_deadpixel, fmt="GTiff")
-        else:
-            self.logger.warning('Could not save VNIR dead pixel map because there is no corresponding attribute.')
+        self.vnir.save_raster_attributes(['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow',
+                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap'],
+                                         product_dir)
 
-        # FIXME we could also write the quicklook included in DLR L1B format
+        # FIXME we could also write the quicklook included in DLR L1B format instead of generating an own one
         self.vnir.generate_quicklook(bands2use=self.vnir.detector_meta.preview_bands) \
-            .save(path.join(product_dir, path.basename(self.meta.vnir.filename_quicklook) + '.png'), fmt='PNG')
+            .save(path.join(product_dir, path.splitext(self.meta.vnir.filename_quicklook)[0] + '.png'), fmt='PNG')
 
         # write the SWIR
-        self.swir.data.save(product_dir + path.sep + self.meta.swir.filename_data, fmt="ENVI")
-        self.swir.mask_clouds.save(product_dir + path.sep + self.meta.swir.filename_mask_clouds, fmt="GTiff")
-        if self.swir.deadpixelmap is not None:
-            self.swir.deadpixelmap.save(product_dir + path.sep + self.meta.swir.filename_mask_deadpixel, fmt="GTiff")
-        else:
-            self.logger.warning('Could not save SWIR dead pixel map because there is no corresponding attribute.')
+        # NOTE: The masks only exist in VNIR sensor geometry (would have to be transformed before to match for the SWIR)
+        self.swir.save_raster_attributes(['data', 'deadpixelmap'], product_dir)
+
         self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
-            .save(path.join(product_dir, path.basename(self.meta.swir.filename_quicklook) + '.png'), fmt='PNG')
+            .save(path.join(product_dir, path.splitext(self.meta.swir.filename_quicklook)[0] + '.png'), fmt='PNG')
 
         # Update the xml file
         metadata_string = self.meta.to_XML()

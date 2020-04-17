@@ -74,7 +74,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         # These lines are used to load path information
         self.filename_data: Optional[str] = None  # detector data filename
         self.scene_basename: Optional[str] = None  # basename of the EnMAP image
-        self.filename_mask_deadpixel: Optional[str] = None  # filename of the dead pixel file
+        self.filename_deadpixelmap: Optional[str] = None  # filename of the dead pixel file
         self.filename_quicklook: Optional[str] = None  # filename of the quicklook file
         # FIXME masks of BOTH detectors
         self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
@@ -138,7 +138,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.filename_data = xml.find("product/image/%s/name" % lbl).text
             self.scene_basename = self.filename_data.split('-SPECTRAL_IMAGE')[0]
             self.filename_quicklook = xml.find("product/quicklook/%s/name" % lbl).text
-            self.filename_mask_deadpixel = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
+            self.filename_deadpixelmap = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
             self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
             self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
             self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
@@ -208,7 +208,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             # read data filenames
             self.filename_data = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
             self.scene_basename = os.path.splitext(self.filename_data)[0]
-            self.filename_mask_deadpixel = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
+            self.filename_deadpixelmap = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
             self.filename_quicklook = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
             self.filename_mask_clouds = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
 
