@@ -269,9 +269,15 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         if self.detector_name == 'VNIR':
             for attrName in ['mask_water', 'mask_land', 'mask_clouds', 'mask_cloudshadow',
                              'mask_haze', 'mask_snow', 'mask_cirrus']:
-                setattr(self, attrName, np.append(getattr(self, attrName),
-                                                  getattr(img2, attrName)[0:n_lines, :],
-                                                  axis=0))
+                arr_img1 = getattr(self, attrName)
+                arr_img2 = getattr(img2, attrName)
+
+                if arr_img1 is not None and arr_img2 is not None:
+                    setattr(self, attrName, np.append(arr_img1, arr_img2[0:n_lines, :], axis=0))
+                else:
+                    # this mainly applies to the dummy data format that does not have all mask files
+                    self.logger.warning("Could not append the '%s' attribute "
+                                        "as it does not exist in the current image." % attrName)
 
         if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
@@ -331,26 +337,35 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
         """
         Read the L1B masks.
         """
+        self.logger.info('Reading image masks in VNIR sensor geometry.')
+
         # water mask (0=backgr.; 1=land; 2=water)
-        self.mask_water = GeoArray(self.paths.mask_water)[:] == 2
+        if self.paths.mask_water:
+            self.mask_water = GeoArray(self.paths.mask_water)[:] == 2
 
         # land mask (0=backgr.; 1=land; 2=water)
-        self.mask_land = GeoArray(self.paths.mask_water)[:] == 1
+        if self.paths.mask_land:
+            self.mask_land = GeoArray(self.paths.mask_water)[:] == 1
 
         # cloud mask (0=none; 1=cloud)
-        self.mask_clouds = GeoArray(self.paths.mask_clouds)[:] == 1
+        if self.paths.mask_clouds:
+            self.mask_clouds = GeoArray(self.paths.mask_clouds)[:] == 1
 
         # cloud shadow mask (0=none; 1=cloud shadow)
-        self.mask_cloudshadow = GeoArray(self.paths.mask_cloudshadow)[:] == 1
+        if self.paths.mask_cloudshadow:
+            self.mask_cloudshadow = GeoArray(self.paths.mask_cloudshadow)[:] == 1
 
         # haze mask (0=none; 1=haze)
-        self.mask_haze = GeoArray(self.paths.mask_haze)[:] == 1
+        if self.paths.mask_water:
+            self.mask_haze = GeoArray(self.paths.mask_haze)[:] == 1
 
         # snow mask (0=none; 1=snow)
-        self.mask_snow = GeoArray(self.paths.mask_snow)[:] == 1
+        if self.paths.mask_snow:
+            self.mask_snow = GeoArray(self.paths.mask_snow)[:] == 1
 
         # cirrus mask (0=none; 1=thin, 2=medium, 3=thick)
-        self.mask_cirrus = GeoArray(self.paths.mask_cirrus)[:]
+        if self.paths.mask_cirrus:
+            self.mask_cirrus = GeoArray(self.paths.mask_cirrus)[:]
 
 
 class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
@@ -652,6 +667,8 @@ class EnMAPL1Product_SensorGeo(object):
 
         :param attrName:    name of the attribute to be set
         """
+        self.logger.info("Transforming the '%s' attribute from VNIR to SWIR sensor geometry." % attrName)
+
         vnir_rasterAttr = getattr(self.vnir, attrName)
 
         if self.meta.vnir.lons is None or self.meta.vnir.lats is None or \
