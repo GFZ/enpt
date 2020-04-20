@@ -117,16 +117,33 @@ class Orthorectifier(object):
                                         swir_wvls=enmap_ImageL1.meta.swir.wvl_center
                                         ).compute_stack(algorithm=self.cfg.vswir_overlap_algorithm)
 
+        # transform masks #
+        ###################
+
         # TODO allow to set geolayer band to be used for warping of 2D arrays
         GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                                      lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                                     ** kw_init)
+                                     ** kw_init)  # FIXME bilinear resampling for masks with discrete values?
 
-        # FIXME cloud mask applies to BOTH detectors
+        enmap_ImageL1.logger.info('Orthorectifying land/water mask...')
+        L2_obj.mask_landwater = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_landwater, **kw_trafo))
+
         enmap_ImageL1.logger.info('Orthorectifying cloud mask...')
         L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds, **kw_trafo))
 
-        # TODO transform mask_clouds_confidence, ac_errors, pixel masks
+        enmap_ImageL1.logger.info('Orthorectifying cloud shadow mask...')
+        L2_obj.mask_cloudshadow = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_cloudshadow, **kw_trafo))
+
+        enmap_ImageL1.logger.info('Orthorectifying haze mask...')
+        L2_obj.mask_haze = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_haze, **kw_trafo))
+
+        enmap_ImageL1.logger.info('Orthorectifying snow mask...')
+        L2_obj.mask_snow = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_snow, **kw_trafo))
+
+        enmap_ImageL1.logger.info('Orthorectifying cirrus mask...')
+        L2_obj.mask_cirrus = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_cirrus, **kw_trafo))
+
+        # TODO transform dead pixel map, quality test flags?
 
         # metadata adjustments #
         ########################

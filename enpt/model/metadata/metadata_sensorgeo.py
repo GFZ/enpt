@@ -452,7 +452,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
         self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
         self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
-        self.metaxml_filename: Optional[str] = None  # filename of XML metadata file
+        self.filename_metaxml: Optional[str] = None  # filename of XML metadata file
 
         self._scene_basename: Optional[str] = None  # basename of the EnMAP image
 
@@ -475,7 +475,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # load the metadata xml file
         xml = ElementTree.parse(path_xml).getroot()
 
-        self.metaxml_filename = os.path.basename(path_xml)
+        self.filename_metaxml = os.path.basename(path_xml)
 
         if not self.cfg.is_dummy_dataformat:
             # read processing level

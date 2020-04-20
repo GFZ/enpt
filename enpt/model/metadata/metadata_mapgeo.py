@@ -86,13 +86,18 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             self.scene_basename = meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
-        self.data_filename = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.dead_pixel_filename_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.dead_pixel_filename_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.quicklook_filename_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.quicklook_filename_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.cloud_mask_filename = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')
-        self.metaxml_filename = meta_l1b.metaxml_filename.replace('L1B-', 'L2A-')
+        self.filename_data = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
+        self.filename_dead_pixel_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
+        self.filename_dead_pixel_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
+        self.filename_quicklook_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
+        self.filename_quicklook_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
+        self.filename_mask_landwater = meta_l1b.vnir.filename_mask_landwater.replace('L1B-', 'L2A-')
+        self.filename_mask_clouds = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')
+        self.filename_mask_cloudshadow = meta_l1b.vnir.filename_mask_cloudshadow.replace('L1B-', 'L2A-')
+        self.filename_mask_haze = meta_l1b.vnir.filename_mask_haze.replace('L1B-', 'L2A-')
+        self.filename_mask_snow = meta_l1b.vnir.filename_mask_snow.replace('L1B-', 'L2A-')
+        self.filename_mask_cirrus = meta_l1b.vnir.filename_mask_cirrus.replace('L1B-', 'L2A-')
+        self.filename_metaxml = meta_l1b.filename_metaxml.replace('L1B-', 'L2A-')
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
         # get band index order
@@ -217,7 +222,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         ############
 
         xml.find("metadata/schema/processingLevel").text = self.proc_level
-        xml.find("metadata/name").text = self.metaxml_filename
+        xml.find("metadata/name").text = self.filename_metaxml
         # xml.find("metadata/comment").text = 'EnMAP Level 0 Product of datatake 987'  # FIXME hardcoded
 
         ##############
@@ -283,7 +288,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             # xml.find("product/image/%s/dimension/dimensionGeographic/longitude" % lbl).text = 'NA'  # TODO
             # xml.find("product/image/%s/dimension/dimensionGeographic/latitude" % lbl).text = 'NA'
 
-            fN_quicklook = self.quicklook_filename_vnir if detName == 'VNIR' else self.quicklook_filename_swir
+            fN_quicklook = self.filename_quicklook_vnir if detName == 'VNIR' else self.filename_quicklook_swir
             size_quicklook = [F['size'] for F in self.fileinfos
                               if os.path.splitext(F['name'])[0].endswith('-QL_%s' % detName)][0]
             xml.find("product/quicklook/%s/name" % lbl).text = fN_quicklook

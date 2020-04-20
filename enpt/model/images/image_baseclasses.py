@@ -69,7 +69,7 @@ class _EnMAP_Image(object):
         # add EnMAP specific attributes
         self.paths = SimpleNamespace()
 
-        # protected attributes
+        # private attributes
         self._data = None
         self._mask_landwater = None
         self._mask_clouds = None
