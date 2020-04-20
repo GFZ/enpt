@@ -27,67 +27,24 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""EnPT metadata modules. All object and functions regarding EnMAP metadata are implemented here."""
+"""EnPT metadata objects for EnMAP data in sensor geometry."""
 
 from datetime import datetime
 from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple  # noqa: F401
+from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
 
-from ..options.config import EnPTConfig, enmap_xres
-from .srf import SRF
-from ..processors.spatial_transform import RPC_3D_Geolayer_Generator
+from ...options.config import EnPTConfig
+from ..srf import SRF
+from ...processors.spatial_transform import RPC_3D_Geolayer_Generator
 
 __author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
-
-
-# Define L1B_product_props
-L1B_product_props = dict(
-    xml_detector_label=dict(
-        VNIR='VNIRDetector',
-        SWIR='SWIRDetector'
-    ),
-    fn_detector_suffix=dict(
-        VNIR='D1',
-        SWIR='D2'
-    )
-)
-
-
-L1B_product_props_DLR = dict(
-    xml_detector_label=dict(
-        VNIR='vnir',
-        SWIR='swir'
-    ),
-    fn_detector_suffix=dict(
-        VNIR='D1',
-        SWIR='D2'
-    )
-)
-
-
-# Define L1B_product_props
-L2A_product_props_DLR = dict(
-    xml_detector_label=dict(
-        VNIR='vnir',
-        SWIR='swir'
-    ),
-    fn_detector_suffix=dict(
-        VNIR='D1',
-        SWIR='D2'
-    )
-)
-
-
-#########################################################
-# EnPT metadata objects for EnMAP data in sensor geometry
-#########################################################
 
 
 class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
@@ -105,8 +62,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param config:          EnPT configuration object
         :param logger:          instance of logging.logger or subclassed
         """
+        from . import L1B_product_props, L1B_product_props_DLR
         self.cfg = config
-        self.detector_name = detector_name  # type: str
+        self.detector_name: str = detector_name
         if not self.cfg.is_dummy_dataformat:
             self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
         else:
@@ -114,37 +72,43 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.data_filename = None  # type: str # detector data filename
-        self.scene_basename = None  # type: str # basename of the EnMAP image
-        self.dead_pixel_filename = None  # type: str # filename of the dead pixel file
-        self.quicklook_filename = None  # type: str # filename of the quicklook file
-        # FIXME cloud mask of BOTH detectors
-        self.cloud_mask_filename = None  # type: str # filename of the cloud mask file
+        self.filename_data: Optional[str] = None  # detector data filename
+        self.scene_basename: Optional[str] = None  # basename of the EnMAP image
+        self.filename_deadpixelmap: Optional[str] = None  # filename of the dead pixel file
+        self.filename_quicklook: Optional[str] = None  # filename of the quicklook file
+        # FIXME masks of BOTH detectors
+        self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
+        self.filename_mask_snow: Optional[str] = None  # filename of the snow mask file
+        self.filename_mask_cloudshadow: Optional[str] = None  # filename of the cloud shadow mask file
+        self.filename_mask_clouds: Optional[str] = None  # filename of the cloud mask file
+        self.filename_mask_haze: Optional[str] = None  # filename of the haze mask file
+        self.filename_mask_cirrus: Optional[str] = None  # filename of the cirrus mask file
 
-        self.wvl_center = None  # type: np.ndarray  # Center wavelengths for each EnMAP band
-        self.fwhm = None  # type: np.ndarray  # Full width half maximmum for each EnMAP band
-        self.srf = None  # type: SRF  # SRF object holding the spectral response functions for each EnMAP band
-        self.solar_irrad = None  # type: np.array  # solar irradiance in [W/m2/nm] for each band
-        self.nwvl = None  # type: int  # Number of wave bands
-        self.nrows = None  # type: int  # number of rows
-        self.ncols = None  # type: int  # number of columns
-        self.smile_coef = None  # type: np.ndarray  # smile coefficients needed for smile computation
-        self.nsmile_coef = None  # type: int  # number of smile coefficients
-        self.smile = None  # type: np.ndarray  # smile for each EnMAP image column
-        self.gains = None  # type: np.ndarray  # band-wise gains for computing radiance from DNs
-        self.offsets = None  # type: np.ndarray  # band-wise offsets for computing radiance from DNs
-        self.l_min = None  # type: np.ndarray  # band-wise l-min for computing radiance from DNs
-        self.l_max = None  # type: np.ndarray  # band-wise l-max for computing radiance from DNs
-        self.lat_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # latitude coords for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR = None  # type:  List[float, float, float, float]  # longitude coords for UL, UR, LL, LR
-        self.rpc_coeffs = OrderedDict()  # type: OrderedDict  # RPC coefficients for geolayer computation
-        self.ll_mapPoly = None  # type: Polygon  # footprint polygon in longitude/latitude map coordinates
-        self.lats = None  # type: np.ndarray  # 2D array of latitude coordinates according to given lon/lat sampling
-        self.lons = None  # type: np.ndarray  # 2D array of longitude coordinates according to given lon/lat sampling
-        self.unit = ''  # type: str  # radiometric unit of pixel values
-        self.unitcode = ''  # type: str  # code of radiometric unit
+        self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
+        self.fwhm: Optional[np.ndarray] = None  # Full width half maximmum for each EnMAP band
+        self.srf: Optional[SRF] = None  # SRF object holding the spectral response functions for each EnMAP band
+        self.solar_irrad: Optional[np.ndarray] = None  # solar irradiance in [W/m2/nm] for each band
+        self.nwvl: Optional[int] = None  # Number of wave bands
+        self.nrows: Optional[int] = None  # number of rows
+        self.ncols: Optional[int] = None  # number of columns
+        self.smile_coef: Optional[np.ndarray] = None  # smile coefficients needed for smile computation
+        self.nsmile_coef: Optional[int] = None  # number of smile coefficients
+        self.smile: Optional[np.ndarray] = None  # smile for each EnMAP image column
+        self.gains: Optional[np.ndarray] = None  # band-wise gains for computing radiance from DNs
+        self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
+        self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
+        self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
+        self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
+        self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
+        self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
+        self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
+        self.lats: Optional[np.ndarray] = None  # 2D array of latitude coordinates according to given lon/lat sampling
+        self.lons: Optional[np.ndarray] = None  # 2D array of longitude coordinates according to given lon/lat sampling
+        self.unit: str = ''  # radiometric unit of pixel values
+        self.unitcode: str = ''  # code of radiometric unit
         self.preview_bands = None
-        self.snr = None  # type: np.ndarray  # Signal to noise ratio as computed from radiance data
+        self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
         """
@@ -171,19 +135,19 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
                 return matches[0]
 
-            self.data_filename = xml.find("product/image/%s/name" % lbl).text
-            self.scene_basename = self.data_filename.split('-SPECTRAL_IMAGE')[0]
-            self.dead_pixel_filename = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
-            self.quicklook_filename = xml.find("product/quicklook/%s/name" % lbl).text
-            # FIXME multiple cloud masks provided. QL_QUALITY_CLASSES as combined product?
-            #   - QL_QUALITY_CLOUD
-            #   - QL_QUALITY_CIRRUS
-            #   - QL_QUALITY_SNOW
-            #   - QL_QUALITY_CLOUDSHADOW
-            #   - QL_QUALITY_HAZE
-            self.cloud_mask_filename = get_filename('*-QL_QUALITY_CLOUD')
-            self.logger.warning('DLR test data provide multiple cloud masks. Added only *%s!'
-                                % self.cloud_mask_filename.split(self.scene_basename)[1])
+            self.filename_data = xml.find("product/image/%s/name" % lbl).text
+            self.scene_basename = self.filename_data.split('-SPECTRAL_IMAGE')[0]
+            self.filename_quicklook = xml.find("product/quicklook/%s/name" % lbl).text
+            self.filename_deadpixelmap = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
+            self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
+            self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
+            self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
+            self.filename_mask_clouds = get_filename('*-QL_QUALITY_CLOUD')
+            self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
+            self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
+
+            # FIXME combine different cloud masks?
+            # TODO: Add test flags layer.
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
@@ -236,23 +200,16 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                     self.rpc_coeffs[bN]['%s_coeffs' % n.lower()] = \
                         np.array([v for k, v in tmp.items() if k.startswith(n)])
 
-            # compute metadata derived from read data
-            self.smile = self.calc_smile()
-            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
-                                                              self.lat_UL_UR_LL_LR)), fix_invalid=True)
-
         else:
             lbl = self.detector_label
             self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
             # read data filenames
-            self.data_filename = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
-            self.scene_basename = os.path.splitext(self.data_filename)[0]
-            self.dead_pixel_filename = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
-            self.quicklook_filename = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
-            self.cloud_mask_filename = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
+            self.filename_data = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
+            self.scene_basename = os.path.splitext(self.filename_data)[0]
+            self.filename_deadpixelmap = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
+            self.filename_quicklook = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
+            self.filename_mask_clouds = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
 
             # read preview bands
             self.preview_bands = np.zeros(3, dtype=np.int)
@@ -301,13 +258,18 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 scl = bi.findall("Smile/Coefficient")
                 for sc in scl:
                     self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
-            self.smile = self.calc_smile()
-            self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-            self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
-            self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
-                                                    fix_invalid=True)
+
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
+
+        # compute metadata derived from read data
+        self.smile = self.calc_smile()
+        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
+        self.solar_irrad = self.calc_solar_irradiance_CWL_FWHM_per_band()
+        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
+                                                          self.lat_UL_UR_LL_LR)), fix_invalid=True)
+        from ...processors.spatial_transform import get_UTMEPSG_from_LonLat_cornersXY
+        self.epsg_ortho = get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -431,7 +393,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         return lons, lats
 
     def calc_solar_irradiance_CWL_FWHM_per_band(self) -> np.array:
-        from ..io.reader import Solar_Irradiance_reader
+        from ...io.reader import Solar_Irradiance_reader
 
         self.logger.debug('Calculating solar irradiance...')
 
@@ -477,22 +439,22 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.rootdir = os.path.dirname(path_metaxml)
 
         # defaults - Common
-        self.proc_level = None  # type: str  # Dataset processing level
-        self.observation_datetime = None  # type: datetime  # Date and Time of image observation
-        self.geom_view_zenith = None  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = None  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = None  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = None  # type: float  # sun azimuth angle
-        self.mu_sun = None  # type: float  # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist = None  # type: float  # earth-sun distance
-        self.aot = None  # type: float  # scene aerosol optical thickness
-        self.water_vapour = None  # type: float  # scene water vapour [cm]
-        self.vnir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of VNIR only
-        self.swir = None  # type: EnMAP_Metadata_L1B_Detector_SensorGeo # metadata of SWIR only
-        self.detector_attrNames = ['vnir', 'swir']  # type: list # attribute names of the detector objects
-        self.metaxml_filename = None  # type: str # filename of XML metadata file
+        self.proc_level: Optional[str] = None   # Dataset processing level
+        self.observation_datetime: Optional[datetime] = None  # Date and Time of image observation
+        self.geom_view_zenith: Optional[float] = None  # viewing zenith angle
+        self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
+        self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
+        self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
+        self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
+        self.earthSunDist: Optional[float] = None  # earth-sun distance
+        self.aot: Optional[float] = None  # scene aerosol optical thickness
+        self.water_vapour: Optional[float] = None  # scene water vapour [cm]
+        self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
+        self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
+        self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
+        self.metaxml_filename: Optional[str] = None  # filename of XML metadata file
 
-        self._scene_basename = None  # type: str # basename of the EnMAP image
+        self._scene_basename: Optional[str] = None  # basename of the EnMAP image
 
     @property
     def scene_basename(self):
@@ -601,6 +563,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """
         Generate an XML metadata string from the L1B metadata.
         """
+        from . import L1B_product_props, L1B_product_props_DLR
         xml = ElementTree.parse(self.path_xml).getroot()
 
         if not self.cfg.is_dummy_dataformat:
@@ -621,313 +584,3 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         xml_string = ElementTree.tostring(xml, encoding='unicode', pretty_print=True)
 
         return xml_string
-
-
-class EnMAP_Metadata_L2A_MapGeo(object):
-    def __init__(self,
-                 config: EnPTConfig,
-                 meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
-                 wvls_l2a: Union[List, np.ndarray],
-                 dims_mapgeo: Tuple[int, int, int],
-                 logger=None):
-        """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
-
-        :param config:              EnPT configuration object
-        :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
-        :param wvls_l2a:            list of center wavelengths included in the L2A product
-        :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
-        :param logger:              instance of logging.logger or subclassed
-        """
-        self.cfg = config
-        self._meta_l1b = meta_l1b
-        self.logger = logger or logging.getLogger()
-
-        # defaults
-        self.band_means = None  # type: np.ndarray # band-wise means in unscaled values (percent in case of reflectance)
-        self.band_stds = None  # type: np.ndarray # band-wise standard deviations in unscaled values
-        self.fileinfos = []  # type: list # file informations for each file beloning to the EnMAP L2A product
-
-        self.proc_level = 'L2A'
-        self.observation_datetime = meta_l1b.observation_datetime  # type: datetime  # Date and Time of observation
-        # FIXME VZA may be negative in DLR data
-        self.geom_view_zenith = meta_l1b.geom_view_zenith  # type: float  # viewing zenith angle
-        self.geom_view_azimuth = meta_l1b.geom_view_azimuth  # type: float  # viewing azimuth angle
-        self.geom_sun_zenith = meta_l1b.geom_sun_zenith  # type: float  # sun zenith angle
-        self.geom_sun_azimuth = meta_l1b.geom_sun_azimuth  # type: float  # sun azimuth angle
-        self.mu_sun = meta_l1b.mu_sun  # type: float  # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist = meta_l1b.earthSunDist  # type: float  # earth-sun distance
-
-        # generate file names for L2A output
-        if not self.cfg.is_dummy_dataformat:
-            self.scene_basename = meta_l1b.vnir.data_filename.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
-        else:
-            self.scene_basename = os.path.splitext(meta_l1b.vnir.data_filename)[0]
-        self.data_filename = meta_l1b.vnir.data_filename.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.dead_pixel_filename_vnir = meta_l1b.vnir.dead_pixel_filename.replace('L1B-', 'L2A-')
-        self.dead_pixel_filename_swir = meta_l1b.swir.dead_pixel_filename.replace('L1B-', 'L2A-')
-        self.quicklook_filename_vnir = meta_l1b.vnir.quicklook_filename.replace('L1B-', 'L2A-')
-        self.quicklook_filename_swir = meta_l1b.swir.quicklook_filename.replace('L1B-', 'L2A-')
-        self.cloud_mask_filename = meta_l1b.vnir.cloud_mask_filename.replace('L1B-', 'L2A-')
-        self.metaxml_filename = meta_l1b.metaxml_filename.replace('L1B-', 'L2A-')
-
-        # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
-        # get band index order
-        wvls_sorted = np.array(sorted(np.hstack([self._meta_l1b.vnir.wvl_center,
-                                                 self._meta_l1b.swir.wvl_center])))
-        bandidx_order = np.array([np.argmin(np.abs(wvls_sorted - cwl)) for cwl in wvls_l2a])
-
-        self.wvl_center = np.hstack([meta_l1b.vnir.wvl_center, meta_l1b.swir.wvl_center])[bandidx_order]
-        self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]
-        self.gains = np.full((dims_mapgeo[2],), 100)  # implies reflectance scaled between 0 and 10000
-        self.offsets = np.zeros((dims_mapgeo[2],))
-        self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
-        self.solar_irrad = np.hstack([meta_l1b.vnir.solar_irrad, meta_l1b.swir.solar_irrad])[bandidx_order]
-
-        if not meta_l1b.vnir.nsmile_coef == meta_l1b.swir.nsmile_coef:
-            raise ValueError('Expected equal number of smile coefficients for VNIR and SWIR. Received %d/%s.'
-                             % (meta_l1b.vnir.nsmile_coef, meta_l1b.swir.nsmile_coef))
-
-        self.nsmile_coef = meta_l1b.vnir.nsmile_coef
-        self.smile_coef = np.vstack([meta_l1b.vnir.smile_coef, meta_l1b.swir.smile_coef])[bandidx_order, :]
-        self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
-
-        if not self.cfg.is_dummy_dataformat:
-            self.rpc_coeffs = OrderedDict(zip(
-                ['band_%d' % (i + 1) for i in range(dims_mapgeo[2])],
-                [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
-                 meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
-        else:
-            self.rpc_coeffs = OrderedDict()
-
-        self.nrows = dims_mapgeo[0]
-        self.ncols = dims_mapgeo[1]
-        self.nwvl = dims_mapgeo[2]
-        common_UL_UR_LL_LR = self.get_common_UL_UR_LL_LR()
-        self.lon_UL_UR_LL_LR = [lon for lon, lat in common_UL_UR_LL_LR]
-        self.lat_UL_UR_LL_LR = [lat for lon, lat in common_UL_UR_LL_LR]
-        self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
-                                                          self.lat_UL_UR_LL_LR)), fix_invalid=True)
-
-        if meta_l1b.vnir.unit != meta_l1b.swir.unit or meta_l1b.vnir.unitcode != meta_l1b.swir.unitcode:
-            raise RuntimeError('L2A data should have the same radiometric unit for VNIR and SWIR. '
-                               'Received %s in %s for VNIR and %s in %s for SWIR.'
-                               % (meta_l1b.vnir.unitcode, meta_l1b.vnir.unit,
-                                  meta_l1b.swir.unitcode, meta_l1b.swir.unit))
-
-        self.unit = meta_l1b.vnir.unit
-        self.unitcode = meta_l1b.vnir.unitcode
-        self.preview_bands_vnir = meta_l1b.vnir.preview_bands
-        self.preview_bands_swir = meta_l1b.swir.preview_bands
-
-        self.snr = None
-        if meta_l1b.vnir.snr is not None:
-            assert meta_l1b.swir.snr is not None
-            self.snr = np.dstack([meta_l1b.vnir.snr, meta_l1b.swir.snr])[:, :, bandidx_order]
-
-    def get_common_UL_UR_LL_LR(self):
-        vnir_ulx, vnir_urx, vnir_llx, vnir_lrx = self._meta_l1b.vnir.lon_UL_UR_LL_LR
-        vnir_uly, vnir_ury, vnir_lly, vnir_lry = self._meta_l1b.vnir.lat_UL_UR_LL_LR
-        swir_ulx, swir_urx, swir_llx, swir_lrx = self._meta_l1b.swir.lon_UL_UR_LL_LR
-        swir_uly, swir_ury, swir_lly, swir_lry = self._meta_l1b.swir.lat_UL_UR_LL_LR
-
-        # use OUTER coordinates
-        return ((min([vnir_ulx, swir_ulx]), max([vnir_uly, swir_uly])),
-                (max([vnir_urx, swir_urx]), max([vnir_ury, swir_ury])),
-                (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
-                (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
-
-    def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
-        R, C, B = datastack_vnir_swir.shape
-        # NOTE:  DEVIDE by gains to reflectance in percent
-        self.band_means = np.mean(datastack_vnir_swir.reshape(1, R * C, B), axis=1) / self.gains
-        self.band_stds = np.mean(datastack_vnir_swir.reshape(1, R * C, B), axis=1) / self.gains
-
-    def add_product_fileinformation(self, filepaths: List[str], sizes: List[int] = None, versions: List[str] = None):
-        self.fileinfos = []
-
-        for i, fp in enumerate(filepaths):
-            ismeta = fp.endswith('METADATA.XML') or fp.endswith('_header.xml')  # FIXME
-            if not os.path.exists(fp):
-                if ismeta:
-                    pass  # does not yet exist
-                else:
-                    raise FileNotFoundError(fp)
-
-            ext = os.path.splitext(fp)[1]
-            fileinfo_dict = dict(
-                name=os.path.basename(fp),
-                size=sizes[i] if sizes else int(os.path.getsize(fp) / 1024) if not ismeta else '',
-                version=versions[i] if versions else '',
-                format='binary' if ext in ['.GEOTIFF',
-                                           '.TIF',
-                                           '.TIFF',
-                                           '.GTIFF',
-                                           '.BSQ',
-                                           '.BIL',
-                                           '.BIP',
-                                           '.JPEG2000'] else 'xml' if ext == '.XML' else 'NA'
-            )
-
-            self.fileinfos.append(fileinfo_dict)
-
-    def to_XML(self) -> str:
-        """
-        Generate an XML metadata string from the L2A metadata.
-        """
-        # use an XML parser that creates properly indented XML files even if new SubElements have been added
-        parser = ElementTree.XMLParser(remove_blank_text=True)
-
-        # parse (use L1B metadata as template)
-        xml = ElementTree.parse(self._meta_l1b.path_xml, parser).getroot()
-
-        if self.cfg.is_dummy_dataformat:
-            self.logger.warning('No XML metadata conversion implemented for datasets different to the DLR format.'
-                                'Metadata XML file will be empty.')
-            return ''
-
-        self.logger.warning('Currently, the L2A metadata XML file does not contain all relevant keys and contains '
-                            'not updated values!')  # FIXME
-
-        ############
-        # metadata #
-        ############
-
-        xml.find("metadata/schema/processingLevel").text = self.proc_level
-        xml.find("metadata/name").text = self.metaxml_filename
-        # xml.find("metadata/comment").text = 'EnMAP Level 0 Product of datatake 987'  # FIXME hardcoded
-
-        ##############
-        # processing #
-        ##############
-
-        xml.find("processing/terrainCorrection").text = 'Yes'  # FIXME hardcoded {Yes, No}
-        xml.find("processing/ozoneValue").text = 'NA'  # FIXME {[200-500], NA}
-        xml.find("processing/season").text = 'NA'  # FIXME {summer, winter, NA}
-        xml.find("processing/productFormat").text = 'GeoTIFF+Metadata'  # FIXME hardcoded
-        # {BSQ+Metadata, BIL+Metadata, BIP+Metadata, JPEG2000+Metadata, GeoTiff+Metadata}
-        xml.find("processing/mapProjection").text = 'UTM_Zone_of_Scene_Center'  # FIXME hardcoded
-        # {UTM_Zone_of_Scene_Center, UTM_Zone_of_Scene_Center(-1), UTM_Zone_of_Scene_Center(+1),
-        #  UTM_Zone_of_Datatake_Center, Geographic, European_Projection_LAEA, NA}
-        xml.find("processing/DEMDBVersion").text = 'SRTM-C_v4'  # FIXME hardcoded
-        # {SRTM-C-X_vv.rr, best-of-DEM_vv.rr, DEM-derivedfrom-Tandem-X_vv.rr, ASTER-GDEM_vv.rr, NA}
-        xml.find("processing/correctionType").text = 'NA'  # FIXME hardcoded {Combined, Land_Mode, Water_Mode, NA}
-        xml.find("processing/cirrusHazeRemoval").text = 'NA'  # FIXME hardcoded {Yes, No}
-        xml.find("processing/bandInterpolation").text = 'NA'  # FIXME hardcoded {Yes, No}
-        xml.find("processing/waterType").text = 'NA'  # FIXME hardcoded {Clear, Turbid, Highly_Turbid, NA}
-
-        ########
-        # base #
-        ########
-
-        # TODO update corner coordinates? DLR just uses the same coordinates like in L1B
-        # xml.find("base/spatialCoverage" % lbl).text =
-        xml.find("base/format").text = 'ENMAP_%s' % self.proc_level
-        xml.find("base/level").text = self.proc_level
-        xml.find("base/size").text = 'NA'  # FIXME Size of product. Attribute unit {byte, Kbyte, Mbyte, Gbyte}
-
-        ############
-        # specific #
-        ############
-
-        xml.find("specific/code").text = self.proc_level
-        bi = "specific/bandCharacterisation/bandID/"
-        for ele, gain in zip(xml.findall(bi + "GainOfBand"), self.gains):
-            ele.text = str(gain)
-        for ele, offset in zip(xml.findall(bi + "OffsetOfBand"), self.offsets):
-            ele.text = str(offset)
-
-        ###########
-        # product #
-        ###########
-
-        if not self.fileinfos:
-            raise ValueError('Product file informations must be added before writing metadata. '
-                             'Call add_product_fileinformation() before!')
-
-        for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
-            lbl = L2A_product_props_DLR['xml_detector_label'][detName]
-            # FIXME DLR uses L0 filenames for VNIR/SWIR separately?!
-            xml.find("product/image/%s/name" % lbl).text = detMetaL1B.data_filename
-            # FIXME this is the size of the VNIR/SWIR stack
-            size = [F['size'] for F in self.fileinfos if os.path.splitext(F['name'])[0].endswith('-SPECTRAL_IMAGE')][0]
-            xml.find("product/image/%s/size" % lbl).text = str(size)
-            # FIXME DLR data dimensions equal neither L2A data nor L1B data
-            xml.find("product/image/%s/channels" % lbl).text = str(detMetaL1B.nwvl)
-            xml.find("product/image/%s/dimension/rows" % lbl).text = str(self.nrows)
-            xml.find("product/image/%s/dimension/columns" % lbl).text = str(self.ncols)
-            # xml.find("product/image/%s/dimension/dimensionGeographic/longitude" % lbl).text = 'NA'  # TODO
-            # xml.find("product/image/%s/dimension/dimensionGeographic/latitude" % lbl).text = 'NA'
-
-            fN_quicklook = self.quicklook_filename_vnir if detName == 'VNIR' else self.quicklook_filename_swir
-            size_quicklook = [F['size'] for F in self.fileinfos
-                              if os.path.splitext(F['name'])[0].endswith('-QL_%s' % detName)][0]
-            xml.find("product/quicklook/%s/name" % lbl).text = fN_quicklook
-            xml.find("product/quicklook/%s/size" % lbl).text = str(size_quicklook)
-            xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(self.nrows)
-            xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(self.ncols)
-            # xml.find("product/quicklook/%s/dimension/dimensionGeographic/longitude" % lbl).text = 'NA'
-            # xml.find("product/quicklook/%s/dimension/dimensionGeographic/latitude" % lbl).text = 'NA'
-
-        # productFileInformation
-        ########################
-
-        # get L1B product file information
-        l1b_fileinfos = xmlSubtree2dict(xml, 'product/productFileInformation/')
-
-        # clear old L1B file information in XML
-        pFI_root = xml.findall('product/productFileInformation')[0]
-        pFI_root.clear()
-
-        # recreate sub-elements for productFileInformation according to L2A file information
-        for i, fileInfo in enumerate(self.fileinfos):
-            fn_l1b_exp = fileInfo['name'].replace('L2A', '*').replace('-SPECTRAL_IMAGE', '-SPECTRAL_IMAGE_VNIR')
-            l1b_fileInfo = [fI for fI in l1b_fileinfos.values() if fnmatch.fnmatch(fI['name'], fn_l1b_exp)]
-
-            if l1b_fileInfo:
-                # TODO update file size of METADATA.XML (has not been written yet)
-                fileInfo['size'] = fileInfo['size'] or l1b_fileInfo[0]['size']
-                fileInfo['version'] = fileInfo['version'] or l1b_fileInfo[0]['version']
-            else:
-                # FIXME if no L1B equivalent is found for the file to be written, the file version will be empty ('')
-                pass
-
-            sub = ElementTree.SubElement(pFI_root, 'file', number=str(i))
-
-            for k, kw in zip(['name', 'size', 'version', 'format'], [{}, {'unit': 'kbytes'}, {}, {}]):
-                ele = ElementTree.SubElement(sub, k, **kw)
-                ele.text = str(fileInfo[k])
-
-        # TODO update product/ortho/projection
-        #      {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}
-        xml.find('product/ortho/resolution').text = str(enmap_xres)
-        xml.find('product/ortho/resampling').text = self.cfg.ortho_resampAlg
-
-        # band statistics
-        #################
-
-        if self.band_means is None or self.band_stds is None:
-            raise ValueError('Band statistics have not yet been computed. Compute them first by calling '
-                             'add_band_statistics()!')
-
-        bs = "specific/bandStatistics/bandID/"
-        for ele, mean in zip(xml.findall(bs + "meanReflectance"), self.band_means):
-            ele.text = str(mean)
-        for ele, std in zip(xml.findall(bs + "stdDeviation"), self.band_stds):
-            ele.text = str(std)
-
-        xml_string = ElementTree.tostring(xml, encoding='unicode', pretty_print=True)
-
-        return xml_string
-
-
-def xmlSubtree2dict(xml_root, path_subtree) -> OrderedDict:
-    outDict = OrderedDict()
-    allEle = xml_root.findall(path_subtree)
-
-    for ele in allEle:
-        eleKey = '%s_%s' % (ele.tag, ele.get('number'))
-        outDict[eleKey] = dict()
-        for subele in ele:
-            outDict[eleKey][subele.tag] = subele.text
-
-    return outDict

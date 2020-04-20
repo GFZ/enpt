@@ -41,8 +41,12 @@ __author__ = 'Daniel Scheffler'
 class EnPT_Logger(logging.Logger):
     """Class for the EnPT logger."""
 
-    def __init__(self, name_logfile, fmt_suffix=None, path_logfile=None, log_level='INFO', append=True):
-        # type: (str, any, str, any, bool) -> None
+    def __init__(self,
+                 name_logfile: str,
+                 fmt_suffix: any = None,
+                 path_logfile: str = None,
+                 log_level: any = 'INFO',
+                 append: bool = True) -> None:
         """Return a logging.logger instance pointing to the given logfile path.
 
         :param name_logfile:

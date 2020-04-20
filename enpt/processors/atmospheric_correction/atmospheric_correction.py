@@ -84,6 +84,8 @@ class AtmosphericCorrector(object):
         options = self.get_ac_options(enmap_ImageL1)
         enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
+        enmap_ImageL1.transform_vnir_to_swir_raster('mask_landwater')
+
         # run AC
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
