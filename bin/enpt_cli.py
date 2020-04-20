@@ -133,8 +133,7 @@ def get_enpt_argparser():
     return parser
 
 
-def parsedArgs_to_user_opts(cli_args):
-    # type: (argparse.Namespace) -> dict
+def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
     """Convert argparse Namespace object to dictionary of explicitly given parameters.
 
     NOTE:   All options that have not been given explicitly (None values) are removed. Reason: EnPTConfig prefers

@@ -27,6 +27,48 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.12.1'
-__versionalias__ = '20200420.01'
+"""EnPT metadata modules. All objects and functions regarding EnMAP metadata are implemented here."""
+
+from .metadata_sensorgeo import EnMAP_Metadata_L1B_Detector_SensorGeo, EnMAP_Metadata_L1B_SensorGeo  # noqa: F401
+from .metadata_mapgeo import EnMAP_Metadata_L2A_MapGeo  # noqa: F401
+
+
 __author__ = 'Daniel Scheffler'
+
+
+# Define L1B_product_props
+L1B_product_props = dict(
+    xml_detector_label=dict(
+        VNIR='VNIRDetector',
+        SWIR='SWIRDetector'
+    ),
+    fn_detector_suffix=dict(
+        VNIR='D1',
+        SWIR='D2'
+    )
+)
+
+
+L1B_product_props_DLR = dict(
+    xml_detector_label=dict(
+        VNIR='vnir',
+        SWIR='swir'
+    ),
+    fn_detector_suffix=dict(
+        VNIR='D1',
+        SWIR='D2'
+    )
+)
+
+
+# Define L1B_product_props
+L2A_product_props_DLR = dict(
+    xml_detector_label=dict(
+        VNIR='vnir',
+        SWIR='swir'
+    ),
+    fn_detector_suffix=dict(
+        VNIR='D1',
+        SWIR='D2'
+    )
+)

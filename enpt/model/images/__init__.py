@@ -27,6 +27,9 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.12.1'
-__versionalias__ = '20200420.01'
+"""EnPT images module. All EnMAP image objects are defined here."""
+
+from .images_sensorgeo import EnMAP_Detector_SensorGeo, EnMAPL1Product_SensorGeo  # noqa: F401
+from .images_mapgeo import EnMAP_Detector_MapGeo, EnMAPL2Product_MapGeo  # noqa: F401
+
 __author__ = 'Daniel Scheffler'

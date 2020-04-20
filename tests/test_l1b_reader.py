@@ -50,136 +50,108 @@ __author__ = 'Daniel Scheffler'
 
 
 class Test_L1B_Reader(unittest.TestCase):
-    """Tests for L1B_Reader class.."""
+    """Tests for L1B_Reader class."""
 
     def setUp(self):
         self.config = EnPTConfig(**config_for_testing)
         self.pathList_testimages = [self.config.path_l1b_enmap_image,
                                     self.config.path_l1b_enmap_image_gapfill]
         self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
+        os.makedirs(self.config.output_dir, exist_ok=True)
 
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
-        shutil.rmtree(self.config.output_dir)
-
-    def test_read_and_save_inputdata(self):
-        print("")
-        print("################################################")
-        print("#                                              #")
-        print("# Test reading EnMAP Level-1B products from SG #")
-        print("#                                              #")
-        print("################################################")
-        print("")
-        print("")
-
-        print("================================================")
-        print("Unzip Test data files")
-        print("================================================")
-        print("")
+        # unzip both test images in dummy format
         for l1b_file in self.pathList_testimages:
             with zipfile.ZipFile(l1b_file, "r") as zf:
                 zf.extractall(self.tmpdir)
-        prods = [os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[0]).split(".zip")[0]),
-                 os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[1]).split(".zip")[0])]
-        print("Done!")
-        print("")
-        print("")
 
-        print("================================================")
-        print("Create the L1B_Reader new instance")
-        print("================================================")
-        print("")
-        rd = L1B_Reader(config=self.config)
-        print("Done!")
-        print("")
-        print("")
+        self.testproducts = [os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[i]).split(".zip")[0])
+                             for i in range(len(self.pathList_testimages))]
 
-        # TEST FOR ONE IMAGE ONLY
-        print("=======================================================================================================")
-        print("Test: Read and write ONE image only")
-        print("=======================================================================================================")
-        print("")
-        for prod in prods:
-            # for l1b_file in self.pathList_testimages:
-            #     with zipfile.ZipFile(l1b_file, "r") as zf:
-            #
-            #         zf.extractall(self.tmpdir)
-            #
-            #         prod = os.path.join(self.tmpdir, os.path.basename(l1b_file).split(".zip")[0])
-            print("-------------------------------------")
-            print("Test with %s" % os.path.basename(prod))
-            print("-------------------------------------")
-            print("Tmp dir: %s" % self.tmpdir)
-            print("")
-            print(" * Without SNR ")
-            print("")
-            L1_obj = rd.read_inputdata(prod, compute_snr=False)
+        self.RD = L1B_Reader(config=self.config)
+
+    def tearDown(self):
+        if os.path.isdir(self.tmpdir):
+            shutil.rmtree(self.tmpdir)
+        if os.path.isdir(self.config.output_dir):
+            shutil.rmtree(self.config.output_dir)
+
+    def test_read_and_save_single_image_no_snr(self):
+        """Test to read test image 1, save it and read the saved result again - without SNR."""
+        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
+            # read
+            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
             self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
             self.assertIsNone(L1_obj.vnir.detector_meta.snr)
             self.assertIsNone(L1_obj.swir.detector_meta.snr)
-            root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "no_snr"))
 
-            # read self written L1 data
-            L1_obj = rd.read_inputdata(root_dir_written_L1_data, compute_snr=False)
+            # save
+            root_dir_written_L1_data = L1_obj.save(tempdir)
+
+            # read saved result
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
             self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-            print("")
-            print(" * With SNR ")
-            print("")
-            L1_obj = rd.read_inputdata(prod)
+    def test_read_and_save_single_image_with_snr(self):
+        """Test to read test image 1, save it and read the saved result again - with SNR."""
+        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
+            # read
+            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=True)
             self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
             self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
             self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
-            root_dir_written_L1_data = L1_obj.save(path.join(self.tmpdir, "with_snr"))
-            L1_obj = rd.read_inputdata(root_dir_written_L1_data)
-            self.assertIsNotNone(L1_obj, EnMAPL1Product_SensorGeo)
 
-        # TEST FOR ONE IMAGE ONLY
-        print("=======================================================================================================")
-        print("Test: read, join and write 2 images if possible!")
-        print("=======================================================================================================")
-        print("")
+            # save
+            root_dir_written_L1_data = L1_obj.save(tempdir)
 
-        for k_prod1, k_prod2 in ((0, 1), (1, 0)):
-            for n_lines in (-1, 10, 50, 80, 100, 150):  # TODO isolate the test for different number of lines
-                tempdir = tempfile.mkdtemp(dir=self.config.working_dir)
-                if n_lines is -1:
-                    n_lines = "all"
-                print("-----------------------------------------------------------------------------------------------")
-                print("Test with %s and %s, with: %s lines" % (os.path.basename(prods[k_prod1]),
-                                                               os.path.basename(prods[k_prod2]),
-                                                               n_lines))
-                print("-----------------------------------------------------------------------------------------------")
+            # read saved result
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-                if n_lines == "all":
-                    n_lines = None
-
-                print("")
-                print(" * Without SNR")
-                print("")
-                L1_obj = rd.read_inputdata(prods[k_prod1], prods[k_prod2], n_lines, compute_snr=False)
-                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-                self.assertIsNone(L1_obj.vnir.detector_meta.snr)
-                self.assertIsNone(L1_obj.swir.detector_meta.snr)
-                root_dir_written_L1_data = L1_obj.save(path.join(tempdir, "no_snr"))
-                L1_obj = rd.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-
-                print("")
-                print(" * With SNR")
-                print("")
-                L1_obj = rd.read_inputdata(prods[k_prod1], prods[k_prod2], n_lines)
-                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+    def _test_append_n_lines(self, *reader_args, **reader_kwargs):
+        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
+            # read images and test append method
+            L1_obj = self.RD.read_inputdata(*reader_args, **reader_kwargs)
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            if reader_kwargs['compute_snr']:
                 self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
                 self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
-                root_dir_written_L1_data = L1_obj.save(path.join(tempdir, "with_snr"))
-                L1_obj = rd.read_inputdata(root_dir_written_L1_data)
-                self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-                print("")
-                print("")
-                shutil.rmtree(tempdir)
+            else:
+                self.assertIsNone(L1_obj.vnir.detector_meta.snr)
+                self.assertIsNone(L1_obj.swir.detector_meta.snr)
 
-        return
+            # save
+            root_dir_written_L1_data = L1_obj.save(path.join(tempdir))
+
+            # read saved result
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=reader_kwargs['compute_snr'])
+            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+
+    def _test_append_n_lines_allimagecombinations_withwithoutSNR(self, n_lines):
+        # append second test image to first (with and without SNR)
+        self._test_append_n_lines(self.testproducts[0], self.testproducts[1], n_line_ext=n_lines, compute_snr=False)
+        self._test_append_n_lines(self.testproducts[0], self.testproducts[1], n_line_ext=n_lines, compute_snr=True)
+
+        # append first test image to second (with and without SNR)
+        self._test_append_n_lines(self.testproducts[1], self.testproducts[0], n_line_ext=n_lines, compute_snr=False)
+        self._test_append_n_lines(self.testproducts[1], self.testproducts[0], n_line_ext=n_lines, compute_snr=True)
+
+    def test_append_all_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=None)
+
+    def test_append_10_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=10)
+
+    def test_append_50_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=50)
+
+    def test_append_80_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=80)
+
+    def test_append_100_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=100)
+
+    def test_append_150_lines(self):
+        self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=150)
 
 
 class Test_L1B_Reader_DLR(unittest.TestCase):

@@ -29,7 +29,7 @@
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
-from typing import Union, Tuple, List  # noqa: F401
+from typing import Union, Tuple, List, Optional  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -62,7 +62,7 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
         if not data_mapgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
-        return super(Geometry_Transformer, self).to_sensor_geometry(
+        return super().to_sensor_geometry(
             data_mapgeo[:],
             src_prj=src_prj or data_mapgeo.prj,
             src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
@@ -109,7 +109,6 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
 class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
     # use Sentinel-2 grid (30m grid with origin at 0/0)
     # EnMAP geolayer contains pixel center coordinate
-
     def to_sensor_geometry(self,
                            path_or_geoarray_mapgeo: Union[str, GeoArray],
                            src_prj: Union[str, int] = None,
@@ -119,7 +118,7 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
         if not data_mapgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
-        return super(Geometry_Transformer_3D, self).to_sensor_geometry(
+        return super().to_sensor_geometry(
             data_mapgeo[:],
             src_prj=src_prj or data_mapgeo.prj,
             src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
@@ -185,7 +184,7 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         :param res_swir:    pixel dimensions of the SWIR if it would be transformed to map geometry (X, Y)
         :param resamp_alg:  resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
         :param gt_opts:     additional options to be passed to the Geometric_Transformer class,
-                            e.g., 'fill_value', 'radius_of_influence', ...
+                            e.g., 'fill_value', 'radius_of_influence', 'nprocs'...
         """
         [self._validate_lonlat_ndim(ll) for ll in [lons_vnir, lats_vnir, lons_swir, lats_swir]]
 
@@ -508,7 +507,7 @@ class RPC_Geolayer_Generator(object):
         return self.compute_geolayer()
 
 
-global_dem_sensorgeo = None  # type: GeoArray
+global_dem_sensorgeo: Optional[GeoArray] = None
 
 
 def mp_initializer_for_RPC_3D_Geolayer_Generator(dem_sensorgeo):

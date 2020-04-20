@@ -2,6 +2,40 @@
 History
 =======
 
+0.13.0 (coming soon)
+--------------------
+
+* Tests now use Arcachon test data as of 02/2020.
+* Mask filenames are now correctly read from XML.
+* Refactored filenames within metadata object to clean up the namespace.
+* Disabled AC within tests.
+* Converted type hints to Python 3.6 style.
+* Dropped Python 3.5 support.
+* Added filenames for masks to metadata.
+* Added attribute 'epsg_ortho' to metadata.
+* Revised _EnMAP_Image.generate_quicklook().
+* __EnMAP_Image.paths is now correctly assigned.
+* Split modules 'images' and 'metadata' into several sub-modules.
+* Renamed image and metadata model modules for more clarity.
+* Removed _EnMAP_Image properties 'mask_clouds_confidence', 'ac_errors' and 'ac_options'. Cleaned code duplicates.
+* EnMAPL1Product_SensorGeo.transform_VNIR_to_SWIR_sensorgeo() now supports multiprocessing.
+* Added mask attributes to sensor geometry image classes.
+* Mask paths are now correctly set.
+* Masks are now read from disk.
+* Added subclasses EnMAP_VNIR_SensorGeo and EnMAP_SWIR_SensorGeo.
+* Added functionality to set SWIR raster attributes with VNIR raster attributes tranformed to SWIR sensor geometry.
+* The enmap_ImageL1 instance passed to SICOR now features a 'mask_water' attribute.
+* Revised test_l1b_reader.py.
+* Combined 'mask_water' and 'mask_land' attributes to 'mask_landwater'.
+* Renamed metadata attribute 'filename_mask_deadpixel' to 'filename_deadpixelmap' for consistency.
+
+0.12.0 (2020-04-09)
+-------------------
+
+* Added new L1B EnMAP test datasets for Arcachon, France (status 14.02.2020) + corresponding DEM.
+* BSQ files now use Git LFS.
+
+
 0.11.8 (2020-04-09)
 -------------------
 
