@@ -115,7 +115,7 @@ config_for_testing_dlr = dict(
     is_dummy_dataformat=False,
     enable_ac=False,
     enable_ice_retrieval=False,
-    CPUs=1,
+    CPUs=32,
     ortho_resampAlg='gauss',
     vswir_overlap_algorithm='swir_only'
 )

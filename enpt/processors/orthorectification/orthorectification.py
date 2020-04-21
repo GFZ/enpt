@@ -117,16 +117,23 @@ class Orthorectifier(object):
                                         swir_wvls=enmap_ImageL1.meta.swir.wvl_center
                                         ).compute_stack(algorithm=self.cfg.vswir_overlap_algorithm)
 
+        # transform masks #
+        ###################
+
         # TODO allow to set geolayer band to be used for warping of 2D arrays
         GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                                      lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                                     ** kw_init)
+                                     ** kw_init)  # FIXME bilinear resampling for masks with discrete values?
 
-        # FIXME cloud mask applies to BOTH detectors
-        enmap_ImageL1.logger.info('Orthorectifying cloud mask...')
-        L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds, **kw_trafo))
+        for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus']:
+            attr = getattr(enmap_ImageL1.vnir, attrName)
 
-        # TODO transform mask_clouds_confidence, ac_errors, pixel masks
+            if attr is not None:
+                enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
+                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo))
+                setattr(L2_obj, attrName, attr_ortho)
+
+        # TODO transform dead pixel map, quality test flags?
 
         # metadata adjustments #
         ########################
