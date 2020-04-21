@@ -107,7 +107,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.lons: Optional[np.ndarray] = None  # 2D array of longitude coordinates according to given lon/lat sampling
         self.unit: str = ''  # radiometric unit of pixel values
         self.unitcode: str = ''  # code of radiometric unit
-        self.preview_bands = None
+        self.preview_wvls: Optional[List[float]] = None  # wavelengths to be used for quicklook images
+        self.preview_bands: Optional[List[int]] = None  # band indices to be used for quicklook images
         self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
@@ -184,8 +185,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             wvl_red = float(xml.find("product/image/%s/qlChannels/red" % lbl).text)
             wvl_green = float(xml.find("product/image/%s/qlChannels/green" % lbl).text)
             wvl_blue = float(xml.find("product/image/%s/qlChannels/blue" % lbl).text)
-            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl))
-                                           for wvl in [wvl_red, wvl_green, wvl_blue]])
+            self.preview_wvls = [wvl_red, wvl_green, wvl_blue]
+            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl)) for wvl in self.preview_wvls])
 
             # read RPC coefficients
             for bID in xml.findall("product/navigation/RPC/bandID")[subset]:
@@ -261,6 +262,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
+            self.preview_wvls = np.array([self.wvl_center[i] for i in self.preview_bands])
 
         # compute metadata derived from read data
         self.smile = self.calc_smile()

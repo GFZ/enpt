@@ -145,8 +145,11 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         self.unit = meta_l1b.vnir.unit
         self.unitcode = meta_l1b.vnir.unitcode
+        self.preview_wvls_vnir = meta_l1b.vnir.preview_wvls
+        self.preview_wvls_swir = meta_l1b.swir.preview_wvls
         self.preview_bands_vnir = meta_l1b.vnir.preview_bands
-        self.preview_bands_swir = meta_l1b.swir.preview_bands
+        self.preview_bands_swir = np.array([np.argmin(np.abs(self.wvl_center - wvl))
+                                            for wvl in meta_l1b.swir.preview_wvls])  # must index from VNIR band 0
 
         self.snr = None
         if meta_l1b.vnir.snr is not None:
