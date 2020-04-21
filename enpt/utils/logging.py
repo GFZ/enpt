@@ -163,6 +163,9 @@ class EnPT_Logger(logging.Logger):
                 handler.close()
             except PermissionError:
                 warnings.warn('Could not properly close logfile due to a PermissionError: %s' % sys.exc_info()[1])
+            except ValueError as e:
+                if str(e) != 'I/O operation on closed file':
+                    raise
 
         if self.handlers[:]:
             warnings.warn('Not all logging handlers could be closed. Remaining handlers: %s' % self.handlers[:])

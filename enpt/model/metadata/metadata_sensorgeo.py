@@ -72,17 +72,17 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.filename_data: Optional[str] = None  # detector data filename
-        self.scene_basename: Optional[str] = None  # basename of the EnMAP image
-        self.filename_deadpixelmap: Optional[str] = None  # filename of the dead pixel file
-        self.filename_quicklook: Optional[str] = None  # filename of the quicklook file
+        self.filename_data: Optional[str] = ''  # detector data filename
+        self.scene_basename: Optional[str] = ''  # basename of the EnMAP image
+        self.filename_deadpixelmap: Optional[str] = ''  # filename of the dead pixel file
+        self.filename_quicklook: Optional[str] = ''  # filename of the quicklook file
         # FIXME masks of BOTH detectors
-        self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
-        self.filename_mask_snow: Optional[str] = None  # filename of the snow mask file
-        self.filename_mask_cloudshadow: Optional[str] = None  # filename of the cloud shadow mask file
-        self.filename_mask_clouds: Optional[str] = None  # filename of the cloud mask file
-        self.filename_mask_haze: Optional[str] = None  # filename of the haze mask file
-        self.filename_mask_cirrus: Optional[str] = None  # filename of the cirrus mask file
+        self.filename_mask_landwater: Optional[str] = ''  # filename of the land/water mask file
+        self.filename_mask_snow: Optional[str] = ''  # filename of the snow mask file
+        self.filename_mask_cloudshadow: Optional[str] = ''  # filename of the cloud shadow mask file
+        self.filename_mask_clouds: Optional[str] = ''  # filename of the cloud mask file
+        self.filename_mask_haze: Optional[str] = ''  # filename of the haze mask file
+        self.filename_mask_cirrus: Optional[str] = ''  # filename of the cirrus mask file
 
         self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
         self.fwhm: Optional[np.ndarray] = None  # Full width half maximmum for each EnMAP band

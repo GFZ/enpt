@@ -87,8 +87,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
         self.filename_data = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.filename_dead_pixel_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.filename_dead_pixel_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
+        self.filename_deadpixelmap_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
+        self.filename_deadpixelmap_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
         self.filename_quicklook_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
         self.filename_quicklook_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
         self.filename_mask_landwater = meta_l1b.vnir.filename_mask_landwater.replace('L1B-', 'L2A-')
@@ -183,18 +183,21 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                     raise FileNotFoundError(fp)
 
             ext = os.path.splitext(fp)[1]
+            fmt = 'binary' if ext in ['.GEOTIFF',
+                                      '.TIF',
+                                      '.TIFF',
+                                      '.GTIFF',
+                                      '.BSQ',
+                                      '.BIL',
+                                      '.BIP',
+                                      '.JPEG2000'] \
+                else 'xml' if ext == '.XML' \
+                else 'NA'
             fileinfo_dict = dict(
                 name=os.path.basename(fp),
                 size=sizes[i] if sizes else int(os.path.getsize(fp) / 1024) if not ismeta else '',
                 version=versions[i] if versions else '',
-                format='binary' if ext in ['.GEOTIFF',
-                                           '.TIF',
-                                           '.TIFF',
-                                           '.GTIFF',
-                                           '.BSQ',
-                                           '.BIL',
-                                           '.BIP',
-                                           '.JPEG2000'] else 'xml' if ext == '.XML' else 'NA'
+                format=fmt
             )
 
             self.fileinfos.append(fileinfo_dict)

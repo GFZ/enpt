@@ -217,8 +217,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         paths.mask_haze = path.join(l2a_outdir, self.meta.filename_mask_haze)
         paths.mask_snow = path.join(l2a_outdir, self.meta.filename_mask_snow)
         paths.mask_cirrus = path.join(l2a_outdir, self.meta.filename_mask_cirrus)
-        paths.deadpixelmap_vnir = path.join(l2a_outdir, self.meta.filename_dead_pixel_vnir)
-        paths.deadpixelmap_swir = path.join(l2a_outdir, self.meta.filename_dead_pixel_swir)
+        paths.deadpixelmap_vnir = path.join(l2a_outdir, self.meta.filename_deadpixelmap_vnir)
+        paths.deadpixelmap_swir = path.join(l2a_outdir, self.meta.filename_deadpixelmap_swir)
         paths.quicklook_vnir = path.join(l2a_outdir, self.meta.filename_quicklook_vnir)
         paths.quicklook_swir = path.join(l2a_outdir, self.meta.filename_quicklook_swir)
 
@@ -238,44 +238,40 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         self.logger.info("Write product to: %s" % product_dir)
         makedirs(product_dir, exist_ok=True)
 
-        # define output paths
-        outpath_data = path.join(product_dir, self.meta.filename_data)
-        outpath_mask_landwater = path.join(product_dir, self.meta.filename_mask_landwater)
-        outpath_mask_clouds = path.join(product_dir, self.meta.filename_mask_clouds)
-        outpath_mask_cloudshadow = path.join(product_dir, self.meta.filename_mask_cloudshadow)
-        outpath_mask_haze = path.join(product_dir, self.meta.filename_mask_haze)
-        outpath_mask_snow = path.join(product_dir, self.meta.filename_mask_snow)
-        outpath_mask_cirrus = path.join(product_dir, self.meta.filename_mask_cirrus)
-        outpath_quicklook_vnir = path.join(product_dir, self.meta.filename_quicklook_vnir)
-        outpath_quicklook_swir = path.join(product_dir, self.meta.filename_quicklook_swir)
-        outpath_meta = path.join(product_dir, self.meta.filename_metaxml)
-        outpaths = [outpath_data, outpath_mask_clouds, outpath_quicklook_vnir, outpath_quicklook_swir, outpath_meta]
-
         # save raster data
         kwargs_save = dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"])
-        self.data.save(outpath_data, **kwargs_save)
-        self.mask_landwater.save(outpath_mask_landwater, **kwargs_save)
-        self.mask_clouds.save(outpath_mask_clouds, **kwargs_save)
-        self.mask_cloudshadow.save(outpath_mask_cloudshadow, **kwargs_save)
-        self.mask_haze.save(outpath_mask_haze, **kwargs_save)
-        self.mask_snow.save(outpath_mask_snow, **kwargs_save)
-        self.mask_cirrus.save(outpath_mask_cirrus, **kwargs_save)
+        outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
-        # TODO VNIR and SWIR must be merged
-        # self.deadpixelmap.save(path.join(product_dir, self.meta.filename_mask_clouds), **kwargs_save)
-        self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
+        for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
+                         'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap']:
 
-        self.generate_quicklook(bands2use=self.meta.preview_bands_vnir).save(outpath_quicklook_vnir, **kwargs_save)
-        self.generate_quicklook(bands2use=self.meta.preview_bands_swir).save(outpath_quicklook_swir, **kwargs_save)
+            if attrName == 'deadpixelmap':
+                # TODO VNIR and SWIR must be merged
+                self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
+                continue
+
+            outpath = path.join(product_dir, getattr(self.meta, 'filename_%s' % attrName))
+
+            attr_gA = \
+                self.generate_quicklook(bands2use=self.meta.preview_bands_vnir) if attrName == 'quicklook_vnir' else \
+                self.generate_quicklook(bands2use=self.meta.preview_bands_swir) if attrName == 'quicklook_swir' else \
+                getattr(self, attrName)
+
+            if attr_gA is not None:
+                attr_gA.save(outpath, **kwargs_save)
+                outpaths[attrName] = outpath
+            else:
+                self.logger.warning("The '%s' attribute cannot be saved because it does not exist in the current EnMAP "
+                                    "image." % attrName)
 
         # TODO remove GDAL's *.aux.xml files?
 
         # save metadata
-        self.meta.add_product_fileinformation(filepaths=outpaths)
+        self.meta.add_product_fileinformation(filepaths=list(outpaths.values()))
         metadata_string = self.meta.to_XML()
 
-        with open(outpath_meta, 'w') as metaF:
-            self.logger.info("Writing metdata to %s" % outpath_meta)
+        with open(outpaths['metaxml'], 'w') as metaF:
+            self.logger.info("Writing metdata to %s" % outpaths['metaxml'])
             metaF.write(metadata_string)
 
         self.logger.info("L2A product successfully written!")

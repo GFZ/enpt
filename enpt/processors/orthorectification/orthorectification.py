@@ -125,23 +125,13 @@ class Orthorectifier(object):
                                      lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
                                      ** kw_init)  # FIXME bilinear resampling for masks with discrete values?
 
-        enmap_ImageL1.logger.info('Orthorectifying land/water mask...')
-        L2_obj.mask_landwater = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_landwater, **kw_trafo))
+        for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus']:
+            attr = getattr(enmap_ImageL1.vnir, attrName)
 
-        enmap_ImageL1.logger.info('Orthorectifying cloud mask...')
-        L2_obj.mask_clouds = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_clouds, **kw_trafo))
-
-        enmap_ImageL1.logger.info('Orthorectifying cloud shadow mask...')
-        L2_obj.mask_cloudshadow = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_cloudshadow, **kw_trafo))
-
-        enmap_ImageL1.logger.info('Orthorectifying haze mask...')
-        L2_obj.mask_haze = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_haze, **kw_trafo))
-
-        enmap_ImageL1.logger.info('Orthorectifying snow mask...')
-        L2_obj.mask_snow = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_snow, **kw_trafo))
-
-        enmap_ImageL1.logger.info('Orthorectifying cirrus mask...')
-        L2_obj.mask_cirrus = GeoArray(*GT_2D.to_map_geometry(enmap_ImageL1.vnir.mask_cirrus, **kw_trafo))
+            if attr is not None:
+                enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
+                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo))
+                setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?
 
