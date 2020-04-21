@@ -2,8 +2,16 @@
 History
 =======
 
-0.13.0 (coming soon)
---------------------
+0.12.2 (2020-04-21)
+-------------------
+
+* L1B masks are now correctly written to the L2A output (fixes issue #48). However, the dead pixel map and the quality
+  test flags are still missing.
+* Silenced warning during closing of logging handler.
+
+
+0.12.1 (2020-04-20)
+-------------------
 
 * Tests now use Arcachon test data as of 02/2020.
 * Mask filenames are now correctly read from XML.
