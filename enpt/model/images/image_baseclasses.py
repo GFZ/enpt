@@ -30,7 +30,7 @@
 """EnPT EnMAP object base classes."""
 
 from types import SimpleNamespace
-from typing import Tuple, Optional  # noqa: F401
+from typing import List, Optional  # noqa: F401
 import numpy as np
 
 # noinspection PyPackageRequirements
@@ -322,21 +322,23 @@ class _EnMAP_Image(object):
 
             return gA
 
-    def generate_quicklook(self, bands2use: Tuple[int, int, int]) -> GeoArray:
+    def generate_quicklook(self, bands2use: List[int]) -> GeoArray:
         """
-        Generate image quicklook and save into a file
+        Generate image quicklook and save into a file.
 
-        :param bands2use:   (red, green, blue) band indices of self.data to be used for quicklook image, e.g., (3, 2, 1)
+        :param bands2use:   band indices of self.data to be used as (red, green, blue) for quicklook image,
+                            e.g., [3, 2, 1]
         :return: GeoArray
         """
         red, green, blue = [self.data[:, :, bandidx] for bandidx in bands2use]
 
         def rescale(bandarray):
-            p2 = np.percentile(bandarray, 2)
-            p98 = np.percentile(bandarray, 98)
-            return exposure.rescale_intensity(bandarray, (p2, p98))
+            pixvals = np.ma.masked_equal(bandarray, self.data.nodata).compressed() \
+                if self.data.nodata is not None else bandarray
+            p2, p98 = np.nanpercentile(pixvals, 2), np.nanpercentile(pixvals, 98)
 
-        pix = np.dstack((rescale(red), rescale(green), rescale(blue)))
-        pix = np.uint8(pix * 255)
+            return exposure.rescale_intensity(bandarray, in_range=(p2, p98), out_range=(0, 255))
+
+        pix = np.dstack((rescale(red), rescale(green), rescale(blue))).astype(np.uint8)
 
         return GeoArray(pix)

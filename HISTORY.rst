@@ -2,6 +2,13 @@
 History
 =======
 
+0.12.3 (2020-04-21)
+-------------------
+
+* Fixed issue #50 (Quicklook images only contain noise).
+* Fix for using the wrong bands for the SWIR quicklook image.
+
+
 0.12.2 (2020-04-21)
 -------------------
 
