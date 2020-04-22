@@ -2,6 +2,13 @@
 History
 =======
 
+0.12.4 (2020-04-??)
+-------------------
+
+* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
+* Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
+  land surfaces later.
+
 0.12.3 (2020-04-21)
 -------------------
 
