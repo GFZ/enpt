@@ -131,7 +131,7 @@ class AtmosphericCorrector(object):
         else:  # self.cfg.mode_ac == 'combined'
             # call SICOR for land and AWI water AC for land surfaces here
 
-            raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
+            raise NotImplementedError("The atmospheric correction mode 'combined' is not yet implemented. "
                                       "You may use 'land' instead.")
 
         return enmap_ImageL1
