@@ -2,6 +2,10 @@
 History
 =======
 
+* Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34).
+* All pixels that have values in VNIR or SWIR only are not set to nodata in the L2A output (fixes issue #34).
+* Nodata values of masks are now set.
+
 0.12.3 (2020-04-21)
 -------------------
 

@@ -161,7 +161,7 @@ class _EnMAP_Image(object):
 
     @mask_landwater.setter
     def mask_landwater(self, *geoArr_initArgs):
-        self._mask_landwater = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_landwater')
+        self._mask_landwater = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_landwater', nodataVal=0)
 
     @mask_landwater.deleter
     def mask_landwater(self):
@@ -177,7 +177,7 @@ class _EnMAP_Image(object):
 
     @mask_clouds.setter
     def mask_clouds(self, *geoArr_initArgs):
-        self._mask_clouds = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_clouds')
+        self._mask_clouds = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_clouds', nodataVal=0)
 
     @mask_clouds.deleter
     def mask_clouds(self):
@@ -193,7 +193,8 @@ class _EnMAP_Image(object):
 
     @mask_cloudshadow.setter
     def mask_cloudshadow(self, *geoArr_initArgs):
-        self._mask_cloudshadow = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cloudshadow')
+        self._mask_cloudshadow = \
+            self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cloudshadow', nodataVal=0)
 
     @mask_cloudshadow.deleter
     def mask_cloudshadow(self):
@@ -209,7 +210,7 @@ class _EnMAP_Image(object):
 
     @mask_haze.setter
     def mask_haze(self, *geoArr_initArgs):
-        self._mask_haze = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_haze')
+        self._mask_haze = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_haze', nodataVal=0)
 
     @mask_haze.deleter
     def mask_haze(self):
@@ -225,7 +226,7 @@ class _EnMAP_Image(object):
 
     @mask_snow.setter
     def mask_snow(self, *geoArr_initArgs):
-        self._mask_snow = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_snow')
+        self._mask_snow = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_snow', nodataVal=0)
 
     @mask_snow.deleter
     def mask_snow(self):
@@ -241,7 +242,7 @@ class _EnMAP_Image(object):
 
     @mask_cirrus.setter
     def mask_cirrus(self, *geoArr_initArgs):
-        self._mask_cirrus = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cirrus')
+        self._mask_cirrus = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_cirrus', nodataVal=0)
 
     @mask_cirrus.deleter
     def mask_cirrus(self):
