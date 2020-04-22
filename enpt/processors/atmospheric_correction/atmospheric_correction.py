@@ -90,33 +90,48 @@ class AtmosphericCorrector(object):
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
 
-        # run SICOR
-        # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
-        #       - cwv_model, cwc_model, toa_model have the SWIR geometry
-        #       - currently, the fast method is implemented,
-        #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
-        #       - ice_model is None if self.cfg.enable_ice_retrieval is False
-        enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
-            sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+        if self.cfg.mode_ac == 'land':
+            # run SICOR and apply the AC to land AND water surfaces
+            # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
+            #       - cwv_model, cwc_model, toa_model have the SWIR geometry
+            #       - currently, the fast method is implemented,
+            #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
+            #       - ice_model is None if self.cfg.enable_ice_retrieval is False
+            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
+                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
-        # validate results
-        for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
-            mean0, std0 = np.nanmean(detectordata[:, :, 0]), np.nanstd(detectordata[:, :, 0])
-            if np.isnan(mean0) or mean0 == 0 or std0 == 0:
-                enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
+            # validate results
+            for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
+                mean0, std0 = np.nanmean(detectordata[:, :, 0]), np.nanstd(detectordata[:, :, 0])
+                if np.isnan(mean0) or mean0 == 0 or std0 == 0:
+                    enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
 
-        # join results
-        enmap_ImageL1.logger.info('Joining results of atmospheric correction.')
+            # join results
+            enmap_ImageL1.logger.info('Joining results of atmospheric correction.')
 
-        for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
-                                             [enmap_l2a_vnir, enmap_l2a_swir]):
-            in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
-            # NOTE: geotransform and projection are missing due to sensor geometry
+            for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
+                                                 [enmap_l2a_vnir, enmap_l2a_swir]):
+                in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                # NOTE: geotransform and projection are missing due to sensor geometry
 
-            in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
-            in_detector.detector_meta.unitcode = 'BOARef'
+                in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                in_detector.detector_meta.unitcode = 'BOARef'
 
-            # FIXME what about mask_clouds, mask_clouds_confidence, ac_errors?
-            # FIXME use cwv_model, cwc_model, toa_model also for EnPT?
+                # FIXME use cwv_model, cwc_model, toa_model also for EnPT?
+
+        elif self.cfg.mode_ac == 'water':
+            # call water AC of AWI here -> apply it to water surfaces ONLY
+            if 2 not in enmap_ImageL1.vnir.mask_landwater[:]:
+                raise RuntimeError("The atmospheric correction mode is set to 'water' but the input image does not "
+                                   "contain any water surfaces according to the land/water image mask.")
+
+            raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
+                                      "You may use 'land' instead.")
+
+        else:  # self.cfg.mode_ac == 'combined'
+            # call SICOR for land and AWI water AC for land surfaces here
+
+            raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
+                                      "You may use 'land' instead.")
 
         return enmap_ImageL1

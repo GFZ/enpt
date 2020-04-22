@@ -114,6 +114,7 @@ config_for_testing_dlr = dict(
     disable_progress_bars=False,
     is_dummy_dataformat=False,
     enable_ac=False,
+    mode_ac='land',
     enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
@@ -186,6 +187,14 @@ class EnPTConfig(object):
         :key enable_ac:
             Enable atmospheric correction using SICOR algorithm (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
+
+        :key mode_ac:
+            3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
+            - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
+            - 'water': POLYMER (developed for water surfaces) is applied to water only
+                       (land surfaces are no included in the L2A product)
+            - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
+                          NOTE that this may result in edge effects, e.g., at coastlines
 
         :key auto_download_ecmwf:
             Automatically download ECMWF data for atmospheric correction
@@ -280,6 +289,10 @@ class EnPTConfig(object):
 
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
+        self.mode_ac = gp('mode_ac')
+        if self.mode_ac != 'land':
+            warnings.warn("The atmospheric correction mode '%s' is currently under development and "
+                          "may not yet work as expected." % self.mode_ac)  # FIXME
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
