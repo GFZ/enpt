@@ -149,7 +149,8 @@ class Orthorectifier(object):
 
         for attr_gA in [L2_obj.mask_landwater, L2_obj.mask_clouds, L2_obj.mask_cloudshadow, L2_obj.mask_haze,
                         L2_obj.mask_snow, L2_obj.mask_cirrus]:
-            attr_gA[~mask_nodata_common] = attr_gA.nodata
+            if attr_gA is not None:
+                attr_gA[~mask_nodata_common] = attr_gA.nodata
 
         # metadata adjustments #
         ########################
@@ -186,9 +187,9 @@ class Orthorectifier(object):
         :param enmap_grid:
         :return:
         """
-        # use only the first geolayer bands  # FIXME respect keystone by using the outermost coords of ALL bands?
-        V_lons, V_lats = enmap_ImageL1.meta.vnir.lons[:, :, 0], enmap_ImageL1.meta.vnir.lats[:, :, 0]
-        S_lons, S_lats = enmap_ImageL1.meta.swir.lons[:, :, 0], enmap_ImageL1.meta.swir.lats[:, :, 0]
+        # get geolayers - 2D for dummy data format else 3D
+        V_lons, V_lats = enmap_ImageL1.meta.vnir.lons, enmap_ImageL1.meta.vnir.lats
+        S_lons, S_lats = enmap_ImageL1.meta.swir.lons, enmap_ImageL1.meta.swir.lats
 
         # get Lon/Lat corner coordinates of geolayers
         V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, -1), (-1, 0)]]
@@ -202,7 +203,15 @@ class Orthorectifier(object):
         V_X_utm, V_Y_utm = zip(*V_UL_UR_LL_LR_utm)
         S_X_utm, S_Y_utm = zip(*S_UL_UR_LL_LR_utm)
 
-        # use inner coordinates as common extent
+        # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
+        # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
+        if V_lons.ndim == 3:
+            V_X_utm = (V_X_utm[0].max(), V_X_utm[1].min(), V_X_utm[2].max(), V_X_utm[3].min())
+            V_Y_utm = (V_Y_utm[0].min(), V_Y_utm[1].min(), V_Y_utm[2].max(), V_Y_utm[3].max())
+            S_X_utm = (S_X_utm[0].max(), S_X_utm[1].min(), S_X_utm[2].max(), S_X_utm[3].min())
+            S_Y_utm = (S_Y_utm[0].min(), S_Y_utm[1].min(), S_Y_utm[2].max(), S_Y_utm[3].max())
+
+        # use inner coordinates of VNIR and SWIR as common extent
         xmin_utm = max([min(V_X_utm), min(S_X_utm)])
         ymin_utm = max([min(V_Y_utm), min(S_Y_utm)])
         xmax_utm = min([max(V_X_utm), max(S_X_utm)])
