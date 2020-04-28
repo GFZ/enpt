@@ -135,7 +135,7 @@ class EnPTConfig(object):
              path to JSON file containing configuration parameters or a string in JSON format
 
         :key CPUs:
-             number of CPU cores to be used for processing (default: "None" -> use all available
+             number of CPU cores to be used for processing (default: "None" -> use all available)
 
         :key path_l1b_enmap_image:
             input path of the EnMAP L1B image to be processed

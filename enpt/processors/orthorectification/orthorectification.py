@@ -92,19 +92,23 @@ class Orthorectifier(object):
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
         kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
                        nprocs=self.cfg.CPUs,
-                       radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45)
+                       # neighbours=8,
+                       radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45
+                       )
         kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
 
         # transform VNIR and SWIR to map geometry
         GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
 
         # FIXME So far, the fill value is set to 0. Is this meaningful?
-        enmap_ImageL1.logger.info('Orthorectifying VNIR data...')
+        enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
+                                  % self.cfg.ortho_resampAlg)
         GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=0, **kw_init)
         vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:], **kw_trafo),
                                   nodata=0)
 
-        enmap_ImageL1.logger.info('Orthorectifying SWIR data...')
+        enmap_ImageL1.logger.info("Orthorectifying SWIR data using '%s' resampling algorithm..."
+                                  % self.cfg.ortho_resampAlg)
         GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=0, **kw_init)
         swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:], **kw_trafo),
                                   nodata=0)
@@ -130,10 +134,23 @@ class Orthorectifier(object):
 
             if attr is not None:
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
-                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo))
+                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?
+
+        # set all pixels to nodata that don't have values in all bands #
+        ################################################################
+
+        enmap_ImageL1.logger.info("Setting all pixels to nodata that have values in the VNIR or the SWIR only...")
+        mask_nodata_common = np.all(np.dstack([vnir_mapgeo_gA.mask_nodata[:],
+                                               swir_mapgeo_gA.mask_nodata[:]]), axis=2)
+        L2_obj.data[~mask_nodata_common] = L2_obj.data.nodata
+
+        for attr_gA in [L2_obj.mask_landwater, L2_obj.mask_clouds, L2_obj.mask_cloudshadow, L2_obj.mask_haze,
+                        L2_obj.mask_snow, L2_obj.mask_cirrus]:
+            if attr_gA is not None:
+                attr_gA[~mask_nodata_common] = attr_gA.nodata
 
         # metadata adjustments #
         ########################
@@ -170,23 +187,45 @@ class Orthorectifier(object):
         :param enmap_grid:
         :return:
         """
-        vnir_coords_utm = np.array([transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y)
-                                    for x, y in zip(enmap_ImageL1.vnir.detector_meta.lon_UL_UR_LL_LR,
-                                                    enmap_ImageL1.vnir.detector_meta.lat_UL_UR_LL_LR,)])
-        swir_coords_utm = np.array([transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y)
-                                    for x, y in zip(enmap_ImageL1.swir.detector_meta.lon_UL_UR_LL_LR,
-                                                    enmap_ImageL1.swir.detector_meta.lat_UL_UR_LL_LR, )])
-        all_coords_utm = np.dstack([vnir_coords_utm, swir_coords_utm])
+        # get geolayers - 2D for dummy data format else 3D
+        V_lons, V_lats = enmap_ImageL1.meta.vnir.lons, enmap_ImageL1.meta.vnir.lats
+        S_lons, S_lats = enmap_ImageL1.meta.swir.lons, enmap_ImageL1.meta.swir.lats
 
-        common_extent = (all_coords_utm[:, 0, :].min(),  # xmin
-                         all_coords_utm[:, 1, :].min(),  # ymin
-                         all_coords_utm[:, 0, :].max(),  # xmax
-                         all_coords_utm[:, 1, :].max())  # ymax
+        # get Lon/Lat corner coordinates of geolayers
+        V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, -1), (-1, 0)]]
+        S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, -1), (-1, 0)]]
 
+        # transform them to UTM
+        V_UL_UR_LL_LR_utm = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in V_UL_UR_LL_LR_ll]
+        S_UL_UR_LL_LR_utm = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in S_UL_UR_LL_LR_ll]
+
+        # separate X and Y
+        V_X_utm, V_Y_utm = zip(*V_UL_UR_LL_LR_utm)
+        S_X_utm, S_Y_utm = zip(*S_UL_UR_LL_LR_utm)
+
+        # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
+        # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
+        if V_lons.ndim == 3:
+            V_X_utm = (V_X_utm[0].max(), V_X_utm[1].min(), V_X_utm[2].max(), V_X_utm[3].min())
+            V_Y_utm = (V_Y_utm[0].min(), V_Y_utm[1].min(), V_Y_utm[2].max(), V_Y_utm[3].max())
+            S_X_utm = (S_X_utm[0].max(), S_X_utm[1].min(), S_X_utm[2].max(), S_X_utm[3].min())
+            S_Y_utm = (S_Y_utm[0].min(), S_Y_utm[1].min(), S_Y_utm[2].max(), S_Y_utm[3].max())
+
+        # use inner coordinates of VNIR and SWIR as common extent
+        xmin_utm = max([min(V_X_utm), min(S_X_utm)])
+        ymin_utm = max([min(V_Y_utm), min(S_Y_utm)])
+        xmax_utm = min([max(V_X_utm), max(S_X_utm)])
+        ymax_utm = min([max(V_Y_utm), max(S_Y_utm)])
+        common_extent_utm = (xmin_utm, ymin_utm, xmax_utm, ymax_utm)
+
+        # move the extent to the EnMAP coordinate grid
         if enmap_grid:
-            common_extent = move_extent_to_EnMAP_grid(common_extent)
+            common_extent_utm = move_extent_to_EnMAP_grid(common_extent_utm)
 
-        return common_extent
+        enmap_ImageL1.logger.info('Computed common target extent of orthorectified image (xmin, ymin, xmax, ymax in '
+                                  'EPSG %s): %s' % (tgt_epsg, str(common_extent_utm)))
+
+        return common_extent_utm
 
 
 class VNIR_SWIR_Stacker(object):
@@ -295,7 +334,8 @@ class VNIR_SWIR_Stacker(object):
         else:
             raise ValueError(algorithm)
 
-        gA_stacked = GeoArray(data_stacked, geotransform=self.vnir.gt, projection=self.vnir.prj)
+        gA_stacked = GeoArray(data_stacked,
+                              geotransform=self.vnir.gt, projection=self.vnir.prj, nodata=self.vnir.nodata)
         gA_stacked.meta.band_meta['wavelength'] = list(wvls)
 
         return gA_stacked

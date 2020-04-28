@@ -2,6 +2,15 @@
 History
 =======
 
+0.12.4 (2020-04-??)
+-------------------
+
+* Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34). This computation now
+  also respects deviations in per-band geolayers due to keystone or misregistrations.
+* All pixels that have values in VNIR or SWIR only are not set to nodata in the L2A output (fixes issue #34).
+* Nodata values of masks are now set.
+
+
 0.12.3 (2020-04-21)
 -------------------
 
