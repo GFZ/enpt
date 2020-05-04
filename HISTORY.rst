@@ -2,7 +2,13 @@
 History
 =======
 
-0.12.4 (2020-04-05)
+0.12.5 (2020-05-04)
+------------------
+
+* Dead-pixel correction is now called once more after AC to correct possible spectral spikes due to fringe effect.
+
+
+0.12.4 (2020-05-04)
 -------------------
 
 * Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34). This computation now
