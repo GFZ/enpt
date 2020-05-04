@@ -2,7 +2,7 @@
 History
 =======
 
-0.12.4 (2020-04-??)
+0.12.4 (2020-04-05)
 -------------------
 
 * Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34). This computation now
