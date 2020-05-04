@@ -2,12 +2,21 @@
 History
 =======
 
-0.12.4 (2020-04-??)
+0.12.5 (2020-04-??)
 -------------------
 
 * Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
 * Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
   land surfaces later.
+
+0.12.4 (2020-04-05)
+-------------------
+
+* Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34). This computation now
+  also respects deviations in per-band geolayers due to keystone or misregistrations.
+* All pixels that have values in VNIR or SWIR only are not set to nodata in the L2A output (fixes issue #34).
+* Nodata values of masks are now set.
+
 
 0.12.3 (2020-04-21)
 -------------------
