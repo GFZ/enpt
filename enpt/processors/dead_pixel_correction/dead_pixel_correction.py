@@ -211,7 +211,7 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
 
     # call 1D interpolation vectorized
     #   => group the dataset by rows that have nodata at the same column position
-    #   => remember the row positions, call the intpolation for these rows at once (vectorized)
+    #   => remember the row positions, call the interpolation for these rows at once (vectorized)
     #      and substitute the original data  at the previously grouped row positions
     groups_unique_rows = npi.group_by(badmask_full).split(np.arange(len(badmask_full)))
 

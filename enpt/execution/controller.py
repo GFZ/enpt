@@ -146,6 +146,9 @@ class EnPT_Controller(object):
         """Run all processors at once."""
         if os.getenv('IS_ENPT_GUI_TEST') != "1":
             try:
+                if self.cfg.log_level == 'DEBUG':
+                    self._print_received_configuration()
+
                 self.read_L1B_data()
                 if self.cfg.run_deadpix_P:
                     self.L1_obj.correct_dead_pixels()
@@ -153,6 +156,11 @@ class EnPT_Controller(object):
                 self.run_dem_processor()
                 if self.cfg.enable_ac:
                     self.run_atmospheric_correction()
+
+                    # re-apply dead pixel correction
+                    self.L1_obj.logger.info(
+                        'Re-applying dead pixel correction to correct fof spectral spikes due to fringe effect.')
+                    self.L1_obj.correct_dead_pixels()
                 else:
                     self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
                                             'computing top-of-atmosphere reflectance instead.')
@@ -164,8 +172,7 @@ class EnPT_Controller(object):
                 self.cleanup()
 
         else:
-            print('EnPT Controller received the following configuration:')
-            print(repr(self.cfg))
+            self._print_received_configuration()
 
             if not os.path.isdir(self.cfg.output_dir):
                 raise NotADirectoryError(self.cfg.output_dir)
@@ -177,6 +184,10 @@ class EnPT_Controller(object):
                         kwargs=self.cfg.kwargs
                     ),
                     outF)
+
+    def _print_received_configuration(self):
+        print('EnPT Controller received the following configuration:')
+        print(repr(self.cfg))
 
     @classmethod
     def _cleanup(cls, tempDir, warn_message):
