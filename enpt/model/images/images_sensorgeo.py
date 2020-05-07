@@ -306,19 +306,20 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 LMAX = self.detector_meta.l_max
                 QCAL = self.data[:]
 
-                self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
+                radiance = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
 
             elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
                 # Lλ = QCAL * GAIN + OFFSET
                 # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
                 #       - DLR gains / offsets are provided in W/m2/sr/nm, so we have to multiply by 1000 to get
                 #         mW/m2/sr/nm as needed later
-                self.data = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
+                radiance = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
 
             else:
                 raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
                                  "are available for radiance computation.")
 
+            self.data = radiance.astype(np.float32)
             self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
             self.detector_meta.unitcode = "TOARad"
         else:
