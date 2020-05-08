@@ -38,7 +38,7 @@ from geoarray import GeoArray
 
 from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
 from sensormapgeo.transformer_2d import AreaDefinition
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
+from py_tools_ds.geo.projection import get_proj4info, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
