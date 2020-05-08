@@ -43,7 +43,7 @@ dependencies:
     - scipy
     - geoarray>=0.8.11
     - py_tools_ds>=0.14.25
-    - sensormapgeo>=0.3.1
+    - sensormapgeo>=0.3.2
     - cerberus
     - jsmin
     - tqdm
