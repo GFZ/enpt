@@ -38,7 +38,7 @@ test_enpt:
 
     # install sensormapgeo, mvgavg
     # TODO: remove when included in docker container
-    - pip install sensormapgeo>=0.3.0
+    - pip install sensormapgeo>=0.3.1
     - pip install mvgavg
 
     # run nosetests
