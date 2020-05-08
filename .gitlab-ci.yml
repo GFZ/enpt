@@ -41,7 +41,7 @@ test_enpt:
     - pip install sensormapgeo>=0.3.2
     - pip install mvgavg
 
-    - conda update -c -y conda-forge pyresample
+    - conda update -y -c conda-forge pyresample
 
     # run nosetests
     - make nosetests  # test are called here
