@@ -2,6 +2,17 @@
 History
 =======
 
+0.12.6 (2020-05-??)
+------------------
+
+* DN2TOARadiance() now returns float32 radiance instead of float64.
+* Bugfix in Orthorectifier._get_common_extent().
+* Revised Geometry_Transformer and Geometry_Transformer_3D classes.
+* Updated minimal version of sensormapgeo which makes the orthorectification much faster (factor 6-10)
+  and fixes the deadlock within sensormapgeo.
+* Bilinear orthorectification now uses 8 neighbours instead of 32 which makes it much faster.
+
+
 0.12.5 (2020-05-04)
 ------------------
 
@@ -58,6 +69,7 @@ History
 * Revised test_l1b_reader.py.
 * Combined 'mask_water' and 'mask_land' attributes to 'mask_landwater'.
 * Renamed metadata attribute 'filename_mask_deadpixel' to 'filename_deadpixelmap' for consistency.
+
 
 0.12.0 (2020-04-09)
 -------------------

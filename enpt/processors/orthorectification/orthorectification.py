@@ -92,9 +92,12 @@ class Orthorectifier(object):
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
         kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
                        nprocs=self.cfg.CPUs,
-                       # neighbours=8,
                        radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45
                        )
+        if self.cfg.ortho_resampAlg == 'bilinear':
+            # increase that if the resampling result contains gaps (default is 32 but this is quite slow)
+            kw_init['neighbours'] = 8
+
         kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
 
         # transform VNIR and SWIR to map geometry
@@ -192,8 +195,8 @@ class Orthorectifier(object):
         S_lons, S_lats = enmap_ImageL1.meta.swir.lons, enmap_ImageL1.meta.swir.lats
 
         # get Lon/Lat corner coordinates of geolayers
-        V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, -1), (-1, 0)]]
-        S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, -1), (-1, 0)]]
+        V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
+        S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
 
         # transform them to UTM
         V_UL_UR_LL_LR_utm = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in V_UL_UR_LL_LR_ll]
@@ -205,6 +208,7 @@ class Orthorectifier(object):
 
         # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
         # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
+        #    (these pixels would be set to nodata later anyways, so we don need to increase the extent for them)
         if V_lons.ndim == 3:
             V_X_utm = (V_X_utm[0].max(), V_X_utm[1].min(), V_X_utm[2].max(), V_X_utm[3].min())
             V_Y_utm = (V_Y_utm[0].min(), V_Y_utm[1].min(), V_Y_utm[2].max(), V_Y_utm[3].max())

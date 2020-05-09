@@ -36,11 +36,9 @@ import numpy as np
 from scipy.interpolate import griddata as interpolate_griddata, interp1d
 from geoarray import GeoArray
 
-from sensormapgeo.sensormapgeo import \
-    SensorMapGeometryTransformer, \
-    SensorMapGeometryTransformer3D, \
-    AreaDefinition
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
+from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
+from sensormapgeo.transformer_2d import AreaDefinition
+from py_tools_ds.geo.projection import get_proj4info, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
@@ -72,35 +70,24 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
                         tgt_res: Tuple[float, float] = None,
+                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
                         area_definition: AreaDefinition = None):
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
-        if area_definition:
-            self.area_definition = area_definition
-        else:
-            if not tgt_prj:
-                raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
+        # get EnMAP grid
+        tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
+        tgt_coordgrid = (enmap_coordinate_grid['x'], enmap_coordinate_grid['y']) if tgt_epsg != 4326 else None
 
-            # compute target resolution and extent (according to EnMAP grid)
-            proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
-
-            if 'units' in proj4dict and proj4dict['units'] == 'm':
-                if not tgt_res:
-                    tgt_res = (np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['x']))
-
-                if not tgt_extent:
-                    # use the extent computed by compute_output_shape and move it to the EnMAP coordinate grid
-                    area_definition = self.compute_areadefinition_sensor2map(
-                        data_sensorgeo[:], tgt_prj, tgt_res=tgt_res)
-
-                    tgt_extent = move_extent_to_EnMAP_grid(tuple(area_definition.area_extent))
-
+        # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
-            super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
-                                                              tgt_extent=tgt_extent, tgt_res=tgt_res,
+            super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:],
+                                                              tgt_prj=tgt_prj,
+                                                              tgt_extent=tgt_extent,
+                                                              tgt_res=tgt_res,
+                                                              tgt_coordgrid=tgt_coordgrid,
                                                               area_definition=self.area_definition)
 
         return out_data, out_gt, out_prj
@@ -127,33 +114,27 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple[float, float] = None
+                        tgt_res: Tuple[float, float] = None,
+                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
+                        area_definition: AreaDefinition = None
                         ) -> Tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
-        if not tgt_prj:
-            raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
+        # get EnMAP grid
+        tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
+        tgt_coordgrid = (enmap_coordinate_grid['x'], enmap_coordinate_grid['y']) if tgt_epsg != 4326 else None
 
-        # compute target resolution and extent (according to EnMAP grid)
-        proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
-
-        if 'units' in proj4dict and proj4dict['units'] == 'm':
-            if not tgt_res:
-                tgt_res = (np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['x']))
-
-            if not tgt_extent:
-                # use the extent computed by compute_output_shape and move it to the EnMAP coordinate grid
-                tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
-                common_extent = self._get_common_target_extent(tgt_epsg)
-
-                tgt_extent = move_extent_to_EnMAP_grid(tuple(common_extent))
-
+        # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
-            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
-                                                                 tgt_extent=tgt_extent, tgt_res=tgt_res)
+            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:],
+                                                                 tgt_prj=tgt_prj,
+                                                                 tgt_extent=tgt_extent,
+                                                                 tgt_res=tgt_res,
+                                                                 tgt_coordgrid=tgt_coordgrid,
+                                                                 area_definition=area_definition)
 
         return out_data, out_gt, out_prj
 

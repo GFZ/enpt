@@ -36,11 +36,6 @@ test_enpt:
     # - python setup.py install
     # - cd ../../
 
-    # install sensormapgeo, mvgavg
-    # TODO: remove when included in docker container
-    - pip install sensormapgeo>=0.2.1
-    - pip install mvgavg
-
     # run nosetests
     - make nosetests  # test are called here
 
