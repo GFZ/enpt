@@ -2,8 +2,8 @@
 History
 =======
 
-0.12.6 (2020-05-??)
-------------------
+0.12.6 (2020-05-09)
+-------------------
 
 * DN2TOARadiance() now returns float32 radiance instead of float64.
 * Bugfix in Orthorectifier._get_common_extent().
@@ -14,7 +14,7 @@ History
 
 
 0.12.5 (2020-05-04)
-------------------
+-------------------
 
 * Dead-pixel correction is now called once more after AC to correct possible spectral spikes due to fringe effect.
 
