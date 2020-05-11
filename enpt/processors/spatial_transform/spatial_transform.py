@@ -35,6 +35,8 @@ from collections import OrderedDict
 import numpy as np
 from scipy.interpolate import griddata as interpolate_griddata, interp1d
 from geoarray import GeoArray
+from natsort import natsorted
+import numpy_indexed as npi
 
 from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
 from sensormapgeo.transformer_2d import AreaDefinition
@@ -491,15 +493,6 @@ class RPC_Geolayer_Generator(object):
 global_dem_sensorgeo: Optional[GeoArray] = None
 
 
-def mp_initializer_for_RPC_3D_Geolayer_Generator(dem_sensorgeo):
-    """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_band()
-
-    :param dem_sensorgeo:   DEM in sensor geometry
-    """
-    global global_dem_sensorgeo
-    global_dem_sensorgeo = dem_sensorgeo
-
-
 class RPC_3D_Geolayer_Generator(object):
     """
     Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC).
@@ -512,15 +505,16 @@ class RPC_3D_Geolayer_Generator(object):
                  CPUs: int = None):
         """Get an instance of RPC_3D_Geolayer_Generator.
 
-        :param rpc_coeffs_per_band:     RPC coefficients for a single EnMAP band ({'band_1': <rpc_coeffs_dict>,
-                                                                                   'band_2': <rpc_coeffs_dict>,
-                                                                                   ...}
+        :param rpc_coeffs_per_band:     dictionary of RPC coefficients for each EnMAP band
+                                        ({'band_1': <rpc_coeffs_dict>,
+                                          'band_2': <rpc_coeffs_dict>,
+                                          ...})
         :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         :param CPUs:                    number of CPUs to use
         """
-        self.rpc_coeffs_per_band = OrderedDict(sorted(rpc_coeffs_per_band.items()))
+        self.rpc_coeffs_per_band = OrderedDict(natsorted(rpc_coeffs_per_band.items()))
         self.dem = dem
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
@@ -534,16 +528,45 @@ class RPC_3D_Geolayer_Generator(object):
         # TODO clip DEM to needed area
         self.dem.to_mem()
 
-    @staticmethod
-    def _compute_geolayer_for_band(rpc_coeffs, enmapIm_cornerCoords, enmapIm_dims_sensorgeo, band_idx):
-        lons, lats = \
-            RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
-                                   dem=global_dem_sensorgeo,
-                                   enmapIm_cornerCoords=enmapIm_cornerCoords,
-                                   enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo) \
-            .compute_geolayer()
+        self.bandgroups_with_unique_rpc_coeffs = self._get_bandgroups_with_unique_rpc_coeffs()
 
-        return lons, lats, band_idx
+    def _get_bandgroups_with_unique_rpc_coeffs(self) -> List[List]:
+        # combine RPC coefficients of all bands in a single numpy array
+        band_inds = list(range(len(self.rpc_coeffs_per_band)))
+        coeffs_first_band = list(self.rpc_coeffs_per_band.values())[0]
+        keys_float = [k for k in coeffs_first_band
+                      if isinstance(coeffs_first_band[k], float)]
+        keys_npa = [k for k in coeffs_first_band
+                    if isinstance(coeffs_first_band[k], np.ndarray)]
+
+        coeffs_allbands = None
+        for i, coeffdict in enumerate(self.rpc_coeffs_per_band.values()):
+            coeffs_curband = np.hstack([[coeffdict[k] for k in keys_float],
+                                        *(coeffdict[k] for k in keys_npa)])
+
+            if coeffs_allbands is None:
+                coeffs_allbands = np.zeros((len(band_inds),
+                                            1 + len(coeffs_curband)))
+                coeffs_allbands[:, 0] = band_inds
+
+            coeffs_allbands[i, 1:] = coeffs_curband
+
+        # get groups of band indices where bands have the same RPC coefficients
+        groups = npi.group_by(coeffs_allbands[:, 1:]).split(coeffs_allbands[:, 0])
+        groups_bandinds = [group.astype(np.int).tolist() for group in groups]
+
+        return groups_bandinds
+
+    @staticmethod
+    def _compute_geolayer_for_unique_coeffgroup(kwargs):
+        lons, lats = \
+            RPC_Geolayer_Generator(rpc_coeffs=kwargs['rpc_coeffs'],
+                                   dem=global_dem_sensorgeo,
+                                   enmapIm_cornerCoords=kwargs['enmapIm_cornerCoords'],
+                                   enmapIm_dims_sensorgeo=kwargs['enmapIm_dims_sensorgeo']
+                                   ).compute_geolayer()
+
+        return lons, lats, kwargs['group_idx']
 
     def compute_geolayer(self):
         rows, cols = self.enmapIm_dims_sensorgeo
@@ -551,37 +574,47 @@ class RPC_3D_Geolayer_Generator(object):
         lons = np.empty((rows, cols, bands), dtype=np.float)
         lats = np.empty((rows, cols, bands), dtype=np.float)
 
-        band_inds = list(range(len(self.rpc_coeffs_per_band)))
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
 
-        if self.CPUs > 1:
-            # multiprocessing
-            args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
-                    for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
+        # get kwargs for each group of unique RPC coefficients
+        kwargs_list = [dict(rpc_coeffs=rpc_coeffs_list[group_bandinds[0]],
+                            enmapIm_cornerCoords=self.enmapIm_cornerCoords,
+                            enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
+                            group_idx=gi)
+                       for gi, group_bandinds in enumerate(self.bandgroups_with_unique_rpc_coeffs)]
 
-            # FIXME: pickling back large lon/lat arrays to the main process may be an issue on small machines
-            # NOTE: With the small test dataset pickling has only a small effect on processing time.
-            with Pool(self.CPUs,
-                      initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
-                      initargs=(self.dem,)) as pool:
-                results = pool.starmap(self._compute_geolayer_for_band, args)
+        # compute the geolayer ONLY FOR ONE BAND per group with unique RPC coefficients
+        global global_dem_sensorgeo
+        global_dem_sensorgeo = self.dem
 
-            for res in results:
-                band_lons, band_lats, band_idx = res
-                lons[:, :, band_idx] = band_lons
-                lats[:, :, band_idx] = band_lats
+        if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
+            lons_oneband, lats_oneband = self._compute_geolayer_for_unique_coeffgroup(kwargs_list[0])[:2]
+
+            lons = np.repeat(lons_oneband[:, :, np.newaxis], bands, axis=2)
+            lats = np.repeat(lats_oneband[:, :, np.newaxis], bands, axis=2)
 
         else:
-            # singleprocessing
-            global global_dem_sensorgeo
-            global_dem_sensorgeo = self.dem
+            if self.CPUs > 1:
+                # multiprocessing (only in case there are multiple unique sets of RPC coefficients)
 
-            for band_idx in band_inds:
-                lons[:, :, band_idx], lats[:, :, band_idx] = \
-                    self._compute_geolayer_for_band(rpc_coeffs=rpc_coeffs_list[band_idx],
-                                                    enmapIm_cornerCoords=self.enmapIm_cornerCoords,
-                                                    enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
-                                                    band_idx=band_idx)[:2]
+                # FIXME: pickling back large lon/lat arrays to the main process may be an issue on small machines
+                #        -> results could be temporarily written to disk in that case
+                # NOTE: With the small test dataset pickling has only a small effect on processing time.
+                with Pool(self.CPUs) as pool:
+                    results = list(pool.imap_unordered(self._compute_geolayer_for_unique_coeffgroup, kwargs_list))
+
+            else:
+                # singleprocessing
+                results = [self._compute_geolayer_for_unique_coeffgroup(kwargs_list[gi])
+                           for gi, group_bandinds in enumerate(self.bandgroups_with_unique_rpc_coeffs)]
+
+            for res in results:
+                band_lons, band_lats, group_idx = res
+                bandinds_to_assign = self.bandgroups_with_unique_rpc_coeffs[group_idx]
+                nbands_to_assign = len(bandinds_to_assign)
+
+                lons[:, :, bandinds_to_assign] = np.repeat(band_lons[:, :, np.newaxis], nbands_to_assign, axis=2)
+                lats[:, :, bandinds_to_assign] = np.repeat(band_lats[:, :, np.newaxis], nbands_to_assign, axis=2)
 
         return lons, lats
 

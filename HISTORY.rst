@@ -2,6 +2,17 @@
 History
 =======
 
+
+0.12.x (2020-05-??)
+-------------------
+
+* Revised RPC_3D_Geolayer_Generator such that the geolayer computation is now only executed for bands with differing
+  RPC coefficients. Since we only have one set of RPC coefficients per detector by now, this speeds up the geolayer
+  generation by the factor 20-50.
+* Added Test_RPC_3D_Geolayer_Generator class.
+* Added natsort to dependencies.
+
+
 0.12.6 (2020-05-09)
 -------------------
 

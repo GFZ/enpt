@@ -50,6 +50,7 @@ dependencies:
     - utm
     - numpy-indexed
     - mvgavg
+    - natsort
     - sphinx-argparse
     - pycodestyle
     - flake8
