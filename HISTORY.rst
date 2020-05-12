@@ -3,7 +3,7 @@ History
 =======
 
 
-0.12.x (2020-05-??)
+0.12.7 (2020-05-12)
 -------------------
 
 * Revised RPC_3D_Geolayer_Generator such that the geolayer computation is now only executed for bands with differing
