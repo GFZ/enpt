@@ -33,7 +33,7 @@ from typing import Union, Tuple, List, Optional  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
-from scipy.interpolate import griddata as interp1d, LinearNDInterpolator
+from scipy.interpolate import interp1d, LinearNDInterpolator
 from scipy.spatial import Delaunay
 from geoarray import GeoArray
 from natsort import natsorted
