@@ -33,7 +33,8 @@ from typing import Union, Tuple, List, Optional  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
-from scipy.interpolate import griddata as interpolate_griddata, interp1d
+from scipy.interpolate import griddata as interp1d, LinearNDInterpolator
+from scipy.spatial import Delaunay
 from geoarray import GeoArray
 from natsort import natsorted
 import numpy_indexed as npi
@@ -408,22 +409,23 @@ class RPC_Geolayer_Generator(object):
             raise ValueError(along_axis, "The 'axis' parameter must be set to 0 or 1")
 
         kw = dict(kind='linear', fill_value='extrapolate')
+        nans = np.isnan(arr)
 
         if along_axis == 0:
             # extrapolate in top/bottom direction
-            cols_with_nan = np.arange(arr.shape[1])[~np.all(np.isnan(arr), axis=0)]
+            cols_with_nan = np.arange(arr.shape[1])[np.any(nans, axis=0)]
 
-            for col in cols_with_nan:  # FIXME iterating over columns is slow
+            for col in cols_with_nan:
                 data = arr[:, col]
-                idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
+                idx_goodvals = np.argwhere(~nans[:, col]).flatten()
                 arr[:, col] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
         else:
             # extrapolate in left/right direction
-            rows_with_nan = np.arange(arr.shape[0])[~np.all(np.isnan(arr), axis=1)]
+            rows_with_nan = np.arange(arr.shape[0])[np.any(nans, axis=1)]
 
-            for row in rows_with_nan:  # FIXME iterating over rows is slow
+            for row in rows_with_nan:
                 data = arr[row, :]
-                idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
+                idx_goodvals = np.argwhere(~nans[row, :]).flatten()
                 arr[row, :] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
 
         return arr
@@ -450,8 +452,11 @@ class RPC_Geolayer_Generator(object):
                                              indexing='ij')
 
         # transform UTM grid to DEM projection
-        x_grid_demPrj, y_grid_demPrj = (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.dem.epsg) else \
-            transform_coordArray(EPSG2WKT(grid_utm_epsg), EPSG2WKT(self.dem.epsg), x_grid_utm, y_grid_utm)
+        x_grid_demPrj, y_grid_demPrj = \
+            (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.dem.epsg) else \
+            transform_coordArray(EPSG2WKT(grid_utm_epsg),
+                                 EPSG2WKT(self.dem.epsg),
+                                 x_grid_utm, y_grid_utm)
 
         # retrieve corresponding heights from DEM
         # -> resample DEM to EnMAP grid?
@@ -470,17 +475,20 @@ class RPC_Geolayer_Generator(object):
         rows_im, cols_im = self.enmapIm_dims_sensorgeo
         out_rows_grid, out_cols_grid = np.meshgrid(range(rows_im), range(cols_im), indexing='ij')
         out_xy_pairs = np.vstack([out_cols_grid.flatten(), out_rows_grid.flatten()]).T
+        in_xy_pairs = np.array((cols, rows)).T
 
-        lons_interp = interpolate_griddata(np.array((cols, rows)).T, lons, out_xy_pairs,
-                                           method='linear').reshape(*out_cols_grid.shape)
-        lats_interp = interpolate_griddata(np.array((cols, rows)).T, lats, out_xy_pairs,
-                                           method='linear').reshape(*out_rows_grid.shape)
+        # Compute the triangulation (that takes time and can be computed for all values to be interpolated at once),
+        # then run the interpolation
+        triangulation = Delaunay(in_xy_pairs)
+        lons_interp = LinearNDInterpolator(triangulation, lons)(out_xy_pairs).reshape(*out_rows_grid.shape)
+        lats_interp = LinearNDInterpolator(triangulation, lats)(out_xy_pairs).reshape(*out_rows_grid.shape)
 
         # lons_interp / lats_interp may contain NaN values in case xmin, ymin, xmax, ymax has been set too small
         # to account for RPC transformation errors
         # => fix that by extrapolation at NaN value positions
+        # FIXME: can this be avoided by modified xmin/ymin/xmy/ymax coords?
 
-        lons_interp = self._fill_nans_at_corners(lons_interp, along_axis=1)  # extrapolate in left/right direction
+        lons_interp = self._fill_nans_at_corners(lons_interp, along_axis=0)  # extrapolate in left/right direction
         lats_interp = self._fill_nans_at_corners(lats_interp, along_axis=1)
 
         # return a geolayer in the exact dimensions like the EnMAP detector array

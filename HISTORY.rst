@@ -11,6 +11,8 @@ History
   generation by the factor 20-50.
 * Added Test_RPC_3D_Geolayer_Generator class.
 * Added natsort to dependencies.
+* Optimized RPC_3D_Geolayer_Generator algorithm to further reduce computation time. Its now 2-3x faster.
+  Revised and added corresponding tests.
 
 
 0.12.6 (2020-05-09)

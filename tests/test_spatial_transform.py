@@ -243,19 +243,21 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
         # TODO validate dem before passing to RPC_Geolayer_Generator
         self.dem = os.path.join(path_testdata, 'DLR_L2A_DEM_UTM32.bsq')
-        # self.dims_sensorgeo = (1024, 1000)
-        self.dims_sensorgeo = (50, 50)
+        self.dims_sensorgeo = (1024, 1000)
 
     def _get_rpc_coeffs_with_multiple_coeff_sets(self):
         rpc_coeffs_per_band = self.rpc_coeffs_per_band.copy()
-        rpc_coeffs_per_band['band_3']['row_off'] += 10
-        rpc_coeffs_per_band['band_3']['col_off'] += 10
-        rpc_coeffs_per_band['band_4']['row_off'] += 10
-        rpc_coeffs_per_band['band_4']['col_off'] += 10
-        rpc_coeffs_per_band['band_5']['row_off'] += 20
-        rpc_coeffs_per_band['band_5']['col_off'] += 20
-        rpc_coeffs_per_band['band_6']['row_off'] += 20
-        rpc_coeffs_per_band['band_6']['col_off'] += 20
+        for b, addval in zip([3, 4, 5, 6], [10, 10, 20, 20]):
+            rpc_coeffs_per_band['band_%d' % b]['row_off'] += addval
+            rpc_coeffs_per_band['band_%d' % b]['col_off'] += addval
+
+        return rpc_coeffs_per_band
+
+    def _get__faulty_rpc_coeffs(self):
+        rpc_coeffs_per_band = self.rpc_coeffs_per_band.copy()
+        for b in range(1, 7):
+            rpc_coeffs_per_band['band_%d' % b]['row_off'] += 10
+            rpc_coeffs_per_band['band_%d' % b]['col_off'] += 10
 
         return rpc_coeffs_per_band
 
@@ -266,9 +268,25 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo
                                                ).compute_geolayer()
         self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (50, 50, 6))
+        self.assertEqual(lons.shape, (1024, 1000, 6))
         self.assertTrue(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
         self.assertTrue(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+    def test_compute_geolayer_faulty_coeff_set(self):
+        """
+        Test in case of a faulty/inaccurate coeff set the result really does not contain NaNs.
+
+        NOTE: NaNs should be filled automatically.
+        """
+        lons, lats = RPC_3D_Geolayer_Generator(self._get__faulty_rpc_coeffs(),
+                                               dem=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertFalse(np.isnan(lons).any())
+        self.assertFalse(np.isnan(lats).any())
 
     def test_compute_geolayer_multiple_coeff_sets_singleprocessing(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
@@ -278,7 +296,7 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                CPUs=1
                                                ).compute_geolayer()
         self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (50, 50, 6))
+        self.assertEqual(lons.shape, (1024, 1000, 6))
         self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
         self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
 
@@ -290,6 +308,6 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                CPUs=6
                                                ).compute_geolayer()
         self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (50, 50, 6))
+        self.assertEqual(lons.shape, (1024, 1000, 6))
         self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
         self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
