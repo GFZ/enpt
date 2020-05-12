@@ -58,8 +58,12 @@ class Dead_Pixel_Corrector(object):
         * Remaining missing data positions (e.g., outermost columns) are spectrally interpolated.
     """
 
-    def __init__(self, algorithm: str = 'spectral', interp_spectral: str = 'linear', interp_spatial: str = 'linear',
-                 CPUs: int = None, logger: logging.Logger = None):
+    def __init__(self,
+                 algorithm: str = 'spectral',
+                 interp_spectral: str = 'linear',
+                 interp_spatial: str = 'linear',
+                 CPUs: int = None,
+                 logger: logging.Logger = None):
         """Get an instance of Dead_Pixel_Corrector.
 
         :param algorithm:           algorithm how to correct dead pixels
@@ -78,7 +82,8 @@ class Dead_Pixel_Corrector(object):
         self.logger = logger or logging.getLogger()
 
     @staticmethod
-    def _validate_inputs(image2correct: GeoArray, deadpixel_map: GeoArray):
+    def _validate_inputs(image2correct: GeoArray,
+                         deadpixel_map: GeoArray):
         if deadpixel_map.ndim == 2:
             if (image2correct.bands, image2correct.columns) != deadpixel_map.shape:
                 raise ValueError('The given image to be corrected (shape: %s) requires a dead column map with shape '
@@ -92,7 +97,9 @@ class Dead_Pixel_Corrector(object):
         else:
             raise ValueError('Unexpected number of dimensions of dead column map.')
 
-    def _interpolate_nodata_spectrally(self, image2correct: GeoArray, deadpixel_map: GeoArray):
+    def _interpolate_nodata_spectrally(self,
+                                       image2correct: GeoArray,
+                                       deadpixel_map: GeoArray):
         assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
         if deadpixel_map.shape != image2correct.shape:
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
@@ -102,7 +109,9 @@ class Dead_Pixel_Corrector(object):
 
         return image_corrected
 
-    def _interpolate_nodata_spatially(self, image2correct: GeoArray, deadpixel_map: GeoArray):
+    def _interpolate_nodata_spatially(self,
+                                      image2correct: GeoArray,
+                                      deadpixel_map: GeoArray):
         assert deadpixel_map.ndim == 3, "3D dead pixel map expected."
         if deadpixel_map.shape != image2correct.shape:
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
@@ -130,7 +139,9 @@ class Dead_Pixel_Corrector(object):
 
         return image2correct
 
-    def correct(self, image2correct: Union[np.ndarray, GeoArray], deadpixel_map: Union[np.ndarray, GeoArray]):
+    def correct(self,
+                image2correct: Union[np.ndarray, GeoArray],
+                deadpixel_map: Union[np.ndarray, GeoArray]):
         """Run the dead pixel correction.
 
         :param image2correct:   image to correct
@@ -174,7 +185,9 @@ class Dead_Pixel_Corrector(object):
             return image2correct
 
 
-def _get_baddata_mask(data: np.ndarray, nodata: Union[np.ndarray, Number] = np.nan, transpose_inNodata: bool = False):
+def _get_baddata_mask(data: np.ndarray,
+                      nodata: Union[np.ndarray, Number] = np.nan,
+                      transpose_inNodata: bool = False):
     if isinstance(nodata, np.ndarray):
         badmask = nodata.T if transpose_inNodata else nodata
 
@@ -187,9 +200,11 @@ def _get_baddata_mask(data: np.ndarray, nodata: Union[np.ndarray, Number] = np.n
     return badmask
 
 
-def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
+def interp_nodata_along_axis_2d(data_2d: np.ndarray,
+                                axis: int = 0,
                                 nodata: Union[np.ndarray, Number] = np.nan,
-                                method: str = 'linear', fill_value: Union[float, str] = 'extrapolate'):
+                                method: str = 'linear',
+                                fill_value: Union[float, str] = 'extrapolate'):
     """Interpolate a 2D array along the given axis (based on scipy.interpolate.interp1d).
 
     :param data_2d:         data to interpolate
@@ -234,8 +249,11 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray, axis: int = 0,
     return data_2d if axis == 1 else data_2d.T
 
 
-def interp_nodata_along_axis(data, axis=0, nodata: Union[np.ndarray, Number] = np.nan,
-                             method: str = 'linear', fill_value: Union[float, str] = 'extrapolate'):
+def interp_nodata_along_axis(data,
+                             axis=0,
+                             nodata: Union[np.ndarray, Number] = np.nan,
+                             method: str = 'linear',
+                             fill_value: Union[float, str] = 'extrapolate'):
     """Interpolate a 2D or 3D array along the given axis (based on scipy.interpolate.interp1d).
 
     :param data:            data to interpolate
@@ -277,9 +295,13 @@ def interp_nodata_along_axis(data, axis=0, nodata: Union[np.ndarray, Number] = n
                     method=method, fill_value=fill_value))
 
 
-def interp_nodata_spatially_2d(data_2d: np.ndarray, axis: int = 0, nodata: Union[np.ndarray, Number] = np.nan,
-                               method: str = 'linear', fill_value: float = np.nan,
-                               implementation: str = 'pandas') -> np.ndarray:
+def interp_nodata_spatially_2d(data_2d: np.ndarray,
+                               axis: int = 0,
+                               nodata: Union[np.ndarray, Number] = np.nan,
+                               method: str = 'linear',
+                               fill_value: float = np.nan,
+                               implementation: str = 'pandas'
+                               ) -> np.ndarray:
     """Interpolate a 2D array spatially.
 
     NOTE: If data_2d contains NaN values that are unlabelled by a given nodata array,
@@ -331,9 +353,14 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray, axis: int = 0, nodata: Union
     return data_2d
 
 
-def interp_nodata_spatially_3d(data_3d: np.ndarray, axis: int = 0, nodata: Union[np.ndarray, Number] = np.nan,
-                               method: str = 'linear', fill_value: float = np.nan, implementation: str = 'pandas',
-                               CPUs: int = None) -> np.ndarray:
+def interp_nodata_spatially_3d(data_3d: np.ndarray,
+                               axis: int = 0,
+                               nodata: Union[np.ndarray, Number] = np.nan,
+                               method: str = 'linear',
+                               fill_value: float = np.nan,
+                               implementation: str = 'pandas',
+                               CPUs: int = None
+                               ) -> np.ndarray:
     """Interpolate a 3D array spatially, band-for-band.
 
     :param data_3d:         data to interpolate
