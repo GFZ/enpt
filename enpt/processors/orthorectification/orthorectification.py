@@ -291,9 +291,9 @@ class VNIR_SWIR_Stacker(object):
                                      for cwl in wvls_overlap_all])
 
         # apply a spectral moving average to the overlapping VNIR/SWIR band
-        bandidxs2average = np.array([bandidxs_overlap.min() - int((filterwidth - 1) / 2)] +
+        bandidxs2average = np.array([np.min(bandidxs_overlap) - int((filterwidth - 1) / 2)] +
                                     list(bandidxs_overlap) +
-                                    [bandidxs_overlap.max() + int((filterwidth - 1) / 2)])
+                                    [np.max(bandidxs_overlap) + int((filterwidth - 1) / 2)])
         data2average = data_stacked[:, :, bandidxs2average]
         data_stacked[:, :, bandidxs_overlap] = mvgavg(data2average,
                                                       n=filterwidth,

@@ -2,6 +2,12 @@
 History
 =======
 
+0.12.x (2020-05-??)
+-------------------
+
+* L2A METADATA.XML now contains correct band characteristics, band statistics and information about the merged
+  VNIR/SWIR cube (fixes issue #53).
+
 
 0.12.7 (2020-05-12)
 -------------------
