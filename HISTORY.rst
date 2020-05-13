@@ -2,7 +2,7 @@
 History
 =======
 
-0.12.x (2020-05-??)
+0.12.8 (2020-05-13)
 -------------------
 
 * L2A METADATA.XML now contains correct band characteristics, band statistics and information about the merged
