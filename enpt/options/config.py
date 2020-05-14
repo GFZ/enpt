@@ -101,14 +101,14 @@ config_for_testing_dlr = dict(
                      # Arcachon full tile 3, reprocessed 05/2020
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
                      )),
-    # path_l1b_enmap_image_gapfill=os.path.abspath(
-    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-    #                  # Alps
-    #                  # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
-    #
-    #                  # Arcachon
-    #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
-    #                  )),
+    path_l1b_enmap_image_gapfill=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+                     # Alps
+                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+
+                     # Arcachon
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+                     )),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data',
                      # Alps
