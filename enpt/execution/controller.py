@@ -159,7 +159,7 @@ class EnPT_Controller(object):
 
                     # re-apply dead pixel correction
                     self.L1_obj.logger.info(
-                        'Re-applying dead pixel correction to correct fof spectral spikes due to fringe effect.')
+                        'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
                     self.L1_obj.correct_dead_pixels()
                 else:
                     self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
