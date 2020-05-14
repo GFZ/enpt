@@ -36,10 +36,8 @@ test_enpt:
     # - python setup.py install
     # - cd ../../
 
-    # install sensormapgeo, mvgavg
-    # TODO: remove when included in docker container
-    - pip install sensormapgeo>=0.2.1
-    - pip install mvgavg
+    # install missing dependencies
+    - pip install natsort  # TODO: remove as soon as its contained in the CI container
 
     # run nosetests
     - make nosetests  # test are called here

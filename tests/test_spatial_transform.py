@@ -46,7 +46,7 @@ from geoarray import GeoArray
 from py_tools_ds.geo.coord_grid import is_point_on_grid
 
 from enpt.processors.spatial_transform import \
-    Geometry_Transformer, RPC_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
+    Geometry_Transformer, RPC_Geolayer_Generator, RPC_3D_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
 from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid
@@ -223,3 +223,91 @@ class Test_RPC_Geolayer_Generator(TestCase):
         self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
         self.assertFalse(np.isnan(lons_interp).any())
         self.assertFalse(np.isnan(lats_interp).any())
+
+
+class Test_RPC_3D_Geolayer_Generator(TestCase):
+    def setUp(self):
+        with open(os.path.join(path_testdata, 'rpc_coeffs_B200.pkl'), 'rb') as pklF:
+            rpc_coeffs_oneband = pickle.load(pklF)
+
+        self.rpc_coeffs_per_band = {'band_%d' % b: rpc_coeffs_oneband.copy() for b in range(1, 7)}
+
+        # bounding polygon DLR test data
+        self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
+        self.lons = np.array([10.7966311, 11.1693436, 10.7111131, 11.0815993])
+        self.corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
+
+        # spatial coverage of datatake DLR test data
+        # self.lats = np.array([47.7870358956, 47.723060779, 46.9808418244, 46.9174014681])
+        # self.lons = np.array([10.7968099213, 11.1693752478, 10.5262233116, 10.8932492494])
+
+        # TODO validate dem before passing to RPC_Geolayer_Generator
+        self.dem = os.path.join(path_testdata, 'DLR_L2A_DEM_UTM32.bsq')
+        self.dims_sensorgeo = (1024, 1000)
+
+    def _get_rpc_coeffs_with_multiple_coeff_sets(self):
+        rpc_coeffs_per_band = self.rpc_coeffs_per_band.copy()
+        for b, addval in zip([3, 4, 5, 6], [10, 10, 20, 20]):
+            rpc_coeffs_per_band['band_%d' % b]['row_off'] += addval
+            rpc_coeffs_per_band['band_%d' % b]['col_off'] += addval
+
+        return rpc_coeffs_per_band
+
+    def _get__faulty_rpc_coeffs(self):
+        rpc_coeffs_per_band = self.rpc_coeffs_per_band.copy()
+        for b in range(1, 7):
+            rpc_coeffs_per_band['band_%d' % b]['row_off'] += 10
+            rpc_coeffs_per_band['band_%d' % b]['col_off'] += 10
+
+        return rpc_coeffs_per_band
+
+    def test_compute_geolayer_one_unique_coeff_set(self):
+        lons, lats = RPC_3D_Geolayer_Generator(self.rpc_coeffs_per_band,
+                                               dem=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertTrue(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
+        self.assertTrue(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+    def test_compute_geolayer_faulty_coeff_set(self):
+        """
+        Test in case of a faulty/inaccurate coeff set the result really does not contain NaNs.
+
+        NOTE: NaNs should be filled automatically.
+        """
+        lons, lats = RPC_3D_Geolayer_Generator(self._get__faulty_rpc_coeffs(),
+                                               dem=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertFalse(np.isnan(lons).any())
+        self.assertFalse(np.isnan(lats).any())
+
+    def test_compute_geolayer_multiple_coeff_sets_singleprocessing(self):
+        lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
+                                               dem=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo,
+                                               CPUs=1
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
+        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+    def test_compute_geolayer_multiple_coeff_sets_multiprocessing(self):
+        lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
+                                               dem=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo,
+                                               CPUs=6
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
+        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))

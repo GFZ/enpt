@@ -10,8 +10,45 @@ History
   land surfaces later.
 
 
+0.12.x (2020-05-??)
+-------------------
+
+* Renamed DEM for Arcachon test dataset.
+* Fixed typo.
+
+
+0.12.8 (2020-05-13)
+-------------------
+
+* L2A METADATA.XML now contains correct band characteristics, band statistics and information about the merged
+  VNIR/SWIR cube (fixes issue #53).
+
+
+0.12.7 (2020-05-12)
+-------------------
+
+* Revised RPC_3D_Geolayer_Generator such that the geolayer computation is now only executed for bands with differing
+  RPC coefficients. Since we only have one set of RPC coefficients per detector by now, this speeds up the geolayer
+  generation by the factor 20-50.
+* Added Test_RPC_3D_Geolayer_Generator class.
+* Added natsort to dependencies.
+* Optimized RPC_3D_Geolayer_Generator algorithm to further reduce computation time. Its now 2-3x faster.
+  Revised and added corresponding tests.
+
+
+0.12.6 (2020-05-09)
+-------------------
+
+* DN2TOARadiance() now returns float32 radiance instead of float64.
+* Bugfix in Orthorectifier._get_common_extent().
+* Revised Geometry_Transformer and Geometry_Transformer_3D classes.
+* Updated minimal version of sensormapgeo which makes the orthorectification much faster (factor 6-10)
+  and fixes the deadlock within sensormapgeo.
+* Bilinear orthorectification now uses 8 neighbours instead of 32 which makes it much faster.
+
+
 0.12.5 (2020-05-04)
-------------------
+-------------------
 
 * Dead-pixel correction is now called once more after AC to correct possible spectral spikes due to fringe effect.
 
@@ -66,6 +103,7 @@ History
 * Revised test_l1b_reader.py.
 * Combined 'mask_water' and 'mask_land' attributes to 'mask_landwater'.
 * Renamed metadata attribute 'filename_mask_deadpixel' to 'filename_deadpixelmap' for consistency.
+
 
 0.12.0 (2020-04-09)
 -------------------
