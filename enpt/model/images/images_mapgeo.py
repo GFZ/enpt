@@ -239,7 +239,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         makedirs(product_dir, exist_ok=True)
 
         # save raster data
-        kwargs_save = dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"])
+        kwargs_save = \
+            dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"]) if self.cfg.output_format == 'GTiff' else \
+            dict(fmt='ENVI')
         outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',

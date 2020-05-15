@@ -125,6 +125,7 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=False,
     is_dummy_dataformat=False,
+    # output_format='ENVI',
     enable_ac=True,
     enable_ice_retrieval=False,
     CPUs=32,

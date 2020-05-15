@@ -88,22 +88,28 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.earthSunDist: float = meta_l1b.earthSunDist  # earth-sun distance
 
         # generate file names for L2A output
+        file_ext_l1b = os.path.splitext(meta_l1b.vnir.filename_data)[1]
+        file_ext_l2a = '.TIF' if self.cfg.output_format == 'GTiff' else '.bsq'
+
+        def convert_fn(fn):
+            return fn.replace('L1B-', 'L2A-').replace(file_ext_l1b, file_ext_l2a)
+
         if not self.cfg.is_dummy_dataformat:
-            self.scene_basename = meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
+            self.scene_basename = convert_fn(meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0])
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
-        self.filename_data = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.filename_deadpixelmap_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.filename_deadpixelmap_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.filename_quicklook_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.filename_quicklook_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.filename_mask_landwater = meta_l1b.vnir.filename_mask_landwater.replace('L1B-', 'L2A-')
-        self.filename_mask_clouds = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')
-        self.filename_mask_cloudshadow = meta_l1b.vnir.filename_mask_cloudshadow.replace('L1B-', 'L2A-')
-        self.filename_mask_haze = meta_l1b.vnir.filename_mask_haze.replace('L1B-', 'L2A-')
-        self.filename_mask_snow = meta_l1b.vnir.filename_mask_snow.replace('L1B-', 'L2A-')
-        self.filename_mask_cirrus = meta_l1b.vnir.filename_mask_cirrus.replace('L1B-', 'L2A-')
-        self.filename_metaxml = meta_l1b.filename_metaxml.replace('L1B-', 'L2A-')
+        self.filename_data = convert_fn(meta_l1b.vnir.filename_data).replace('_VNIR', '')
+        self.filename_deadpixelmap_vnir = convert_fn(meta_l1b.vnir.filename_deadpixelmap)
+        self.filename_deadpixelmap_swir = convert_fn(meta_l1b.swir.filename_deadpixelmap)
+        self.filename_quicklook_vnir = convert_fn(meta_l1b.vnir.filename_quicklook)
+        self.filename_quicklook_swir = convert_fn(meta_l1b.swir.filename_quicklook)
+        self.filename_mask_landwater = convert_fn(meta_l1b.vnir.filename_mask_landwater)
+        self.filename_mask_clouds = convert_fn(meta_l1b.vnir.filename_mask_clouds)
+        self.filename_mask_cloudshadow = convert_fn(meta_l1b.vnir.filename_mask_cloudshadow)
+        self.filename_mask_haze = convert_fn(meta_l1b.vnir.filename_mask_haze)
+        self.filename_mask_snow = convert_fn(meta_l1b.vnir.filename_mask_snow)
+        self.filename_mask_cirrus = convert_fn(meta_l1b.vnir.filename_mask_cirrus)
+        self.filename_metaxml = convert_fn(meta_l1b.filename_metaxml)
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
         # get band index order
@@ -198,9 +204,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                                       '.TIF',
                                       '.TIFF',
                                       '.GTIFF',
-                                      '.BSQ',
-                                      '.BIL',
-                                      '.BIP',
+                                      '.BSQ', '.bsq',
+                                      '.BIL', '.bil',
+                                      '.BIP', '.bip',
                                       '.JPEG2000'] \
                 else 'xml' if ext == '.XML' \
                 else 'NA'
