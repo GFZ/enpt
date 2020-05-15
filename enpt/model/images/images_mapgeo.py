@@ -240,8 +240,15 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         # save raster data
         kwargs_save = \
-            dict(fmt='GTiff', creationOptions=["COMPRESS=LZW"]) if self.cfg.output_format == 'GTiff' else \
-            dict(fmt='ENVI')
+            dict(fmt='GTiff',
+                 creationOptions=["COMPRESS=LZW",
+                                  "NUM_THREADS=%d" % self.cfg.CPUs,
+                                  "INTERLEAVE=%s" % ('BAND' if self.cfg.output_interleave == 'band' else 'PIXEL')]
+                 ) if self.cfg.output_format == 'GTiff' else \
+            dict(fmt='ENVI',
+                 creationOptions=["INTERLEAVE=%s" %("BSQ" if self.cfg.output_interleave == 'band' else
+                                                    "BIL" if self.cfg.output_interleave == 'line' else
+                                                    "BIP")])
         outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',

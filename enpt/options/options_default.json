@@ -22,9 +22,13 @@
 
     "output": {
         "output_dir": "",  /*output directory where processed data and log files are saved*/
-        "output_format": "GTiff"  /*file format of all raster output files
-                                    'GTiff': GeoTIFF
-                                    'ENVI':  ENVI BSQ*/
+        "output_format": "GTiff",  /*file format of all raster output files
+                                     'GTiff': GeoTIFF
+                                     'ENVI':  ENVI BSQ*/
+        "output_interleave": "pixel"  /*raster data interleaving type (default: 'pixel')
+                                        - 'band': band-sequential (BSQ),
+                                        - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+                                        - 'pixel' data interleaved-by-pixel (BIP)*/
     },
 
     "processors": {

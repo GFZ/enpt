@@ -89,7 +89,11 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # generate file names for L2A output
         file_ext_l1b = os.path.splitext(meta_l1b.vnir.filename_data)[1]
-        file_ext_l2a = '.TIF' if self.cfg.output_format == 'GTiff' else '.bsq'
+        file_ext_l2a = \
+            '.TIF' if self.cfg.output_format == 'GTiff' else \
+            '.bsq' if self.cfg.output_interleave == 'band' else \
+            '.bil' if self.cfg.output_interleave == 'line' else \
+            '.bip'
 
         def convert_fn(fn):
             return fn.replace('L1B-', 'L2A-').replace(file_ext_l1b, file_ext_l2a)
