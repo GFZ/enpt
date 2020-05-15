@@ -246,9 +246,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                                   "INTERLEAVE=%s" % ('BAND' if self.cfg.output_interleave == 'band' else 'PIXEL')]
                  ) if self.cfg.output_format == 'GTiff' else \
             dict(fmt='ENVI',
-                 creationOptions=["INTERLEAVE=%s" %("BSQ" if self.cfg.output_interleave == 'band' else
-                                                    "BIL" if self.cfg.output_interleave == 'line' else
-                                                    "BIP")])
+                 creationOptions=["INTERLEAVE=%s" % ("BSQ" if self.cfg.output_interleave == 'band' else
+                                                     "BIL" if self.cfg.output_interleave == 'line' else
+                                                     "BIP")])
         outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
