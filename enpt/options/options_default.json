@@ -21,7 +21,10 @@
     },
 
     "output": {
-        "output_dir": ""  /*output directory where processed data and log files are saved*/
+        "output_dir": "",  /*output directory where processed data and log files are saved*/
+        "output_format": "GTiff"  /*file format of all raster output files
+                                    'GTiff': GeoTIFF
+                                    'ENVI':  ENVI BSQ*/
     },
 
     "processors": {

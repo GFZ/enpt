@@ -80,6 +80,8 @@ def get_enpt_argparser():
              'ignored if DEM is given')
     add('-od', '--output_dir', type=str, default=None,
         help='output directory where processed data and log files are saved')
+    add('-of', '--output_format', type=str, default='GTiff',
+        help="file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')")
     add('-wd', '--working_dir', type=str, default=None,
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,

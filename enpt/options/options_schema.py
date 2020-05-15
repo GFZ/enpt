@@ -53,6 +53,7 @@ enpt_schema_input = dict(
         type='dict', required=False,
         schema=dict(
             output_dir=dict(type='string', required=False),
+            output_format=dict(type='string', required=False, allowed=['GTiff', 'ENVI'])
         )),
 
     processors=dict(
@@ -130,6 +131,7 @@ parameter_mapping = dict(
 
     # output
     output_dir=('output', 'output_dir'),
+    output_format=('output', 'output_format'),
 
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),

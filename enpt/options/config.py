@@ -167,6 +167,9 @@ class EnPTConfig(object):
         :key output_dir:
             output directory where processed data and log files are saved
 
+        :key output_format:
+            file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')
+
         :key working_dir:
             directory to be used for temporary files
 
@@ -275,6 +278,7 @@ class EnPTConfig(object):
         ##################
 
         self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
+        self.output_format = gp('output_format')
 
         ###########################
         # processor configuration #
