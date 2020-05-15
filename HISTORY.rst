@@ -7,6 +7,10 @@ History
 
 * Renamed DEM for Arcachon test dataset.
 * Fixed typo.
+* Added config parameter 'output_format'.
+* Implementated ENVI output format.
+* Fixed log message.
+* The output interleave is now also configurable via the parameter 'output_interleave'.
 
 
 0.12.8 (2020-05-13)

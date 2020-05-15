@@ -125,6 +125,8 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=False,
     is_dummy_dataformat=False,
+    # output_format='ENVI',
+    # output_interleave='band',
     enable_ac=True,
     enable_ice_retrieval=False,
     CPUs=32,
@@ -166,6 +168,15 @@ class EnPTConfig(object):
 
         :key output_dir:
             output directory where processed data and log files are saved
+
+        :key output_format:
+            file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')
+
+        :key output_interleave:
+            raster data interleaving type (default: 'pixel')
+            - 'band': band-sequential (BSQ),
+            - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+            - 'pixel' data interleaved-by-pixel (BIP)
 
         :key working_dir:
             directory to be used for temporary files
@@ -254,7 +265,7 @@ class EnPTConfig(object):
 
         self.is_dummy_dataformat = gp('is_dummy_dataformat')
         if 'is_dlr_dataformat' in user_opts:
-            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+            warnings.warn("The 'is_dlr_dataformat' flag is deprecated and will not exist in future. "
                           "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
             self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
@@ -275,6 +286,8 @@ class EnPTConfig(object):
         ##################
 
         self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
+        self.output_format = gp('output_format')
+        self.output_interleave = gp('output_interleave')
 
         ###########################
         # processor configuration #
@@ -315,6 +328,12 @@ class EnPTConfig(object):
         #########################
 
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(self.to_dict())
+
+        # check invalid interleave
+        if self.output_interleave == 'line' and self.output_format == 'GTiff':
+            warnings.warn("The interleaving type 'line' is not supported by the GTiff output format. Using 'pixel'.",
+                          UserWarning)
+            self.output_interleave = 'pixel'
 
     @staticmethod
     def absPath(path):

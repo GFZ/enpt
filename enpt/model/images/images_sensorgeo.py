@@ -120,7 +120,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         method_spectral, method_spatial = self.cfg.deadpix_P_interp_spectral, self.cfg.deadpix_P_interp_spatial
         self.logger.info("Correcting dead pixels of %s detector...\n"
                          "Used algorithm: %s interpolation in the %s domain"
-                         % (self.detector_name, algo, method_spectral if algo == 'spectral' else method_spatial))
+                         % (self.detector_name, method_spectral, algo if algo == 'spectral' else method_spatial))
 
         self.data = \
             Dead_Pixel_Corrector(algorithm=algo,
