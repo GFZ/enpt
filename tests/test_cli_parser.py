@@ -69,6 +69,18 @@ class Test_CLIParser(TestCase):
         self.assertNotIsInstance(config.CPUs, str)
         self.assertEqual(config.CPUs, cpu_count())
 
+    def test_param_list(self):
+        parsed_args = self.parser_run.parse_args(self.baseargs +
+                                                 ['--target_coord_grid', '0', '30', '0', '30'])
+        self.get_config(parsed_args)  # we don't check the result here as EnPT_Config generates a dict from it
+
+        try:
+            self.parser_run.parse_args(self.baseargs + ['--target_coord_grid', '0', '30'])
+        except SystemExit as e:
+            assert isinstance(e.__context__, ArgumentError)
+        else:
+            raise ValueError("Exception not raised")
+
     def test_param_boolean(self):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'True'])

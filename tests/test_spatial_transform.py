@@ -49,7 +49,7 @@ from enpt.processors.spatial_transform import \
     Geometry_Transformer, RPC_Geolayer_Generator, RPC_3D_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
 from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
 from enpt.io.reader import L1B_Reader
-from enpt.options.config import enmap_coordinate_grid
+from enpt.options.config import enmap_coordinate_grid_utm
 
 __author__ = 'Daniel Scheffler'
 
@@ -83,11 +83,14 @@ class Test_Geometry_Transformer(TestCase):
             GT.to_map_geometry(self.gA2transform_mapgeo, tgt_prj=32632)
 
         # test transformation to UTM zone 32
-        data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632)
-        self.assertEqual((gt[1], -gt[5]), (np.ptp(enmap_coordinate_grid['x']),
-                                           np.ptp(enmap_coordinate_grid['x'])))  # 30m output
+        data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632,
+                                                  tgt_coordgrid=(enmap_coordinate_grid_utm['x'],
+                                                                 enmap_coordinate_grid_utm['y']))
+        self.assertEqual((gt[1], -gt[5]), (np.ptp(enmap_coordinate_grid_utm['x']),
+                                           np.ptp(enmap_coordinate_grid_utm['y'])))  # 30m output
         self.assertTrue(is_point_on_grid((gt[0], gt[3]),
-                                         xgrid=enmap_coordinate_grid['x'], ygrid=enmap_coordinate_grid['y']))
+                                         xgrid=enmap_coordinate_grid_utm['x'],
+                                         ygrid=enmap_coordinate_grid_utm['y']))
 
         # test transformation to LonLat
         GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=4326)

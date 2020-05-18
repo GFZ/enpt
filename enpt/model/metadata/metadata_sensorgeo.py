@@ -271,7 +271,10 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                           self.lat_UL_UR_LL_LR)), fix_invalid=True)
         from ...processors.spatial_transform import get_UTMEPSG_from_LonLat_cornersXY
-        self.epsg_ortho = get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
+        # NOTE:   self.cfg.target_epsg is set if user-provided or in case of Lon/Lat coordinates
+        self.epsg_ortho = \
+            self.cfg.target_epsg or \
+            get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
