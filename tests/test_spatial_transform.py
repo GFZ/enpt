@@ -83,9 +83,11 @@ class Test_Geometry_Transformer(TestCase):
             GT.to_map_geometry(self.gA2transform_mapgeo, tgt_prj=32632)
 
         # test transformation to UTM zone 32
-        data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632)
+        data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632,
+                                                  tgt_coordgrid=(enmap_coordinate_grid_utm['x'],
+                                                                 enmap_coordinate_grid_utm['y']))
         self.assertEqual((gt[1], -gt[5]), (np.ptp(enmap_coordinate_grid_utm['x']),
-                                           np.ptp(enmap_coordinate_grid_utm['x'])))  # 30m output
+                                           np.ptp(enmap_coordinate_grid_utm['y'])))  # 30m output
         self.assertTrue(is_point_on_grid((gt[0], gt[3]),
                                          xgrid=enmap_coordinate_grid_utm['x'],
                                          ygrid=enmap_coordinate_grid_utm['y']))
