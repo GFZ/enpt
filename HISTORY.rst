@@ -2,7 +2,7 @@
 History
 =======
 
-0.12.x (2020-05-??)
+0.13.0 (2020-05-18)
 -------------------
 
 * Renamed DEM for Arcachon test dataset.
