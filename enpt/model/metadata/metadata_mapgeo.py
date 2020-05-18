@@ -41,7 +41,7 @@ from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # no
 from geoarray import GeoArray
 
 from .metadata_sensorgeo import EnMAP_Metadata_L1B_SensorGeo
-from ...options.config import EnPTConfig, enmap_xres
+from ...options.config import EnPTConfig
 from ..srf import SRF
 from ...version import __version__
 
@@ -54,6 +54,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
                  wvls_l2a: Union[List, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
+                 grid_res_l2a: Tuple[float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
@@ -61,10 +62,12 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
         :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
+        :param grid_res_l2a         Coordinate grid resolution of the L2A product (x, y)
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
         self._meta_l1b = meta_l1b
+        self.grid_res = grid_res_l2a
         self.logger = logger or logging.getLogger()
 
         # defaults
@@ -154,6 +157,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.lat_UL_UR_LL_LR = [lat for lon, lat in common_UL_UR_LL_LR]
         self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                           self.lat_UL_UR_LL_LR)), fix_invalid=True)
+        self.epsg = self._meta_l1b.vnir.epsg_ortho
 
         if meta_l1b.vnir.unit != meta_l1b.swir.unit or meta_l1b.vnir.unitcode != meta_l1b.swir.unitcode:
             raise RuntimeError('L2A data should have the same radiometric unit for VNIR and SWIR. '
@@ -417,9 +421,20 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # ortho #
         #########
 
-        # TODO update product/ortho/projection
-        #      {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}
-        uk('product/ortho/resolution', enmap_xres)
+        if self.epsg == 4326:
+            proj_str = 'Geographic'
+        elif self.epsg == 3035:
+            proj_str = 'LAEA-ETRS89'
+        elif len(str(self.epsg)) == 5 and str(self.epsg)[:3] in ['326', '327']:
+            zone = int(str(self.epsg)[-2:])
+            if not 0 <= zone <= 60:
+                raise RuntimeError('Invalid L2A UTM zone: %d.' % zone)
+            proj_str = 'UTM_Zone%d_North' % zone if str(self.epsg).startswith('326') else 'UTM_Zone%d_South' % zone
+        else:
+            proj_str = 'NA'
+
+        uk('product/ortho/projection', proj_str)  # {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}  # noqa
+        uk('product/ortho/resolution', self.grid_res[0])
         uk('product/ortho/resampling', self.cfg.ortho_resampAlg)
 
         # band statistics

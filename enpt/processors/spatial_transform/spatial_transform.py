@@ -29,7 +29,7 @@
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
-from typing import Union, Tuple, List, Optional  # noqa: F401
+from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -41,11 +41,11 @@ import numpy_indexed as npi
 
 from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
 from sensormapgeo.transformer_2d import AreaDefinition
-from py_tools_ds.geo.projection import get_proj4info, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
+from py_tools_ds.geo.projection import prj_equal, EPSG2WKT
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
-from ...options.config import enmap_coordinate_grid
+from ...options.config import enmap_coordinate_grid_utm
 
 __author__ = 'Daniel Scheffler'
 
@@ -79,10 +79,6 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
-
-        # get EnMAP grid
-        tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
-        tgt_coordgrid = (enmap_coordinate_grid['x'], enmap_coordinate_grid['y']) if tgt_epsg != 4326 else None
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
@@ -125,10 +121,6 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
-
-        # get EnMAP grid
-        tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
-        tgt_coordgrid = (enmap_coordinate_grid['x'], enmap_coordinate_grid['y']) if tgt_epsg != 4326 else None
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
@@ -234,14 +226,17 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         return tgt_data_sensorgeo
 
 
-def move_extent_to_EnMAP_grid(extent_utm: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:
-    """Move a UTM coordinate extent to the EnMAP coordinate grid (30m x 30m, origin at 0/0).
+def move_extent_to_coord_grid(extent_utm: Tuple[float, float, float, float],
+                              tgt_xgrid: Sequence[float],
+                              tgt_ygrid: Sequence[float],
+                              ) -> Tuple[float, float, float, float]:
+    """Move the given coordinate extent to a coordinate grid.
 
     :param extent_utm:  xmin, ymin, xmax, ymax coordinates
+    :param tgt_xgrid:  target X coordinate grid, e.g. [0, 30]
+    :param tgt_ygrid:  target Y coordinate grid, e.g. [0, 30]
     """
     xmin, ymin, xmax, ymax = extent_utm
-    tgt_xgrid = enmap_coordinate_grid['x']
-    tgt_ygrid = enmap_coordinate_grid['y']
     tgt_xmin = find_nearest(tgt_xgrid, xmin, roundAlg='off', extrapolate=True)
     tgt_xmax = find_nearest(tgt_xgrid, xmax, roundAlg='on', extrapolate=True)
     tgt_ymin = find_nearest(tgt_ygrid, ymin, roundAlg='off', extrapolate=True)
@@ -443,7 +438,9 @@ class RPC_Geolayer_Generator(object):
         ymin, ymax = cornerCoordsUTM[:, 1].min(), cornerCoordsUTM[:, 1].max()
 
         # get UTM bounding box and move it to the EnMAP grid
-        xmin, ymin, xmax, ymax = move_extent_to_EnMAP_grid((xmin, ymin, xmax, ymax))
+        xmin, ymin, xmax, ymax = \
+            move_extent_to_coord_grid((xmin, ymin, xmax, ymax),
+                                      enmap_coordinate_grid_utm['x'], enmap_coordinate_grid_utm['y'])
 
         # set up a regular grid of UTM points with a specific mesh width
         meshwidth = 300  # 10 EnMAP pixels
