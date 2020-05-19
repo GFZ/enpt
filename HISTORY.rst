@@ -2,19 +2,28 @@
 History
 =======
 
-0.12.? (2020-04-??)
--------------------
+coming soon
+-----------
 
 * Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
 * Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
   land surfaces later.
 
 
-0.12.x (2020-05-??)
+0.13.0 (2020-05-18)
 -------------------
 
 * Renamed DEM for Arcachon test dataset.
 * Fixed typo.
+* Added config parameter 'output_format'.
+* Implementated ENVI output format.
+* Fixed log message.
+* The output interleave is now also configurable via the parameter 'output_interleave'.
+* Implemented 3 new config parameters: 'target_projection_type', 'target_epsg' and 'target_coord_grid'. This allows
+  the user to choose between UTM and geographic L2A projection, to specify a custom L2A projection by providing an
+  EPSG code or to specify a certain L2A coordinate grid.
+* Added 'grid_res' and 'epsg' attributes to EnMAP_Metadata_L2A_MapGeo object.
+* The L2A projection metadata is now correctly written to the XML file.
 
 
 0.12.8 (2020-05-13)

@@ -125,6 +125,11 @@ config_for_testing_dlr = dict(
     n_lines_to_append=50,
     disable_progress_bars=False,
     is_dummy_dataformat=False,
+    # output_format='ENVI',
+    # output_interleave='band',
+    # target_projection_type='Geographic',
+    # target_epsg=32632,
+    # target_coord_grid=[-1.37950, -1.37923, 44.60710, 44.60737],
     enable_ac=True,
     mode_ac='land',
     enable_ice_retrieval=False,
@@ -134,10 +139,9 @@ config_for_testing_dlr = dict(
 )
 
 
-enmap_coordinate_grid = dict(x=np.array([0, 30]),
-                             y=np.array([0, 30]))
-enmap_xres, enmap_yres = np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['y'])
-assert enmap_xres == enmap_yres, 'Unequal X/Y resolution of the output grid!'
+enmap_coordinate_grid_utm = dict(x=np.array([0, 30]),
+                                 y=np.array([0, 30]))
+enmap_xres, enmap_yres = np.ptp(enmap_coordinate_grid_utm['x']), np.ptp(enmap_coordinate_grid_utm['y'])
 
 
 class EnPTConfig(object):
@@ -167,6 +171,15 @@ class EnPTConfig(object):
 
         :key output_dir:
             output directory where processed data and log files are saved
+
+        :key output_format:
+            file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')
+
+        :key output_interleave:
+            raster data interleaving type (default: 'pixel')
+            - 'band': band-sequential (BSQ),
+            - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+            - 'pixel' data interleaved-by-pixel (BIP)
 
         :key working_dir:
             directory to be used for temporary files
@@ -236,8 +249,18 @@ class EnPTConfig(object):
         :key deadpix_P_interp_spatial:
             Spatial interpolation algorithm to be used during dead pixel correction
              ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
+
         :key ortho_resampAlg:
             Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')
+
+        :key target_projection_type:
+            Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')
+
+        :key target_epsg:
+            Custom EPSG code of the target projection (overrides target_projection_type)
+
+        :key target_coord_grid:
+            Custom target coordinate grid where the output is resampled to ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])
         """
 
         # fixed attributes
@@ -263,7 +286,7 @@ class EnPTConfig(object):
 
         self.is_dummy_dataformat = gp('is_dummy_dataformat')
         if 'is_dlr_dataformat' in user_opts:
-            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+            warnings.warn("The 'is_dlr_dataformat' flag is deprecated and will not exist in future. "
                           "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
             self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
@@ -284,6 +307,8 @@ class EnPTConfig(object):
         ##################
 
         self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
+        self.output_format = gp('output_format')
+        self.output_interleave = gp('output_interleave')
 
         ###########################
         # processor configuration #
@@ -322,12 +347,42 @@ class EnPTConfig(object):
         # orthorectification / VSWIR fusion
         self.ortho_resampAlg = gp('ortho_resampAlg')
         self.vswir_overlap_algorithm = gp('vswir_overlap_algorithm')
+        self.target_projection_type = gp('target_projection_type')
+        self.target_epsg = gp('target_epsg')
+        grid = gp('target_coord_grid')
+        self.target_coord_grid = dict(x=np.array(grid[:2]), y=np.array(grid[2:])) if grid else None
 
         #########################
         # validate final config #
         #########################
 
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(self.to_dict())
+
+        # check invalid interleave
+        if self.output_interleave == 'line' and self.output_format == 'GTiff':
+            warnings.warn("The interleaving type 'line' is not supported by the GTiff output format. Using 'pixel'.",
+                          UserWarning)
+            self.output_interleave = 'pixel'
+
+        # override target_projection_type if target_epsg is given
+        if self.target_epsg:
+            self.target_projection_type = \
+                'Geographic' if self.target_epsg == 4326 else \
+                'UTM' if len(str(self.target_epsg)) == 5 and str(self.target_epsg)[:3] in ['326', '327'] else \
+                'NA'
+        if self.target_projection_type == 'Geographic':
+            self.target_epsg = 4326
+
+        # set target coordinate grid to the UTM EnMAP grid if no other grid is provided and target projection is UTM
+        self.target_coord_grid = \
+            self.target_coord_grid if self.target_coord_grid else \
+            enmap_coordinate_grid_utm if self.target_projection_type == 'UTM' else None
+
+        # bug warning regarding holes in bilinear resampling output
+        if self.target_projection_type == 'Geographic' and self.ortho_resampAlg == 'bilinear':
+            warnings.warn("There is currently a bug that causes holes in the bilinear resampling results if the "
+                          "target projection is 'Geographic'. It is recommended to use 'nearest' or 'gauss' instead.",
+                          UserWarning)
 
     @staticmethod
     def absPath(path):

@@ -47,8 +47,7 @@ from ...model.metadata import EnMAP_Metadata_L2A_MapGeo
 from ..spatial_transform import \
     Geometry_Transformer, \
     Geometry_Transformer_3D, \
-    move_extent_to_EnMAP_grid, \
-    get_UTMEPSG_from_LonLat_cornersXY
+    move_extent_to_coord_grid
 
 __author__ = 'Daniel Scheffler'
 
@@ -87,8 +86,8 @@ class Orthorectifier(object):
         lons_vnir, lats_vnir = enmap_ImageL1.vnir.detector_meta.lons, enmap_ImageL1.vnir.detector_meta.lats
         lons_swir, lats_swir = enmap_ImageL1.swir.detector_meta.lons, enmap_ImageL1.swir.detector_meta.lats
 
-        # get target UTM zone and common extent  # TODO add optionally user defined UTM zone?
-        tgt_epsg = self._get_tgt_UTMepsg(enmap_ImageL1)
+        # get target EPSG code and common extent
+        tgt_epsg = enmap_ImageL1.meta.vnir.epsg_ortho
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
         kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
                        nprocs=self.cfg.CPUs,
@@ -98,7 +97,10 @@ class Orthorectifier(object):
             # increase that if the resampling result contains gaps (default is 32 but this is quite slow)
             kw_init['neighbours'] = 8
 
-        kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent)
+        kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent,
+                        tgt_coordgrid=((self.cfg.target_coord_grid['x'], self.cfg.target_coord_grid['y'])
+                                       if self.cfg.target_coord_grid else None)
+                        )
 
         # transform VNIR and SWIR to map geometry
         GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
@@ -163,6 +165,7 @@ class Orthorectifier(object):
                                                 meta_l1b=enmap_ImageL1.meta,
                                                 wvls_l2a=L2_obj.data.meta.band_meta['wavelength'],
                                                 dims_mapgeo=L2_obj.data.shape,
+                                                grid_res_l2a=(L2_obj.data.gt[1], abs(L2_obj.data.gt[5])),
                                                 logger=L2_obj.logger)
         L2_obj.meta.add_band_statistics(L2_obj.data)
 
@@ -174,13 +177,8 @@ class Orthorectifier(object):
 
         return L2_obj
 
-    @staticmethod
-    def _get_tgt_UTMepsg(enmap_ImageL1: EnMAPL1Product_SensorGeo) -> int:
-        return get_UTMEPSG_from_LonLat_cornersXY(lons=enmap_ImageL1.vnir.detector_meta.lon_UL_UR_LL_LR,
-                                                 lats=enmap_ImageL1.vnir.detector_meta.lat_UL_UR_LL_LR)
-
-    @staticmethod
-    def _get_common_extent(enmap_ImageL1: EnMAPL1Product_SensorGeo,
+    def _get_common_extent(self,
+                           enmap_ImageL1: EnMAPL1Product_SensorGeo,
                            tgt_epsg: int,
                            enmap_grid: bool = True) -> Tuple[float, float, float, float]:
         """Get common target extent for VNIR and SWIR.
@@ -199,37 +197,39 @@ class Orthorectifier(object):
         S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
 
         # transform them to UTM
-        V_UL_UR_LL_LR_utm = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in V_UL_UR_LL_LR_ll]
-        S_UL_UR_LL_LR_utm = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in S_UL_UR_LL_LR_ll]
+        V_UL_UR_LL_LR_prj = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in V_UL_UR_LL_LR_ll]
+        S_UL_UR_LL_LR_prj = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in S_UL_UR_LL_LR_ll]
 
         # separate X and Y
-        V_X_utm, V_Y_utm = zip(*V_UL_UR_LL_LR_utm)
-        S_X_utm, S_Y_utm = zip(*S_UL_UR_LL_LR_utm)
+        V_X_prj, V_Y_prj = zip(*V_UL_UR_LL_LR_prj)
+        S_X_prj, S_Y_prj = zip(*S_UL_UR_LL_LR_prj)
 
         # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
         # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
-        #    (these pixels would be set to nodata later anyways, so we don need to increase the extent for them)
+        #    (these pixels would be set to nodata later anyways, so we don't need to increase the extent for them)
         if V_lons.ndim == 3:
-            V_X_utm = (V_X_utm[0].max(), V_X_utm[1].min(), V_X_utm[2].max(), V_X_utm[3].min())
-            V_Y_utm = (V_Y_utm[0].min(), V_Y_utm[1].min(), V_Y_utm[2].max(), V_Y_utm[3].max())
-            S_X_utm = (S_X_utm[0].max(), S_X_utm[1].min(), S_X_utm[2].max(), S_X_utm[3].min())
-            S_Y_utm = (S_Y_utm[0].min(), S_Y_utm[1].min(), S_Y_utm[2].max(), S_Y_utm[3].max())
+            V_X_prj = (V_X_prj[0].max(), V_X_prj[1].min(), V_X_prj[2].max(), V_X_prj[3].min())
+            V_Y_prj = (V_Y_prj[0].min(), V_Y_prj[1].min(), V_Y_prj[2].max(), V_Y_prj[3].max())
+            S_X_prj = (S_X_prj[0].max(), S_X_prj[1].min(), S_X_prj[2].max(), S_X_prj[3].min())
+            S_Y_prj = (S_Y_prj[0].min(), S_Y_prj[1].min(), S_Y_prj[2].max(), S_Y_prj[3].max())
 
         # use inner coordinates of VNIR and SWIR as common extent
-        xmin_utm = max([min(V_X_utm), min(S_X_utm)])
-        ymin_utm = max([min(V_Y_utm), min(S_Y_utm)])
-        xmax_utm = min([max(V_X_utm), max(S_X_utm)])
-        ymax_utm = min([max(V_Y_utm), max(S_Y_utm)])
-        common_extent_utm = (xmin_utm, ymin_utm, xmax_utm, ymax_utm)
+        xmin_prj = max([min(V_X_prj), min(S_X_prj)])
+        ymin_prj = max([min(V_Y_prj), min(S_Y_prj)])
+        xmax_prj = min([max(V_X_prj), max(S_X_prj)])
+        ymax_prj = min([max(V_Y_prj), max(S_Y_prj)])
+        common_extent_prj = (xmin_prj, ymin_prj, xmax_prj, ymax_prj)
 
         # move the extent to the EnMAP coordinate grid
-        if enmap_grid:
-            common_extent_utm = move_extent_to_EnMAP_grid(common_extent_utm)
+        if enmap_grid and self.cfg.target_coord_grid:
+            common_extent_prj = move_extent_to_coord_grid(common_extent_prj,
+                                                          self.cfg.target_coord_grid['x'],
+                                                          self.cfg.target_coord_grid['y'],)
 
         enmap_ImageL1.logger.info('Computed common target extent of orthorectified image (xmin, ymin, xmax, ymax in '
-                                  'EPSG %s): %s' % (tgt_epsg, str(common_extent_utm)))
+                                  'EPSG %s): %s' % (tgt_epsg, str(common_extent_prj)))
 
-        return common_extent_utm
+        return common_extent_prj
 
 
 class VNIR_SWIR_Stacker(object):

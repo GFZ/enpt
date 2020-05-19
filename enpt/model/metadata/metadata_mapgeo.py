@@ -41,7 +41,7 @@ from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # no
 from geoarray import GeoArray
 
 from .metadata_sensorgeo import EnMAP_Metadata_L1B_SensorGeo
-from ...options.config import EnPTConfig, enmap_xres
+from ...options.config import EnPTConfig
 from ..srf import SRF
 from ...version import __version__
 
@@ -54,6 +54,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
                  wvls_l2a: Union[List, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
+                 grid_res_l2a: Tuple[float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
@@ -61,10 +62,12 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
         :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
+        :param grid_res_l2a         Coordinate grid resolution of the L2A product (x, y)
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
         self._meta_l1b = meta_l1b
+        self.grid_res = grid_res_l2a
         self.logger = logger or logging.getLogger()
 
         # defaults
@@ -88,22 +91,32 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.earthSunDist: float = meta_l1b.earthSunDist  # earth-sun distance
 
         # generate file names for L2A output
+        file_ext_l1b = os.path.splitext(meta_l1b.vnir.filename_data)[1]
+        file_ext_l2a = \
+            '.TIF' if self.cfg.output_format == 'GTiff' else \
+            '.bsq' if self.cfg.output_interleave == 'band' else \
+            '.bil' if self.cfg.output_interleave == 'line' else \
+            '.bip'
+
+        def convert_fn(fn):
+            return fn.replace('L1B-', 'L2A-').replace(file_ext_l1b, file_ext_l2a)
+
         if not self.cfg.is_dummy_dataformat:
-            self.scene_basename = meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0].replace('L1B-', 'L2A-')
+            self.scene_basename = convert_fn(meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0])
         else:
             self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
-        self.filename_data = meta_l1b.vnir.filename_data.replace('L1B-', 'L2A-').replace('_VNIR', '')
-        self.filename_deadpixelmap_vnir = meta_l1b.vnir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.filename_deadpixelmap_swir = meta_l1b.swir.filename_deadpixelmap.replace('L1B-', 'L2A-')
-        self.filename_quicklook_vnir = meta_l1b.vnir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.filename_quicklook_swir = meta_l1b.swir.filename_quicklook.replace('L1B-', 'L2A-')
-        self.filename_mask_landwater = meta_l1b.vnir.filename_mask_landwater.replace('L1B-', 'L2A-')
-        self.filename_mask_clouds = meta_l1b.vnir.filename_mask_clouds.replace('L1B-', 'L2A-')
-        self.filename_mask_cloudshadow = meta_l1b.vnir.filename_mask_cloudshadow.replace('L1B-', 'L2A-')
-        self.filename_mask_haze = meta_l1b.vnir.filename_mask_haze.replace('L1B-', 'L2A-')
-        self.filename_mask_snow = meta_l1b.vnir.filename_mask_snow.replace('L1B-', 'L2A-')
-        self.filename_mask_cirrus = meta_l1b.vnir.filename_mask_cirrus.replace('L1B-', 'L2A-')
-        self.filename_metaxml = meta_l1b.filename_metaxml.replace('L1B-', 'L2A-')
+        self.filename_data = convert_fn(meta_l1b.vnir.filename_data).replace('_VNIR', '')
+        self.filename_deadpixelmap_vnir = convert_fn(meta_l1b.vnir.filename_deadpixelmap)
+        self.filename_deadpixelmap_swir = convert_fn(meta_l1b.swir.filename_deadpixelmap)
+        self.filename_quicklook_vnir = convert_fn(meta_l1b.vnir.filename_quicklook)
+        self.filename_quicklook_swir = convert_fn(meta_l1b.swir.filename_quicklook)
+        self.filename_mask_landwater = convert_fn(meta_l1b.vnir.filename_mask_landwater)
+        self.filename_mask_clouds = convert_fn(meta_l1b.vnir.filename_mask_clouds)
+        self.filename_mask_cloudshadow = convert_fn(meta_l1b.vnir.filename_mask_cloudshadow)
+        self.filename_mask_haze = convert_fn(meta_l1b.vnir.filename_mask_haze)
+        self.filename_mask_snow = convert_fn(meta_l1b.vnir.filename_mask_snow)
+        self.filename_mask_cirrus = convert_fn(meta_l1b.vnir.filename_mask_cirrus)
+        self.filename_metaxml = convert_fn(meta_l1b.filename_metaxml)
 
         # fuse band-wise metadata (sort all band-wise metadata by wavelengths but band number keeps as it is)
         # get band index order
@@ -144,6 +157,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.lat_UL_UR_LL_LR = [lat for lon, lat in common_UL_UR_LL_LR]
         self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                           self.lat_UL_UR_LL_LR)), fix_invalid=True)
+        self.epsg = self._meta_l1b.vnir.epsg_ortho
 
         if meta_l1b.vnir.unit != meta_l1b.swir.unit or meta_l1b.vnir.unitcode != meta_l1b.swir.unitcode:
             raise RuntimeError('L2A data should have the same radiometric unit for VNIR and SWIR. '
@@ -198,9 +212,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                                       '.TIF',
                                       '.TIFF',
                                       '.GTIFF',
-                                      '.BSQ',
-                                      '.BIL',
-                                      '.BIP',
+                                      '.BSQ', '.bsq',
+                                      '.BIL', '.bil',
+                                      '.BIP', '.bip',
                                       '.JPEG2000'] \
                 else 'xml' if ext == '.XML' \
                 else 'NA'
@@ -407,9 +421,20 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # ortho #
         #########
 
-        # TODO update product/ortho/projection
-        #      {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}
-        uk('product/ortho/resolution', enmap_xres)
+        if self.epsg == 4326:
+            proj_str = 'Geographic'
+        elif self.epsg == 3035:
+            proj_str = 'LAEA-ETRS89'
+        elif len(str(self.epsg)) == 5 and str(self.epsg)[:3] in ['326', '327']:
+            zone = int(str(self.epsg)[-2:])
+            if not 0 <= zone <= 60:
+                raise RuntimeError('Invalid L2A UTM zone: %d.' % zone)
+            proj_str = 'UTM_Zone%d_North' % zone if str(self.epsg).startswith('326') else 'UTM_Zone%d_South' % zone
+        else:
+            proj_str = 'NA'
+
+        uk('product/ortho/projection', proj_str)  # {UTM_ZoneX_North, UTM_ZoneX_South (where X in {1..60}), Geographic, LAEA-ETRS89, NA}  # noqa
+        uk('product/ortho/resolution', self.grid_res[0])
         uk('product/ortho/resampling', self.cfg.ortho_resampAlg)
 
         # band statistics
