@@ -120,13 +120,41 @@ class AtmosphericCorrector(object):
                 # FIXME use cwv_model, cwc_model, toa_model also for EnPT?
 
         elif self.cfg.mode_ac == 'water':
+
             # call water AC of AWI here -> apply it to water surfaces ONLY
+
             if 2 not in enmap_ImageL1.vnir.mask_landwater[:]:
                 raise RuntimeError("The atmospheric correction mode is set to 'water' but the input image does not "
                                    "contain any water surfaces according to the land/water image mask.")
 
-            raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
-                                      "You may use 'land' instead.")
+            # raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
+            #                           "You may use 'land' instead.")
+
+            from acwater.level1_enmap import run_polymer_enmap
+
+            # load data as polymer object
+            l2 = run_polymer_enmap(enmap_l1b=enmap_ImageL1)
+            enmap_l2a_vnir = l2.Rw
+            enmap_l2a_swir = np.full(enmap_ImageL1.swir.data.shape, np.NaN, dtype=np.float)
+
+            # validate results
+            for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
+                mean0, std0 = np.nanmean(detectordata[:, :, 0]), np.nanstd(detectordata[:, :, 0])
+                if np.isnan(mean0) or mean0 == 0 or std0 == 0:
+                    enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
+
+
+            # join results
+            enmap_ImageL1.logger.info('Joining results of atmospheric correction for water.')
+
+            for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
+                                                 [enmap_l2a_vnir, enmap_l2a_swir]):
+                # in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                in_detector.detector_meta.unitcode = 'BOARef'
+
+            # TODO, join bands prior polymer run?
+            # detectors are joined at : EnPT/enpt/processors/orthorectification/orthorectification.py:109
 
         else:  # self.cfg.mode_ac == 'combined'
             # call SICOR for land and AWI water AC for land surfaces here
