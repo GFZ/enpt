@@ -172,7 +172,7 @@ class Dead_Pixel_Corrector(object):
                 prop_dp = deadpixel_map.sum() / image2correct.size
 
             self.logger.info('Percentage of defective pixels: %.2f' % (prop_dp * 100))
-            self.logger.debug('Percentage of pixel with a defect in any band: %.2f' % (prop_dp_anyband * 100))
+            self.logger.debug('Percentage of pixels with a defect in any band: %.2f' % (prop_dp_anyband * 100))
 
             # run correction
             if self.algorithm == 'spectral':
