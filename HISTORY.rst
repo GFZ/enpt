@@ -10,6 +10,14 @@ coming soon
   land surfaces later.
 
 
+0.13.1 (2020-08-07)
+-------------------
+
+* Updated the minimal version of sensormapgeo. This reduces the memory consumption during orthorectification when
+  running in multiprocessing. Fixes issue #59 (High memory consumption of orthorectification causes deadlock or crash
+  on smaller machines.)
+
+
 0.13.0 (2020-05-18)
 -------------------
 
