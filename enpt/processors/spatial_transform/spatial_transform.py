@@ -251,13 +251,14 @@ class RPC_Geolayer_Generator(object):
     """
     def __init__(self,
                  rpc_coeffs: dict,
-                 dem: Union[str, GeoArray],
+                 elevation: Union[str, GeoArray, int, float],
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                  enmapIm_dims_sensorgeo: Tuple[int, int]):
         """Get an instance of RPC_Geolayer_Generator.
 
         :param rpc_coeffs:              RPC coefficients for a single EnMAP band
-        :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
+        :param elevation:               digital elevation model in map geometry (file path or instance of GeoArray) OR
+                                        average elevation as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         """
@@ -276,7 +277,7 @@ class RPC_Geolayer_Generator(object):
         self.col_num_coeffs = rpc_coeffs['col_num_coeffs']
         self.col_den_coeffs = rpc_coeffs['col_den_coeffs']
 
-        self.dem = GeoArray(dem)
+        self.elevation = elevation if isinstance(elevation, (int, float)) else GeoArray(elevation)
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
 
@@ -315,7 +316,7 @@ class RPC_Geolayer_Generator(object):
 
         :param lon_norm:    normalized longitudes
         :param lat_norm:    normalized latitudes
-        :param height_norm: normalized elevations
+        :param height_norm: normalized elevation
         :return:
         """
         P = lat_norm.flatten()
@@ -448,17 +449,20 @@ class RPC_Geolayer_Generator(object):
                                              np.arange(xmin, xmax + meshwidth, meshwidth),
                                              indexing='ij')
 
-        # transform UTM grid to DEM projection
-        x_grid_demPrj, y_grid_demPrj = \
-            (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.dem.epsg) else \
-            transform_coordArray(EPSG2WKT(grid_utm_epsg),
-                                 EPSG2WKT(self.dem.epsg),
-                                 x_grid_utm, y_grid_utm)
+        if not isinstance(self.elevation, (int, float)):
+            # transform UTM grid to DEM projection
+            x_grid_demPrj, y_grid_demPrj = \
+                (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.elevation.epsg) else \
+                transform_coordArray(EPSG2WKT(grid_utm_epsg),
+                                     EPSG2WKT(self.elevation.epsg),
+                                     x_grid_utm, y_grid_utm)
 
-        # retrieve corresponding heights from DEM
-        # -> resample DEM to EnMAP grid?
-        xy_pairs_demPrj = np.vstack([x_grid_demPrj.flatten(), y_grid_demPrj.flatten()]).T
-        heights = self.dem.read_pointData(xy_pairs_demPrj).flatten()
+            # retrieve corresponding heights from DEM
+            # -> resample DEM to EnMAP grid?
+            xy_pairs_demPrj = np.vstack([x_grid_demPrj.flatten(), y_grid_demPrj.flatten()]).T
+            heights = self.elevation.read_pointData(xy_pairs_demPrj).flatten()
+        else:
+            heights = np.full_like(x_grid_utm.flatten(), self.elevation)
 
         # transform UTM points to lon/lat
         lon_grid, lat_grid = transform_coordArray(EPSG2WKT(grid_utm_epsg), EPSG2WKT(4326), x_grid_utm, y_grid_utm)
@@ -504,7 +508,7 @@ class RPC_3D_Geolayer_Generator(object):
     """
     def __init__(self,
                  rpc_coeffs_per_band: dict,
-                 dem: Union[str, GeoArray],
+                 elevation: Union[str, GeoArray, int, float],
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                  enmapIm_dims_sensorgeo: Tuple[int, int],
                  CPUs: int = None):
@@ -514,24 +518,27 @@ class RPC_3D_Geolayer_Generator(object):
                                         ({'band_1': <rpc_coeffs_dict>,
                                           'band_2': <rpc_coeffs_dict>,
                                           ...})
-        :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
+        :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
+                                        average elevation as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         :param CPUs:                    number of CPUs to use
         """
         self.rpc_coeffs_per_band = OrderedDict(natsorted(rpc_coeffs_per_band.items()))
-        self.dem = dem
+        self.elevation = elevation
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
         self.CPUs = CPUs or cpu_count()
 
-        # get validated DEM in map geometry
-        # self.logger.debug('Verifying DEM...')  # TODO
-        from ..dem_preprocessing import DEM_Processor
-        self.dem = DEM_Processor(dem_path_geoarray=dem,
-                                 enmapIm_cornerCoords=enmapIm_cornerCoords).dem
-        # TODO clip DEM to needed area
-        self.dem.to_mem()
+        if not isinstance(elevation, (int, float)):
+            # get validated DEM in map geometry
+            # self.logger.debug('Verifying DEM...')  # TODO
+            from ..dem_preprocessing import DEM_Processor
+            self.elevation = DEM_Processor(dem_path_geoarray=elevation,
+                                           enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+            # TODO clip DEM to needed area
+            self.elevation.to_mem()
+            # self.elevation.reproject_to_new_grid()
 
         self.bandgroups_with_unique_rpc_coeffs = self._get_bandgroups_with_unique_rpc_coeffs()
 
@@ -566,7 +573,7 @@ class RPC_3D_Geolayer_Generator(object):
     def _compute_geolayer_for_unique_coeffgroup(kwargs):
         lons, lats = \
             RPC_Geolayer_Generator(rpc_coeffs=kwargs['rpc_coeffs'],
-                                   dem=global_dem_sensorgeo,
+                                   elevation=global_dem_sensorgeo,
                                    enmapIm_cornerCoords=kwargs['enmapIm_cornerCoords'],
                                    enmapIm_dims_sensorgeo=kwargs['enmapIm_dims_sensorgeo']
                                    ).compute_geolayer()
@@ -590,7 +597,7 @@ class RPC_3D_Geolayer_Generator(object):
 
         # compute the geolayer ONLY FOR ONE BAND per group with unique RPC coefficients
         global global_dem_sensorgeo
-        global_dem_sensorgeo = self.dem
+        global_dem_sensorgeo = self.elevation
 
         if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
             lons_oneband, lats_oneband = self._compute_geolayer_for_unique_coeffgroup(kwargs_list[0])[:2]
@@ -626,7 +633,7 @@ class RPC_3D_Geolayer_Generator(object):
 
 def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float, float]],
                                            rpc_coeffs: dict,
-                                           dem: Union[str, GeoArray],
+                                           elevation: Union[str, GeoArray, int, float],
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
                                            ) -> List[Tuple[float, float]]:
@@ -634,14 +641,15 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry
-    :param dem:                     digital elevation model in MAP geometry
+    :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
+                                    average elevation as integer or float
     :param enmapIm_cornerCoords:    MAP coordinates of the EnMAP image
     :param enmapIm_dims_sensorgeo:  dimensions of the sensor geometry EnMAP image (rows, columns)
     :return:
     """
     # compute coordinate array
     RPCGG = RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
-                                   dem=dem,
+                                   elevation=elevation,
                                    enmapIm_cornerCoords=enmapIm_cornerCoords,  # order does not matter
                                    enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo)
     lons, lats = RPCGG.compute_geolayer()

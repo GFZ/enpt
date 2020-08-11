@@ -34,11 +34,11 @@ from multiprocessing import cpu_count
 import numpy as np
 
 from geoarray import GeoArray
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict
+from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, EPSG2WKT
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
 from py_tools_ds.geo.vector.topology import get_footprint_polygon, get_overlap_polygon
 
-from ..spatial_transform import Geometry_Transformer
+from ..spatial_transform import Geometry_Transformer, get_UTMEPSG_from_LonLat, get_center_coord
 
 __author__ = 'Daniel Scheffler'
 
@@ -78,14 +78,41 @@ class DEM_Processor(object):
             xmin, xmax = cornersXY[:, 0].min(), cornersXY[:, 0].max()
             ymin, ymax = cornersXY[:, 1].min(), cornersXY[:, 1].max()
 
-            raise ValueError('The provided digital elevation model covers %.1f percent of the EnMAP image. It must '
-                             'cover it completely. The minimal needed extent in the provided projection is: \n'
+            raise ValueError('The provided digital elevation model does not cover the EnMAP image completely '
+                             '(only around %.1f percent). The minimal needed extent in the provided projection is: \n'
                              'xmin: %s, xmax: %s, ymin: %s, ymax: %s.' % (overlap_perc, xmin, xmax, ymin, ymax))
 
     def _set_nodata_if_not_provided(self):
         # noinspection PyProtectedMember
         if self.dem._nodata is None:
             self.dem.nodata = -9999
+
+    @classmethod
+    def get_flat_dem_from_average_elevation(cls, corner_coords_lonlat, average_elevation, xres=30, yres=30):
+        """Return a 'flat DEM' instance of DEM_Processor.
+
+        (a GeoArray fully covering the given coorner coordinates with the average elevation as pixel values)
+
+        :param corner_coords_lonlat:    corner coordinates to be covered by the output DEM
+        :param average_elevation:       average elevation in meters
+        :param xres:                    x-resolution in meters
+        :param yres:                    y-resolution in meters
+        :return:
+        """
+        # compute the dimensions of the flat output DEM
+        tgt_utm_epsg = get_UTMEPSG_from_LonLat(*get_center_coord(corner_coords_lonlat))
+        corner_coords_utm = [transform_any_prj(prj_src=4326, prj_tgt=tgt_utm_epsg, x=x, y=y)
+                             for x, y in corner_coords_lonlat]
+        x_all, y_all = list(zip(*corner_coords_utm))
+        cols = int(np.ceil((max(x_all) - min(x_all)) / xres)) + 2
+        rows = int(np.ceil((max(y_all) - min(y_all)) / yres)) + 2
+
+        # get a GeoArray instance
+        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation),
+                          geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
+                          projection=EPSG2WKT(tgt_utm_epsg))
+
+        return cls(dem_gA, corner_coords_lonlat)
 
     def fill_gaps(self):
         pass

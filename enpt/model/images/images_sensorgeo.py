@@ -129,7 +129,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
-    def get_preprocessed_dem(self):
+    def get_preprocessed_dem(self) -> GeoArray:
+        """Get a digital elevation model in EnMAP sensor geometry of the current detector."""
         if self.cfg.path_dem:
             self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
             DP = DEM_Processor(self.cfg.path_dem, enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
@@ -163,6 +164,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
             else:
                 self.dem = DP.dem
+
+        else:
+            self.logger.info('No DEM for the %s detector provided. Falling back to an average elevation of %d meters.'
+                             % (self.detector_name, self.cfg.average_elevation))
+            self.dem = GeoArray(np.full(self.data.shape[:2], self.cfg.average_elevation).astype(np.int16))
 
         return self.dem
 
@@ -224,13 +230,15 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         if not self.cfg.is_dummy_dataformat:
             img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                           img2.detector_meta.lat_UL_UR_LL_LR))
-            dem_validated = DEM_Processor(img2.cfg.path_dem,
-                                          enmapIm_cornerCoords=img2_cornerCoords).dem
+            elevation = DEM_Processor(img2.cfg.path_dem,
+                                      enmapIm_cornerCoords=img2_cornerCoords).dem \
+                if img2.cfg.path_dem else self.cfg.average_elevation
+
             LL, LR = compute_mapCoords_within_sensorGeoDims(
                 sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
                                     (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
                 rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
-                dem=dem_validated,
+                elevation=elevation,
                 enmapIm_cornerCoords=img2_cornerCoords,
                 enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
             )

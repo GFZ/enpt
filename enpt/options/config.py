@@ -287,7 +287,7 @@ class EnPTConfig(object):
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_dem = self.absPath(gp('path_dem'))
-        self.average_elevation = self.absPath(gp('average_elevation'))
+        self.average_elevation = gp('average_elevation')
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
         self.n_lines_to_append = gp('n_lines_to_append')
@@ -344,6 +344,16 @@ class EnPTConfig(object):
         #########################
 
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(self.to_dict())
+
+        # check if given paths point to existing files
+        paths = {k: v for k, v in self.__dict__.items() if k.startswith('path_')}
+        for k, fp in paths.items():
+            if fp and not os.path.exists(fp):
+                raise FileNotFoundError("The file path provided at the '%s' parameter does not exist (%s)." % (k, fp))
+
+        if not self.path_dem:
+            warnings.warn('No digital elevation model provided. Note that this may cause uncertainties, e.g., '
+                          'in the atmospheric correction and the orthorectification.', RuntimeWarning, stacklevel=2)
 
         # check invalid interleave
         if self.output_interleave == 'line' and self.output_format == 'GTiff':
@@ -484,9 +494,9 @@ def json_to_python(value):
             return None
         if value == "slice(None, None, None)":
             return slice(None)
-        if value in [True, "true"]:
+        if value is True or value == "true":
             return True
-        if value in [False, "false"]:
+        if value is False or value == "false":
             return False
         if is_number(value):
             try:

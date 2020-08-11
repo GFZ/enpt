@@ -90,6 +90,12 @@ class Test_DEM_Processor(TestCase):
         with self.assertRaises(ValueError):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
+    def test_get_flat_dem(self):
+        DP = DEM_Processor.get_flat_dem_from_average_elevation(corner_coords_lonlat=self.ll_cornerCoords,
+                                                               average_elevation=50)
+        self.assertIsInstance(DP.dem, GeoArray)
+        self.assertEqual(np.mean(DP.dem), 50)
+
     def test_fill_gaps(self):
         pass
 
