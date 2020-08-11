@@ -181,7 +181,7 @@ class Test_RPC_Geolayer_Generator(TestCase):
         # bounding polygon DLR test data
         self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
         self.lons = np.array([10.7966311, 11.1693436, 10.7111131, 11.0815993])
-        corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
+        self._corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
 
         # spatial coverage of datatake DLR test data
         # self.lats = np.array([47.7870358956, 47.723060779, 46.9808418244, 46.9174014681])
@@ -193,8 +193,8 @@ class Test_RPC_Geolayer_Generator(TestCase):
         self.dims_sensorgeo = (1024, 1000)
 
         self.RPCGG = RPC_Geolayer_Generator(self.rpc_coeffs,
-                                            dem=self.dem,
-                                            enmapIm_cornerCoords=corner_coords,
+                                            elevation=self.dem,
+                                            enmapIm_cornerCoords=self._corner_coords,
                                             enmapIm_dims_sensorgeo=self.dims_sensorgeo)
 
     def test_normalize_coordinates(self):
@@ -222,6 +222,18 @@ class Test_RPC_Geolayer_Generator(TestCase):
 
     def test_compute_geolayer(self):
         lons_interp, lats_interp = self.RPCGG.compute_geolayer()
+        self.assertEqual(lons_interp.shape, lats_interp.shape)
+        self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
+        self.assertFalse(np.isnan(lons_interp).any())
+        self.assertFalse(np.isnan(lats_interp).any())
+
+    def test_compute_geolayer_average_elevation(self):
+        RPCGG = RPC_Geolayer_Generator(self.rpc_coeffs,
+                                       elevation=50.6,
+                                       enmapIm_cornerCoords=self._corner_coords,
+                                       enmapIm_dims_sensorgeo=self.dims_sensorgeo)
+
+        lons_interp, lats_interp = RPCGG.compute_geolayer()
         self.assertEqual(lons_interp.shape, lats_interp.shape)
         self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
         self.assertFalse(np.isnan(lons_interp).any())
@@ -266,7 +278,7 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
     def test_compute_geolayer_one_unique_coeff_set(self):
         lons, lats = RPC_3D_Geolayer_Generator(self.rpc_coeffs_per_band,
-                                               dem=self.dem,
+                                               elevation=self.dem,
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo
                                                ).compute_geolayer()
@@ -282,7 +294,7 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
         NOTE: NaNs should be filled automatically.
         """
         lons, lats = RPC_3D_Geolayer_Generator(self._get__faulty_rpc_coeffs(),
-                                               dem=self.dem,
+                                               elevation=self.dem,
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo
                                                ).compute_geolayer()
@@ -293,7 +305,7 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
     def test_compute_geolayer_multiple_coeff_sets_singleprocessing(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
-                                               dem=self.dem,
+                                               elevation=self.dem,
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo,
                                                CPUs=1
@@ -305,7 +317,19 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
     def test_compute_geolayer_multiple_coeff_sets_multiprocessing(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
-                                               dem=self.dem,
+                                               elevation=self.dem,
+                                               enmapIm_cornerCoords=self.corner_coords,
+                                               enmapIm_dims_sensorgeo=self.dims_sensorgeo,
+                                               CPUs=6
+                                               ).compute_geolayer()
+        self.assertEqual(lons.shape, lats.shape)
+        self.assertEqual(lons.shape, (1024, 1000, 6))
+        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
+        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+    def test_compute_geolayer_average_elevation(self):
+        lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
+                                               elevation=50.6,
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo,
                                                CPUs=6

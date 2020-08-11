@@ -255,7 +255,7 @@ class _EnMAP_Image(object):
         :return: geoarray.GeoArray
         """
         if self._dem is None:
-            raise NotImplementedError('An automatic DEM getter is not yet implemented.')
+            raise NotImplementedError('DEM is missing. An automatic DEM getter is currently not implemented.')
         return self._dem
 
     @dem.setter

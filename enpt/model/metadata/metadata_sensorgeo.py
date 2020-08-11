@@ -386,13 +386,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     def compute_geolayer_for_cube(self):
         self.logger.info('Computing %s geolayer...' % self.detector_name)
-
-        lons, lats = RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
-                                               dem=self.cfg.path_dem,
-                                               enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR,
-                                                                              self.lat_UL_UR_LL_LR)),
-                                               enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
-                                               CPUs=self.cfg.CPUs)\
+        lons, lats = \
+            RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
+                                      elevation=self.cfg.path_dem if self.cfg.path_dem else self.cfg.average_elevation,
+                                      enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
+                                      enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
+                                      CPUs=self.cfg.CPUs)\
             .compute_geolayer()
 
         return lons, lats
