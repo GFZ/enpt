@@ -10,6 +10,18 @@ coming soon
   land surfaces later.
 
 
+0.13.2 (2020-08-11)
+-------------------
+
+* Fixed issue #37 (Empty FileNotFoundError in case no DEM is provided by the user). If no DEM is provided by the user,
+  an average elevation (default=0) is used instead. Added corresponding warning and log messages.
+* Fixed exception in case an average elevation is passed.
+* Fixed a bug that caused 0 or 1 integers provided in the config parameters to be converted to booleans.
+* User-provided file paths are now validated directly on startup.
+* DEM_Processor instance can now be created from an average elevation (returns a flat DEM).
+* RPC geolayer generators are now also compatible with an integer as input elevation.
+
+
 0.13.1 (2020-08-07)
 -------------------
 
