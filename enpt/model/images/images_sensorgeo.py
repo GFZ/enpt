@@ -486,13 +486,30 @@ class EnMAPL1Product_SensorGeo(object):
         self.paths = self.get_paths()
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
+        # or directly read here in case the user does not want to include all L1B bands into the processing
         self.vnir.data = self.paths.vnir.data
-        self.vnir.read_masks()
         self.swir.data = self.paths.swir.data
+        self.vnir.read_masks()
+
+        if self.cfg.drop_bad_bands:
+            self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
+            self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
-            self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
+            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
+
+            if self.cfg.drop_bad_bands:
+                if vnir_dpm.ndim == 3:
+                    self.vnir.deadpixelmap = vnir_dpm[:, :, self.meta.vnir.goodbands_inds]
+                    self.swir.deadpixelmap = swir_dpm[:, :, self.meta.swir.goodbands_inds]
+                else:  # 2D
+                    self.vnir.deadpixelmap = vnir_dpm[self.meta.vnir.goodbands_inds, :]
+                    self.swir.deadpixelmap = swir_dpm[self.meta.swir.goodbands_inds, :]
+            else:
+                self.vnir.deadpixelmap = vnir_dpm
+                self.swir.deadpixelmap = swir_dpm
+
         except ValueError:
             self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
             self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)

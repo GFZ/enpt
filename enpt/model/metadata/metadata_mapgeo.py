@@ -140,10 +140,10 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
 
         if not self.cfg.is_dummy_dataformat:
-            self.rpc_coeffs = OrderedDict(zip(
-                ['band_%d' % (i + 1) for i in range(dims_mapgeo[2])],
-                [meta_l1b.vnir.rpc_coeffs['band_%d' % (i + 1)] if 'band_%d' % (i + 1) in meta_l1b.vnir.rpc_coeffs else
-                 meta_l1b.swir.rpc_coeffs['band_%d' % (i + 1)] for i in bandidx_order]))
+            all_rpc_coeffs = OrderedDict(list(meta_l1b.vnir.rpc_coeffs.items()) +
+                                         list(meta_l1b.swir.rpc_coeffs.items()))
+            self.rpc_coeffs = OrderedDict([(k, v) for i, (k, v) in enumerate(all_rpc_coeffs.items())
+                                           if i in bandidx_order])
         else:
             self.rpc_coeffs = OrderedDict()
 

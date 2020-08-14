@@ -88,6 +88,9 @@ def get_enpt_argparser():
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,
         help='number of lines to be added to the main image [if None, use the whole imgap]. Requires --imgap to be set')
+    add('-dbb', '--drop_bad_bands', type=_str2bool, default=True,
+        help='if set to True (default), the water absorption bands between 1358 and 1453 nm as well as between 1814 '
+             'and 1961 nm are excluded from processing and will not be contained in the L2A product')
     add('-dpb', '--disable_progress_bars', type=_str2bool, default=False, nargs='?', const=True,
         help='whether to disable all progress bars during processing')
     add('--path_earthSunDist', type=str, default=None,
