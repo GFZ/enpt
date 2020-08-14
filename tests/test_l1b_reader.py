@@ -58,7 +58,6 @@ class Test_L1B_Reader(unittest.TestCase):
         # don't drop bands - otherwise we can't run write-read-tests as the writer does not include the full bandlist
         self.config.drop_bad_bands = False
 
-
         self.pathList_testimages = [self.config.path_l1b_enmap_image,
                                     self.config.path_l1b_enmap_image_gapfill]
         self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
