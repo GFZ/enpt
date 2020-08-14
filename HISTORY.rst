@@ -6,9 +6,9 @@ History
 -------------------
 
 * Implemented new configuration option (parameter 'drop_bad_bands') to leave out certain water absorption bands from
-  processing. Updated HISTORY.rst.
+  processing.
 * Bugfix for allowing directories at filename config parameters.
-* Total runtime is now printed. Fixed linting.
+* Total runtime is now printed.
 
 
 0.13.2 (2020-08-11)
