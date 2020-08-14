@@ -101,21 +101,21 @@ config_for_testing_dlr = dict(
                      # Arcachon full tile 3, reprocessed 05/2020
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
                      )),
-    path_l1b_enmap_image_gapfill=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     # Alps
-                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
-
-                     # Arcachon
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
-                     )),
+    # path_l1b_enmap_image_gapfill=os.path.abspath(
+    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+    #                  # Alps
+    #                  'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+    #
+    #                  # Arcachon
+    #                  # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+    #                  )),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data',
                      # Alps
                      # 'DLR_L2A_DEM_UTM32.bsq'
 
                      # Arcachon tile 2 ASTER DEM (02/2020)
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
 
                      # Arcachon tile 3 ASTER DEM (05/2020)
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
@@ -353,8 +353,9 @@ class EnPTConfig(object):
         # check if given paths point to existing files
         paths = {k: v for k, v in self.__dict__.items() if k.startswith('path_')}
         for k, fp in paths.items():
-            if fp and not os.path.exists(fp):
-                raise FileNotFoundError("The file path provided at the '%s' parameter does not exist (%s)." % (k, fp))
+            if fp and not os.path.isfile(fp):
+                raise FileNotFoundError("The file path provided at the '%s' parameter does not point to an existing "
+                                        "file (%s)." % (k, fp))
 
         if not self.path_dem:
             warnings.warn('No digital elevation model provided. Note that this may cause uncertainties, e.g., '

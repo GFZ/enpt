@@ -7,6 +7,7 @@ History
 
 * Implemented new configuration option (parameter 'drop_bad_bands') to leave out certain water absorption bands from
   processing. Updated HISTORY.rst.
+* Bugfix for allowing directories at filename config parameters.
 
 
 0.13.2 (2020-08-11)

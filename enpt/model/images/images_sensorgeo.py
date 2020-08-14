@@ -496,12 +496,16 @@ class EnMAPL1Product_SensorGeo(object):
             self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            if not self.cfg.drop_bad_bands:
+            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
+            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
+
+            if self.cfg.drop_bad_bands and vnir_dpm.ndim == 3:
+                self.vnir.deadpixelmap = vnir_dpm[:, :, self.meta.vnir.goodbands_inds]
+                self.swir.deadpixelmap = swir_dpm[:, :, self.meta.swir.goodbands_inds]
+            else:
                 self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
                 self.swir.deadpixelmap = self.paths.swir.deadpixelmap
-            else:
-                self.vnir.deadpixelmap = GeoArray(self.paths.vnir.deadpixelmap)[:, :, self.meta.vnir.goodbands_inds]
-                self.swir.deadpixelmap = GeoArray(self.paths.swir.deadpixelmap)[:, :, self.meta.swir.goodbands_inds]
+
         except ValueError:
             self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
             self.vnir.deadpixelmap = np.zeros((self.meta.vnir.nrows, self.meta.vnir.ncols, self.meta.vnir.nwvl))
