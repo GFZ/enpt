@@ -115,7 +115,7 @@ config_for_testing_dlr = dict(
                      # 'DLR_L2A_DEM_UTM32.bsq'
 
                      # Arcachon tile 2 ASTER DEM (02/2020)
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
 
                      # Arcachon tile 3 ASTER DEM (05/2020)
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
@@ -186,6 +186,10 @@ class EnPTConfig(object):
         :key n_lines_to_append:
             number of lines to be added to the main image [if None, use the whole imgap].
             Requires 'path_l1b_enmap_image_gapfill' to be set.
+
+        :key drop_bad_bands:
+            if set to True (default), the water absorption bands between 1358 and 1453 nm as well
+            as between 1814 and 1961 nm are excluded from processing and will not be contained in the L2A product
 
         :key disable_progress_bars:
             whether to disable all progress bars during processing
@@ -291,6 +295,7 @@ class EnPTConfig(object):
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
         self.n_lines_to_append = gp('n_lines_to_append')
+        self.drop_bad_bands = gp('drop_bad_bands')
         self.disable_progress_bars = gp('disable_progress_bars')
 
         ##################

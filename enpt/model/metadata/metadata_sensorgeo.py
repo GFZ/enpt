@@ -98,6 +98,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
         self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
         self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
+        self.goodbands_inds: Optional[List] = None  # list of band indices included in the processing (all other bands are removed)  # noqa
         self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
@@ -263,6 +264,23 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
             self.preview_wvls = np.array([self.wvl_center[i] for i in self.preview_bands])
+
+        # drop bad bands from metadata if desired
+        if self.cfg.drop_bad_bands:
+            wvls = list(self.wvl_center)
+            self.goodbands_inds = gbl = [wvls.index(wvl) for wvl in wvls
+                                         if not (1358 < wvl < 1453 or
+                                                 1814 < wvl < 1961)]
+
+            if len(gbl) < len(wvls):
+                for attrN in ['wvl_center', 'fwhm', 'offsets', 'gains', 'l_min', 'l_max']:
+                    if getattr(self, attrN) is not None:
+                        setattr(self, attrN, getattr(self, attrN)[gbl])
+
+                self.nwvl = len(gbl)
+                self.smile_coef = self.smile_coef[gbl, :]
+                self.rpc_coeffs = OrderedDict([(k, v) for i, (k, v) in enumerate(self.rpc_coeffs.items())
+                                               if i in gbl])
 
         # compute metadata derived from read data
         self.smile = self.calc_smile()

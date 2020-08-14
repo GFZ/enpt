@@ -486,17 +486,26 @@ class EnMAPL1Product_SensorGeo(object):
         self.paths = self.get_paths()
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
+        # or directly read here in case the user does not want to include all L1B bands into the processing
         self.vnir.data = self.paths.vnir.data
-        self.vnir.read_masks()
         self.swir.data = self.paths.swir.data
+        self.vnir.read_masks()
+
+        if self.cfg.drop_bad_bands:
+            self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
+            self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
-            self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+            if not self.cfg.drop_bad_bands:
+                self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
+                self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+            else:
+                self.vnir.deadpixelmap = GeoArray(self.paths.vnir.deadpixelmap)[:, :, self.meta.vnir.goodbands_inds]
+                self.swir.deadpixelmap = GeoArray(self.paths.swir.deadpixelmap)[:, :, self.meta.swir.goodbands_inds]
         except ValueError:
             self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
-            self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)
-            self.swir.deadpixelmap = np.zeros(self.swir.data.shape)
+            self.vnir.deadpixelmap = np.zeros((self.meta.vnir.nrows, self.meta.vnir.ncols, self.meta.vnir.nwvl))
+            self.swir.deadpixelmap = np.zeros((self.meta.swir.nrows, self.meta.swir.ncols, self.meta.swir.nwvl))
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.

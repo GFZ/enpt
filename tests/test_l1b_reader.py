@@ -176,6 +176,17 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
         L1_obj.save(path.join(self.config.output_dir, "no_snr"))
 
+    def test_read_inputdata_dont_drop_bad_bands(self):
+        with zipfile.ZipFile(self.pathList_testimages[0], "r") as zf:
+            zf.extractall(self.tmpdir)
+
+        cfg = self.config
+        cfg.drop_bad_bands = False
+        RD = L1B_Reader(config=cfg)
+
+        L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
+        self.assertEquals(L1_obj.swir.detector_meta.nwvl, 130)
+
 
 if __name__ == "__main__":
     unittest.main()
