@@ -499,17 +499,21 @@ class EnMAPL1Product_SensorGeo(object):
             vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
             swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
 
-            if self.cfg.drop_bad_bands and vnir_dpm.ndim == 3:
-                self.vnir.deadpixelmap = vnir_dpm[:, :, self.meta.vnir.goodbands_inds]
-                self.swir.deadpixelmap = swir_dpm[:, :, self.meta.swir.goodbands_inds]
+            if self.cfg.drop_bad_bands:
+                if vnir_dpm.ndim == 3:
+                    self.vnir.deadpixelmap = vnir_dpm[:, :, self.meta.vnir.goodbands_inds]
+                    self.swir.deadpixelmap = swir_dpm[:, :, self.meta.swir.goodbands_inds]
+                else:  # 2D
+                    self.vnir.deadpixelmap = vnir_dpm[self.meta.vnir.goodbands_inds, :]
+                    self.swir.deadpixelmap = swir_dpm[self.meta.swir.goodbands_inds, :]
             else:
-                self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
-                self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+                self.vnir.deadpixelmap = vnir_dpm
+                self.swir.deadpixelmap = swir_dpm
 
         except ValueError:
             self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
-            self.vnir.deadpixelmap = np.zeros((self.meta.vnir.nrows, self.meta.vnir.ncols, self.meta.vnir.nwvl))
-            self.swir.deadpixelmap = np.zeros((self.meta.swir.nrows, self.meta.swir.ncols, self.meta.swir.nwvl))
+            self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)
+            self.swir.deadpixelmap = np.zeros(self.swir.data.shape)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
