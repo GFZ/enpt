@@ -258,7 +258,7 @@ class RPC_Geolayer_Generator(object):
 
         :param rpc_coeffs:              RPC coefficients for a single EnMAP band
         :param elevation:               digital elevation model in map geometry (file path or instance of GeoArray) OR
-                                        average elevation as integer or float
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         """
@@ -519,7 +519,7 @@ class RPC_3D_Geolayer_Generator(object):
                                           'band_2': <rpc_coeffs_dict>,
                                           ...})
         :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
-                                        average elevation as integer or float
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         :param CPUs:                    number of CPUs to use
@@ -642,7 +642,7 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry
     :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
-                                    average elevation as integer or float
+                                    average elevation in meters as integer or float
     :param enmapIm_cornerCoords:    MAP coordinates of the EnMAP image
     :param enmapIm_dims_sensorgeo:  dimensions of the sensor geometry EnMAP image (rows, columns)
     :return:
