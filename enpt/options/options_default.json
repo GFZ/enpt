@@ -44,7 +44,11 @@
         "geometry": {
             "enable_keystone_correction": false,
             "enable_vnir_swir_coreg": false,
-            "path_reference_image": ""
+            "enable_absolute_coreg": false,  /*enable the co-registration of the EnMAP image to the reference image given with 'path_reference_image'*/
+            "path_reference_image": ""  /*image to be used as spatial reference for co-registration
+                                          - provide in a GDAL-readable data format
+                                          - acquisition date should be close to the one of the EnMAP scene
+                                          - cloud coverage should be low*/
         },
 
         "atmospheric_correction": {

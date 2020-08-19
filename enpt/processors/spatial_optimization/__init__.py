@@ -29,4 +29,10 @@
 
 """EnPT 'spatial optimization' module."""
 
+from .spatial_optimization import Spatial_Optimizer
+
 __author__ = 'Daniel Scheffler'
+__all__ = [
+    '__author__',
+    'Spatial_Optimizer'
+]

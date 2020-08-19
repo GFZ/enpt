@@ -58,7 +58,7 @@ class Orthorectifier(object):
         self.cfg = config
 
     @staticmethod
-    def validate_input(enmap_ImageL1):
+    def validate_input(enmap_ImageL1: EnMAPL1Product_SensorGeo):
         # check type
         if not isinstance(enmap_ImageL1, EnMAPL1Product_SensorGeo):
             raise TypeError(enmap_ImageL1, "The Orthorectifier expects an instance of 'EnMAPL1Product_SensorGeo'."
