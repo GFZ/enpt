@@ -83,7 +83,7 @@ class Test_Spatial_Optimizer(TestCase):
         #                            ))
 
 
-class Test_Orthorectifier_DLR(TestCase):
+class Test_Spatial_Optimizer_DLR(TestCase):
     def setUp(self):
         self.config = EnPTConfig(**config_for_testing_dlr)
 
