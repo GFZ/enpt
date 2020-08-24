@@ -36,95 +36,84 @@ Fits the VNIR detector data to the reference image. Corrects for keystone.
 __author__ = 'Daniel Scheffler'
 
 import numpy as np
+from typing import Optional
 
 from arosics import COREG_LOCAL
 from geoarray import GeoArray
-from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry
+from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_coordArray
+from py_tools_ds.geo.projection import EPSG2WKT
 
 from ...options.config import EnPTConfig
 from ...model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
-from ..spatial_transform import Geometry_Transformer
+from ..spatial_transform import Geometry_Transformer, Geometry_Transformer_3D
 
 
 class Spatial_Optimizer(object):
     def __init__(self, config: EnPTConfig):
         """Create an instance of Spatial_Optimizer"""
         self.cfg = config
+        self._ref_Im: Optional[GeoArray, None] = GeoArray(self.cfg.path_reference_image)
 
-    def _get_enmap_band_for_matching(self,
-                                     enmap_ImageL1: EnMAPL1Product_SensorGeo)\
+        self._EnMAP_Im: Optional[EnMAPL1Product_SensorGeo, None] = None
+        self._EnMAP_band: Optional[GeoArray, None] = None
+        self._EnMAP_mask: Optional[GeoArray, None] = None
+
+    def _get_enmap_band_for_matching(self)\
             -> GeoArray:
-        """
-
-        :param enmap_ImageL1:
-        :return:
-        """
-        enmap_ImageL1.logger.warning('Statically using band 40 for co-registration.')
-        bandidx = 39
-        enmap_band_sensorgeo = enmap_ImageL1.vnir.data[:, :, bandidx]
+        """Return the EnMAP band to be used in co-registration in the projection of the reference image."""
+        self._EnMAP_Im.logger.warning('Statically using band 40 for co-registration.')
+        bandidx = 39  # FIXME hardcoded
+        enmap_band_sensorgeo = self._EnMAP_Im.vnir.data[:, :, bandidx]
 
         # transform from sensor to map geometry to make it usable for tie point detection
-        enmap_ImageL1.logger.info('Temporarily transforming EnMAP band %d to map geometry for co-registration.'
-                                  % (bandidx + 1))
-        GT = Geometry_Transformer(lons=enmap_ImageL1.meta.vnir.lons[:, :, bandidx],
-                                  lats=enmap_ImageL1.meta.vnir.lats[:, :, bandidx],
+        self._EnMAP_Im.logger.info('Temporarily transforming EnMAP band %d to map geometry for co-registration.'
+                                   % (bandidx + 1))
+        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, bandidx],
+                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, bandidx],
                                   fill_value=0,
                                   resamp_alg='gauss',
                                   radius_of_influence=30,
                                   nprocs=self.cfg.CPUs)
 
-        ref_gA = GeoArray(self.cfg.path_reference_image)
-
-        enmap_band_mapgeo = \
+        self._EnMAP_band = \
             GeoArray(*GT.to_map_geometry(enmap_band_sensorgeo,
-                                         tgt_prj=ref_gA.prj,  # TODO correct?
-                                         tgt_coordgrid=ref_gA.xygrid_specs),
+                                         tgt_prj=self._ref_Im.prj,  # TODO correct?
+                                         tgt_coordgrid=self._ref_Im.xygrid_specs),
                      nodata=0)
 
-        return enmap_band_mapgeo
+        return self._EnMAP_band
 
-    def _get_enmap_mask_for_matching(self,
-                                     enmap_ImageL1: EnMAPL1Product_SensorGeo)\
+    def _get_enmap_mask_for_matching(self)\
             -> GeoArray:
-        """
-
-        :param enmap_ImageL1:
-        :return:
-        """
+        """Return the EnMAP mask to be used in co-registration in the projection of the reference image."""
         # use the water mask
-        enmap_mask_sensorgeo = enmap_ImageL1.vnir.mask_landwater[:] == 2  # 2 is water here
+        enmap_mask_sensorgeo = self._EnMAP_Im.vnir.mask_landwater[:] == 2  # 2 is water here
 
         # transform from sensor to map geometry to make it usable for tie point detection
-        enmap_ImageL1.logger.info('Temporarily transforming EnMAP water mask to map geometry for co-registration.')
-        GT = Geometry_Transformer(lons=enmap_ImageL1.meta.vnir.lons[:, :, 39],  # FIXME hardcoded
-                                  lats=enmap_ImageL1.meta.vnir.lats[:, :, 39],
+        self._EnMAP_Im.logger.info('Temporarily transforming EnMAP water mask to map geometry for co-registration.')
+        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, 39],  # FIXME hardcoded
+                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, 39],
                                   fill_value=0,
                                   resamp_alg='nearest',
                                   nprocs=self.cfg.CPUs)
 
-        ref_gA = GeoArray(self.cfg.path_reference_image)
-
-        enmap_mask_mapgeo = \
+        self._EnMAP_mask = \
             GeoArray(*GT.to_map_geometry(enmap_mask_sensorgeo,
-                                         tgt_prj=ref_gA.prj,  # TODO correct?
-                                         tgt_coordgrid=ref_gA.xygrid_specs),
+                                         tgt_prj=self._ref_Im.prj,  # TODO correct?
+                                         tgt_coordgrid=self._ref_Im.xygrid_specs),
                      nodata=0)
 
-        return enmap_mask_mapgeo
+        return self._EnMAP_mask
 
-    def _compute_tie_points(self,
-                            enmap_ImageL1: EnMAPL1Product_SensorGeo):
-        enmap_band_mapgeo = self._get_enmap_band_for_matching(enmap_ImageL1)  # in the projection of the reference image
-        ref_gA = GeoArray(self.cfg.path_reference_image)
-
+    def _compute_tie_points(self):
         CRL = COREG_LOCAL(self.cfg.path_reference_image,
-                          enmap_band_mapgeo,
+                          self._EnMAP_band,
                           grid_res=40,
                           max_shift=5,
-                          nodata=(ref_gA.nodata, 0),
-                          footprint_poly_tgt=reproject_shapelyGeometry(enmap_ImageL1.meta.vnir.ll_mapPoly,
-                                                                       4326, enmap_band_mapgeo.epsg),
-                          mask_baddata_tgt=self._get_enmap_mask_for_matching(enmap_ImageL1)
+                          nodata=(self._ref_Im.nodata, 0),
+                          footprint_poly_tgt=reproject_shapelyGeometry(self._EnMAP_Im.meta.vnir.ll_mapPoly,
+                                                                       4326, self._EnMAP_band.epsg),
+                          mask_baddata_tgt=self._EnMAP_mask
                           )
         TPG = CRL.tiepoint_grid
         # CRL.view_CoRegPoints(shapes2plot='vectors', hide_filtered=False, figsize=(20, 20),
@@ -134,7 +123,8 @@ class Spatial_Optimizer(object):
 
         return valid_tiepoints
 
-    def _interpolate_tiepoints_into_space(self, tiepoints, outshape, metric='ABS_SHIFT'):
+    @staticmethod
+    def _interpolate_tiepoints_into_space(tiepoints, outshape, metric='ABS_SHIFT'):
         rows = np.array(tiepoints.Y_IM)
         cols = np.array(tiepoints.X_IM)
         data = np.array(tiepoints[metric])
@@ -152,8 +142,8 @@ class Spatial_Optimizer(object):
 
         # rows_lowres = np.arange(0, outshape[0] + 10, 10)
         # cols_lowres = np.arange(0, outshape[1] + 10, 10)
-        rows_lowres = np.arange(0, outshape[0] + 5, 5)
-        cols_lowres = np.arange(0, outshape[1] + 5, 5)
+        rows_lowres = np.arange(0, outshape[0], 5)
+        cols_lowres = np.arange(0, outshape[1], 5)
         f = Rbf(cols, rows, data)
         data_interp_lowres = f(*np.meshgrid(cols_lowres, rows_lowres))
 
@@ -166,11 +156,12 @@ class Spatial_Optimizer(object):
 
         from scipy.interpolate import RegularGridInterpolator
         RGI = RegularGridInterpolator(points=[cols_lowres, rows_lowres],
-                                      values=data_interp_lowres,
-                                      method='linear')
+                                      values=data_interp_lowres.T,  # must be in shape [x, y]
+                                      method='linear',
+                                      bounds_error=False)
         rows_full = np.arange(outshape[0])
         cols_full = np.arange(outshape[1])
-        data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full, indexing='ij')))
+        data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full)))
 
         print('interpolation runtime: %.2fs' % (time() - t0))
 
@@ -186,16 +177,56 @@ class Spatial_Optimizer(object):
 
     def optimize_geolayer(self,
                           enmap_ImageL1: EnMAPL1Product_SensorGeo):
-        if self.cfg.enable_absolute_coreg:
+        self._EnMAP_Im = enmap_ImageL1
+        self._get_enmap_band_for_matching()
+        self._get_enmap_mask_for_matching()
 
+        enmap_ImageL1.logger.info('Computing tie points between the EnMAP image and the given spatial reference image.')
+        tiepoints = self._compute_tie_points()
 
-            tiepoints = self._compute_tie_points(enmap_ImageL1)
-            xshift_map = self._interpolate_tiepoints_into_space(tiepoints,
-                                                                (1800, 1800),  # FIXME hardcoded
-                                                                # metric='ABS_SHIFT'
-                                                                metric='X_SHIFT_M')
-            yshift_map = self._interpolate_tiepoints_into_space(tiepoints,
-                                                                (1800, 1800),  # FIXME hardcoded
-                                                                # metric='ABS_SHIFT'
-                                                                metric='Y_SHIFT_M')
-            a=1
+        enmap_ImageL1.logger.info('Generating misregistration array.')
+        xshift_map = self._interpolate_tiepoints_into_space(tiepoints,
+                                                            self._EnMAP_band.shape,
+                                                            metric='X_SHIFT_M')
+        yshift_map = self._interpolate_tiepoints_into_space(tiepoints,
+                                                            self._EnMAP_band.shape,
+                                                            metric='Y_SHIFT_M')
+
+        ULx, ULy = self._EnMAP_band.box.boxMapXY[0]
+        xgsd, ygsd = self._EnMAP_band.xgsd, self._EnMAP_band.ygsd
+        rows, cols = self._EnMAP_band.shape
+        xgrid_map, ygrid_map = np.meshgrid(np.arange(ULx, ULx + cols * xgsd, xgsd),
+                                           np.arange(ULy, ULy + rows * ygsd, ygsd))
+
+        xgrid_map_coreg = xgrid_map + xshift_map
+        ygrid_map_coreg = ygrid_map + yshift_map
+
+        # transform map to sensor geometry
+        enmap_ImageL1.logger.info('Transforming spatial optimization results back to sensor geometry.')
+        lons_band = self._EnMAP_Im.meta.vnir.lons[:, :, 39]  # FIXME hardcoded
+        lats_band = self._EnMAP_Im.meta.vnir.lats[:, :, 39]
+        GT = Geometry_Transformer_3D(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
+                                     lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
+                                     fill_value=0,
+                                     resamp_alg='bilinear',
+                                     nprocs=self.cfg.CPUs)
+
+        geolayer_sensorgeo = \
+            GT.to_sensor_geometry(GeoArray(np.dstack([xgrid_map_coreg,
+                                                      ygrid_map_coreg]),
+                                           geotransform=self._EnMAP_band.gt,
+                                           projection=self._EnMAP_band.prj))
+
+        enmap_ImageL1.logger.info('Applying results of spatial optimization to geolayer.')
+        lons_coreg, lats_coreg = transform_coordArray(prj_src=self._ref_Im.prj,
+                                                      prj_tgt=EPSG2WKT(4326),
+                                                      Xarr=geolayer_sensorgeo[:, :, 0],
+                                                      Yarr=geolayer_sensorgeo[:, :, 1])
+
+        diffs_lons_coreg = lons_band - lons_coreg
+        diffs_lats_coreg = lats_band - lats_coreg
+
+        enmap_ImageL1.meta.vnir.lons -= diffs_lons_coreg[:, :, np.newaxis]
+        enmap_ImageL1.meta.vnir.lats -= diffs_lats_coreg[:, :, np.newaxis]
+
+        return enmap_ImageL1
