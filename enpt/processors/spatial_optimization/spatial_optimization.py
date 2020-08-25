@@ -142,8 +142,8 @@ class Spatial_Optimizer(object):
 
         # rows_lowres = np.arange(0, outshape[0] + 10, 10)
         # cols_lowres = np.arange(0, outshape[1] + 10, 10)
-        rows_lowres = np.arange(0, outshape[0], 5)
-        cols_lowres = np.arange(0, outshape[1], 5)
+        rows_lowres = np.arange(0, outshape[0] + 5, 5)
+        cols_lowres = np.arange(0, outshape[1] + 5, 5)
         f = Rbf(cols, rows, data)
         data_interp_lowres = f(*np.meshgrid(cols_lowres, rows_lowres))
 
@@ -196,7 +196,7 @@ class Spatial_Optimizer(object):
         xgsd, ygsd = self._EnMAP_band.xgsd, self._EnMAP_band.ygsd
         rows, cols = self._EnMAP_band.shape
         xgrid_map, ygrid_map = np.meshgrid(np.arange(ULx, ULx + cols * xgsd, xgsd),
-                                           np.arange(ULy, ULy + rows * ygsd, ygsd))
+                                           np.arange(ULy, ULy - rows * ygsd, -ygsd))
 
         xgrid_map_coreg = xgrid_map + xshift_map
         ygrid_map_coreg = ygrid_map + yshift_map
@@ -208,7 +208,8 @@ class Spatial_Optimizer(object):
         GT = Geometry_Transformer_3D(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
                                      lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
                                      fill_value=0,
-                                     resamp_alg='bilinear',
+                                     # resamp_alg='bilinear',
+                                     resamp_alg='gauss',
                                      nprocs=self.cfg.CPUs)
 
         geolayer_sensorgeo = \
@@ -226,7 +227,13 @@ class Spatial_Optimizer(object):
         diffs_lons_coreg = lons_band - lons_coreg
         diffs_lats_coreg = lats_band - lats_coreg
 
-        enmap_ImageL1.meta.vnir.lons -= diffs_lons_coreg[:, :, np.newaxis]
-        enmap_ImageL1.meta.vnir.lats -= diffs_lats_coreg[:, :, np.newaxis]
+        # enmap_ImageL1.meta.vnir.lons -= diffs_lons_coreg[:, :, np.newaxis]
+        # enmap_ImageL1.meta.vnir.lats -= diffs_lats_coreg[:, :, np.newaxis]
+        # enmap_ImageL1.meta.swir.lons -= diffs_lons_coreg[:, :, np.newaxis]
+        # enmap_ImageL1.meta.swir.lats -= diffs_lats_coreg[:, :, np.newaxis]
+        enmap_ImageL1.meta.vnir.lons = enmap_ImageL1.meta.vnir.lons - diffs_lons_coreg[:, :, np.newaxis]
+        enmap_ImageL1.meta.vnir.lats = enmap_ImageL1.meta.vnir.lats - diffs_lats_coreg[:, :, np.newaxis]
+        enmap_ImageL1.meta.swir.lons = enmap_ImageL1.meta.swir.lons - diffs_lons_coreg[:, :, np.newaxis]
+        enmap_ImageL1.meta.swir.lats = enmap_ImageL1.meta.swir.lats - diffs_lats_coreg[:, :, np.newaxis]
 
         return enmap_ImageL1
