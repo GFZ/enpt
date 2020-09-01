@@ -38,7 +38,7 @@ Tests for `processors.dem_preprocessing` module.
 from unittest import TestCase
 
 import numpy as np
-from py_tools_ds.geo.projection import EPSG2WKT
+from pyproj import CRS
 from geoarray import GeoArray
 
 from enpt.processors.dem_preprocessing import DEM_Processor
@@ -78,14 +78,14 @@ class Test_DEM_Processor(TestCase):
         with self.assertRaises(ValueError):
             dem = GeoArray(np.array([1, 2]),
                            geotransform=(10.6, 0.00036, -0.0, 47.5, -0.0, -0.00036),  # can be anything
-                           projection=EPSG2WKT(4269))  # NAD83
+                           projection=CRS(4269).to_wkt())  # NAD83
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
     def test_init_demTooSmall(self):
         # covers only 100x100 px in the upper left (<5%)
         dem = GeoArray(np.random.randint(0, 500, (100, 100)),
                        geotransform=(626938.928052, 30.0, 0, 5267203.56579, 0, -30.0),
-                       projection=EPSG2WKT(32632))
+                       projection=CRS(32632).to_wkt())
 
         with self.assertRaises(ValueError):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
