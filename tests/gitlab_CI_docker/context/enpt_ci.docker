@@ -20,5 +20,4 @@ COPY sicor /tmp/sicor
 RUN bash -i -c "\
     source /root/miniconda3/bin/activate ci_env; \
     cd /tmp/sicor/ ; \
-    pip install -e . ; \
-    git lfs pull"
+    pip install -e ."
