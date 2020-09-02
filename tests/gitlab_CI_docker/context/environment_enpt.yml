@@ -1,7 +1,7 @@
 name: enpt
 
 channels: &id1
-  - http://conda.anaconda.org/conda-forge
+  - conda-forge
 
 dependencies:
   - python=3.*.*
@@ -13,7 +13,6 @@ dependencies:
 
   # geoarray / py_tools_ds
   - gdal
-  - conda-forge::libgdal  # force to use conda-forge for libgdal to avoid package version incompatiblies due to mixed channels
   - scikit-image
   - geopandas
   - matplotlib
@@ -61,7 +60,3 @@ dependencies:
     - nose-htmloutput
     - coverage
     - rednose
-
-    # sicor
-    - ecmwf-api-client  # mirror of the below
-    # - https://software.ecmwf.int/wiki/download/attachments/56664858/ecmwf-api-client-python.tgz  # does not works via 'conda env create' on windows
