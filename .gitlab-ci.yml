@@ -35,7 +35,7 @@ test_enpt:
     # - make download-tables
     # - python setup.py install
     # - cd ../../
-    - pip install -u sicor
+    - pip install -U sicor
 
     # run nosetests
     - make nosetests  # test are called here
