@@ -7,8 +7,8 @@ gitlab_runner="enpt_gitlab_CI_runner"
 
 # get sicor project
 rm -rf context/sicor
-git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-# git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
+git clone git@gitext.gfz-potsdam.de:EnMAP/sicor.git ./context/sicor
+# git clone git@gitext.gfz-potsdam.de:EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
 
 echo "#### Build runner docker image"
 docker rmi ${tag}
