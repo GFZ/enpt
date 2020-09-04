@@ -90,13 +90,13 @@ config_for_testing_dlr = dict(
                      # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z.zip'
 
                      # Arcachon
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
 
                      # Arcachon 1000x30
                      # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
 
                      # Arcachon full tile 2
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z.zip'
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z.zip'
 
                      # Arcachon full tile 3, reprocessed 05/2020
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
@@ -130,7 +130,7 @@ config_for_testing_dlr = dict(
     # target_projection_type='Geographic',
     # target_epsg=32632,
     # target_coord_grid=[-1.37950, -1.37923, 44.60710, 44.60737],
-    enable_ac=False,
+    enable_ac=True,
     enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
