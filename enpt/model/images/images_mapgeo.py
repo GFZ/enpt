@@ -280,7 +280,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         metadata_string = self.meta.to_XML()
 
         with open(outpaths['metaxml'], 'w') as metaF:
-            self.logger.info("Writing metdata to %s" % outpaths['metaxml'])
+            self.logger.info("Writing metadata to %s" % outpaths['metaxml'])
             metaF.write(metadata_string)
 
         self.logger.info("L2A product successfully written!")

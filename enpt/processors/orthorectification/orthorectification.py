@@ -39,7 +39,7 @@ import numpy as np
 from mvgavg import mvgavg
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import transform_any_prj
-from py_tools_ds.geo.projection import EPSG2WKT, prj_equal
+from py_tools_ds.geo.projection import prj_equal
 
 from ...options.config import EnPTConfig
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
@@ -197,8 +197,8 @@ class Orthorectifier(object):
         S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
 
         # transform them to UTM
-        V_UL_UR_LL_LR_prj = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in V_UL_UR_LL_LR_ll]
-        S_UL_UR_LL_LR_prj = [transform_any_prj(EPSG2WKT(4326), EPSG2WKT(tgt_epsg), x, y) for x, y in S_UL_UR_LL_LR_ll]
+        V_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in V_UL_UR_LL_LR_ll]
+        S_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in S_UL_UR_LL_LR_ll]
 
         # separate X and Y
         V_X_prj, V_Y_prj = zip(*V_UL_UR_LL_LR_prj)

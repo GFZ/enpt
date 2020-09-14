@@ -15,4 +15,5 @@ lxml
 numpy-indexed
 mvgavg
 natsort
+pyproj>=2.2.0
 git+https://gitlab.awi.de/phytooptics/acwater.git

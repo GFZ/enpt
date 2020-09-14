@@ -21,16 +21,22 @@ Using conda_, the recommended approach is:
     conda config --set channel_priority strict
 
     # install some dependencies that cause trouble when installed via pip
-    conda install -c conda-forge numpy pandas lxml
+    conda install -c conda-forge numpy pandas lxml pyproj
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    conda install -c conda-forge gdal libgdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
+    conda install -c conda-forge gdal libgdal scikit-image geopandas matplotlib basemap shapely pyresample
 
     # install not pip-installable deps of arosics
     conda install -c conda-forge pyfftw pykrige
 
     # install not pip-installable deps of sicor
     conda install -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+
+    # install sicor
+    git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git
+    cd sicor
+    python setup.py install
+    git lfs pull
 
     # install enpt
     pip install enpt

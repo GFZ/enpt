@@ -38,10 +38,11 @@ from scipy.spatial import Delaunay
 from geoarray import GeoArray
 from natsort import natsorted
 import numpy_indexed as npi
+from pyproj import CRS
 
 from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
 from sensormapgeo.transformer_2d import AreaDefinition
-from py_tools_ds.geo.projection import prj_equal, EPSG2WKT
+from py_tools_ds.geo.projection import prj_equal
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
@@ -258,7 +259,7 @@ class RPC_Geolayer_Generator(object):
 
         :param rpc_coeffs:              RPC coefficients for a single EnMAP band
         :param elevation:               digital elevation model in map geometry (file path or instance of GeoArray) OR
-                                        average elevation as integer or float
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         """
@@ -453,8 +454,8 @@ class RPC_Geolayer_Generator(object):
             # transform UTM grid to DEM projection
             x_grid_demPrj, y_grid_demPrj = \
                 (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.elevation.epsg) else \
-                transform_coordArray(EPSG2WKT(grid_utm_epsg),
-                                     EPSG2WKT(self.elevation.epsg),
+                transform_coordArray(CRS(grid_utm_epsg).to_wkt(),
+                                     CRS(self.elevation.epsg).to_wkt(),
                                      x_grid_utm, y_grid_utm)
 
             # retrieve corresponding heights from DEM
@@ -465,7 +466,8 @@ class RPC_Geolayer_Generator(object):
             heights = np.full_like(x_grid_utm.flatten(), self.elevation)
 
         # transform UTM points to lon/lat
-        lon_grid, lat_grid = transform_coordArray(EPSG2WKT(grid_utm_epsg), EPSG2WKT(4326), x_grid_utm, y_grid_utm)
+        lon_grid, lat_grid = \
+            transform_coordArray(CRS(grid_utm_epsg).to_wkt(), CRS(4326).to_wkt(), x_grid_utm, y_grid_utm)
         lons = lon_grid.flatten()
         lats = lat_grid.flatten()
 
@@ -519,7 +521,7 @@ class RPC_3D_Geolayer_Generator(object):
                                           'band_2': <rpc_coeffs_dict>,
                                           ...})
         :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
-                                        average elevation as integer or float
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         :param CPUs:                    number of CPUs to use
@@ -642,7 +644,7 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry
     :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
-                                    average elevation as integer or float
+                                    average elevation in meters as integer or float
     :param enmapIm_cornerCoords:    MAP coordinates of the EnMAP image
     :param enmapIm_dims_sensorgeo:  dimensions of the sensor geometry EnMAP image (rows, columns)
     :return:

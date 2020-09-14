@@ -54,6 +54,10 @@ class Test_L1B_Reader(unittest.TestCase):
 
     def setUp(self):
         self.config = EnPTConfig(**config_for_testing)
+
+        # don't drop bands - otherwise we can't run write-read-tests as the writer does not include the full bandlist
+        self.config.drop_bad_bands = False
+
         self.pathList_testimages = [self.config.path_l1b_enmap_image,
                                     self.config.path_l1b_enmap_image_gapfill]
         self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
@@ -175,6 +179,17 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
 
         L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
         L1_obj.save(path.join(self.config.output_dir, "no_snr"))
+
+    def test_read_inputdata_dont_drop_bad_bands(self):
+        with zipfile.ZipFile(self.pathList_testimages[0], "r") as zf:
+            zf.extractall(self.tmpdir)
+
+        cfg = self.config
+        cfg.drop_bad_bands = False
+        RD = L1B_Reader(config=cfg)
+
+        L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
+        self.assertEquals(L1_obj.swir.detector_meta.nwvl, 130)
 
 
 if __name__ == "__main__":

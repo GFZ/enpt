@@ -37,6 +37,8 @@ import weakref
 import warnings
 import pickle
 from typing import Optional
+from time import time
+from datetime import timedelta
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
@@ -62,6 +64,9 @@ class EnPT_Controller(object):
         # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
         self._finalizer = weakref.finalize(self, self._cleanup, self.tempDir,
                                            warn_message="Implicitly cleaning up {!r}".format(self))
+
+        # record startup time
+        self._time_startup = time()
 
         # defaults
         self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
@@ -168,6 +173,9 @@ class EnPT_Controller(object):
                 self.run_geometry_processor()
                 self.run_orthorectification()
                 self.write_output()
+
+                self.L1_obj.logger.info('Total runtime of the processing chain: %s'
+                                        % timedelta(seconds=time() - self._time_startup))
             finally:
                 self.cleanup()
 

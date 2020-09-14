@@ -17,6 +17,9 @@
         "working_dir": "",  /*directory to be used for temporary files*/
         "n_lines_to_append": "None",  /*Number of lines to be added to the main image [if None, use the whole path_l1b_enmap_image_gapfill].
                                         Requires path_l1b_enmap_image_gapfill to be set.*/
+        "drop_bad_bands": true, /*if set to True (default), the water absorption bands between 1358 and 1453 nm
+                                  as well as between 1814 and 1961 nm are excluded from processing and will not be
+                                  contained in the L2A product*/
         "disable_progress_bars": false  /*whether to disable all progress bars during processing*/
     },
 
