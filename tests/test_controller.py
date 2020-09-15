@@ -46,8 +46,8 @@ __author__ = 'Daniel Scheffler'
 
 class Test_EnPT_Controller(TestCase):
     def setUp(self):
-        self.CTR = EnPT_Controller(**config_for_testing)
-        # self.CTR = EnPT_Controller(**config_for_testing_water)
+        # self.CTR = EnPT_Controller(**config_for_testing)
+        self.CTR = EnPT_Controller(**config_for_testing_water)
 
     def tearDown(self):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
@@ -59,7 +59,8 @@ class Test_EnPT_Controller(TestCase):
 
 class Test_EnPT_Controller_DLR_testdata(TestCase):
     def setUp(self):
-        self.CTR = EnPT_Controller(**config_for_testing_dlr)
+        # self.CTR = EnPT_Controller(**config_for_testing_dlr)
+        self.CTR = EnPT_Controller(**config_for_testing_water)
 
     def tearDown(self):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
