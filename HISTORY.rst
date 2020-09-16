@@ -2,6 +2,13 @@
 History
 =======
 
+0.14.1 (2020-09-01)
+-------------------
+
+* Updated installation instructions to include SICOR installation there.
+* Some adaptions to recent changes in py_tools_ds and pyproj.
+
+
 0.14.0 (2020-08-14)
 -------------------
 

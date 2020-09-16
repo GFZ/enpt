@@ -1,51 +1,23 @@
-FROM centos:7
-# matplotlib requires freetype, freetype-devel, libpng-devel under centos
-# scikit-image requires blas-devel, lapack-devel, atlas-devel under centos
+FROM ci_base_centos:0.1
+
 RUN yum update -y && \
-    yum install -y wget vim bzip2 gcc gcc-c++ make libgl1-mesa-glx mesa-libGL qt5-qtbase-gui git nano tree gdb texlive
-
-# change version numbers for future upgrades   # currently Anaconda 4.5.1 (worked fine)
-ENV miniconda_dl 'Miniconda3-latest-Linux-x86_64.sh'
-# use miniconda 4.3.31 as workaround for "IsADirectoryError(21, 'Is a directory')" with version 4.4.10 (currently latest)
-# ENV miniconda_dl 'Miniconda3-4.3.31-Linux-x86_64.sh'
-ENV envconfig 'environment_enpt.yml'
-ENV git_lfs_v='2.11.0'
-
-RUN /bin/bash -i -c "cd /root; wget https://repo.continuum.io/miniconda/$miniconda_dl ; \
-    bash -i /root/$miniconda_dl -b ; \
-    rm -f /root/$miniconda_dl"
+    yum install -y texlive
 
 # copy some needed stuff to /root
 COPY *.yml /root/
 
-# create an environment with all packages specified in $envconfig (name is 'enpt' -> also specified in $envconfig)
-RUN /bin/bash -i -c "source /root/miniconda3/bin/activate ; \
-    conda update -n base -c defaults conda ; \
-    conda env update -f /root/$envconfig"
-
-# install git lfs
-RUN /bin/bash -i -c "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash"
-
-# install git large file support, see here: https://git-lfs.github.com/
-RUN /bin/bash -i -c "wget https://github.com/git-lfs/git-lfs/releases/download/v${git_lfs_v}/git-lfs-linux-amd64-v${git_lfs_v}.tar.gz; \
-    tar -zxvf git-lfs-linux-amd64-v${git_lfs_v}.tar.gz; \
-    cd git-lfs-v${git_lfs_v}; \
-    bash ./install.sh"
+# update the ci_env environment (that already contains all packages installed via 'docker_pyenvs' repo)
+RUN /bin/bash -i -c "\
+    source /root/miniconda3/bin/activate ; \
+    conda update -n base -c conda-forge conda;\
+    source activate ci_env; \
+    conda env update -n ci_env -f /root/environment_enpt.yml"
 
 # copy sicor code to /tmp
 COPY sicor /tmp/sicor
 
 # install sicor (in pip development mode so that its root directory in /tmp/sicor matching with the subsequent COPY command)
-RUN bash -i -c "source /root/miniconda3/bin/activate enpt; \
+RUN bash -i -c "\
+    source /root/miniconda3/bin/activate ci_env; \
     cd /tmp/sicor/ ; \
-    make clean ; \
-    make requirements ; \
-    make download-tables ; \
-    pip install -e . --no-cache-dir"
-
-# copy sicor cache files to sicor root directory (speeds up SICOR CI tests because table subsets dont have to be created each time)
-# -> sicor root directory is the default directory of these cache files if sicor_cache_dir is not set in EnPT options
-COPY *.zip /tmp/sicor/sicor
-
-# copy AC LUT for EnMAP to SICOR tables directory
-COPY EnMAP_LUT* /tmp/sicor/sicor/tables
+    pip install -e ."

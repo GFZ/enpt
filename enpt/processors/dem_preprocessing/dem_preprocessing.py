@@ -32,9 +32,9 @@
 from typing import Union, Tuple  # noqa: F401
 from multiprocessing import cpu_count
 import numpy as np
+from pyproj import CRS
 
 from geoarray import GeoArray
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, EPSG2WKT
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
 from py_tools_ds.geo.vector.topology import get_footprint_polygon, get_overlap_polygon
 
@@ -61,10 +61,9 @@ class DEM_Processor(object):
                              'The provided digital elevation model has no valid geo-coding or projection.')
 
         # check if provided as WGS-84
-        proj4dict = proj4_to_dict(get_proj4info(proj=self.dem.prj))
-        if 'datum' not in proj4dict or proj4dict['datum'] != 'WGS84':
-            raise ValueError(proj4dict,
-                             "The digital elevation model must be provided with 'WGS84' as geographic datum.")
+        ell = CRS(self.dem.prj).datum.ellipsoid.name
+        if ell != 'WGS 84':
+            raise ValueError(ell, "The digital elevation model must be provided with 'WGS84' as geographic datum.")
 
         # check overlap
         dem_ll_mapPoly = reproject_shapelyGeometry(self.dem.footprint_poly, prj_src=self.dem.epsg, prj_tgt=4326)
@@ -110,7 +109,7 @@ class DEM_Processor(object):
         # get a GeoArray instance
         dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation),
                           geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
-                          projection=EPSG2WKT(tgt_utm_epsg))
+                          projection=CRS(tgt_utm_epsg).to_wkt())
 
         return cls(dem_gA, corner_coords_lonlat)
 

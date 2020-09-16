@@ -22,7 +22,7 @@ To run the whole EnPT processing pipeline via the Python API:
     CTR.run_all_processors()
 
 Further *configuration parameters* are documented
-`here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig>`__.
+`here <https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.options.html#enpt.options.config.EnPTConfig>`__.
 Note that the class `EnPTConfig` takes the same keyword arguments like the `EnPT_Controller` class.
 
 You can also pass a *JSON-File with your EnPT configuration* to the `EnPT_Controller` class. This allows you to easily
@@ -60,7 +60,7 @@ Note, that the processors are built on each other, so the order must be unchange
 
    Get the in-memory Python object representing the Level-1 dataset (NOTE: the attributes and methods of this
    Python object are documented
-   `here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL1Product_SensorGeo>`__):
+   `here <https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL1Product_SensorGeo>`__):
 
    .. code-block:: python
 
@@ -100,7 +100,7 @@ Note, that the processors are built on each other, so the order must be unchange
       self.run_orthorectification()
 
    From now on, you may get the in-memory EnMAP Level-2 Python object (attributes and methods are documented
-   `here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL2Product_MapGeo>`__):
+   `here <https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/enpt.model.html#enpt.model.images.EnMAPL2Product_MapGeo>`__):
 
    .. code-block:: python
 

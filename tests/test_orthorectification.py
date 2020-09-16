@@ -42,9 +42,9 @@ import tempfile
 import shutil
 from copy import deepcopy
 
+from pyproj import CRS
 import numpy as np
 from geoarray import GeoArray
-from py_tools_ds.geo.projection import EPSG2WKT
 
 from enpt.processors.orthorectification import Orthorectifier, VNIR_SWIR_Stacker
 from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
@@ -127,10 +127,10 @@ class Test_VNIR_SWIR_Stacker(TestCase):
     def setUp(self):
         self.vnir_gA = GeoArray(np.random.randint(0, 255, (10, 10, 10)),
                                 geotransform=(331185.0, 30.0, -0.0, 5840115.0, -0.0, -30.0),
-                                projection=EPSG2WKT(32633))
+                                projection=CRS(32633).to_wkt())
         self.swir_gA = GeoArray(np.random.randint(0, 255, (10, 10, 20)),
                                 geotransform=(331185.0, 30.0, -0.0, 5840115.0, -0.0, -30.0),
-                                projection=EPSG2WKT(32633))
+                                projection=CRS(32633).to_wkt())
         self.vnir_wvls = np.arange(900, 1000, 10)
         self.swir_wvls = np.arange(935, 1135, 10)
 
@@ -147,7 +147,7 @@ class Test_VNIR_SWIR_Stacker(TestCase):
 
         # unequal projection
         swir_gA = deepcopy(self.swir_gA)
-        swir_gA.prj = EPSG2WKT(32632)
+        swir_gA.prj = CRS(32632).to_wkt()
         with self.assertRaises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=swir_gA,
                               vnir_wvls=self.vnir_wvls, swir_wvls=self.swir_wvls)
