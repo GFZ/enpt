@@ -52,41 +52,6 @@ __author__ = 'Daniel Scheffler'
 
 class Test_Spatial_Optimizer(TestCase):
     def setUp(self):
-        self.config = EnPTConfig(**config_for_testing)
-
-        # create a temporary directory
-        # NOTE: This must exist during the whole runtime of Test_Spatial_Optimizer, otherwise
-        #       Spatial_Optimizer.optimize_geolayer will fail to read some files.
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
-
-        # get EnMAP L1 object in sensor geometry
-        with ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
-            zf.extractall(self.tmpdir)
-            self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
-                root_dir_main=os.path.join(self.tmpdir,
-                                           os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0]),
-                compute_snr=False)
-
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
-
-    def test_optimize_geolayer(self):
-        SO = Spatial_Optimizer(config=self.config)
-        out = SO.optimize_geolayer(self.L1_obj)
-
-        # self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
-        # self.assertTrue(L2_obj.data.is_map_geo)
-        # self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
-        # self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
-        # self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
-        # self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
-        #                            np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-        #                            rtol=0.01
-        #                            ))
-
-
-class Test_Spatial_Optimizer_DLR(TestCase):
-    def setUp(self):
         self.config = EnPTConfig(**config_for_testing_dlr)
 
         # create a temporary directory
