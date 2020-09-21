@@ -1,5 +1,5 @@
 
-.. image:: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/img/EnPT_logo_final.svg
+.. image:: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/img/EnPT_logo_final.svg
    :width: 300px
    :alt: EnPT Logo
 
@@ -45,10 +45,10 @@ Status
     :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
 
 .. |badge2| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
-    :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
+    :target: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
 
 .. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
-    :target: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
+    :target: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
 
 .. |badge4| image:: https://img.shields.io/pypi/v/enpt.svg
     :target: https://pypi.python.org/pypi/enpt
@@ -80,12 +80,14 @@ This software was developed within the context of the EnMAP project supported by
 funds of the German Federal Ministry of Economic Affairs and Energy (on the basis of a decision by the German
 Bundestag: 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 
+Sentinel-2 spatial reference test data have been provided by ESA.
+
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-.. _documentation: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/
-.. _coverage: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
-.. _nosetests: http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
+.. _documentation: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc
+.. _coverage: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
+.. _nosetests: https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
 .. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
 .. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics

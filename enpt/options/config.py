@@ -147,6 +147,8 @@ config_for_testing_dlr = dict(
     # target_projection_type='Geographic',
     # target_epsg=32632,
     # target_coord_grid=[-1.37950, -1.37923, 44.60710, 44.60737],
+    enable_absolute_coreg=True,
+    path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
     mode_ac='land',
     enable_ice_retrieval=False,
@@ -226,6 +228,9 @@ class EnPTConfig(object):
 
         :key enable_vnir_swir_coreg:
             Enable VNIR/SWIR co-registration
+
+        :key enable_absolute_coreg:
+            Enable the co-registration of the EnMAP image to the reference image given with 'path_reference_image'
 
         :key path_reference_image:
             Reference image for co-registration.
@@ -344,6 +349,7 @@ class EnPTConfig(object):
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')
         self.enable_vnir_swir_coreg = gp('enable_vnir_swir_coreg')
+        self.enable_absolute_coreg = gp('enable_absolute_coreg')
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction

@@ -10,6 +10,14 @@ coming soon
   land surfaces later.
 
 
+0.15.0 (2020-09-21)
+-------------------
+
+* Added functionality to apply co-registration between an EnMAP image and a user-provided spatial reference dataset
+  (still needs to be improved but can already be used). This includes: Spatial_Optimizer class, Test_Spatial_Optimizer
+  class, updated config parameters, spatial reference test image.
+
+
 0.14.1 (2020-09-01)
 -------------------
 
