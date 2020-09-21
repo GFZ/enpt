@@ -165,13 +165,13 @@ class Spatial_Optimizer(object):
 
         print('interpolation runtime: %.2fs' % (time() - t0))
 
-        from matplotlib import pyplot as plt
-        plt.figure()
-        im = plt.imshow(data_full)
-        plt.colorbar(im)
-        plt.scatter(cols, rows, c=data, edgecolors='black')
-        plt.title(metric)
-        plt.show()
+        # from matplotlib import pyplot as plt
+        # plt.figure()
+        # im = plt.imshow(data_full)
+        # plt.colorbar(im)
+        # plt.scatter(cols, rows, c=data, edgecolors='black')
+        # plt.title(metric)
+        # plt.show()
 
         return data_full
 

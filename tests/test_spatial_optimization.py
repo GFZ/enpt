@@ -40,10 +40,12 @@ from unittest import TestCase
 from zipfile import ZipFile
 import tempfile
 import shutil
+import numpy as np
 
 from enpt.processors.spatial_optimization import Spatial_Optimizer
 from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
 from enpt.io.reader import L1B_Reader
+from enpt.model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
 
 __author__ = 'Daniel Scheffler'
 
@@ -104,14 +106,10 @@ class Test_Spatial_Optimizer_DLR(TestCase):
 
     def test_optimize_geolayer(self):
         SO = Spatial_Optimizer(config=self.config)
-        out = SO.optimize_geolayer(self.L1_obj)
+        L1_obj = SO.optimize_geolayer(self.L1_obj)
 
-        # self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
-        # self.assertTrue(L2_obj.data.is_map_geo)
-        # self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
-        # self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
-        # self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
-        # self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
-        #                            np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-        #                            rtol=0.01
-        #                            ))
+        self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+        self.assertNotEqual(np.mean(L1_obj.meta.vnir.lons), 0)
+        self.assertNotEqual(np.std(L1_obj.meta.vnir.lons), 0)
+        self.assertNotEqual(np.mean(L1_obj.meta.vnir.lats), 0)
+        self.assertNotEqual(np.std(L1_obj.meta.vnir.lats), 0)
