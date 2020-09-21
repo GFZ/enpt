@@ -35,7 +35,6 @@ test_spatial_optimization
 Tests for `processors.spatial_optimization.spatial_optimization` module.
 """
 
-import os
 from unittest import TestCase
 from zipfile import ZipFile
 import tempfile
@@ -43,7 +42,7 @@ import shutil
 import numpy as np
 
 from enpt.processors.spatial_optimization import Spatial_Optimizer
-from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
+from enpt.options.config import config_for_testing_dlr, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
 
