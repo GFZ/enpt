@@ -128,8 +128,13 @@ class EnPT_Controller(object):
     def run_dem_processor(self):
         self.L1_obj.get_preprocessed_dem()
 
-    def run_geometry_processor(self):
-        pass
+    def run_spatial_optimization(self):
+        # get a new instance of radiometric transformer
+        from ..processors.spatial_optimization import Spatial_Optimizer
+        SpO = Spatial_Optimizer(self.cfg)
+
+        # run optimization
+        self.L1_obj = SpO.optimize_geolayer(self.L1_obj)
 
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""
@@ -157,7 +162,9 @@ class EnPT_Controller(object):
                 self.read_L1B_data()
                 if self.cfg.run_deadpix_P:
                     self.L1_obj.correct_dead_pixels()
-                # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                if self.cfg.enable_absolute_coreg:
+                    # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                    self.run_spatial_optimization()
                 self.run_dem_processor()
                 if self.cfg.enable_ac:
                     self.run_atmospheric_correction()
@@ -170,7 +177,7 @@ class EnPT_Controller(object):
                     self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
                                             'computing top-of-atmosphere reflectance instead.')
                     self.run_toaRad2toaRef()
-                self.run_geometry_processor()
+                # self.run_spatial_optimization()
                 self.run_orthorectification()
                 self.write_output()
 

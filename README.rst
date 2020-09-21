@@ -80,6 +80,8 @@ This software was developed within the context of the EnMAP project supported by
 funds of the German Federal Ministry of Economic Affairs and Energy (on the basis of a decision by the German
 Bundestag: 50 EE 1529) and contributions from DLR, GFZ and OHB System AG.
 
+Sentinel-2 spatial reference test data have been provided by ESA.
+
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
