@@ -120,7 +120,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         method_spectral, method_spatial = self.cfg.deadpix_P_interp_spectral, self.cfg.deadpix_P_interp_spatial
         self.logger.info("Correcting dead pixels of %s detector...\n"
                          "Used algorithm: %s interpolation in the %s domain"
-                         % (self.detector_name, algo, method_spectral if algo == 'spectral' else method_spatial))
+                         % (self.detector_name, method_spectral, algo if algo == 'spectral' else method_spatial))
 
         self.data = \
             Dead_Pixel_Corrector(algorithm=algo,
@@ -129,7 +129,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
-    def get_preprocessed_dem(self):
+    def get_preprocessed_dem(self) -> GeoArray:
+        """Get a digital elevation model in EnMAP sensor geometry of the current detector."""
         if self.cfg.path_dem:
             self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
             DP = DEM_Processor(self.cfg.path_dem, enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
@@ -163,6 +164,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
             else:
                 self.dem = DP.dem
+
+        else:
+            self.logger.info('No DEM for the %s detector provided. Falling back to an average elevation of %d meters.'
+                             % (self.detector_name, self.cfg.average_elevation))
+            self.dem = GeoArray(np.full(self.data.shape[:2], self.cfg.average_elevation).astype(np.int16))
 
         return self.dem
 
@@ -224,13 +230,15 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         if not self.cfg.is_dummy_dataformat:
             img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                           img2.detector_meta.lat_UL_UR_LL_LR))
-            dem_validated = DEM_Processor(img2.cfg.path_dem,
-                                          enmapIm_cornerCoords=img2_cornerCoords).dem
+            elevation = DEM_Processor(img2.cfg.path_dem,
+                                      enmapIm_cornerCoords=img2_cornerCoords).dem \
+                if img2.cfg.path_dem else self.cfg.average_elevation
+
             LL, LR = compute_mapCoords_within_sensorGeoDims(
                 sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
                                     (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
                 rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
-                dem=dem_validated,
+                elevation=elevation,
                 enmapIm_cornerCoords=img2_cornerCoords,
                 enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
             )
@@ -306,19 +314,20 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 LMAX = self.detector_meta.l_max
                 QCAL = self.data[:]
 
-                self.data = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
+                radiance = ((LMAX - LMIN)/(QCALMAX - QCALMIN)) * (QCAL - QCALMIN) + LMIN
 
             elif self.detector_meta.gains is not None and self.detector_meta.offsets is not None:
                 # Lλ = QCAL * GAIN + OFFSET
                 # NOTE: - DLR provides gains between 2000 and 10000, so we have to DEVIDE by gains
                 #       - DLR gains / offsets are provided in W/m2/sr/nm, so we have to multiply by 1000 to get
                 #         mW/m2/sr/nm as needed later
-                self.data = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
+                radiance = 1000 * (self.data[:] * self.detector_meta.gains + self.detector_meta.offsets)
 
             else:
                 raise ValueError("Neighter 'l_min'/'l_max' nor 'gains'/'offsets' "
                                  "are available for radiance computation.")
 
+            self.data = radiance.astype(np.float32)
             self.detector_meta.unit = "mW m^-2 sr^-1 nm^-1"
             self.detector_meta.unitcode = "TOARad"
         else:
@@ -477,13 +486,30 @@ class EnMAPL1Product_SensorGeo(object):
         self.paths = self.get_paths()
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
+        # or directly read here in case the user does not want to include all L1B bands into the processing
         self.vnir.data = self.paths.vnir.data
-        self.vnir.read_masks()
         self.swir.data = self.paths.swir.data
+        self.vnir.read_masks()
+
+        if self.cfg.drop_bad_bands:
+            self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
+            self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            self.vnir.deadpixelmap = self.paths.vnir.deadpixelmap
-            self.swir.deadpixelmap = self.paths.swir.deadpixelmap
+            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
+            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
+
+            if self.cfg.drop_bad_bands:
+                if vnir_dpm.ndim == 3:
+                    self.vnir.deadpixelmap = vnir_dpm[:, :, self.meta.vnir.goodbands_inds]
+                    self.swir.deadpixelmap = swir_dpm[:, :, self.meta.swir.goodbands_inds]
+                else:  # 2D
+                    self.vnir.deadpixelmap = vnir_dpm[self.meta.vnir.goodbands_inds, :]
+                    self.swir.deadpixelmap = swir_dpm[self.meta.swir.goodbands_inds, :]
+            else:
+                self.vnir.deadpixelmap = vnir_dpm
+                self.swir.deadpixelmap = swir_dpm
+
         except ValueError:
             self.logger.warning("Unexpected dimensions of dead pixel mask. Setting all pixels to 'normal'.")
             self.vnir.deadpixelmap = np.zeros(self.vnir.data.shape)

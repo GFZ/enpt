@@ -118,6 +118,10 @@ class Test_EnPTConfig(TestCase):
         # check validity
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(params)
 
+    def test_invalid_filepath(self):
+        with self.assertRaises(FileNotFoundError):
+            EnPTConfig(path_l1b_enmap_image='/path/to/not/existing/image.tif')
+
 
 if __name__ == '__main__':
     main()

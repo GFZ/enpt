@@ -31,7 +31,7 @@ This tutorial requires some software to be installed on your machine:
     - QGIS_ and the EnMAP-Box_
       (see `here <https://enmap-box.readthedocs.io/en/latest/usr_section/usr_installation.html>`__
       for installation instructions)
-    - EnPT_ (see `here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html>`__
+    - EnPT_ (see `here <https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html>`__
       for installation instructions)
     - `EnPT EnMAP-Box App (GUI)`_ (see `here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/
       installation.html>`__ for installation instructions)

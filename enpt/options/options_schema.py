@@ -45,7 +45,8 @@ enpt_schema_input = dict(
             average_elevation=dict(type='integer', required=False),
             path_l1b_snr_model=dict(type='string', required=False),
             working_dir=dict(type='string', required=False, nullable=True),
-            n_lines_to_append=dict(type='integer', required=False, nullable=True),
+            n_lines_to_append=dict(type='integer', required=False, nullable=True, min=0),
+            drop_bad_bands=dict(type='boolean', required=False),
             disable_progress_bars=dict(type='boolean', required=False, nullable=True),
         )),
 
@@ -53,6 +54,8 @@ enpt_schema_input = dict(
         type='dict', required=False,
         schema=dict(
             output_dir=dict(type='string', required=False),
+            output_format=dict(type='string', required=False, allowed=['GTiff', 'ENVI']),
+            output_interleave=dict(type='string', required=False, allowed=['band', 'line', 'pixel'])
         )),
 
     processors=dict(
@@ -64,7 +67,7 @@ enpt_schema_input = dict(
                 schema=dict(
                     path_earthSunDist=dict(type='string', required=False),
                     path_solar_irr=dict(type='string', required=False),
-                    scale_factor_toa_ref=dict(type='integer', required=False),
+                    scale_factor_toa_ref=dict(type='integer', required=False, min=1),
                 )),
 
             geometry=dict(
@@ -72,6 +75,7 @@ enpt_schema_input = dict(
                 schema=dict(
                     enable_keystone_correction=dict(type='boolean', required=False),
                     enable_vnir_swir_coreg=dict(type='boolean', required=False),
+                    enable_absolute_coreg=dict(type='boolean', required=False),
                     path_reference_image=dict(type='string', required=False),
                 )),
 
@@ -81,7 +85,7 @@ enpt_schema_input = dict(
                     enable_ac=dict(type='boolean', required=False),
                     auto_download_ecmwf=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
-                    scale_factor_boa_ref=dict(type='integer', required=False),
+                    scale_factor_boa_ref=dict(type='integer', required=False, min=1),
                 )),
 
             smile=dict(
@@ -107,6 +111,9 @@ enpt_schema_input = dict(
                     resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss']),
                     vswir_overlap_algorithm=dict(type='string', required=False,
                                                  allowed=['order_by_wvl', 'average', 'vnir_only', 'swir_only']),
+                    target_projection_type=dict(type='string', required=False, allowed=['UTM', 'Geographic']),
+                    target_epsg=dict(type='integer', required=False, nullable=True, min=0, forbidden=[0]),
+                    target_coord_grid=dict(type='list', required=False, nullable=True, minlength=4, maxlength=4)
                 ))
         ))
 )
@@ -125,10 +132,13 @@ parameter_mapping = dict(
     path_l1b_snr_model=('general_opts', 'path_l1b_snr_model'),
     working_dir=('general_opts', 'working_dir'),
     n_lines_to_append=('general_opts', 'n_lines_to_append'),
+    drop_bad_bands=('general_opts', 'drop_bad_bands'),
     disable_progress_bars=('general_opts', 'disable_progress_bars'),
 
     # output
     output_dir=('output', 'output_dir'),
+    output_format=('output', 'output_format'),
+    output_interleave=('output', 'output_interleave'),
 
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),
@@ -138,6 +148,7 @@ parameter_mapping = dict(
     # processors > geometry
     enable_keystone_correction=('processors', 'geometry', 'enable_keystone_correction'),
     enable_vnir_swir_coreg=('processors', 'geometry', 'enable_vnir_swir_coreg'),
+    enable_absolute_coreg=('processors', 'geometry', 'enable_absolute_coreg'),
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
@@ -158,6 +169,9 @@ parameter_mapping = dict(
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),
     vswir_overlap_algorithm=('processors', 'orthorectification', 'vswir_overlap_algorithm'),
+    target_projection_type=('processors', 'orthorectification', 'target_projection_type'),
+    target_epsg=('processors', 'orthorectification', 'target_epsg'),
+    target_coord_grid=('processors', 'orthorectification', 'target_coord_grid'),
 )
 
 
@@ -175,6 +189,10 @@ def get_updated_schema(source_schema, key2update, new_value):
 
     from copy import deepcopy
     tgt_schema = deepcopy(source_schema)
+
+    tgt_schema['processors']['schema']['orthorectification']['schema']['target_coord_grid'] = \
+        dict(type='dict', required=False, nullable=True)
+
     return deep_update(tgt_schema, key2update, new_value)
 
 

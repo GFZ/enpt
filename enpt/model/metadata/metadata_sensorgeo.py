@@ -72,17 +72,17 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.filename_data: Optional[str] = None  # detector data filename
-        self.scene_basename: Optional[str] = None  # basename of the EnMAP image
-        self.filename_deadpixelmap: Optional[str] = None  # filename of the dead pixel file
-        self.filename_quicklook: Optional[str] = None  # filename of the quicklook file
+        self.filename_data: Optional[str] = ''  # detector data filename
+        self.scene_basename: Optional[str] = ''  # basename of the EnMAP image
+        self.filename_deadpixelmap: Optional[str] = ''  # filename of the dead pixel file
+        self.filename_quicklook: Optional[str] = ''  # filename of the quicklook file
         # FIXME masks of BOTH detectors
-        self.filename_mask_landwater: Optional[str] = None  # filename of the land/water mask file
-        self.filename_mask_snow: Optional[str] = None  # filename of the snow mask file
-        self.filename_mask_cloudshadow: Optional[str] = None  # filename of the cloud shadow mask file
-        self.filename_mask_clouds: Optional[str] = None  # filename of the cloud mask file
-        self.filename_mask_haze: Optional[str] = None  # filename of the haze mask file
-        self.filename_mask_cirrus: Optional[str] = None  # filename of the cirrus mask file
+        self.filename_mask_landwater: Optional[str] = ''  # filename of the land/water mask file
+        self.filename_mask_snow: Optional[str] = ''  # filename of the snow mask file
+        self.filename_mask_cloudshadow: Optional[str] = ''  # filename of the cloud shadow mask file
+        self.filename_mask_clouds: Optional[str] = ''  # filename of the cloud mask file
+        self.filename_mask_haze: Optional[str] = ''  # filename of the haze mask file
+        self.filename_mask_cirrus: Optional[str] = ''  # filename of the cirrus mask file
 
         self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
         self.fwhm: Optional[np.ndarray] = None  # Full width half maximmum for each EnMAP band
@@ -98,6 +98,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
         self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
         self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
+        self.goodbands_inds: Optional[List] = None  # list of band indices included in the processing (all other bands are removed)  # noqa
         self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
@@ -107,7 +108,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.lons: Optional[np.ndarray] = None  # 2D array of longitude coordinates according to given lon/lat sampling
         self.unit: str = ''  # radiometric unit of pixel values
         self.unitcode: str = ''  # code of radiometric unit
-        self.preview_bands = None
+        self.preview_wvls: Optional[List[float]] = None  # wavelengths to be used for quicklook images
+        self.preview_bands: Optional[List[int]] = None  # band indices to be used for quicklook images
         self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
@@ -184,8 +186,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             wvl_red = float(xml.find("product/image/%s/qlChannels/red" % lbl).text)
             wvl_green = float(xml.find("product/image/%s/qlChannels/green" % lbl).text)
             wvl_blue = float(xml.find("product/image/%s/qlChannels/blue" % lbl).text)
-            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl))
-                                           for wvl in [wvl_red, wvl_green, wvl_blue]])
+            self.preview_wvls = [wvl_red, wvl_green, wvl_blue]
+            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl)) for wvl in self.preview_wvls])
 
             # read RPC coefficients
             for bID in xml.findall("product/navigation/RPC/bandID")[subset]:
@@ -261,6 +263,24 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
+            self.preview_wvls = np.array([self.wvl_center[i] for i in self.preview_bands])
+
+        # drop bad bands from metadata if desired
+        if self.cfg.drop_bad_bands:
+            wvls = list(self.wvl_center)
+            self.goodbands_inds = gbl = [wvls.index(wvl) for wvl in wvls
+                                         if not (1358 < wvl < 1453 or
+                                                 1814 < wvl < 1961)]
+
+            if len(gbl) < len(wvls):
+                for attrN in ['wvl_center', 'fwhm', 'offsets', 'gains', 'l_min', 'l_max']:
+                    if getattr(self, attrN) is not None:
+                        setattr(self, attrN, getattr(self, attrN)[gbl])
+
+                self.nwvl = len(gbl)
+                self.smile_coef = self.smile_coef[gbl, :]
+                self.rpc_coeffs = OrderedDict([(k, v) for i, (k, v) in enumerate(self.rpc_coeffs.items())
+                                               if i in gbl])
 
         # compute metadata derived from read data
         self.smile = self.calc_smile()
@@ -269,7 +289,10 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                           self.lat_UL_UR_LL_LR)), fix_invalid=True)
         from ...processors.spatial_transform import get_UTMEPSG_from_LonLat_cornersXY
-        self.epsg_ortho = get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
+        # NOTE:   self.cfg.target_epsg is set if user-provided or in case of Lon/Lat coordinates
+        self.epsg_ortho = \
+            self.cfg.target_epsg or \
+            get_UTMEPSG_from_LonLat_cornersXY(lons=self.lon_UL_UR_LL_LR, lats=self.lat_UL_UR_LL_LR)
 
     def calc_smile(self):
         """Compute smile for each EnMAP column.
@@ -381,13 +404,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     def compute_geolayer_for_cube(self):
         self.logger.info('Computing %s geolayer...' % self.detector_name)
-
-        lons, lats = RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
-                                               dem=self.cfg.path_dem,
-                                               enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR,
-                                                                              self.lat_UL_UR_LL_LR)),
-                                               enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
-                                               CPUs=self.cfg.CPUs)\
+        lons, lats = \
+            RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
+                                      elevation=self.cfg.path_dem if self.cfg.path_dem else self.cfg.average_elevation,
+                                      enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
+                                      enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
+                                      CPUs=self.cfg.CPUs)\
             .compute_geolayer()
 
         return lons, lats
@@ -452,7 +474,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
         self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
         self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
-        self.metaxml_filename: Optional[str] = None  # filename of XML metadata file
+        self.filename_metaxml: Optional[str] = None  # filename of XML metadata file
 
         self._scene_basename: Optional[str] = None  # basename of the EnMAP image
 
@@ -475,7 +497,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         # load the metadata xml file
         xml = ElementTree.parse(path_xml).getroot()
 
-        self.metaxml_filename = os.path.basename(path_xml)
+        self.filename_metaxml = os.path.basename(path_xml)
 
         if not self.cfg.is_dummy_dataformat:
             # read processing level

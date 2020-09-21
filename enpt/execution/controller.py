@@ -37,6 +37,8 @@ import weakref
 import warnings
 import pickle
 from typing import Optional
+from time import time
+from datetime import timedelta
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
@@ -62,6 +64,9 @@ class EnPT_Controller(object):
         # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
         self._finalizer = weakref.finalize(self, self._cleanup, self.tempDir,
                                            warn_message="Implicitly cleaning up {!r}".format(self))
+
+        # record startup time
+        self._time_startup = time()
 
         # defaults
         self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
@@ -123,8 +128,13 @@ class EnPT_Controller(object):
     def run_dem_processor(self):
         self.L1_obj.get_preprocessed_dem()
 
-    def run_geometry_processor(self):
-        pass
+    def run_spatial_optimization(self):
+        # get a new instance of radiometric transformer
+        from ..processors.spatial_optimization import Spatial_Optimizer
+        SpO = Spatial_Optimizer(self.cfg)
+
+        # run optimization
+        self.L1_obj = SpO.optimize_geolayer(self.L1_obj)
 
     def run_atmospheric_correction(self):
         """Run atmospheric correction only."""
@@ -146,26 +156,38 @@ class EnPT_Controller(object):
         """Run all processors at once."""
         if os.getenv('IS_ENPT_GUI_TEST') != "1":
             try:
+                if self.cfg.log_level == 'DEBUG':
+                    self._print_received_configuration()
+
                 self.read_L1B_data()
                 if self.cfg.run_deadpix_P:
                     self.L1_obj.correct_dead_pixels()
-                # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                if self.cfg.enable_absolute_coreg:
+                    # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                    self.run_spatial_optimization()
                 self.run_dem_processor()
                 if self.cfg.enable_ac:
                     self.run_atmospheric_correction()
+
+                    # re-apply dead pixel correction
+                    self.L1_obj.logger.info(
+                        'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
+                    self.L1_obj.correct_dead_pixels()
                 else:
                     self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
                                             'computing top-of-atmosphere reflectance instead.')
                     self.run_toaRad2toaRef()
-                self.run_geometry_processor()
+                # self.run_spatial_optimization()
                 self.run_orthorectification()
                 self.write_output()
+
+                self.L1_obj.logger.info('Total runtime of the processing chain: %s'
+                                        % timedelta(seconds=time() - self._time_startup))
             finally:
                 self.cleanup()
 
         else:
-            print('EnPT Controller received the following configuration:')
-            print(repr(self.cfg))
+            self._print_received_configuration()
 
             if not os.path.isdir(self.cfg.output_dir):
                 raise NotADirectoryError(self.cfg.output_dir)
@@ -177,6 +199,10 @@ class EnPT_Controller(object):
                         kwargs=self.cfg.kwargs
                     ),
                     outF)
+
+    def _print_received_configuration(self):
+        print('EnPT Controller received the following configuration:')
+        print(repr(self.cfg))
 
     @classmethod
     def _cleanup(cls, tempDir, warn_message):

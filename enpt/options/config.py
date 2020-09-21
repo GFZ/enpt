@@ -75,6 +75,7 @@ config_for_testing = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=True,
     enable_ac=False,
+    enable_ice_retrieval=False,
     CPUs=16
 )
 
@@ -85,44 +86,63 @@ config_for_testing_dlr = dict(
                      # Alps
                      # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip'
 
+                     # Alps full
+                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z.zip'
+
                      # Arcachon
                      'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
 
                      # Arcachon 1000x30
                      # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
-                     )),
-    path_l1b_enmap_image_gapfill=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     # Alps
-                     # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
 
-                     # Arcachon
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+                     # Arcachon full tile 2
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z.zip'
+
+                     # Arcachon full tile 3, reprocessed 05/2020
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
                      )),
+    # path_l1b_enmap_image_gapfill=os.path.abspath(
+    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+    #                  # Alps
+    #                  'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+    #
+    #                  # Arcachon
+    #                  # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+    #                  )),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data',
                      # Alps
                      # 'DLR_L2A_DEM_UTM32.bsq'
 
-                     # Arcachon
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__DEM_ASTER.bsq'
+                     # Arcachon tile 2 ASTER DEM (02/2020)
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
+
+                     # Arcachon tile 3 ASTER DEM (05/2020)
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
                      )),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
     n_lines_to_append=50,
     disable_progress_bars=False,
     is_dummy_dataformat=False,
+    # output_format='ENVI',
+    # output_interleave='band',
+    # target_projection_type='Geographic',
+    # target_epsg=32632,
+    # target_coord_grid=[-1.37950, -1.37923, 44.60710, 44.60737],
+    enable_absolute_coreg=True,
+    path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
+    enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
     vswir_overlap_algorithm='swir_only'
 )
 
 
-enmap_coordinate_grid = dict(x=np.array([0, 30]),
-                             y=np.array([0, 30]))
-enmap_xres, enmap_yres = np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['y'])
-assert enmap_xres == enmap_yres, 'Unequal X/Y resolution of the output grid!'
+enmap_coordinate_grid_utm = dict(x=np.array([0, 30]),
+                                 y=np.array([0, 30]))
+enmap_xres, enmap_yres = np.ptp(enmap_coordinate_grid_utm['x']), np.ptp(enmap_coordinate_grid_utm['y'])
 
 
 class EnPTConfig(object):
@@ -133,7 +153,7 @@ class EnPTConfig(object):
              path to JSON file containing configuration parameters or a string in JSON format
 
         :key CPUs:
-             number of CPU cores to be used for processing (default: "None" -> use all available
+             number of CPU cores to be used for processing (default: "None" -> use all available)
 
         :key path_l1b_enmap_image:
             input path of the EnMAP L1B image to be processed
@@ -153,12 +173,25 @@ class EnPTConfig(object):
         :key output_dir:
             output directory where processed data and log files are saved
 
+        :key output_format:
+            file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')
+
+        :key output_interleave:
+            raster data interleaving type (default: 'pixel')
+            - 'band': band-sequential (BSQ),
+            - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+            - 'pixel' data interleaved-by-pixel (BIP)
+
         :key working_dir:
             directory to be used for temporary files
 
         :key n_lines_to_append:
             number of lines to be added to the main image [if None, use the whole imgap].
             Requires 'path_l1b_enmap_image_gapfill' to be set.
+
+        :key drop_bad_bands:
+            if set to True (default), the water absorption bands between 1358 and 1453 nm as well
+            as between 1814 and 1961 nm are excluded from processing and will not be contained in the L2A product
 
         :key disable_progress_bars:
             whether to disable all progress bars during processing
@@ -178,6 +211,9 @@ class EnPTConfig(object):
         :key enable_vnir_swir_coreg:
             Enable VNIR/SWIR co-registration
 
+        :key enable_absolute_coreg:
+            Enable the co-registration of the EnMAP image to the reference image given with 'path_reference_image'
+
         :key path_reference_image:
             Reference image for co-registration.
 
@@ -189,7 +225,7 @@ class EnPTConfig(object):
             Automatically download ECMWF data for atmospheric correction
 
         :key enable_ice_retrieval:
-            Enable ice retrieval (default); increases accuracy of water vapour retrieval (DEPRECATED)
+            Enable ice retrieval (default); increases accuracy of water vapour retrieval
 
         :key enable_cloud_screening:
             Enable cloud screening during atmospheric correction
@@ -213,8 +249,18 @@ class EnPTConfig(object):
         :key deadpix_P_interp_spatial:
             Spatial interpolation algorithm to be used during dead pixel correction
              ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
+
         :key ortho_resampAlg:
             Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')
+
+        :key target_projection_type:
+            Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')
+
+        :key target_epsg:
+            Custom EPSG code of the target projection (overrides target_projection_type)
+
+        :key target_coord_grid:
+            Custom target coordinate grid where the output is resampled to ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])
         """
 
         # fixed attributes
@@ -240,7 +286,7 @@ class EnPTConfig(object):
 
         self.is_dummy_dataformat = gp('is_dummy_dataformat')
         if 'is_dlr_dataformat' in user_opts:
-            warnings.warn("The 'is_dlr_dataformat' flag is deprectated and will not exist in future. "
+            warnings.warn("The 'is_dlr_dataformat' flag is deprecated and will not exist in future. "
                           "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
             self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
@@ -250,10 +296,11 @@ class EnPTConfig(object):
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_dem = self.absPath(gp('path_dem'))
-        self.average_elevation = self.absPath(gp('average_elevation'))
+        self.average_elevation = gp('average_elevation')
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
         self.n_lines_to_append = gp('n_lines_to_append')
+        self.drop_bad_bands = gp('drop_bad_bands')
         self.disable_progress_bars = gp('disable_progress_bars')
 
         ##################
@@ -261,6 +308,8 @@ class EnPTConfig(object):
         ##################
 
         self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
+        self.output_format = gp('output_format')
+        self.output_interleave = gp('output_interleave')
 
         ###########################
         # processor configuration #
@@ -274,15 +323,13 @@ class EnPTConfig(object):
         # geometry
         self.enable_keystone_correction = gp('enable_keystone_correction')
         self.enable_vnir_swir_coreg = gp('enable_vnir_swir_coreg')
+        self.enable_absolute_coreg = gp('enable_absolute_coreg')
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
-        if 'enable_ice_retrieval' in user_opts:
-            warnings.warn("The parameter 'enable_ice_retrieval' is deprecated and will be removed in future versions."
-                          "Ice retireval is now always turned on during atmospheric correction.", DeprecationWarning)
-
         self.enable_ac = gp('enable_ac')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
+        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
 
@@ -298,12 +345,53 @@ class EnPTConfig(object):
         # orthorectification / VSWIR fusion
         self.ortho_resampAlg = gp('ortho_resampAlg')
         self.vswir_overlap_algorithm = gp('vswir_overlap_algorithm')
+        self.target_projection_type = gp('target_projection_type')
+        self.target_epsg = gp('target_epsg')
+        grid = gp('target_coord_grid')
+        self.target_coord_grid = dict(x=np.array(grid[:2]), y=np.array(grid[2:])) if grid else None
 
         #########################
         # validate final config #
         #########################
 
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(self.to_dict())
+
+        # check if given paths point to existing files
+        paths = {k: v for k, v in self.__dict__.items() if k.startswith('path_')}
+        for k, fp in paths.items():
+            if fp and not os.path.isfile(fp):
+                raise FileNotFoundError("The file path provided at the '%s' parameter does not point to an existing "
+                                        "file (%s)." % (k, fp))
+
+        if not self.path_dem:
+            warnings.warn('No digital elevation model provided. Note that this may cause uncertainties, e.g., '
+                          'in the atmospheric correction and the orthorectification.', RuntimeWarning, stacklevel=2)
+
+        # check invalid interleave
+        if self.output_interleave == 'line' and self.output_format == 'GTiff':
+            warnings.warn("The interleaving type 'line' is not supported by the GTiff output format. Using 'pixel'.",
+                          UserWarning)
+            self.output_interleave = 'pixel'
+
+        # override target_projection_type if target_epsg is given
+        if self.target_epsg:
+            self.target_projection_type = \
+                'Geographic' if self.target_epsg == 4326 else \
+                'UTM' if len(str(self.target_epsg)) == 5 and str(self.target_epsg)[:3] in ['326', '327'] else \
+                'NA'
+        if self.target_projection_type == 'Geographic':
+            self.target_epsg = 4326
+
+        # set target coordinate grid to the UTM EnMAP grid if no other grid is provided and target projection is UTM
+        self.target_coord_grid = \
+            self.target_coord_grid if self.target_coord_grid else \
+            enmap_coordinate_grid_utm if self.target_projection_type == 'UTM' else None
+
+        # bug warning regarding holes in bilinear resampling output
+        if self.target_projection_type == 'Geographic' and self.ortho_resampAlg == 'bilinear':
+            warnings.warn("There is currently a bug that causes holes in the bilinear resampling results if the "
+                          "target projection is 'Geographic'. It is recommended to use 'nearest' or 'gauss' instead.",
+                          UserWarning)
 
     @staticmethod
     def absPath(path):
@@ -418,9 +506,9 @@ def json_to_python(value):
             return None
         if value == "slice(None, None, None)":
             return slice(None)
-        if value in [True, "true"]:
+        if value is True or value == "true":
             return True
-        if value in [False, "false"]:
+        if value is False or value == "false":
             return False
         if is_number(value):
             try:

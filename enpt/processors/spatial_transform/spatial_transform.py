@@ -29,22 +29,24 @@
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 
-from typing import Union, Tuple, List, Optional  # noqa: F401
+from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
-from scipy.interpolate import griddata as interpolate_griddata, interp1d
+from scipy.interpolate import interp1d, LinearNDInterpolator
+from scipy.spatial import Delaunay
 from geoarray import GeoArray
+from natsort import natsorted
+import numpy_indexed as npi
+from pyproj import CRS
 
-from sensormapgeo.sensormapgeo import \
-    SensorMapGeometryTransformer, \
-    SensorMapGeometryTransformer3D, \
-    AreaDefinition
-from py_tools_ds.geo.projection import get_proj4info, proj4_to_dict, prj_equal, EPSG2WKT, WKT2EPSG, proj4_to_WKT
+from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
+from sensormapgeo.transformer_2d import AreaDefinition
+from py_tools_ds.geo.projection import prj_equal
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
 
-from ...options.config import enmap_coordinate_grid
+from ...options.config import enmap_coordinate_grid_utm
 
 __author__ = 'Daniel Scheffler'
 
@@ -72,35 +74,20 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
                         tgt_res: Tuple[float, float] = None,
+                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
                         area_definition: AreaDefinition = None):
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
-        if area_definition:
-            self.area_definition = area_definition
-        else:
-            if not tgt_prj:
-                raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
-
-            # compute target resolution and extent (according to EnMAP grid)
-            proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
-
-            if 'units' in proj4dict and proj4dict['units'] == 'm':
-                if not tgt_res:
-                    tgt_res = (np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['x']))
-
-                if not tgt_extent:
-                    # use the extent computed by compute_output_shape and move it to the EnMAP coordinate grid
-                    area_definition = self.compute_areadefinition_sensor2map(
-                        data_sensorgeo[:], tgt_prj, tgt_res=tgt_res)
-
-                    tgt_extent = move_extent_to_EnMAP_grid(tuple(area_definition.area_extent))
-
+        # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
-            super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
-                                                              tgt_extent=tgt_extent, tgt_res=tgt_res,
+            super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:],
+                                                              tgt_prj=tgt_prj,
+                                                              tgt_extent=tgt_extent,
+                                                              tgt_res=tgt_res,
+                                                              tgt_coordgrid=tgt_coordgrid,
                                                               area_definition=self.area_definition)
 
         return out_data, out_gt, out_prj
@@ -127,33 +114,23 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
                         tgt_prj:  Union[str, int] = None,
                         tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple[float, float] = None
+                        tgt_res: Tuple[float, float] = None,
+                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
+                        area_definition: AreaDefinition = None
                         ) -> Tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
-        if not tgt_prj:
-            raise ValueError(tgt_prj, 'Target projection must be given if area_definition is not given.')
-
-        # compute target resolution and extent (according to EnMAP grid)
-        proj4dict = proj4_to_dict(get_proj4info(proj=tgt_prj))
-
-        if 'units' in proj4dict and proj4dict['units'] == 'm':
-            if not tgt_res:
-                tgt_res = (np.ptp(enmap_coordinate_grid['x']), np.ptp(enmap_coordinate_grid['x']))
-
-            if not tgt_extent:
-                # use the extent computed by compute_output_shape and move it to the EnMAP coordinate grid
-                tgt_epsg = WKT2EPSG(proj4_to_WKT(get_proj4info(proj=tgt_prj)))
-                common_extent = self._get_common_target_extent(tgt_epsg)
-
-                tgt_extent = move_extent_to_EnMAP_grid(tuple(common_extent))
-
+        # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
         out_data, out_gt, out_prj = \
-            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:], tgt_prj=tgt_prj,
-                                                                 tgt_extent=tgt_extent, tgt_res=tgt_res)
+            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:],
+                                                                 tgt_prj=tgt_prj,
+                                                                 tgt_extent=tgt_extent,
+                                                                 tgt_res=tgt_res,
+                                                                 tgt_coordgrid=tgt_coordgrid,
+                                                                 area_definition=area_definition)
 
         return out_data, out_gt, out_prj
 
@@ -250,14 +227,17 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         return tgt_data_sensorgeo
 
 
-def move_extent_to_EnMAP_grid(extent_utm: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:
-    """Move a UTM coordinate extent to the EnMAP coordinate grid (30m x 30m, origin at 0/0).
+def move_extent_to_coord_grid(extent_utm: Tuple[float, float, float, float],
+                              tgt_xgrid: Sequence[float],
+                              tgt_ygrid: Sequence[float],
+                              ) -> Tuple[float, float, float, float]:
+    """Move the given coordinate extent to a coordinate grid.
 
     :param extent_utm:  xmin, ymin, xmax, ymax coordinates
+    :param tgt_xgrid:  target X coordinate grid, e.g. [0, 30]
+    :param tgt_ygrid:  target Y coordinate grid, e.g. [0, 30]
     """
     xmin, ymin, xmax, ymax = extent_utm
-    tgt_xgrid = enmap_coordinate_grid['x']
-    tgt_ygrid = enmap_coordinate_grid['y']
     tgt_xmin = find_nearest(tgt_xgrid, xmin, roundAlg='off', extrapolate=True)
     tgt_xmax = find_nearest(tgt_xgrid, xmax, roundAlg='on', extrapolate=True)
     tgt_ymin = find_nearest(tgt_ygrid, ymin, roundAlg='off', extrapolate=True)
@@ -272,13 +252,14 @@ class RPC_Geolayer_Generator(object):
     """
     def __init__(self,
                  rpc_coeffs: dict,
-                 dem: Union[str, GeoArray],
+                 elevation: Union[str, GeoArray, int, float],
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                  enmapIm_dims_sensorgeo: Tuple[int, int]):
         """Get an instance of RPC_Geolayer_Generator.
 
         :param rpc_coeffs:              RPC coefficients for a single EnMAP band
-        :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
+        :param elevation:               digital elevation model in map geometry (file path or instance of GeoArray) OR
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         """
@@ -297,7 +278,7 @@ class RPC_Geolayer_Generator(object):
         self.col_num_coeffs = rpc_coeffs['col_num_coeffs']
         self.col_den_coeffs = rpc_coeffs['col_den_coeffs']
 
-        self.dem = GeoArray(dem)
+        self.elevation = elevation if isinstance(elevation, (int, float)) else GeoArray(elevation)
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
 
@@ -336,7 +317,7 @@ class RPC_Geolayer_Generator(object):
 
         :param lon_norm:    normalized longitudes
         :param lat_norm:    normalized latitudes
-        :param height_norm: normalized elevations
+        :param height_norm: normalized elevation
         :return:
         """
         P = lat_norm.flatten()
@@ -425,22 +406,23 @@ class RPC_Geolayer_Generator(object):
             raise ValueError(along_axis, "The 'axis' parameter must be set to 0 or 1")
 
         kw = dict(kind='linear', fill_value='extrapolate')
+        nans = np.isnan(arr)
 
         if along_axis == 0:
             # extrapolate in top/bottom direction
-            cols_with_nan = np.arange(arr.shape[1])[~np.all(np.isnan(arr), axis=0)]
+            cols_with_nan = np.arange(arr.shape[1])[np.any(nans, axis=0)]
 
-            for col in cols_with_nan:  # FIXME iterating over columns is slow
+            for col in cols_with_nan:
                 data = arr[:, col]
-                idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
+                idx_goodvals = np.argwhere(~nans[:, col]).flatten()
                 arr[:, col] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
         else:
             # extrapolate in left/right direction
-            rows_with_nan = np.arange(arr.shape[0])[~np.all(np.isnan(arr), axis=1)]
+            rows_with_nan = np.arange(arr.shape[0])[np.any(nans, axis=1)]
 
-            for row in rows_with_nan:  # FIXME iterating over rows is slow
+            for row in rows_with_nan:
                 data = arr[row, :]
-                idx_goodvals = np.argwhere(~np.isnan(data)).flatten()
+                idx_goodvals = np.argwhere(~nans[row, :]).flatten()
                 arr[row, :] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
 
         return arr
@@ -458,7 +440,9 @@ class RPC_Geolayer_Generator(object):
         ymin, ymax = cornerCoordsUTM[:, 1].min(), cornerCoordsUTM[:, 1].max()
 
         # get UTM bounding box and move it to the EnMAP grid
-        xmin, ymin, xmax, ymax = move_extent_to_EnMAP_grid((xmin, ymin, xmax, ymax))
+        xmin, ymin, xmax, ymax = \
+            move_extent_to_coord_grid((xmin, ymin, xmax, ymax),
+                                      enmap_coordinate_grid_utm['x'], enmap_coordinate_grid_utm['y'])
 
         # set up a regular grid of UTM points with a specific mesh width
         meshwidth = 300  # 10 EnMAP pixels
@@ -466,17 +450,24 @@ class RPC_Geolayer_Generator(object):
                                              np.arange(xmin, xmax + meshwidth, meshwidth),
                                              indexing='ij')
 
-        # transform UTM grid to DEM projection
-        x_grid_demPrj, y_grid_demPrj = (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.dem.epsg) else \
-            transform_coordArray(EPSG2WKT(grid_utm_epsg), EPSG2WKT(self.dem.epsg), x_grid_utm, y_grid_utm)
+        if not isinstance(self.elevation, (int, float)):
+            # transform UTM grid to DEM projection
+            x_grid_demPrj, y_grid_demPrj = \
+                (x_grid_utm, y_grid_utm) if prj_equal(grid_utm_epsg, self.elevation.epsg) else \
+                transform_coordArray(CRS(grid_utm_epsg).to_wkt(),
+                                     CRS(self.elevation.epsg).to_wkt(),
+                                     x_grid_utm, y_grid_utm)
 
-        # retrieve corresponding heights from DEM
-        # -> resample DEM to EnMAP grid?
-        xy_pairs_demPrj = np.vstack([x_grid_demPrj.flatten(), y_grid_demPrj.flatten()]).T
-        heights = self.dem.read_pointData(xy_pairs_demPrj).flatten()
+            # retrieve corresponding heights from DEM
+            # -> resample DEM to EnMAP grid?
+            xy_pairs_demPrj = np.vstack([x_grid_demPrj.flatten(), y_grid_demPrj.flatten()]).T
+            heights = self.elevation.read_pointData(xy_pairs_demPrj).flatten()
+        else:
+            heights = np.full_like(x_grid_utm.flatten(), self.elevation)
 
         # transform UTM points to lon/lat
-        lon_grid, lat_grid = transform_coordArray(EPSG2WKT(grid_utm_epsg), EPSG2WKT(4326), x_grid_utm, y_grid_utm)
+        lon_grid, lat_grid = \
+            transform_coordArray(CRS(grid_utm_epsg).to_wkt(), CRS(4326).to_wkt(), x_grid_utm, y_grid_utm)
         lons = lon_grid.flatten()
         lats = lat_grid.flatten()
 
@@ -487,17 +478,20 @@ class RPC_Geolayer_Generator(object):
         rows_im, cols_im = self.enmapIm_dims_sensorgeo
         out_rows_grid, out_cols_grid = np.meshgrid(range(rows_im), range(cols_im), indexing='ij')
         out_xy_pairs = np.vstack([out_cols_grid.flatten(), out_rows_grid.flatten()]).T
+        in_xy_pairs = np.array((cols, rows)).T
 
-        lons_interp = interpolate_griddata(np.array((cols, rows)).T, lons, out_xy_pairs,
-                                           method='linear').reshape(*out_cols_grid.shape)
-        lats_interp = interpolate_griddata(np.array((cols, rows)).T, lats, out_xy_pairs,
-                                           method='linear').reshape(*out_rows_grid.shape)
+        # Compute the triangulation (that takes time and can be computed for all values to be interpolated at once),
+        # then run the interpolation
+        triangulation = Delaunay(in_xy_pairs)
+        lons_interp = LinearNDInterpolator(triangulation, lons)(out_xy_pairs).reshape(*out_rows_grid.shape)
+        lats_interp = LinearNDInterpolator(triangulation, lats)(out_xy_pairs).reshape(*out_rows_grid.shape)
 
         # lons_interp / lats_interp may contain NaN values in case xmin, ymin, xmax, ymax has been set too small
         # to account for RPC transformation errors
         # => fix that by extrapolation at NaN value positions
+        # FIXME: can this be avoided by modified xmin/ymin/xmy/ymax coords?
 
-        lons_interp = self._fill_nans_at_corners(lons_interp, along_axis=1)  # extrapolate in left/right direction
+        lons_interp = self._fill_nans_at_corners(lons_interp, along_axis=0)  # extrapolate in left/right direction
         lats_interp = self._fill_nans_at_corners(lats_interp, along_axis=1)
 
         # return a geolayer in the exact dimensions like the EnMAP detector array
@@ -510,59 +504,83 @@ class RPC_Geolayer_Generator(object):
 global_dem_sensorgeo: Optional[GeoArray] = None
 
 
-def mp_initializer_for_RPC_3D_Geolayer_Generator(dem_sensorgeo):
-    """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_band()
-
-    :param dem_sensorgeo:   DEM in sensor geometry
-    """
-    global global_dem_sensorgeo
-    global_dem_sensorgeo = dem_sensorgeo
-
-
 class RPC_3D_Geolayer_Generator(object):
     """
     Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC).
     """
     def __init__(self,
                  rpc_coeffs_per_band: dict,
-                 dem: Union[str, GeoArray],
+                 elevation: Union[str, GeoArray, int, float],
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                  enmapIm_dims_sensorgeo: Tuple[int, int],
                  CPUs: int = None):
         """Get an instance of RPC_3D_Geolayer_Generator.
 
-        :param rpc_coeffs_per_band:     RPC coefficients for a single EnMAP band ({'band_1': <rpc_coeffs_dict>,
-                                                                                   'band_2': <rpc_coeffs_dict>,
-                                                                                   ...}
-        :param dem:                     digital elevation model in map geometry (file path or instance of GeoArray)
+        :param rpc_coeffs_per_band:     dictionary of RPC coefficients for each EnMAP band
+                                        ({'band_1': <rpc_coeffs_dict>,
+                                          'band_2': <rpc_coeffs_dict>,
+                                          ...})
+        :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
+                                        average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
         :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
         :param CPUs:                    number of CPUs to use
         """
-        self.rpc_coeffs_per_band = OrderedDict(sorted(rpc_coeffs_per_band.items()))
-        self.dem = dem
+        self.rpc_coeffs_per_band = OrderedDict(natsorted(rpc_coeffs_per_band.items()))
+        self.elevation = elevation
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
         self.CPUs = CPUs or cpu_count()
 
-        # get validated DEM in map geometry
-        # self.logger.debug('Verifying DEM...')  # TODO
-        from ..dem_preprocessing import DEM_Processor
-        self.dem = DEM_Processor(dem_path_geoarray=dem,
-                                 enmapIm_cornerCoords=enmapIm_cornerCoords).dem
-        # TODO clip DEM to needed area
-        self.dem.to_mem()
+        if not isinstance(elevation, (int, float)):
+            # get validated DEM in map geometry
+            # self.logger.debug('Verifying DEM...')  # TODO
+            from ..dem_preprocessing import DEM_Processor
+            self.elevation = DEM_Processor(dem_path_geoarray=elevation,
+                                           enmapIm_cornerCoords=enmapIm_cornerCoords).dem
+            # TODO clip DEM to needed area
+            self.elevation.to_mem()
+            # self.elevation.reproject_to_new_grid()
+
+        self.bandgroups_with_unique_rpc_coeffs = self._get_bandgroups_with_unique_rpc_coeffs()
+
+    def _get_bandgroups_with_unique_rpc_coeffs(self) -> List[List]:
+        # combine RPC coefficients of all bands in a single numpy array
+        band_inds = list(range(len(self.rpc_coeffs_per_band)))
+        coeffs_first_band = list(self.rpc_coeffs_per_band.values())[0]
+        keys_float = [k for k in coeffs_first_band
+                      if isinstance(coeffs_first_band[k], float)]
+        keys_npa = [k for k in coeffs_first_band
+                    if isinstance(coeffs_first_band[k], np.ndarray)]
+
+        coeffs_allbands = None
+        for i, coeffdict in enumerate(self.rpc_coeffs_per_band.values()):
+            coeffs_curband = np.hstack([[coeffdict[k] for k in keys_float],
+                                        *(coeffdict[k] for k in keys_npa)])
+
+            if coeffs_allbands is None:
+                coeffs_allbands = np.zeros((len(band_inds),
+                                            1 + len(coeffs_curband)))
+                coeffs_allbands[:, 0] = band_inds
+
+            coeffs_allbands[i, 1:] = coeffs_curband
+
+        # get groups of band indices where bands have the same RPC coefficients
+        groups = npi.group_by(coeffs_allbands[:, 1:]).split(coeffs_allbands[:, 0])
+        groups_bandinds = [group.astype(np.int).tolist() for group in groups]
+
+        return groups_bandinds
 
     @staticmethod
-    def _compute_geolayer_for_band(rpc_coeffs, enmapIm_cornerCoords, enmapIm_dims_sensorgeo, band_idx):
+    def _compute_geolayer_for_unique_coeffgroup(kwargs):
         lons, lats = \
-            RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
-                                   dem=global_dem_sensorgeo,
-                                   enmapIm_cornerCoords=enmapIm_cornerCoords,
-                                   enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo) \
-            .compute_geolayer()
+            RPC_Geolayer_Generator(rpc_coeffs=kwargs['rpc_coeffs'],
+                                   elevation=global_dem_sensorgeo,
+                                   enmapIm_cornerCoords=kwargs['enmapIm_cornerCoords'],
+                                   enmapIm_dims_sensorgeo=kwargs['enmapIm_dims_sensorgeo']
+                                   ).compute_geolayer()
 
-        return lons, lats, band_idx
+        return lons, lats, kwargs['group_idx']
 
     def compute_geolayer(self):
         rows, cols = self.enmapIm_dims_sensorgeo
@@ -570,44 +588,54 @@ class RPC_3D_Geolayer_Generator(object):
         lons = np.empty((rows, cols, bands), dtype=np.float)
         lats = np.empty((rows, cols, bands), dtype=np.float)
 
-        band_inds = list(range(len(self.rpc_coeffs_per_band)))
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
 
-        if self.CPUs > 1:
-            # multiprocessing
-            args = [(coeffs, self.enmapIm_cornerCoords, self.enmapIm_dims_sensorgeo, idx)
-                    for coeffs, idx in zip(rpc_coeffs_list, band_inds)]
+        # get kwargs for each group of unique RPC coefficients
+        kwargs_list = [dict(rpc_coeffs=rpc_coeffs_list[group_bandinds[0]],
+                            enmapIm_cornerCoords=self.enmapIm_cornerCoords,
+                            enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
+                            group_idx=gi)
+                       for gi, group_bandinds in enumerate(self.bandgroups_with_unique_rpc_coeffs)]
 
-            # FIXME: pickling back large lon/lat arrays to the main process may be an issue on small machines
-            # NOTE: With the small test dataset pickling has only a small effect on processing time.
-            with Pool(self.CPUs,
-                      initializer=mp_initializer_for_RPC_3D_Geolayer_Generator,
-                      initargs=(self.dem,)) as pool:
-                results = pool.starmap(self._compute_geolayer_for_band, args)
+        # compute the geolayer ONLY FOR ONE BAND per group with unique RPC coefficients
+        global global_dem_sensorgeo
+        global_dem_sensorgeo = self.elevation
 
-            for res in results:
-                band_lons, band_lats, band_idx = res
-                lons[:, :, band_idx] = band_lons
-                lats[:, :, band_idx] = band_lats
+        if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
+            lons_oneband, lats_oneband = self._compute_geolayer_for_unique_coeffgroup(kwargs_list[0])[:2]
+
+            lons = np.repeat(lons_oneband[:, :, np.newaxis], bands, axis=2)
+            lats = np.repeat(lats_oneband[:, :, np.newaxis], bands, axis=2)
 
         else:
-            # singleprocessing
-            global global_dem_sensorgeo
-            global_dem_sensorgeo = self.dem
+            if self.CPUs > 1:
+                # multiprocessing (only in case there are multiple unique sets of RPC coefficients)
 
-            for band_idx in band_inds:
-                lons[:, :, band_idx], lats[:, :, band_idx] = \
-                    self._compute_geolayer_for_band(rpc_coeffs=rpc_coeffs_list[band_idx],
-                                                    enmapIm_cornerCoords=self.enmapIm_cornerCoords,
-                                                    enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
-                                                    band_idx=band_idx)[:2]
+                # FIXME: pickling back large lon/lat arrays to the main process may be an issue on small machines
+                #        -> results could be temporarily written to disk in that case
+                # NOTE: With the small test dataset pickling has only a small effect on processing time.
+                with Pool(self.CPUs) as pool:
+                    results = list(pool.imap_unordered(self._compute_geolayer_for_unique_coeffgroup, kwargs_list))
+
+            else:
+                # singleprocessing
+                results = [self._compute_geolayer_for_unique_coeffgroup(kwargs_list[gi])
+                           for gi, group_bandinds in enumerate(self.bandgroups_with_unique_rpc_coeffs)]
+
+            for res in results:
+                band_lons, band_lats, group_idx = res
+                bandinds_to_assign = self.bandgroups_with_unique_rpc_coeffs[group_idx]
+                nbands_to_assign = len(bandinds_to_assign)
+
+                lons[:, :, bandinds_to_assign] = np.repeat(band_lons[:, :, np.newaxis], nbands_to_assign, axis=2)
+                lats[:, :, bandinds_to_assign] = np.repeat(band_lats[:, :, np.newaxis], nbands_to_assign, axis=2)
 
         return lons, lats
 
 
 def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float, float]],
                                            rpc_coeffs: dict,
-                                           dem: Union[str, GeoArray],
+                                           elevation: Union[str, GeoArray, int, float],
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
                                            ) -> List[Tuple[float, float]]:
@@ -615,14 +643,15 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry
-    :param dem:                     digital elevation model in MAP geometry
+    :param elevation:               digital elevation model in MAP geometry (file path or instance of GeoArray) OR
+                                    average elevation in meters as integer or float
     :param enmapIm_cornerCoords:    MAP coordinates of the EnMAP image
     :param enmapIm_dims_sensorgeo:  dimensions of the sensor geometry EnMAP image (rows, columns)
     :return:
     """
     # compute coordinate array
     RPCGG = RPC_Geolayer_Generator(rpc_coeffs=rpc_coeffs,
-                                   dem=dem,
+                                   elevation=elevation,
                                    enmapIm_cornerCoords=enmapIm_cornerCoords,  # order does not matter
                                    enmapIm_dims_sensorgeo=enmapIm_dims_sensorgeo)
     lons, lats = RPCGG.compute_geolayer()

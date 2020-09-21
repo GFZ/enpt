@@ -80,10 +80,17 @@ def get_enpt_argparser():
              'ignored if DEM is given')
     add('-od', '--output_dir', type=str, default=None,
         help='output directory where processed data and log files are saved')
+    add('-of', '--output_format', type=str, default='GTiff',
+        help="file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')")
+    add('-ointlv', '--output_interleave', type=str, default='pixel',
+        help="raster data interleaving type ('band', 'line', 'pixel'; default: 'pixel')")
     add('-wd', '--working_dir', type=str, default=None,
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,
         help='number of lines to be added to the main image [if None, use the whole imgap]. Requires --imgap to be set')
+    add('-dbb', '--drop_bad_bands', type=_str2bool, default=True,
+        help='if set to True (default), the water absorption bands between 1358 and 1453 nm as well as between 1814 '
+             'and 1961 nm are excluded from processing and will not be contained in the L2A product')
     add('-dpb', '--disable_progress_bars', type=_str2bool, default=False, nargs='?', const=True,
         help='whether to disable all progress bars during processing')
     add('--path_earthSunDist', type=str, default=None,
@@ -126,6 +133,12 @@ def get_enpt_argparser():
     add('--vswir_overlap_algorithm', type=str, default='swir_only',
         help="Algorithm specifying how to deal with the spectral bands in the VNIR/SWIR spectral overlap region "
              "('order_by_wvl', 'average', 'vnir_only', 'swir_only')")
+    add('-tgtprj', '--target_projection_type', type=str, default='UTM',
+        help="Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')")
+    add('-tgtepsg', '--target_epsg', type=int, default=None,
+        help="Custom EPSG code of the target projection (overrides target_projection_type)")
+    add('-tgtgrid', '--target_coord_grid', nargs=4, type=float, default=None,
+        help="Custom target coordinate grid where is output is resampled to ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])")
 
     # link parser to run function
     parser.set_defaults(func=run_job)

@@ -2,8 +2,128 @@
 History
 =======
 
-0.13.0 (coming soon)
---------------------
+0.15.0 (2020-09-21)
+-------------------
+
+* Added functionality to apply co-registration between an EnMAP image and a user-provided spatial reference dataset
+  (still needs to be improved but can already be used). This includes: Spatial_Optimizer class, Test_Spatial_Optimizer
+  class, updated config parameters, spatial reference test image.
+
+
+0.14.1 (2020-09-01)
+-------------------
+
+* Updated installation instructions to include SICOR installation there.
+* Some adaptions to recent changes in py_tools_ds and pyproj.
+
+
+0.14.0 (2020-08-14)
+-------------------
+
+* Implemented new configuration option (parameter 'drop_bad_bands') to leave out certain water absorption bands from
+  processing.
+* Bugfix for allowing directories at filename config parameters.
+* Total runtime is now printed.
+
+
+0.13.2 (2020-08-11)
+-------------------
+
+* Fixed issue #37 (Empty FileNotFoundError in case no DEM is provided by the user). If no DEM is provided by the user,
+  an average elevation (default=0) is used instead. Added corresponding warning and log messages.
+* Fixed exception in case an average elevation is passed.
+* Fixed a bug that caused 0 or 1 integers provided in the config parameters to be converted to booleans.
+* User-provided file paths are now validated directly on startup.
+* DEM_Processor instance can now be created from an average elevation (returns a flat DEM).
+* RPC geolayer generators are now also compatible with an integer as input elevation.
+
+
+0.13.1 (2020-08-07)
+-------------------
+
+* Updated the minimal version of sensormapgeo. This reduces the memory consumption during orthorectification when
+  running in multiprocessing. Fixes issue #59 (High memory consumption of orthorectification causes deadlock or crash
+  on smaller machines.)
+
+
+0.13.0 (2020-05-18)
+-------------------
+
+* Renamed DEM for Arcachon test dataset.
+* Fixed typo.
+* Added config parameter 'output_format'.
+* Implementated ENVI output format.
+* Fixed log message.
+* The output interleave is now also configurable via the parameter 'output_interleave'.
+* Implemented 3 new config parameters: 'target_projection_type', 'target_epsg' and 'target_coord_grid'. This allows
+  the user to choose between UTM and geographic L2A projection, to specify a custom L2A projection by providing an
+  EPSG code or to specify a certain L2A coordinate grid.
+* Added 'grid_res' and 'epsg' attributes to EnMAP_Metadata_L2A_MapGeo object.
+* The L2A projection metadata is now correctly written to the XML file.
+
+
+0.12.8 (2020-05-13)
+-------------------
+
+* L2A METADATA.XML now contains correct band characteristics, band statistics and information about the merged
+  VNIR/SWIR cube (fixes issue #53).
+
+
+0.12.7 (2020-05-12)
+-------------------
+
+* Revised RPC_3D_Geolayer_Generator such that the geolayer computation is now only executed for bands with differing
+  RPC coefficients. Since we only have one set of RPC coefficients per detector by now, this speeds up the geolayer
+  generation by the factor 20-50.
+* Added Test_RPC_3D_Geolayer_Generator class.
+* Added natsort to dependencies.
+* Optimized RPC_3D_Geolayer_Generator algorithm to further reduce computation time. Its now 2-3x faster.
+  Revised and added corresponding tests.
+
+
+0.12.6 (2020-05-09)
+-------------------
+
+* DN2TOARadiance() now returns float32 radiance instead of float64.
+* Bugfix in Orthorectifier._get_common_extent().
+* Revised Geometry_Transformer and Geometry_Transformer_3D classes.
+* Updated minimal version of sensormapgeo which makes the orthorectification much faster (factor 6-10)
+  and fixes the deadlock within sensormapgeo.
+* Bilinear orthorectification now uses 8 neighbours instead of 32 which makes it much faster.
+
+
+0.12.5 (2020-05-04)
+-------------------
+
+* Dead-pixel correction is now called once more after AC to correct possible spectral spikes due to fringe effect.
+
+
+0.12.4 (2020-05-04)
+-------------------
+
+* Revised computation of the common VNIR/SWIR extent within orthorectification (fixes issue #34). This computation now
+  also respects deviations in per-band geolayers due to keystone or misregistrations.
+* All pixels that have values in VNIR or SWIR only are not set to nodata in the L2A output (fixes issue #34).
+* Nodata values of masks are now set.
+
+
+0.12.3 (2020-04-21)
+-------------------
+
+* Fixed issue #50 (Quicklook images only contain noise).
+* Fix for using the wrong bands for the SWIR quicklook image.
+
+
+0.12.2 (2020-04-21)
+-------------------
+
+* L1B masks are now correctly written to the L2A output (fixes issue #48). However, the dead pixel map and the quality
+  test flags are still missing.
+* Silenced warning during closing of logging handler.
+
+
+0.12.1 (2020-04-20)
+-------------------
 
 * Tests now use Arcachon test data as of 02/2020.
 * Mask filenames are now correctly read from XML.
@@ -28,6 +148,7 @@ History
 * Revised test_l1b_reader.py.
 * Combined 'mask_water' and 'mask_land' attributes to 'mask_landwater'.
 * Renamed metadata attribute 'filename_mask_deadpixel' to 'filename_deadpixelmap' for consistency.
+
 
 0.12.0 (2020-04-09)
 -------------------

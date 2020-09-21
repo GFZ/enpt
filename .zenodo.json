@@ -73,7 +73,7 @@
         },
         {
             "scheme": "url",
-            "identifier": "http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc",
+            "identifier": "https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc",
             "relation": "isDocumentedBy",
             "resource_type": "publication-softwaredocumentation"
         },

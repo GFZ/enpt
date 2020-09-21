@@ -17,11 +17,21 @@
         "working_dir": "",  /*directory to be used for temporary files*/
         "n_lines_to_append": "None",  /*Number of lines to be added to the main image [if None, use the whole path_l1b_enmap_image_gapfill].
                                         Requires path_l1b_enmap_image_gapfill to be set.*/
+        "drop_bad_bands": true, /*if set to True (default), the water absorption bands between 1358 and 1453 nm
+                                  as well as between 1814 and 1961 nm are excluded from processing and will not be
+                                  contained in the L2A product*/
         "disable_progress_bars": false  /*whether to disable all progress bars during processing*/
     },
 
     "output": {
-        "output_dir": ""  /*output directory where processed data and log files are saved*/
+        "output_dir": "",  /*output directory where processed data and log files are saved*/
+        "output_format": "GTiff",  /*file format of all raster output files
+                                     'GTiff': GeoTIFF
+                                     'ENVI':  ENVI BSQ*/
+        "output_interleave": "pixel"  /*raster data interleaving type (default: 'pixel')
+                                        - 'band': band-sequential (BSQ),
+                                        - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+                                        - 'pixel' data interleaved-by-pixel (BIP)*/
     },
 
     "processors": {
@@ -34,7 +44,11 @@
         "geometry": {
             "enable_keystone_correction": false,
             "enable_vnir_swir_coreg": false,
-            "path_reference_image": ""
+            "enable_absolute_coreg": false,  /*enable the co-registration of the EnMAP image to the reference image given with 'path_reference_image'*/
+            "path_reference_image": ""  /*image to be used as spatial reference for co-registration
+                                          - provide in a GDAL-readable data format
+                                          - acquisition date should be close to the one of the EnMAP scene
+                                          - cloud coverage should be low*/
         },
 
         "atmospheric_correction": {
@@ -63,12 +77,17 @@
 
         "orthorectification": {
             "resamp_alg": "bilinear",  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
-            "vswir_overlap_algorithm": "swir_only" /*Algorithm how to output the spectral bands in the VNIR/SWIR spectral overlap region
-                                                     'order_by_wvl': keep spectral bands unchanged, order bands by wavelength
-                                                     'average': average the spectral information within the overlap
-                                                     'vnir_only': only use the VNIR bands (cut overlapping SWIR bands)
-                                                     'swir_only': only use the SWIR bands (cut overlapping VNIR bands)
-                                                     */
+            "vswir_overlap_algorithm": "swir_only", /*Algorithm how to output the spectral bands in the VNIR/SWIR spectral overlap region
+                                                      'order_by_wvl': keep spectral bands unchanged, order bands by wavelength
+                                                      'average': average the spectral information within the overlap
+                                                      'vnir_only': only use the VNIR bands (cut overlapping SWIR bands)
+                                                      'swir_only': only use the SWIR bands (cut overlapping VNIR bands)
+                                                      */
+            "target_projection_type": "UTM",  /*projection type of the raster output files (default: 'UTM')
+                                                ('UTM': Universal Transverse Mercator, 'Geographic': Longitude/Latitude)*/
+            "target_epsg": "None",  /*custom EPSG code of the target projection (overrides target_projection_type)*/
+            "target_coord_grid": "None"  /*custom target coordinate grid where is output is resampled to
+                                           ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])*/
         }
     }
 }

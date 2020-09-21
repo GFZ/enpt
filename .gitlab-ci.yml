@@ -10,7 +10,7 @@ stages:
 test_enpt:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate enpt
+    - source /root/miniconda3/bin/activate ci_env
 
     # update geoarray and py_tools_ds
     - pip install 'geoarray>=0.8.11'
@@ -35,11 +35,8 @@ test_enpt:
     # - make download-tables
     # - python setup.py install
     # - cd ../../
-
-    # install sensormapgeo, mvgavg
-    # TODO: remove when included in docker container
-    - pip install sensormapgeo>=0.2.1
-    - pip install mvgavg
+    # - pip install -U sicor
+    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
 
     # run nosetests
     - make nosetests  # test are called here
@@ -60,7 +57,7 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate enpt
+    - source /root/miniconda3/bin/activate ci_env
     - make lint
   artifacts:
     paths:
@@ -80,7 +77,7 @@ test_enpt_install:
     - source activate enpt_test
 
     # update conda and python
-    - conda update -n base -c defaults conda
+    - conda update -n base -c conda-forge conda
 #    - conda update -c conda-forge python
 
     # avoid package incompatibilities
@@ -97,6 +94,7 @@ test_enpt_install:
 
     # install not pip-installable deps of sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
 
     # install enpt
     - pip install -e .
@@ -154,7 +152,7 @@ deploy_pypi:
   dependencies:
     - test_enpt
   script:
-    - source /root/miniconda3/bin/activate enpt
+    - source /root/miniconda3/bin/activate ci_env
     - pip install -U twine
     - python setup.py sdist
     - twine upload dist/*  # requires creds as environment variables
