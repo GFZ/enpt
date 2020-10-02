@@ -130,10 +130,10 @@ class AtmosphericCorrector(object):
             # raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
             #                           "You may use 'land' instead.")
 
-            from acwater.level1_enmap import run_polymer_enmap
+            from acwater.run_polymer import run_enmap
 
             # load data as polymer object
-            l2 = run_polymer_enmap(enmap_l1b=enmap_ImageL1)
+            l2 = run_enmap(enmap_l1b=enmap_ImageL1)
             enmap_l2a_vnir = l2.Rw
             enmap_l2a_swir = np.full(enmap_ImageL1.swir.data.shape, np.NaN, dtype=np.float)
 
@@ -152,9 +152,6 @@ class AtmosphericCorrector(object):
                 # in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
-
-            # TODO, join bands prior polymer run?
-            # detectors are joined at : EnPT/enpt/processors/orthorectification/orthorectification.py:109
 
         else:  # self.cfg.mode_ac == 'combined'
             # call SICOR for land and AWI water AC for land surfaces here
