@@ -63,7 +63,14 @@
             "auto_download_ecmwf": false,  /*FIXME this might be not needed anymore in future*/
             "enable_ice_retrieval":  true,  /*enable ice retrieval (default); increases accuracy of water vapour retrieval*/
             "enable_cloud_screening": false,  /*FIXME this is currently not implemented*/
-            "scale_factor_boa_ref": 10000  /*scale factor to be applied to BOA reflectance result*/
+            "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
+            "multiprocessing": -1, /*number of threads:
+                                    'multiprocessing = 0': for single thread
+                                    'multiprocessing < 0': for as many threads as there are CPUs
+                                    'multiprocessing > 0': gives the number of threads*/
+            "blocksize":100 /*block size for multiprocessing*/
+
+
         },
 
         "smile": {
