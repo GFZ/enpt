@@ -56,7 +56,7 @@ requirements = [
     'py_tools_ds>=0.14.23',
     'scipy',
     'sensormapgeo>=0.4.0',
-    'sicor>=0.15.0'
+    'sicor>=0.15.0',
     'tqdm',
     'utm',
 ]
