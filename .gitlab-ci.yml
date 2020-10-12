@@ -28,7 +28,6 @@ test_enpt:
     # - pip install -e /tmp/sicor
 
     # update sicor
-    # - conda install -y -q -c conda-forge basemap
     # - rm -rf context/sicor
     # - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     # - cd ./context/sicor
@@ -87,7 +86,7 @@ test_enpt_install:
     - conda install -y -c conda-forge numpy pandas lxml
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
+    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib cartopy shapely pyresample
 
     # install not pip-installable deps of arosics
     - conda install -y -c conda-forge pyfftw pykrige

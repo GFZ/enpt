@@ -2,6 +2,13 @@
 History
 =======
 
+0.15.1 (2020-10-12)
+-------------------
+
+* Replaced deprecated function 'add_stylesheet' in conf.py.
+* Use SPDX license identifier and set all files to GLP3+ to be consistent with license headers in the source files.
+
+
 0.15.0 (2020-09-21)
 -------------------
 
