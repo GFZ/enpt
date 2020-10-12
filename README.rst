@@ -39,7 +39,7 @@ Feature overview
 Status
 ------
 
-|badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8|
+|badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8| |badge9|
 
 .. |badge1| image:: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
     :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
@@ -53,16 +53,19 @@ Status
 .. |badge4| image:: https://img.shields.io/pypi/v/enpt.svg
     :target: https://pypi.python.org/pypi/enpt
 
-.. |badge5| image:: https://img.shields.io/pypi/l/enpt.svg
+.. |badge5| image:: https://img.shields.io/conda/vn/conda-forge/enpt.svg
+        :target: https://anaconda.org/conda-forge/enpt
+
+.. |badge6| image:: https://img.shields.io/pypi/l/enpt.svg
     :target: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/LICENSE
 
-.. |badge6| image:: https://img.shields.io/pypi/pyversions/enpt.svg
+.. |badge7| image:: https://img.shields.io/pypi/pyversions/enpt.svg
     :target: https://img.shields.io/pypi/pyversions/enpt.svg
 
-.. |badge7| image:: https://img.shields.io/pypi/dm/enpt.svg
+.. |badge8| image:: https://img.shields.io/pypi/dm/enpt.svg
     :target: https://pypi.python.org/pypi/enpt
 
-.. |badge8| image:: https://zenodo.org/badge/253474970.svg
+.. |badge9| image:: https://zenodo.org/badge/253474970.svg
    :target: https://zenodo.org/badge/latestdoi/253474970
 
 See also the latest coverage_ report and the nosetests_ HTML report.

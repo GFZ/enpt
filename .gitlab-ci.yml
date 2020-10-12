@@ -35,7 +35,6 @@ test_enpt:
     # - python setup.py install
     # - cd ../../
     - pip install -U sicor
-    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
 
     # run nosetests
     - make nosetests  # test are called here
@@ -93,7 +92,6 @@ test_enpt_install:
 
     # install not pip-installable deps of sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
-    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
 
     # install enpt
     - pip install -e .

@@ -4,48 +4,76 @@
 Installation
 ============
 
-EnPT depends on some open source packages which are usually installed without problems by the automatic install
-routine. However, for some projects, we strongly recommend resolving the dependency before the automatic installer
-is run. This approach avoids problems with conflicting versions of the same software.
-Using conda_, the recommended approach is:
 
-.. _conda: https://conda.io/docs/
+Using Anaconda or Miniconda (recommended)
+-----------------------------------------
 
-.. code-block:: bash
-
-    # create virtual environment for enpt, this is optional but recommended
-    conda create --name enpt python=3
-    source activate enpt
-
-    # avoid package incompatibilities
-    conda config --set channel_priority strict
-
-    # install some dependencies that cause trouble when installed via pip
-    conda install -c conda-forge numpy pandas lxml pyproj
-
-    # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    conda install -c conda-forge gdal libgdal scikit-image geopandas matplotlib basemap shapely pyresample
-
-    # install not pip-installable deps of arosics
-    conda install -c conda-forge pyfftw pykrige
-
-    # install not pip-installable deps of sicor
-    conda install -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
-
-    # install sicor
-    git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git
-    cd sicor
-    python setup.py install
-    git lfs pull
-
-    # install enpt
-    pip install enpt
+Using conda_, EnPT is installed as follows:
 
 
-This is the preferred method to install EnPT, as it will always install the most recent stable release. 
+1. Create virtual environment for enpt (optional but recommended):
+
+   .. code-block:: bash
+
+    $ conda create -c conda-forge --name enpt python=3
+    $ source activate enpt
+
+
+2. Then install EnPT itself:
+
+   .. code-block:: bash
+
+    $ conda install -c conda-forge enpt
+
+
+This is the preferred method to install EnPT, as it will always installs the most recent stable release and
+automatically resolves all the dependencies.
+
+
+Using pip (not recommended)
+---------------------------
+
+There is also a `pip`_ installer for EnPT. However, please note that EnPT depends on some
+open source packages that may cause problems when installed with pip. Therefore, we strongly recommend
+to resolve the following dependencies before the pip installer is run:
+
+    * cachetools
+    * cartopy
+    * gdal
+    * geopandas
+    * glymur
+    * h5py
+    * numba
+    * numpy
+    * llvmlite
+    * lxml
+    * matplotlib
+    * pandas
+    * pyhdf
+    * pyproj >2.2.0
+    * pyresample
+    * pytables
+    * scikit-image
+    * scikit-learn
+    * shapely
+
+
+Then, the pip installer can be run by:
+
+   .. code-block:: bash
+
+    $ pip install enpt
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
 
+
+
+.. note::
+
+    EnPT has been tested with Python 3.6+., i.e., should be fully compatible to all Python versions from 3.6 onwards.
+
+
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+.. _conda: https://conda.io/docs
