@@ -54,6 +54,7 @@ req = [
     'pandas',
     'pyproj>=2.2.0',
     'py_tools_ds>=0.14.23',
+    'scikit-image',
     'scipy',
     'sensormapgeo>=0.4.0',
     'sicor>=0.15.0',
