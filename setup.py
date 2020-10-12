@@ -40,10 +40,25 @@ version = {}
 with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
-requirements = [  # put package requirements here
-    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo>=0.4.0',
-    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed', 'mvgavg', 'natsort', 'pyproj>=2.2.0',
-    'sicor @ git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git#egg=sicor'
+requirements = [
+    'arosics>=1.0.0',
+    'cerberus',
+    'geoarray>=0.9.0',
+    'jsmin',
+    'lxml',
+    'matplotlib',
+    'mvgavg',
+    'natsort',
+    'numpy',
+    'numpy-indexed',
+    'pandas',
+    'pyproj>=2.2.0',
+    'py_tools_ds>=0.14.23',
+    'scipy',
+    'sensormapgeo>=0.4.0',
+    'sicor>=0.15.0'
+    'tqdm',
+    'utm',
 ]
 
 setup_requirements = ['setuptools-git']  # needed for package_data version controlled by GIT
@@ -55,17 +70,18 @@ setup(
     author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, stephane.guillaso@gfz-potsdam.de",
     classifiers=[
         'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="EnMAP Processing Tool",
     keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
     include_package_data=True,
     install_requires=requirements,
-    license="GNU General Public License v3",
+    license="GPL-3.0-or-later",
     long_description=readme,
     name='enpt',
     package_dir={'enpt': 'enpt'},

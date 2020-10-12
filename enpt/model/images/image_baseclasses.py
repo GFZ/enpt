@@ -104,7 +104,7 @@ class _EnMAP_Image(object):
             - gt(list):  GDAL geotransform: contains the geocoding
             - prj(str): WKT projection string
             - show(*args, **kwargs):  plot the image
-            - show_map(*args, **kwargs):  plot a map of the image (based on Basemap library)
+            - show_map(*args, **kwargs):  plot a map of the image (based on cartopy library)
             - reproject_to_new_grid(*args, **kwargs)
 
         Usage (there will soon be detailed instructions on usage at https://gitext.gfz-potsdam.de/danschef/geoarray):

@@ -121,7 +121,7 @@ autoclass_content = 'both'
 
 # Increase content width of generated docs
 def setup(app):
-    app.add_stylesheet('wider_theme.css')
+    app.add_css_file('wider_theme.css')
 
 
 # -- Options for HTML output -------------------------------------------

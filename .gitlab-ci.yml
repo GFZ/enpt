@@ -28,15 +28,13 @@ test_enpt:
     - pip install -e /tmp/sicor
 
     # update sicor
-    # - conda install -y -q -c conda-forge basemap
     # - rm -rf context/sicor
     # - git clone https://gitext.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     # - cd ./context/sicor
     # - make download-tables
     # - python setup.py install
     # - cd ../../
-    # - pip install -U sicor
-    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
+    - pip install -U sicor
 
     # run nosetests
     - make nosetests  # test are called here
@@ -87,14 +85,13 @@ test_enpt_install:
     - conda install -y -c conda-forge numpy pandas lxml
 
     # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib basemap shapely pyresample
+    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib cartopy shapely pyresample
 
     # install not pip-installable deps of arosics
     - conda install -y -c conda-forge pyfftw pykrige
 
     # install not pip-installable deps of sicor
     - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
-    - pip install ecmwf-api-client  # FIXME remove as long as this is no more needed for the hyperspectral part of SICOR
 
     # install enpt
     - pip install -e .
