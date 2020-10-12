@@ -49,6 +49,7 @@ to resolve the following dependencies before the pip installer is run:
     * lxml
     * matplotlib
     * pandas
+    * pygrib
     * pyhdf
     * pyproj >2.2.0
     * pyresample

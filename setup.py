@@ -40,7 +40,7 @@ version = {}
 with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
-requirements = [
+req = [
     'arosics>=1.0.0',
     'cerberus',
     'geoarray>=0.9.0',
@@ -61,9 +61,15 @@ requirements = [
     'utm',
 ]
 
-setup_requirements = ['setuptools-git']  # needed for package_data version controlled by GIT
+req_setup = ['setuptools-git']  # needed for package_data version controlled by GIT
 
-test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
+req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose']
+
+req_doc = ['sphinx-argparse', 'sphinx_rtd_theme']
+
+req_lint = ['flake8', 'pycodestyle', 'pydocstyle']
+
+req_dev = req_setup + req_test + req_doc + req_lint
 
 setup(
     author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso",
@@ -78,9 +84,15 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     description="EnMAP Processing Tool",
+    extras_require={
+        "doc": req_doc,
+        "test": req_test,
+        "lint": req_lint,
+        "dev": req_dev
+    },
     keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=req,
     license="GPL-3.0-or-later",
     long_description=readme,
     name='enpt',
@@ -90,9 +102,9 @@ setup(
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
     scripts=['bin/enpt_cli.py'],
-    setup_requires=setup_requirements,
+    setup_requires=req_setup,
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=req_test,
     url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     version=version['__version__'],
     zip_safe=False

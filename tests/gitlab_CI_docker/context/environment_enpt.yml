@@ -26,7 +26,7 @@ dependencies:
     - tqdm
     - utm
 
-    # test/docs requirements
+    # test/doc/lint requirements
     - coverage
     - flake8
     - nose
@@ -37,3 +37,4 @@ dependencies:
     - pylint
     - rednose
     - sphinx-argparse
+    - sphinx_rtd_theme
