@@ -2,6 +2,13 @@
 History
 =======
 
+0.16.1 (2020-10-12)
+-------------------
+
+* Added pygrib to pip installation instructions.
+* Added test, doc and lint requirements as optional requirements to setup.py.
+
+
 0.16.0 (2020-10-12)
 -------------------
 
