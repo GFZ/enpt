@@ -2,6 +2,13 @@
 History
 =======
 
+0.16.3 (coming soon)
+--------------------
+
+* Replaced deprecated 'source activate' by 'conda activate'.
+* Updated installation instructions.
+
+
 0.16.2 (2020-10-12)
 -------------------
 
