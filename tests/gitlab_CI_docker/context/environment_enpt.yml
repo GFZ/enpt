@@ -6,59 +6,36 @@ channels: &id1
 dependencies:
   - python=3.*.*
   - pip  # avoids that conda uses the wrong pip
+  - arosics>1.0.0
+  - geoarray>=0.9.0
+  - lxml
+  - matplotlib
   - numpy
   - pandas
-  - lxml
   - pyproj>=2.2.0
-
-  # geoarray / py_tools_ds
-  - gdal
+  - py_tools_ds>=0.14.25
   - scikit-image
-  - geopandas
-  - matplotlib
-  - basemap
-  - shapely
-  - holoviews
-  - bokeh
-
-  # sensormapgeo
-  - pyresample>=1.11.0
-  - _openmp_mutex=*=*llvm* [Unix]  # fixes a deadlock (https://gitext.gfz-potsdam.de/EnMAP/sensormapgeo/-/issues/6)
-
-  # arosics
-  - pyfftw
-  - pykrige
-
-  # sicor
-  - glymur
-  - cachetools
-  - pyhdf
-  - h5py
-  - pytables
-  - llvmlite
-  - numba  # force install via conda-forge to get rid of llvm incompatibilities
-  - scikit-learn
+  - sensormapgeo>=0.4.0
 
   - pip:
-    - scipy
-    - geoarray>=0.8.11
-    - py_tools_ds>=0.14.25
-    - sensormapgeo>=0.4.0
-    - arosics>0.9.2
     - cerberus
+    - mvgavg
+    - natsort
+    - numpy-indexed
+    - scipy
     - jsmin
     - tqdm
     - utm
-    - numpy-indexed
-    - mvgavg
-    - natsort
-    - sphinx-argparse
-    - pycodestyle
+
+    # test/doc/lint requirements
+    - coverage
     - flake8
-    - pylint
-    - pydocstyle
     - nose
     - nose2
     - nose-htmloutput
-    - coverage
+    - pycodestyle
+    - pydocstyle
+    - pylint
     - rednose
+    - sphinx-argparse
+    - sphinx_rtd_theme

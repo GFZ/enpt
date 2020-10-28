@@ -10,6 +10,35 @@ coming soon
   land surfaces later.
 
 
+0.16.3 (coming soon)
+--------------------
+
+* Replaced deprecated 'source activate' by 'conda activate'.
+* Updated installation instructions.
+
+
+0.16.2 (2020-10-12)
+-------------------
+
+* Added missing requirement 'scikit-image'.
+
+
+0.16.1 (2020-10-12)
+-------------------
+
+* Added pygrib to pip installation instructions.
+* Added test, doc and lint requirements as optional requirements to setup.py.
+
+
+0.16.0 (2020-10-12)
+-------------------
+
+* Replaced deprecated function 'add_stylesheet' in conf.py.
+* Use SPDX license identifier and set all files to GLP3+ to be consistent with license headers in the source files.
+* EnPT is now on conda-forge! Updated the installation instructions accordingly. Added conda badge.
+* Revised requirements and environment_enpt.yml.
+
+
 0.15.0 (2020-09-21)
 -------------------
 

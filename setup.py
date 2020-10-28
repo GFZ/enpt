@@ -40,32 +40,61 @@ version = {}
 with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
-requirements = [  # put package requirements here
-    'numpy', 'pandas', 'scipy', 'geoarray>=0.8.11', 'py_tools_ds>=0.14.23', 'arosics>=0.9.2', 'sensormapgeo>=0.4.0',
-    'cerberus', 'jsmin', 'matplotlib', 'tqdm', 'utm', 'lxml', 'numpy-indexed', 'mvgavg', 'natsort', 'pyproj>=2.2.0',
-    'sicor @ git+https://gitext.gfz-potsdam.de/EnMAP/sicor.git#egg=sicor'
+req = [
+    'arosics>=1.0.0',
+    'cerberus',
+    'geoarray>=0.9.0',
+    'jsmin',
+    'lxml',
+    'matplotlib',
+    'mvgavg',
+    'natsort',
+    'numpy',
+    'numpy-indexed',
+    'pandas',
+    'pyproj>=2.2.0',
+    'py_tools_ds>=0.14.23',
+    'scikit-image',
+    'scipy',
+    'sensormapgeo>=0.4.0',
+    'sicor>=0.15.0',
+    'tqdm',
+    'utm',
 ]
 
-setup_requirements = ['setuptools-git']  # needed for package_data version controlled by GIT
+req_setup = ['setuptools-git']  # needed for package_data version controlled by GIT
 
-test_requirements = ['coverage', 'nose', 'nose-htmloutput', 'rednose']
+req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose']
+
+req_doc = ['sphinx-argparse', 'sphinx_rtd_theme']
+
+req_lint = ['flake8', 'pycodestyle', 'pydocstyle']
+
+req_dev = req_setup + req_test + req_doc + req_lint
 
 setup(
     author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso",
     author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, stephane.guillaso@gfz-potsdam.de",
     classifiers=[
         'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="EnMAP Processing Tool",
+    extras_require={
+        "doc": req_doc,
+        "test": req_test,
+        "lint": req_lint,
+        "dev": req_dev
+    },
     keywords=['EnPT', 'EnMAP', 'EnMAP-Box', 'hyperspectral', 'remote sensing', 'satellite', 'processing chain'],
     include_package_data=True,
-    install_requires=requirements,
-    license="GNU General Public License v3",
+    install_requires=req,
+    license="GPL-3.0-or-later",
     long_description=readme,
     name='enpt',
     package_dir={'enpt': 'enpt'},
@@ -74,9 +103,9 @@ setup(
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
     scripts=['bin/enpt_cli.py'],
-    setup_requires=setup_requirements,
+    setup_requires=req_setup,
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=req_test,
     url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     version=version['__version__'],
     zip_safe=False
