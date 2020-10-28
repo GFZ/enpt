@@ -73,7 +73,7 @@ test_enpt_install:
     - source /root/miniconda3/bin/activate
     - conda update conda
     - conda create -y -q -c conda-forge --name enpt_test python=3
-    - source activate enpt_test
+    - conda activate enpt_test
 
     # update conda and python
     - conda update -n base -c conda-forge conda

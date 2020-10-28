@@ -8,7 +8,7 @@ Installation
 Using Anaconda or Miniconda (recommended)
 -----------------------------------------
 
-Using conda_, EnPT is installed as follows:
+Using conda_ (latest version recommended), EnPT is installed as follows:
 
 
 1. Create virtual environment for enpt (optional but recommended):
@@ -16,7 +16,7 @@ Using conda_, EnPT is installed as follows:
    .. code-block:: bash
 
     $ conda create -c conda-forge --name enpt python=3
-    $ source activate enpt
+    $ conda activate enpt
 
 
 2. Then install EnPT itself:
@@ -26,7 +26,7 @@ Using conda_, EnPT is installed as follows:
     $ conda install -c conda-forge enpt
 
 
-This is the preferred method to install EnPT, as it will always installs the most recent stable release and
+This is the preferred method to install EnPT, as it always installs the most recent stable release and
 automatically resolves all the dependencies.
 
 
