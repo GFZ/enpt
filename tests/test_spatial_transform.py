@@ -149,8 +149,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
         self.assertEqual(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
-        GeoArray(data_vnir_sensorgeo, nodata=0)\
-            .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
+        # GeoArray(data_vnir_sensorgeo, nodata=0)\
+        #     .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
         # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_sensorgeo.bsq')
 

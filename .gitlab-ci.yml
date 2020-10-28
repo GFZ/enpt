@@ -34,6 +34,7 @@ test_enpt:
     # - make download-tables
     # - python setup.py install
     # - cd ../../
+    - conda install -c conda-forge pygrib  # FIXME remove as soon as docker container is rebuilt
     - pip install -U sicor
 
     # run nosetests
@@ -72,7 +73,7 @@ test_enpt_install:
     - source /root/miniconda3/bin/activate
     - conda update conda
     - conda create -y -q -c conda-forge --name enpt_test python=3
-    - source activate enpt_test
+    - conda activate enpt_test
 
     # update conda and python
     - conda update -n base -c conda-forge conda
@@ -91,7 +92,7 @@ test_enpt_install:
     - conda install -y -c conda-forge pyfftw pykrige
 
     # install not pip-installable deps of sicor
-    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn
+    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn pygrib
 
     # install enpt
     - pip install -e .

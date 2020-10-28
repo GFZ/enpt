@@ -343,7 +343,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :param outputDir:   output directory
         """
         for attrName in attrNames:
-            attr = getattr(self, attrName)  # type: GeoArray
+            attr: GeoArray = getattr(self, attrName)
             fN = getattr(self.detector_meta, 'filename_%s' % attrName)
 
             if attr is not None:
