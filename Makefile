@@ -43,10 +43,10 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	## don't include coverage lib here because clean-test is also executed during package setup and coverage is only a
-	## test requirement
+	## don't call coverage erase here because make install calls make clean which calls make clean-test
+	## -> since make install should run without the test requirements we can't use coverage erase here
 	rm -fr .tox/
-	rm -f .coverage
+	rm -fr .coverage.*
 	rm -fr htmlcov/
 	rm -fr nosetests.html
 	rm -fr nosetests.xml

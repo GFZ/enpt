@@ -2,11 +2,13 @@
 History
 =======
 
-0.16.3 (coming soon)
+0.16.3 (2020-11-03)
 --------------------
 
 * Replaced deprecated 'source activate' by 'conda activate'.
 * Updated installation instructions.
+* Fixed DeprecationWarning (Using or importing the ABCs from 'collections' instead of from 'collections.abc' is
+  deprecated since Python 3.3, and in 3.9 it will stop working)
 
 
 0.16.2 (2020-10-12)

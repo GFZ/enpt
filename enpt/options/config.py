@@ -42,7 +42,8 @@ from pprint import pformat
 
 from jsmin import jsmin
 from cerberus import Validator
-from collections import OrderedDict, Mapping
+from collections import OrderedDict
+from collections.abc import Mapping
 import numpy as np
 from multiprocessing import cpu_count
 
@@ -119,6 +120,7 @@ config_for_testing_dlr = dict(
 
                      # Arcachon tile 3 ASTER DEM (05/2020)
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
+                     # '15_DEM_UTM__with_prj.tif'
                      )),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
