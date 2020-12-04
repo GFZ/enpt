@@ -2,8 +2,14 @@
 History
 =======
 
-0.16.3 (2020-11-03)
+0.17.0 (coming soon)
 --------------------
+
+* Implemented new methods to transform raster arrays between sensor and map geomet
+
+
+0.16.3 (2020-11-03)
+-------------------
 
 * Replaced deprecated 'source activate' by 'conda activate'.
 * Updated installation instructions.
