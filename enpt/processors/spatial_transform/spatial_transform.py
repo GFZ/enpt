@@ -151,10 +151,10 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  **gt_opts) -> None:
         """Get an instance of VNIR_SWIR_SensorGeometryTransformer.
 
-        :param lons_vnir:   2D VNIR longitude array corresponding to the sensor geometry arrays passed later
-        :param lats_vnir:   2D VNIR latitude array corresponding to the sensor geometry arrays passed later
-        :param lons_swir:   2D SWIR longitude array corresponding to the sensor geometry arrays passed later
-        :param lats_swir:   2D SWIR latitude array corresponding to the sensor geometry arrays passed later
+        :param lons_vnir:   VNIR longitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
+        :param lats_vnir:   VNIR latitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
+        :param lons_swir:   SWIR longitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
+        :param lats_swir:   SWIR latitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
         :param prj_vnir:    projection of the VNIR if it would be transformed to map geometry (WKT string or EPSG code)
         :param prj_swir:    projection of the SWIR if it would be transformed to map geometry (WKT string or EPSG code)
         :param res_vnir:    pixel dimensions of the VNIR if it would be transformed to map geometry (X, Y)
@@ -163,8 +163,6 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         :param gt_opts:     additional options to be passed to the Geometric_Transformer class,
                             e.g., 'fill_value', 'radius_of_influence', 'nprocs'...
         """
-        [self._validate_lonlat_ndim(ll) for ll in [lons_vnir, lats_vnir, lons_swir, lats_swir]]
-
         self.vnir_meta = dict(
             lons=lons_vnir,
             lats=lats_vnir,
@@ -179,14 +177,6 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         )
         self.resamp_alg = resamp_alg
         self.gt_opts = gt_opts
-
-    @staticmethod
-    def _validate_lonlat_ndim(coord_array):
-        if coord_array.ndim == 3:
-            raise RuntimeError("3D longitude/latitude array are not supported because they model keystone effects "
-                               "which cannot be transferred between VNIR and SWIR.")
-        else:
-            assert coord_array.ndim == 2, 'Only 2D coordinate arrays are supported.'
 
     def transform_sensorgeo_VNIR_to_SWIR(self, data_vnirsensorgeo: np.ndarray) -> np.ndarray:
         """Transform any array in VNIR sensor geometry to SWIR sensor geometry to remove geometric shifts.
@@ -222,18 +212,34 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
         src, tgt = (self.vnir_meta, self.swir_meta) if inputgeo == 'vnir' else (self.swir_meta, self.vnir_meta)
 
+        # get 2D or 3D GeoTransformer
+        if data2transform.ndim == 3 and src['lons'].ndim == 3 and src['lons'].shape[2] == data2transform.shape[2]:
+            GT_src = Geometry_Transformer_3D(lons=src['lons'],
+                                             lats=src['lats'],
+                                             resamp_alg=self.resamp_alg,
+                                             **self.gt_opts)
+            GT_tgt = Geometry_Transformer_3D(lons=tgt['lons'],
+                                             lats=tgt['lats'],
+                                             resamp_alg=self.resamp_alg,
+                                             **self.gt_opts)
+
+        else:
+            def ensure_2D(coord_array):
+                return coord_array if coord_array.ndim == 2 else coord_array[:, :, 0]
+
+            GT_src = Geometry_Transformer(lons=ensure_2D(src['lons']),
+                                          lats=ensure_2D(src['lats']),
+                                          resamp_alg=self.resamp_alg,
+                                          **self.gt_opts)
+            GT_tgt = Geometry_Transformer(lons=ensure_2D(tgt['lons']),
+                                          lats=ensure_2D(tgt['lats']),
+                                          resamp_alg=self.resamp_alg,
+                                          **self.gt_opts)
+
         # temporarily transform the input sensor geometry array to map geometry
-        GT_src = Geometry_Transformer(lons=src['lons'],
-                                      lats=src['lats'],
-                                      resamp_alg=self.resamp_alg,
-                                      **self.gt_opts)
         gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj']))
 
         # generate the target sensor geometry array (target lons/lats define the target swath definition)
-        GT_tgt = Geometry_Transformer(lons=tgt['lons'],
-                                      lats=tgt['lats'],
-                                      resamp_alg=self.resamp_alg,
-                                      **self.gt_opts)
         tgt_data_sensorgeo = GT_tgt.to_sensor_geometry(gA_mapgeo)
 
         return tgt_data_sensorgeo

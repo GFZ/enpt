@@ -5,7 +5,9 @@ History
 0.17.0 (coming soon)
 --------------------
 
-* Implemented new methods to transform raster arrays between sensor and map geomet
+* Implemented new methods to transform raster arrays between sensor and map geometry.
+* VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
+* Added test_images_sensorgeo.py
 
 
 0.16.3 (2020-11-03)
