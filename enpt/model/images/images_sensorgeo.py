@@ -357,17 +357,27 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                                        src_lons: np.ndarray,
                                                        src_lats: np.ndarray,
                                                        src_epsg: int,
-                                                       resamp_alg: str = 'nearest') -> np.ndarray:
+                                                       resamp_alg: str = 'nearest',
+                                                       respect_keystone: bool = False
+                                                       ) -> np.ndarray:
         """Transform the given input raster from SWIR to VNIR or from SWIR to VNIR sensor geometry.
 
-        NOTE: The transformation target is always the EnMAP_Detector_SensorGeo instance sensor geometry
-              (e.g., VNIR sensorgeo if self.detector_name == 'VNIR').
+        NOTE: - The transformation target is always the EnMAP_Detector_SensorGeo instance sensor geometry
+                (e.g., VNIR sensorgeo if self.detector_name == 'VNIR').
+              - In case a 3D array is given and the array has the exact dimensions of the source detector,
+                the full geolayer is only used if 'respect_keystone' is set to True. This saves computation time
+                for input arrays where the keystone uncertainty does not matter.
 
-        :param array:       input array to be transformed (2- or 3-dimensional)
-        :param src_lons:    geolayer longitudes corresponding to the input array (same nbands like the source detector)
-        :param src_lats:    geolayer latitudes corresponding to the input array (same nbands like the source detector)
-        :param src_epsg:    projection EPSG code of the source array
-        :param resamp_alg:  resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+
+        :param array:               input array to be transformed (2- or 3-dimensional)
+        :param src_lons:            geolayer longitudes corresponding to the input array
+                                    (same nbands like the source detector)
+        :param src_lats:            geolayer latitudes corresponding to the input array
+                                    (same nbands like the source detector)
+        :param src_epsg:            projection EPSG code of the source array
+        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
+                                    in the dimension of the source detector is passed (default: False)
         :return:
         """
         detN = self.detector_name
@@ -387,7 +397,9 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         prj_swir = self.detector_meta.epsg_ortho if detN == 'SWIR' else src_epsg
 
         # use first geolayer band if the input array has only one band
-        if array.ndim == 2:
+        if array.ndim == 2 or \
+           array.shape[2] != src_lons.shape[2] or \
+           not respect_keystone:
             vnir_lons = vnir_lons[:, :, 0]
             vnir_lats = vnir_lats[:, :, 0]
             swir_lons = swir_lons[:, :, 0]
@@ -451,7 +463,9 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
                                       swir_lons: np.ndarray,
                                       swir_lats: np.ndarray,
                                       swir_epsg: int,
-                                      resamp_alg: str = 'nearest') -> np.ndarray:
+                                      resamp_alg: str = 'nearest',
+                                      respect_keystone: bool = False
+                                      ) -> np.ndarray:
         """Transform the given SWIR sensor-geometry raster array into VNIR sensor geometry.
 
         :param array_swirsensorgeo: source array in SWIR sensor geometry to be transformed
@@ -459,9 +473,11 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
         :param swir_lats:           latitude geolayer array of the SWIR
         :param swir_epsg:           EPSG code of the SWIR when transformed to map geometry
         :param resamp_alg:          resampling algorith ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
+                                    in the dimension of the SWIR detector is passed (default: False)
         """
         return self._transform_raster_geometry_from_other_detector(
-            array_swirsensorgeo, swir_lons, swir_lats, swir_epsg, resamp_alg)
+            array_swirsensorgeo, swir_lons, swir_lats, swir_epsg, resamp_alg, respect_keystone)
 
 
 class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
@@ -482,7 +498,9 @@ class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
                                       vnir_lons: np.ndarray,
                                       vnir_lats: np.ndarray,
                                       vnir_epsg: int,
-                                      resamp_alg: str = 'nearest') -> np.ndarray:
+                                      resamp_alg: str = 'nearest',
+                                      respect_keystone: bool = False
+                                      ) -> np.ndarray:
         """Transform the given VNIR sensor-geometry raster array into SWIR sensor geometry.
 
         :param array_vnirsensorgeo: source array in VNIR sensor geometry to be transformed
@@ -490,9 +508,11 @@ class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
         :param vnir_lats:           latitude geolayer array of the VNIR
         :param vnir_epsg:           EPSG code of the VNIR when transformed to map geometry
         :param resamp_alg:          resampling algorith ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
+                                    in the dimension of the VNIR detector is passed (default: False)
         """
         return self._transform_raster_geometry_from_other_detector(
-            array_vnirsensorgeo, vnir_lons, vnir_lats, vnir_epsg, resamp_alg)
+            array_vnirsensorgeo, vnir_lons, vnir_lats, vnir_epsg, resamp_alg, respect_keystone)
 
 
 class EnMAPL1Product_SensorGeo(object):
@@ -763,11 +783,15 @@ class EnMAPL1Product_SensorGeo(object):
 
     def transform_vnir_to_swir_raster(self,
                                       array_vnirsensorgeo: np.ndarray,
-                                      resamp_alg: str = 'nearest') -> np.ndarray:
+                                      resamp_alg: str = 'nearest',
+                                      respect_keystone: bool = False
+                                      ) -> np.ndarray:
         """Transform the given array from VNIR into SWIR sensor geometry.
 
         :param array_vnirsensorgeo: raster array in VNIR sensor geometry to be transformed into SWIR sensor geometry
         :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
+                                    in the dimension of the VNIR detector is passed (default: False)
         """
         if self.meta.vnir.lons is None or self.meta.vnir.lats is None or \
            self.meta.swir.lons is None or self.meta.swir.lats is None:
@@ -778,14 +802,19 @@ class EnMAPL1Product_SensorGeo(object):
                                                        vnir_lons=self.meta.vnir.lons,
                                                        vnir_lats=self.meta.vnir.lats,
                                                        vnir_epsg=self.meta.vnir.epsg_ortho,
-                                                       resamp_alg=resamp_alg)
+                                                       resamp_alg=resamp_alg,
+                                                       respect_keystone=respect_keystone)
 
     def transform_swir_to_vnir_raster(self, array_swirsensorgeo: np.ndarray,
-                                      resamp_alg: str = 'nearest') -> np.ndarray:
+                                      resamp_alg: str = 'nearest',
+                                      respect_keystone: bool = False
+                                      ) -> np.ndarray:
         """Transform the given array from SWIR into VNIR sensor geometry.
 
         :param array_swirsensorgeo: raster array in SWIR sensor geometry to be transformed into VNIR sensor geometry
         :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
+                                    in the dimension of the VNIR detector is passed (default: False)
         """
         if self.meta.vnir.lons is None or self.meta.vnir.lats is None or \
            self.meta.swir.lons is None or self.meta.swir.lats is None:
@@ -796,14 +825,19 @@ class EnMAPL1Product_SensorGeo(object):
                                                        swir_lons=self.meta.vnir.lons,
                                                        swir_lats=self.meta.vnir.lats,
                                                        swir_epsg=self.meta.vnir.epsg_ortho,
-                                                       resamp_alg=resamp_alg)
+                                                       resamp_alg=resamp_alg,
+                                                       respect_keystone=respect_keystone)
 
     def set_SWIRattr_with_transformedVNIRattr(self, attrName: str,
-                                              resamp_alg: str = 'nearest') -> None:
+                                              resamp_alg: str = 'nearest',
+                                              respect_keystone: bool = False
+                                              ) -> None:
         """Set the specified SWIR raster attribute with a VNIR attribute transformed to SWIR sensor geometry.
 
-        :param attrName:    name of the attribute to be set
-        :param resamp_alg:  resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param attrName:            name of the attribute to be set
+        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param respect_keystone:    whether to use the full geoarray (all bands) in case the attribute
+                                    to be transformed is 'data' (default: False)
         """
         self.logger.info("Transforming the '%s' attribute from VNIR to SWIR sensor geometry." % attrName)
 
@@ -813,7 +847,8 @@ class EnMAPL1Product_SensorGeo(object):
             raise RuntimeError("%s.vnir.%s has not yet been set." % (self.__class__.__name__, attrName))
 
         attr_transformed = self.transform_vnir_to_swir_raster(array_vnirsensorgeo=np.array(vnir_rasterAttr),
-                                                              resamp_alg=resamp_alg)
+                                                              resamp_alg=resamp_alg,
+                                                              respect_keystone=respect_keystone)
         setattr(self.swir, attrName, attr_transformed)
 
     def run_AC(self):
