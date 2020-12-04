@@ -206,7 +206,13 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
     def _transform_sensorgeo(self,
                              data2transform: np.ndarray,
-                             inputgeo: str = 'vnir') -> np.ndarray:
+                             inputgeo: str) -> np.ndarray:
+        """Transform the input array between VNIR and SWIR sensor geometry.
+
+        :param data2transform:  input array to be transformed
+        :param inputgeo:        'vnir' if data2transform is given in VNIR sensor geometry
+                                'swir' if data2transform is given in SWIR sensor geometry
+        """
         # TODO: Avoid the resampling here, maybe by replacing the lon/lat arrays by image coordinates for the source
         #       geometry and by image coordinate differences for the target geometry. Maybe also the proj string for
         #       local coordinate systems helps (see SensorMapGeometryTransformer class).
@@ -217,11 +223,17 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         src, tgt = (self.vnir_meta, self.swir_meta) if inputgeo == 'vnir' else (self.swir_meta, self.vnir_meta)
 
         # temporarily transform the input sensor geometry array to map geometry
-        GT_src = Geometry_Transformer(lons=src['lons'], lats=src['lats'], resamp_alg=self.resamp_alg, **self.gt_opts)
+        GT_src = Geometry_Transformer(lons=src['lons'],
+                                      lats=src['lats'],
+                                      resamp_alg=self.resamp_alg,
+                                      **self.gt_opts)
         gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj']))
 
         # generate the target sensor geometry array (target lons/lats define the target swath definition)
-        GT_tgt = Geometry_Transformer(lons=tgt['lons'], lats=tgt['lats'], resamp_alg=self.resamp_alg, **self.gt_opts)
+        GT_tgt = Geometry_Transformer(lons=tgt['lons'],
+                                      lats=tgt['lats'],
+                                      resamp_alg=self.resamp_alg,
+                                      **self.gt_opts)
         tgt_data_sensorgeo = GT_tgt.to_sensor_geometry(gA_mapgeo)
 
         return tgt_data_sensorgeo
