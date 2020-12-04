@@ -357,7 +357,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                                        src_lons: np.ndarray,
                                                        src_lats: np.ndarray,
                                                        src_epsg: int,
-                                                       resamp_alg:str = 'nearest') -> np.ndarray:
+                                                       resamp_alg: str = 'nearest') -> np.ndarray:
         """Transform the given input raster from SWIR to VNIR or from SWIR to VNIR sensor geometry.
 
         NOTE: The transformation target is always the EnMAP_Detector_SensorGeo instance sensor geometry
