@@ -188,6 +188,6 @@ summarized below:
 
 
 .. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
-.. _`documentation pages of SICOR`: http://enmap.gitext.gfz-potsdam.de/sicor/doc/
+.. _`documentation pages of SICOR`: https://enmap.gitext-pages.gfz-potsdam.de/sicor/doc/
 .. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample

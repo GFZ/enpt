@@ -39,3 +39,4 @@ dependencies:
     - rednose
     - sphinx-argparse
     - sphinx_rtd_theme
+    - urlchecker

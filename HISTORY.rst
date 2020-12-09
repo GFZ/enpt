@@ -2,8 +2,14 @@
 History
 =======
 
+0.16.4 (2020-12-10)
+-------------------
+
+* Added URL checker CI job and fixed all dead UR
+
+
 0.16.3 (2020-11-03)
---------------------
+-------------------
 
 * Replaced deprecated 'source activate' by 'conda activate'.
 * Updated installation instructions.
