@@ -64,7 +64,7 @@ req = [
 
 req_setup = ['setuptools-git']  # needed for package_data version controlled by GIT
 
-req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose']
+req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose', 'urlchecker']
 
 req_doc = ['sphinx-argparse', 'sphinx_rtd_theme']
 
