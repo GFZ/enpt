@@ -57,7 +57,9 @@ lint: ## check style with flake8
 	-pydocstyle enpt > ./tests/linting/pydocstyle.log
 
 urlcheck: ## check for dead URLs
-	urlchecker check . --file-types .py,.rst,.md,.json
+	urlchecker check . \
+		--file-types .py,.rst,.md,.json \
+		--white-listed-patterns www.enmap.org  # certificate checks fail although URLs work
 
 test: ## run tests quickly with the default Python
 	python setup.py test
