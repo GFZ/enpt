@@ -822,9 +822,9 @@ class EnMAPL1Product_SensorGeo(object):
                                'to transform arrays from VNIR to SWIR sensor geometry.')
 
         return self.vnir.transform_swir_to_vnir_raster(array_swirsensorgeo=array_swirsensorgeo,
-                                                       swir_lons=self.meta.vnir.lons,
-                                                       swir_lats=self.meta.vnir.lats,
-                                                       swir_epsg=self.meta.vnir.epsg_ortho,
+                                                       swir_lons=self.meta.swir.lons,
+                                                       swir_lats=self.meta.swir.lats,
+                                                       swir_epsg=self.meta.swir.epsg_ortho,
                                                        resamp_alg=resamp_alg,
                                                        respect_keystone=respect_keystone)
 
