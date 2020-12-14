@@ -81,16 +81,24 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
             self.L1_obj.set_SWIRattr_with_transformedVNIRattr('mask_haze')
 
     def test_transform_vnir_to_swir_raster_with_keystone(self):
-        vnirdata_swirgeo = self.L1_obj.transform_vnir_to_swir_raster(self.L1_obj.vnir.data[:], respect_keystone=True)
+        vnirdata_swirgeo = self.L1_obj.transform_vnir_to_swir_raster(self.L1_obj.vnir.data[:],
+                                                                     respect_keystone=True)
 
         self.assertIsInstance(vnirdata_swirgeo, np.ndarray)
         self.assertEqual(vnirdata_swirgeo.shape, self.L1_obj.vnir.data.shape)
 
+        # at least the last 10 lines must be zero due to the VNIR/SWIR shift
+        self.assertEqual(np.mean(vnirdata_swirgeo[-10:, :, :]), 0)
+
     def test_transform_swir_to_vnir_raster_no_keystone(self):
-        swirdata_vnirgeo = self.L1_obj.transform_swir_to_vnir_raster(self.L1_obj.swir.data[:], respect_keystone=False)
+        swirdata_vnirgeo = self.L1_obj.transform_swir_to_vnir_raster(self.L1_obj.swir.data[:],
+                                                                     respect_keystone=False)
 
         self.assertIsInstance(swirdata_vnirgeo, np.ndarray)
         self.assertEqual(swirdata_vnirgeo.shape, self.L1_obj.swir.data.shape)
+
+        # at least the first 10 lines must be zero due to the VNIR/SWIR shift
+        self.assertEqual(np.mean(swirdata_vnirgeo[:10, :, :]), 0)
 
     def test_transform_vnir_to_swir_raster__no_geolayer(self):
         vnir_lons = self.L1_obj.meta.vnir.lons
