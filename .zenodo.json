@@ -79,7 +79,7 @@
         },
         {
             "scheme": "url",
-            "identifier": "http://www.enmap.org/enmapbox.html",
+            "identifier": "https://www.enmap.org/data_tools/enmapbox/",
             "relation": "isPartOf"
         }
     ],
