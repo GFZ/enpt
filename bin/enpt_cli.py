@@ -59,7 +59,7 @@ def get_enpt_argparser():
     #       => see docs in parsedArgs_to_user_opts() for explanation
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
-             'https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
+             'https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
              'EnPT/blob/master/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
         help='number of CPU cores to be used for processing (default: "None" -> use all available')
