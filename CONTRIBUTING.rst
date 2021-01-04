@@ -64,7 +64,7 @@ Ready to contribute? Here's how to set up `enpt` for local development.
 1. Fork the `enpt` repo on GitLab.
 2. Clone your fork locally::
 
-    $ git clone git@gitext.gfz-potsdam.de:your_name_here/enpt.git
+    $ git clone git@git.gfz-potsdam.de:your_name_here/enpt.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up
    your fork for local development::
