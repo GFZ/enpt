@@ -88,8 +88,8 @@ EnMAP image data at the indicated dead pixel positions. It supports two interpol
 Atmospheric correction
 **********************
 
-.. image:: https://gitext.gfz-potsdam.de/EnMAP/sicor/raw/master/docs/images/sicor_logo_lr.png
-   :target: https://gitext.gfz-potsdam.de/EnMAP/sicor
+.. image:: https://git.gfz-potsdam.de/EnMAP/sicor/raw/master/docs/images/sicor_logo_lr.png
+   :target: https://git.gfz-potsdam.de/EnMAP/sicor
    :width: 150px
    :alt: SICOR Logo
 
@@ -105,8 +105,8 @@ German Research Centre for Geosciences (GFZ) Potsdam. For details on the underly
 Spatial Co-Registration
 ***********************
 
-.. image:: https://gitext.gfz-potsdam.de/danschef/arosics/raw/master/docs/images/arosics_logo.png
-   :target: https://gitext.gfz-potsdam.de/danschef/arosics
+.. image:: https://git.gfz-potsdam.de/danschef/arosics/raw/master/docs/images/arosics_logo.png
+   :target: https://git.gfz-potsdam.de/danschef/arosics
    :width: 150px
    :alt: AROSICS Logo
 
@@ -187,7 +187,7 @@ summarized below:
     +-----------------------------------------------+---------------------+---------+-------------+
 
 
-.. _SICOR: https://gitext.gfz-potsdam.de/EnMAP/sicor
-.. _`documentation pages of SICOR`: https://enmap.gitext-pages.gfz-potsdam.de/sicor/doc/
-.. _AROSICS: https://gitext.gfz-potsdam.de/danschef/arosics
+.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/
+.. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample

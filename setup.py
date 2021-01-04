@@ -106,7 +106,7 @@ setup(
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
-    url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
+    url='https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     version=version['__version__'],
     zip_safe=False
 )

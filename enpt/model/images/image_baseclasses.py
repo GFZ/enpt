@@ -107,7 +107,7 @@ class _EnMAP_Image(object):
             - show_map(*args, **kwargs):  plot a map of the image (based on cartopy library)
             - reproject_to_new_grid(*args, **kwargs)
 
-        Usage (there will soon be detailed instructions on usage at https://gitext.gfz-potsdam.de/danschef/geoarray):
+        Usage (there will soon be detailed instructions on usage at https://git.gfz-potsdam.de/danschef/geoarray):
 
             - Use self.data like a normal numpy.ndarray!
                 - NOTE: Operators like *, /, + , - will soon be implemented. In the meanwhile use:
