@@ -8,6 +8,8 @@ History
 * Implemented new methods to transform raster arrays between sensor and map geometry.
 * VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
 * Added test_images_sensorgeo.py
+* Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
+  and adjusted 'make gitlab_CI_docker' accordingly.
 
 
 0.16.4 (2020-12-10)
