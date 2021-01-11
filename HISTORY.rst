@@ -2,6 +2,13 @@
 History
 =======
 
+0.17.0 (coming soon)
+--------------------
+
+* Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
+  and adjusted 'make gitlab_CI_docker' accordingly.
+
+
 0.16.4 (2020-12-10)
 -------------------
 

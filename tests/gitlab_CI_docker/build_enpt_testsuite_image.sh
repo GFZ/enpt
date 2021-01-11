@@ -5,14 +5,6 @@ dockerfile="enpt_ci.docker"
 tag="enpt_ci:0.14.1"
 gitlab_runner="enpt_gitlab_CI_runner"
 
-# get sicor project
-rm -rf context/sicor
-git clone git@git.gfz-potsdam.de:EnMAP/sicor.git ./context/sicor
-# git clone git@git.gfz-potsdam.de:EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
-cd ./context/sicor
-git lfs pull
-cd ../..
-
 echo "#### Build runner docker image"
 docker rmi ${tag}
 docker build ${context_dir} \
