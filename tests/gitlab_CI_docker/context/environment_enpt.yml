@@ -13,7 +13,7 @@ dependencies:
   - numpy
   - pandas
   - pyproj>=2.2.0
-  - py_tools_ds>=0.14.25
+  - py-tools-ds>=0.14.25
   - scikit-image
   - sensormapgeo>=0.4.0
 

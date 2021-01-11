@@ -7,6 +7,7 @@ History
 
 * Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
   and adjusted 'make gitlab_CI_docker' accordingly.
+* Fixed wrong package name in environment_enpt.yml.
 
 
 0.16.4 (2020-12-10)
