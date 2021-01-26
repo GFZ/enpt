@@ -9,12 +9,13 @@ History
   and adjusted 'make gitlab_CI_docker' accordingly.
 * Fixed wrong package name in environment_enpt.yml.
 * Added sicor as conda environment to environment_enpt.yml which also makes before_script.sh obsolete.
+* Coverage files are now completely deleted by running 'make clean-test'.
 
 
 0.16.4 (2020-12-10)
 -------------------
 
-* Added URL checker CI job and fixed all dead UR
+* Added URL checker CI job and fixed all dead URLs.
 
 
 0.16.3 (2020-11-03)
