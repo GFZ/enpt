@@ -2,19 +2,32 @@
 History
 =======
 
-coming soon
------------
+0.17.0 (coming soon)
+--------------------
+
+* Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
+  and adjusted 'make gitlab_CI_docker' accordingly.
+* Fixed wrong package name in environment_enpt.yml.
+* Added sicor as conda environment to environment_enpt.yml which also makes before_script.sh obsolete.
 
 * Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
 * Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
   land surfaces later.
 
 
-0.16.3 (coming soon)
---------------------
+0.16.4 (2020-12-10)
+-------------------
+
+* Added URL checker CI job and fixed all dead UR
+
+
+0.16.3 (2020-11-03)
+-------------------
 
 * Replaced deprecated 'source activate' by 'conda activate'.
 * Updated installation instructions.
+* Fixed DeprecationWarning (Using or importing the ABCs from 'collections' instead of from 'collections.abc' is
+  deprecated since Python 3.3, and in 3.9 it will stop working)
 
 
 0.16.2 (2020-10-12)

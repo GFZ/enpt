@@ -27,6 +27,6 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = '0.16.2'
-__versionalias__ = '20201012.03'
+__version__ = '0.16.4'
+__versionalias__ = '20201210.01'
 __author__ = 'Daniel Scheffler'

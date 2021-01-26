@@ -64,7 +64,7 @@ req = [
 
 req_setup = ['setuptools-git']  # needed for package_data version controlled by GIT
 
-req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose']
+req_test = ['coverage', 'nose', 'nose2', 'nose-htmloutput', 'rednose', 'urlchecker']
 
 req_doc = ['sphinx-argparse', 'sphinx_rtd_theme']
 
@@ -106,7 +106,7 @@ setup(
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
-    url='https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
+    url='https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT',
     version=version['__version__'],
     zip_safe=False
 )
