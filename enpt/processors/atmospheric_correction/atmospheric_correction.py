@@ -130,10 +130,10 @@ class AtmosphericCorrector(object):
             # raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
             #                           "You may use 'land' instead.")
 
-            from acwater.run_polymer import run_enmap
+            from acwater import acwater
 
             # load data as polymer object
-            l2 = run_enmap(enmap_l1b=enmap_ImageL1)
+            l2 = acwater.run_enmap(enmap_l1b=enmap_ImageL1)
             enmap_l2a_vnir = l2.Rw
             enmap_l2a_swir = np.full(enmap_ImageL1.swir.data.shape, np.NaN, dtype=np.float)
 
