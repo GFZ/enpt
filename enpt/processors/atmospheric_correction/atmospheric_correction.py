@@ -133,9 +133,7 @@ class AtmosphericCorrector(object):
             from acwater import acwater
 
             # load data as polymer object
-            l2 = acwater.run_enmap(enmap_l1b=enmap_ImageL1)
-            enmap_l2a_vnir = l2.Rw
-            enmap_l2a_swir = np.full(enmap_ImageL1.swir.data.shape, np.NaN, dtype=np.float)
+            enmap_l2a_vnir, enmap_l2a_swir = acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
 
             # validate results
             for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
@@ -143,13 +141,12 @@ class AtmosphericCorrector(object):
                 if np.isnan(mean0) or mean0 == 0 or std0 == 0:
                     enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
 
-
             # join results
             enmap_ImageL1.logger.info('Joining results of atmospheric correction for water.')
 
             for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
                                                  [enmap_l2a_vnir, enmap_l2a_swir]):
-                # in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
 
