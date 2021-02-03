@@ -261,11 +261,11 @@ class EnPTConfig(object):
         :key scale_factor_boa_ref:
             Scale factor to be applied to BOA reflectance result
 
-        :key multiprocessing:
+        :key threads:
             number of threads for multiprocessing of blocks (see bellow):
-            - 'multiprocessing = 0': for single thread
-            - 'multiprocessing < 0': for as many threads as there are CPUs
-            - 'multiprocessing > 0': gives the number of threads
+            - 'threads = 0': for single thread
+            - 'threads < 0': for as many threads as there are CPUs
+            - 'threads > 0': gives the number of threads
 
         :key blocksize:
             block size for multiprocessing
@@ -373,7 +373,7 @@ class EnPTConfig(object):
         self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
-        self.multiprocessing = gp('multiprocessing')
+        self.threads = gp('threads')
         self.blocksize = gp('blocksize')
 
         # smile

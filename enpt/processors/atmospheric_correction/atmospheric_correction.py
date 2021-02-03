@@ -40,6 +40,8 @@ import sicor
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
+from acwater import acwater
+
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
 from ...utils.path_generator import get_path_ac_options
@@ -130,8 +132,6 @@ class AtmosphericCorrector(object):
             # raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
             #                           "You may use 'land' instead.")
 
-            from acwater import acwater
-
             # load data as polymer object
             enmap_l2a_vnir, enmap_l2a_swir = acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
 
@@ -152,6 +152,15 @@ class AtmosphericCorrector(object):
 
         else:  # self.cfg.mode_ac == 'combined'
             # call SICOR for land and AWI water AC for land surfaces here
+
+            # enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
+            #     sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+            #
+            # enmap_l2a_vnir_poly, enmap_l2a_swir_poly = acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
+            #
+            # enmap_l2a_vnir_poly[landmask==1] = enmap_l2a_vnir
+            # or
+            # enmap_l2a_vnir = enmap_l2a_vnir_poly[landmask==2] + enmap_l2a_vnir[landmask==1]
 
             raise NotImplementedError("The atmospheric correction mode 'combined' is not yet implemented. "
                                       "You may use 'land' instead.")

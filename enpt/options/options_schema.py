@@ -88,7 +88,7 @@ enpt_schema_input = dict(
                     enable_ice_retrieval=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
                     scale_factor_boa_ref=dict(type='integer', required=False, min=1),
-                    multiprocessing=dict(type='integer', required=False),
+                    threads=dict(type='integer', required=False),
                     blocksize=dict(type='integer', required=False),
 
                 )),
@@ -163,7 +163,7 @@ parameter_mapping = dict(
     enable_ice_retrieval=('processors', 'atmospheric_correction', 'enable_ice_retrieval'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
     scale_factor_boa_ref=('processors', 'atmospheric_correction', 'scale_factor_boa_ref'),
-    multiprocessing=('processors', 'atmospheric_correction', 'multiprocessing'),
+    threads=('processors', 'atmospheric_correction', 'threads'),
     blocksize=('processors', 'atmospheric_correction', 'blocksize'),
 
     # processors > smile
