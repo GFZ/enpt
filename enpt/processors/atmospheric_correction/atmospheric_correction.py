@@ -150,19 +150,35 @@ class AtmosphericCorrector(object):
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
 
-        else:  # self.cfg.mode_ac == 'combined'
+        elif self.cfg.mode_ac == 'combined':
             # call SICOR for land and AWI water AC for land surfaces here
 
-            # enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
-            #     sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
-            #
-            # enmap_l2a_vnir_poly, enmap_l2a_swir_poly = acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
-            #
-            # enmap_l2a_vnir_poly[landmask==1] = enmap_l2a_vnir
-            # or
-            # enmap_l2a_vnir = enmap_l2a_vnir_poly[landmask==2] + enmap_l2a_vnir[landmask==1]
+            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
+                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
-            raise NotImplementedError("The atmospheric correction mode 'combined' is not yet implemented. "
-                                      "You may use 'land' instead.")
+            enmap_l2a_vnir_water, enmap_l2a_swir_water = \
+                acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
+
+            # enmap_l2a_vnir = np.where(enmap_l2a_vnir_water is None, enmap_l2a_vnir, enmap_l2a_vnir_water)
+            # enmap_l2a_swir = np.where(enmap_l2a_swir_water is None, enmap_l2a_swir, enmap_l2a_swir_water)
+            enmap_l2a_vnir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_vnir, enmap_l2a_vnir_water)
+            enmap_l2a_swir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_swir, enmap_l2a_swir_water)
+
+            # enmap_l2a_vnir_water[np.argwhere(np.isnan(enmap_l2a_vnir_water))] = enmap_l2a_vnir
+
+            # validate results
+            for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
+                mean0, std0 = np.nanmean(detectordata[:, :, 0]), np.nanstd(detectordata[:, :, 0])
+                if np.isnan(mean0) or mean0 == 0 or std0 == 0:
+                    enmap_ImageL1.logger.warning('The atmospheric correction returned empty %s bands!' % detectorname)
+
+            # join results
+            enmap_ImageL1.logger.info('Joining results of atmospheric correction for water.')
+
+            for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
+                                                 [enmap_l2a_vnir, enmap_l2a_swir]):
+                in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                in_detector.detector_meta.unitcode = 'BOARef'
 
         return enmap_ImageL1

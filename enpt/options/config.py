@@ -75,7 +75,7 @@ config_for_testing_water = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=False,
     enable_ac=True,
-    mode_ac='water',
+    mode_ac='combined',
     enable_ice_retrieval=False,
     CPUs=16
 )
