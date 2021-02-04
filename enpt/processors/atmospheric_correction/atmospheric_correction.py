@@ -40,7 +40,7 @@ import sicor
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
-from acwater import acwater
+from acwater.acwater import polymer_ac_enmap
 
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
@@ -122,18 +122,16 @@ class AtmosphericCorrector(object):
                 # FIXME use cwv_model, cwc_model, toa_model also for EnPT?
 
         elif self.cfg.mode_ac == 'water':
-
-            # call water AC of AWI here -> apply it to water surfaces ONLY
-
+            # call acwater and runs polymer atmospheric correction
+            # NOTE: - enmap_l2a_vnir and enmap_l2a_swir are the reflectance above the water surface
+            #       - values are returned only for water masked surface, as in the condition bellow
             if 2 not in enmap_ImageL1.vnir.mask_landwater[:]:
                 raise RuntimeError("The atmospheric correction mode is set to 'water' but the input image does not "
                                    "contain any water surfaces according to the land/water image mask.")
 
-            # raise NotImplementedError("The atmospheric correction mode 'water' is not yet implemented. "
-            #                           "You may use 'land' instead.")
-
             # load data as polymer object
-            enmap_l2a_vnir, enmap_l2a_swir = acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
+            enmap_l2a_vnir, enmap_l2a_swir = \
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
 
             # validate results
             for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
@@ -151,20 +149,22 @@ class AtmosphericCorrector(object):
                 in_detector.detector_meta.unitcode = 'BOARef'
 
         elif self.cfg.mode_ac == 'combined':
-            # call SICOR for land and AWI water AC for land surfaces here
+            # call SICOR for land and acwater for water and combine results using the landmask
+
+            if 1 not in enmap_ImageL1.vnir.mask_landwater[:] or 2 not in enmap_ImageL1.vnir.mask_landwater[:]:
+                enmap_ImageL1.logger.warning("The atmospheric correction mode is set to 'combined' "
+                                             "but the input image does not contain both water and land surfaces "
+                                             "according to the land/water image mask.")
 
             enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
                 sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
+            # polymer_ac_enmap returns masked (nan) values for land
             enmap_l2a_vnir_water, enmap_l2a_swir_water = \
-                acwater.run_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
 
-            # enmap_l2a_vnir = np.where(enmap_l2a_vnir_water is None, enmap_l2a_vnir, enmap_l2a_vnir_water)
-            # enmap_l2a_swir = np.where(enmap_l2a_swir_water is None, enmap_l2a_swir, enmap_l2a_swir_water)
             enmap_l2a_vnir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_vnir, enmap_l2a_vnir_water)
-            enmap_l2a_swir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_swir, enmap_l2a_swir_water)
-
-            # enmap_l2a_vnir_water[np.argwhere(np.isnan(enmap_l2a_vnir_water))] = enmap_l2a_vnir
+            enmap_l2a_swir = np.where(np.isnan(enmap_l2a_swir_water), enmap_l2a_swir, enmap_l2a_swir_water)
 
             # validate results
             for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
