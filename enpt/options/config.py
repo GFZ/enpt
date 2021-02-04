@@ -64,7 +64,7 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 
 config_for_testing_water = dict(
     path_l1b_enmap_image=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-750.zip')),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     path_dem=os.path.abspath(
@@ -76,6 +76,8 @@ config_for_testing_water = dict(
     is_dummy_dataformat=False,
     enable_ac=True,
     mode_ac='combined',
+    blocksize=100,
+    auto_download_ecmwf=True,
     enable_ice_retrieval=False,
     CPUs=16
 )
@@ -366,9 +368,6 @@ class EnPTConfig(object):
         # atmospheric_correction
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
-        if self.mode_ac != 'land':
-            warnings.warn("The atmospheric correction mode '%s' is currently under development and "
-                          "may not yet work as expected." % self.mode_ac)  # FIXME
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
