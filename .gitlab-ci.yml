@@ -13,18 +13,18 @@ test_enpt:
     - source /root/miniconda3/bin/activate ci_env
 
     # update geoarray and py_tools_ds
-    - pip install 'geoarray>=0.8.11'
-    - pip install 'py_tools_ds>=0.14.23'
+    # - pip install 'geoarray>=0.8.11'
+    # - pip install 'py_tools_ds>=0.14.23'
 
     # install sicor and perhaps switch sicor branch
-    - mkdir /tmp/sicor_tables
-    - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
-    - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
+    # - mkdir /tmp/sicor_tables
+    # - mv /tmp/sicor/sicor/tables/*.h5 /tmp/sicor_tables
+    # - mv /tmp/sicor/sicor/tables/EnMAP_LUT* /tmp/sicor_tables
     - rm -rf /tmp/sicor
-#    - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
+    # - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
     - git clone -b dev https://git.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor  # FIXME use master as soon as its merged
-    - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
-    - rm -rf /tmp/sicor_tables/
+    # - mv /tmp/sicor_tables/* /tmp/sicor/sicor/tables
+    # - rm -rf /tmp/sicor_tables/
     - pip install -e /tmp/sicor
 
     # update sicor
@@ -34,14 +34,14 @@ test_enpt:
     # - make download-tables
     # - python setup.py install
     # - cd ../../
-    - conda install -c conda-forge pygrib  # FIXME remove as soon as docker container is rebuilt
-    - pip install -U sicor
+    # - conda install -c conda-forge pygrib  # FIXME remove as soon as docker container is rebuilt
+    # - pip install -U sicor
 
     # run nosetests
     - make nosetests  # test are called here
 
     # create the docs
-    - pip install sphinx_rtd_theme  # Read-the-docs theme for SPHINX documentation
+    # - pip install sphinx_rtd_theme  # Read-the-docs theme for SPHINX documentation
     - make docs
   artifacts:
     paths:
