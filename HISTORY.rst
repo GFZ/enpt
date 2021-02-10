@@ -5,17 +5,20 @@ History
 0.17.0 (coming soon)
 --------------------
 
+* Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
+  and adjusted 'make gitlab_CI_docker' accordingly.
+* Fixed wrong package name in environment_enpt.yml.
+* Added sicor as conda environment to environment_enpt.yml which also makes before_script.sh obsolete.
+* Coverage files are now completely deleted by running 'make clean-test'.
 * Implemented new methods to transform raster arrays between sensor and map geometry.
 * VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
 * Added test_images_sensorgeo.py
-* Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
-  and adjusted 'make gitlab_CI_docker' accordingly.
 
 
 0.16.4 (2020-12-10)
 -------------------
 
-* Added URL checker CI job and fixed all dead UR
+* Added URL checker CI job and fixed all dead URLs.
 
 
 0.16.3 (2020-11-03)
