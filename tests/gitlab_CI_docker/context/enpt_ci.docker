@@ -12,12 +12,3 @@ RUN /bin/bash -i -c "\
     conda update -n base -c conda-forge conda;\
     conda activate ci_env; \
     conda env update -n ci_env -f /root/environment_enpt.yml"
-
-# copy sicor code to /tmp
-COPY sicor /tmp/sicor
-
-# install sicor (in pip development mode so that its root directory in /tmp/sicor matching with the subsequent COPY command)
-RUN bash -i -c "\
-    source /root/miniconda3/bin/activate ci_env; \
-    cd /tmp/sicor/ ; \
-    pip install -e ."

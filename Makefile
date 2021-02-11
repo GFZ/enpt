@@ -46,6 +46,7 @@ clean-test: ## remove test and coverage artifacts
 	## don't call coverage erase here because make install calls make clean which calls make clean-test
 	## -> since make install should run without the test requirements we can't use coverage erase here
 	rm -fr .tox/
+	rm -f .coverage
 	rm -fr .coverage.*
 	rm -fr htmlcov/
 	rm -fr nosetests.html
@@ -55,6 +56,11 @@ lint: ## check style with flake8
 	flake8 --max-line-length=120 enpt tests > ./tests/linting/flake8.log
 	pycodestyle enpt --exclude="*.ipynb,*.ipynb*" --max-line-length=120 > ./tests/linting/pycodestyle.log
 	-pydocstyle enpt > ./tests/linting/pydocstyle.log
+
+urlcheck: ## check for dead URLs
+	urlchecker check . \
+		--file-types .py,.rst,.md,.json \
+		--white-listed-patterns www.enmap.org  # certificate checks fail although URLs work
 
 test: ## run tests quickly with the default Python
 	python setup.py test

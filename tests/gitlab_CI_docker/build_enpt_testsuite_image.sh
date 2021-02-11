@@ -5,14 +5,6 @@ dockerfile="enpt_ci.docker"
 tag="enpt_ci:0.14.1"
 gitlab_runner="enpt_gitlab_CI_runner"
 
-# get sicor project
-rm -rf context/sicor
-git clone git@gitext.gfz-potsdam.de:EnMAP/sicor.git ./context/sicor
-# git clone git@gitext.gfz-potsdam.de:EnMAP/sicor.git --branch feature/improve_enmap --single-branch ./context/sicor
-cd ./context/sicor
-git lfs pull
-cd ../..
-
 echo "#### Build runner docker image"
 docker rmi ${tag}
 docker build ${context_dir} \
@@ -36,7 +28,7 @@ docker run \
     gitlab/gitlab-runner:latest
 
 # register the runner at the corresponding GitLab repository via a registration-token
-echo "#### Register container at gitlab, get token here https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/settings/ci_cd"
+echo "#### Register container at gitlab, get token here https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/settings/ci_cd"
 read -p "Please enter gitlab token: " token
 echo ""
 read -p "Please enter gitlab runner name: " runner_name
@@ -49,7 +41,7 @@ gitlab-ci-multi-runner register \
   --non-interactive \
   --executor 'docker' \
   --docker-image '${tag}' \
-  --url 'https://gitext.gfz-potsdam.de/ci' \
+  --url 'https://git.gfz-potsdam.de/ci' \
   --registration-token '${token}' \
   --description '${runner_name}' \
   --tag-list enpt_ci_client \

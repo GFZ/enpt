@@ -5,18 +5,18 @@ From EnMAP Level-1B to Level-2A
 *******************************
 
 In this tutorial, we generate EnMAP_ Level-2A from Level-1B data using the EnMAP processing tool (EnPT_).
-Please refer to the overview about EnMAP data products `here <http://www.enmap.org/dataproducts.html>`__ to learn more
-about the differences between EnMAP processing levels.
+Please refer to the overview about EnMAP data products `here <https://www.enmap.org/mission/dataproducts/>`__ to learn
+more about the differences between EnMAP processing levels.
 
 As described in the :ref:`usage` section of this documentation, the input parameters of EnPT_ can be set using the
 Python application programming interface (API), the command line interface (CLI) or the graphical userface (GUI) within
 the EnMAP-Box_ in QGIS_. In this tutorial, we will use the GUI for simplicity. More information about the GUI can be
-found `here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp>`__.
+found `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp>`__.
 
 
-.. _EnPT: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT
-.. _EnMAP: http://www.enmap.org/
-.. _EnMAP-Box: http://www.enmap.org/enmapbox.html
+.. _EnPT: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT
+.. _EnMAP: https://www.enmap.org/
+.. _EnMAP-Box: https://www.enmap.org/data_tools/enmapbox/
 .. _QGIS: https://www.qgis.org
 
 
@@ -31,19 +31,20 @@ This tutorial requires some software to be installed on your machine:
     - QGIS_ and the EnMAP-Box_
       (see `here <https://enmap-box.readthedocs.io/en/latest/usr_section/usr_installation.html>`__
       for installation instructions)
-    - EnPT_ (see `here <https://enmap.gitext-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html>`__
+    - EnPT_ (see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html>`__
       for installation instructions)
-    - `EnPT EnMAP-Box App (GUI)`_ (see `here <http://enmap.gitext.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/
-      installation.html>`__ for installation instructions)
+    - `EnPT EnMAP-Box App (GUI)`_ (see `here
+      <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/installation.html>`__
+      for installation instructions)
 
-.. _`EnPT EnMAP-Box App (GUI)`: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
+.. _`EnPT EnMAP-Box App (GUI)`: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 
 
 Data
 """"
 
 You can download the input data for this tutorial
-`here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/data/
+`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
 EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__.
 
 Inspect the Level-1B data
@@ -52,7 +53,7 @@ Inspect the Level-1B data
 The downloaded zip-archive contains a subset of an EnMAP Level-1B dataset covering a rural region in Bavaria, Germany.
 
 Extract the zip-archive on your local disk and inspect the extracted files. An explanation of all the contained files
-is given `here <https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/data/>`__.
+is given `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/>`__.
 
 .. image:: img/tut__contents_test_dataset.png
 
