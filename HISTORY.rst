@@ -13,6 +13,7 @@ History
 * Implemented new methods to transform raster arrays between sensor and map geometry.
 * VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
 * Added test_images_sensorgeo.py
+* Removed deprecated config options 'enable_ice_retrieval' and 'auto_download_ecmwf'.
 
 
 0.16.4 (2020-12-10)
