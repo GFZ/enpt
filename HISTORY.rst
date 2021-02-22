@@ -2,8 +2,8 @@
 History
 =======
 
-0.17.0 (coming soon)
---------------------
+0.17.0 (2021-02-22)
+-------------------
 
 * Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
   and adjusted 'make gitlab_CI_docker' accordingly.
@@ -14,6 +14,8 @@ History
 * VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
 * Added test_images_sensorgeo.py
 * Removed deprecated config options 'enable_ice_retrieval' and 'auto_download_ecmwf'.
+* EnPT is now compatible with the latest SICOR algorithm which fixes EnMAP/sicor#40
+  ([EnMAP] SWIR parameter retrieval results are applied to wrong VNIR coordinates).
 
 
 0.16.4 (2020-12-10)
