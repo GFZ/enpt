@@ -172,7 +172,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             # FIXME hardcoded - DLR does not provide any smile information
             #   => smile coefficients are set to zero until we have valid ones
             self.nsmile_coef = 5
-            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
+            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
 
             startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
             subset = slice(startband, startband + self.nwvl)
@@ -195,7 +195,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
                 keys2combine = ('row_num', 'row_den', 'col_num', 'col_den')
 
-                tmp = OrderedDict([(ele.tag.lower(), np.float(ele.text)) for ele in bID.findall('./')])
+                tmp = OrderedDict([(ele.tag.lower(), float(ele.text)) for ele in bID.findall('./')])
                 self.rpc_coeffs[bN] = {k: v for k, v in tmp.items() if not k.startswith(keys2combine)}
 
                 for n in keys2combine:
@@ -214,14 +214,14 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.filename_mask_clouds = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
 
             # read preview bands
-            self.preview_bands = np.zeros(3, dtype=np.int)
-            self.preview_bands[0] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
-            self.preview_bands[1] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
-            self.preview_bands[2] = np.int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
+            self.preview_bands = np.zeros(3, dtype=int)
+            self.preview_bands[0] = int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
+            self.preview_bands[1] = int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
+            self.preview_bands[2] = int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
 
             # read some basic information concerning the detector
-            self.nrows = np.int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
-            self.ncols = np.int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
+            self.nrows = int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
+            self.ncols = int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
             self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
             self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
 
@@ -229,37 +229,37 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/"
                                                    "SceneCornerCoordinates" % lbl)
             self.lat_UL_UR_LL_LR = [
-                np.float(scene_corner_coordinates[0].findall("Latitude")[0].text),
-                np.float(scene_corner_coordinates[1].findall("Latitude")[0].text),
-                np.float(scene_corner_coordinates[2].findall("Latitude")[0].text),
-                np.float(scene_corner_coordinates[3].findall("Latitude")[0].text)
+                float(scene_corner_coordinates[0].findall("Latitude")[0].text),
+                float(scene_corner_coordinates[1].findall("Latitude")[0].text),
+                float(scene_corner_coordinates[2].findall("Latitude")[0].text),
+                float(scene_corner_coordinates[3].findall("Latitude")[0].text)
             ]
             self.lon_UL_UR_LL_LR = [
-                np.float(scene_corner_coordinates[0].findall("Longitude")[0].text),
-                np.float(scene_corner_coordinates[1].findall("Longitude")[0].text),
-                np.float(scene_corner_coordinates[2].findall("Longitude")[0].text),
-                np.float(scene_corner_coordinates[3].findall("Longitude")[0].text)
+                float(scene_corner_coordinates[0].findall("Longitude")[0].text),
+                float(scene_corner_coordinates[1].findall("Longitude")[0].text),
+                float(scene_corner_coordinates[2].findall("Longitude")[0].text),
+                float(scene_corner_coordinates[3].findall("Longitude")[0].text)
             ]
 
             # read the band related information: wavelength, fwhm
-            self.nwvl = np.int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
-            self.nsmile_coef = np.int(xml.findall(
+            self.nwvl = int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
+            self.nsmile_coef = int(xml.findall(
                 "ProductComponent/%s/Data/BandInformationList/SmileInformation/NumberOfCoefficients" % lbl)[0].text)
-            self.fwhm = np.zeros(self.nwvl, dtype=np.float)
-            self.wvl_center = np.zeros(self.nwvl, dtype=np.float)
-            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=np.float)
-            self.l_min = np.zeros(self.nwvl, dtype=np.float)
-            self.l_max = np.zeros(self.nwvl, dtype=np.float)
+            self.fwhm = np.zeros(self.nwvl, dtype=float)
+            self.wvl_center = np.zeros(self.nwvl, dtype=float)
+            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
+            self.l_min = np.zeros(self.nwvl, dtype=float)
+            self.l_max = np.zeros(self.nwvl, dtype=float)
             band_informations = xml.findall("ProductComponent/%s/Data/BandInformationList/BandInformation" % lbl)
             for bi in band_informations:
                 k = np.int64(bi.attrib['Id']) - 1
-                self.wvl_center[k] = np.float(bi.findall("CenterWavelength")[0].text)
-                self.fwhm[k] = np.float(bi.findall("FullWidthHalfMaximum")[0].text)
-                self.l_min[k] = np.float(bi.findall("L_min")[0].text)
-                self.l_max[k] = np.float(bi.findall("L_max")[0].text)
+                self.wvl_center[k] = float(bi.findall("CenterWavelength")[0].text)
+                self.fwhm[k] = float(bi.findall("FullWidthHalfMaximum")[0].text)
+                self.l_min[k] = float(bi.findall("L_min")[0].text)
+                self.l_max[k] = float(bi.findall("L_max")[0].text)
                 scl = bi.findall("Smile/Coefficient")
                 for sc in scl:
-                    self.smile_coef[k, np.int64(sc.attrib['exponent'])] = np.float(sc.text)
+                    self.smile_coef[k, np.int64(sc.attrib['exponent'])] = float(sc.text)
 
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
@@ -517,14 +517,14 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
             # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
             # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
-            self.geom_view_zenith = np.abs(np.float(xml.find("specific/acrossOffNadirAngle/center").text))
+            self.geom_view_zenith = np.abs(float(xml.find("specific/acrossOffNadirAngle/center").text))
             # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
-            self.geom_view_azimuth = np.float(xml.find("specific/sceneAzimuthAngle/center").text)
-            self.geom_sun_zenith = 90 - np.float(xml.find("specific/sunElevationAngle/center").text)
-            self.geom_sun_azimuth = np.float(xml.find("specific/sunAzimuthAngle/center").text)
+            self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
+            self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
+            self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
-            self.aot = np.float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
-            self.water_vapour = np.float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
+            self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
+            self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
         else:
             # read the acquisition time
             self.observation_datetime = \
@@ -535,10 +535,10 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
 
             # read Geometry (observation/illumination) angle
-            self.geom_view_zenith = np.float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
-            self.geom_view_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
-            self.geom_sun_zenith = np.float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
-            self.geom_sun_azimuth = np.float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
+            self.geom_view_zenith = float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
+            self.geom_view_azimuth = float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
+            self.geom_sun_zenith = float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
+            self.geom_sun_azimuth = float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):

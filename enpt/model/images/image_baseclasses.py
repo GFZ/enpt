@@ -273,7 +273,7 @@ class _EnMAP_Image(object):
         :return: geoarray.GeoArray
         """
         if self._deadpixelmap is not None:
-            self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
+            self._deadpixelmap.arr = self._deadpixelmap[:].astype(bool)  # ensure boolean map
 
         return self._deadpixelmap
 

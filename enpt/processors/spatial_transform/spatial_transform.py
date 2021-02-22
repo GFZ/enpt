@@ -567,7 +567,7 @@ class RPC_3D_Geolayer_Generator(object):
 
         # get groups of band indices where bands have the same RPC coefficients
         groups = npi.group_by(coeffs_allbands[:, 1:]).split(coeffs_allbands[:, 0])
-        groups_bandinds = [group.astype(np.int).tolist() for group in groups]
+        groups_bandinds = [group.astype(int).tolist() for group in groups]
 
         return groups_bandinds
 
@@ -585,8 +585,8 @@ class RPC_3D_Geolayer_Generator(object):
     def compute_geolayer(self):
         rows, cols = self.enmapIm_dims_sensorgeo
         bands = len(self.rpc_coeffs_per_band)
-        lons = np.empty((rows, cols, bands), dtype=np.float)
-        lats = np.empty((rows, cols, bands), dtype=np.float)
+        lons = np.empty((rows, cols, bands), dtype=float)
+        lats = np.empty((rows, cols, bands), dtype=float)
 
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
 
