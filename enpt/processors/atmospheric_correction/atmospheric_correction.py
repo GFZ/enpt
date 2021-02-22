@@ -34,9 +34,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 import pprint
 import numpy as np
 from multiprocessing import cpu_count
-from os import path
 
-import sicor
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
@@ -58,22 +56,14 @@ class AtmosphericCorrector(object):
         path_opts = get_path_ac_options()
 
         try:
-            options = get_ac_options(path_opts, validation=False)  # FIXME validation is currently not implemented
+            options = get_ac_options(path_opts, validation=True)
 
             # adjust options
-            # FIXME this path should be already known to sicor
-            options["EnMAP"]["Retrieval"]["fn_LUT"] = \
-                path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
-            # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
-
             if enmap_ImageL1.meta.aot is not None:
-                options["EnMAP"]["FO_settings"]["aot"] = enmap_ImageL1.meta.aot
+                options["retrieval"]["default_aot_value"] = enmap_ImageL1.meta.aot
 
-            # always use the fast implementation (the slow implementation was only a temporary solution)
-            options["EnMAP"]["Retrieval"]["fast"] = True
-            options["EnMAP"]["Retrieval"]["ice"] = self.cfg.enable_ice_retrieval
-            options["EnMAP"]["Retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
-            options["EnMAP"]["Retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
+            options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
+            options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
             return options
 
@@ -84,7 +74,7 @@ class AtmosphericCorrector(object):
         options = self.get_ac_options(enmap_ImageL1)
         enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
-        enmap_ImageL1.transform_vnir_to_swir_raster('mask_landwater')
+        enmap_ImageL1.set_SWIRattr_with_transformedVNIRattr('mask_landwater')
 
         # run AC
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
@@ -92,12 +82,17 @@ class AtmosphericCorrector(object):
 
         # run SICOR
         # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
-        #       - cwv_model, cwc_model, toa_model have the SWIR geometry
-        #       - currently, the fast method is implemented,
-        #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
-        #       - ice_model is None if self.cfg.enable_ice_retrieval is False
-        enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
-            sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+        #       - res: a dictionary containing retrieval maps with path lengths of the three water phases
+        #              and several retrieval uncertainty measures
+        #              -> cwv_model, liq_model, ice_model, intercept_model, slope_model, toa_model,
+        #                 sx (posterior predictive uncertainty matrix), scem (correlation error matrix),
+        #                 srem (relative error matrix)
+        #                 optional (if options["retrieval"]["inversion"]["full"] = True):
+        #                 jacobian, convergence, iterations, gain, averaging_kernel, cost_function,
+        #                 dof (degrees of freedom), information_content, retrieval_noise, smoothing_error
+        #              -> SWIR geometry (?)  # FIXME
+        enmap_l2a_vnir, enmap_l2a_swir, res = \
+            sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, unknowns=True, logger=enmap_ImageL1.logger)
 
         # validate results
         for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):

@@ -83,8 +83,6 @@ enpt_schema_input = dict(
                 type='dict', required=False,
                 schema=dict(
                     enable_ac=dict(type='boolean', required=False),
-                    auto_download_ecmwf=dict(type='boolean', required=False),
-                    enable_ice_retrieval=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
                     scale_factor_boa_ref=dict(type='integer', required=False, min=1),
                 )),
@@ -154,8 +152,6 @@ parameter_mapping = dict(
 
     # processors > atmospheric_correction
     enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
-    auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
-    enable_ice_retrieval=('processors', 'atmospheric_correction', 'enable_ice_retrieval'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
     scale_factor_boa_ref=('processors', 'atmospheric_correction', 'scale_factor_boa_ref'),
 
