@@ -57,7 +57,7 @@ req = [
     'scikit-image',
     'scipy',
     'sensormapgeo>=0.4.0',
-    'sicor>=0.15.6',
+    'sicor>=0.16.0',
     'tqdm',
     'utm',
 ]
