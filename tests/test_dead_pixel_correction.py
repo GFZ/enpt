@@ -243,3 +243,8 @@ class Test_interp_nodata_spatially_2d(TestCase):
             interp_nodata_spatially_2d(self.get_data2d(), nodata=np.array([1, 2, 3]))
         with self.assertRaises(ValueError):
             interp_nodata_spatially_2d(self.get_data2d(), implementation='invalid')
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

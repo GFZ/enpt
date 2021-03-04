@@ -35,7 +35,7 @@ test_controller
 Tests for `execution.controller` module.
 """
 
-from unittest import TestCase, main
+from unittest import TestCase
 import shutil
 
 from enpt.execution.controller import EnPT_Controller
@@ -69,4 +69,5 @@ class Test_EnPT_Controller_DLR_testdata(TestCase):
 
 
 if __name__ == '__main__':
-    main()
+    import nose2
+    nose2.main()

@@ -29,7 +29,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from unittest import TestCase, main
+from unittest import TestCase
 import tempfile
 import zipfile
 
@@ -75,5 +75,6 @@ class Test_Radiometric_Transformer(TestCase):
             self.assertTrue(L1_obj.swir.detector_meta.unitcode == 'TOARef')
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

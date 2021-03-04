@@ -356,3 +356,8 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
         self.assertEqual(lons.shape, (1024, 1000, 6))
         self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
         self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

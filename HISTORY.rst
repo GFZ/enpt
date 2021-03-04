@@ -2,6 +2,12 @@
 History
 =======
 
+0.17.2 (2021-03-04)
+-------------------
+
+* Added "if __name__ == '__main__'" blocks below test modules to ensure tests are also running properly on Windows.
+
+
 0.17.1 (2021-02-23)
 -------------------
 

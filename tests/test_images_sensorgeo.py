@@ -127,3 +127,8 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
         finally:
             self.L1_obj.meta.vnir.lons = vnir_lons
             self.assertIsInstance(self.L1_obj.meta.vnir.lons, np.ndarray)
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

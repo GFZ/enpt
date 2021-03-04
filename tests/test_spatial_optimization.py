@@ -77,3 +77,8 @@ class Test_Spatial_Optimizer(TestCase):
         self.assertNotEqual(np.std(L1_obj.meta.vnir.lons), 0)
         self.assertNotEqual(np.mean(L1_obj.meta.vnir.lats), 0)
         self.assertNotEqual(np.std(L1_obj.meta.vnir.lats), 0)
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()
