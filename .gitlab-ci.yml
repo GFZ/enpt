@@ -72,28 +72,12 @@ test_enpt_install:
   stage: test
   script:
     - source /root/miniconda3/bin/activate
-    - conda update conda
-    - conda create -y -q -c conda-forge --name enpt_test python=3
-    - conda activate enpt_test
+    - conda install -c conda-forge mamba
+    - mamba update -n base --all
 
-    # update conda and python
-    - conda update -n base -c conda-forge conda
-#    - conda update -c conda-forge python
-
-    # avoid package incompatibilities
-    # - conda config --set channel_priority strict  # otherwise gdal or libgdal may be installed from defaults channel
-
-    # install some dependencies that cause trouble when installed via pip
-    - conda install -y -c conda-forge numpy pandas lxml
-
-    # install not pip-installable deps of py_tools_ds / geoarray / sensormapgeo
-    - conda install -y -c conda-forge gdal scikit-image pyproj geopandas matplotlib cartopy shapely pyresample
-
-    # install not pip-installable deps of arosics
-    - conda install -y -c conda-forge pyfftw pykrige
-
-    # install not pip-installable deps of sicor
-    - conda install -y -q -c conda-forge glymur cachetools pyhdf h5py pytables llvmlite numba scikit-learn pygrib
+    # create enpt environment from environment_enpt.yml
+    - mamba env create --name enpt_test -f tests/gitlab_CI_docker/context/environment_enpt.yml
+    - conda activate enval_test
 
     # install enpt
     - pip install -e .
