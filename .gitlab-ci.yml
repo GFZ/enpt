@@ -73,11 +73,11 @@ test_enpt_install:
   script:
     - source /root/miniconda3/bin/activate
     - conda install -c conda-forge mamba
-    - mamba update -n base --all
+    - mamba update -n base -c conda-forge --all
 
     # create enpt environment from environment_enpt.yml
     - mamba env create --name enpt_test -f tests/gitlab_CI_docker/context/environment_enpt.yml
-    - conda activate enval_test
+    - conda activate enpt_test
 
     # install enpt
     - pip install -e .
