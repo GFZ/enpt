@@ -83,8 +83,6 @@ class AtmosphericCorrector(object):
             raise FileNotFoundError('Could not locate options file for atmospheric correction at %s.' % path_opts)
 
     def run_ac(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL1Product_SensorGeo:
-        options = self.get_ac_options(enmap_ImageL1)
-        enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
         enmap_ImageL1.transform_vnir_to_swir_raster('mask_landwater')
 
@@ -99,6 +97,9 @@ class AtmosphericCorrector(object):
             #       - currently, the fast method is implemented,
             #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
             #       - ice_model is None if self.cfg.enable_ice_retrieval is False
+            options = self.get_ac_options(enmap_ImageL1)
+            enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
+
             enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
                 sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
 
@@ -155,6 +156,9 @@ class AtmosphericCorrector(object):
                 enmap_ImageL1.logger.warning("The atmospheric correction mode is set to 'combined' "
                                              "but the input image does not contain both water and land surfaces "
                                              "according to the land/water image mask.")
+
+            options = self.get_ac_options(enmap_ImageL1)
+            enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
             enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
                 sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
