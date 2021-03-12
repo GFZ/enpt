@@ -153,7 +153,13 @@ class _EnMAP_Image(object):
 
     @property
     def mask_landwater(self) -> GeoArray:
-        """Return the water mask (0=background, 1=no water, 2=water, 3=background/resampling artifact).
+        """Return the land/water mask.
+
+        pixel values:
+        - 0: background within scene dimensions, e.g. due to missing values/errors
+        - 1: no water
+        - 2: water
+        - 3: background outside the scene dimensions (artifact from resampling between map and sensor geometry)
 
         :return: geoarray.GeoArray
         """
