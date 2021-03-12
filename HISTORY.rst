@@ -2,6 +2,12 @@
 History
 =======
 
+0.17.3 (coming soon)
+--------------------
+
+* Added documentation for pixel value 3 of land/water mask (#73).
+
+
 0.17.2 (2021-03-04)
 -------------------
 
