@@ -163,7 +163,7 @@ class Dead_Pixel_Corrector(object):
 
                 # convert 2D deadcolumn_map to 3D deadpixel_map
                 B, C = deadcolumn_map.shape
-                deadpixel_map = np.empty((image2correct.shape[0], C, B), np.bool)
+                deadpixel_map = np.empty((image2correct.shape[0], C, B), bool)
                 deadpixel_map[:, :, :] = deadcolumn_map.T
 
             else:
@@ -338,7 +338,7 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray,
                          method=method, fill_value=fill_value)
 
         elif implementation == 'pandas':
-            data2int = data_2d.astype(np.float)
+            data2int = data_2d.astype(float)
             data2int[badmask_full] = np.nan
 
             data_2d = np.array(DataFrame(data2int)

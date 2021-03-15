@@ -189,3 +189,8 @@ class Test_VNIR_SWIR_Stacker(TestCase):
         # wrong input algorithm
         with self.assertRaises(ValueError):
             self.VSSt.compute_stack(algorithm='mean')
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

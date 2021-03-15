@@ -39,7 +39,7 @@ from json import \
     dumps, \
     JSONDecodeError
 
-from unittest import TestCase, main
+from unittest import TestCase
 
 from enpt.options.config import \
     get_options, \
@@ -124,4 +124,5 @@ class Test_EnPTConfig(TestCase):
 
 
 if __name__ == '__main__':
-    main()
+    import nose2
+    nose2.main()

@@ -86,7 +86,7 @@ class SRF(object):
         if normalize:
             y *= (1.0 / y.max())
 
-        rsp = np.empty((x.size, 2), dtype=np.float)
+        rsp = np.empty((x.size, 2), dtype=float)
         rsp[:, 0] = x
         rsp[:, 1] = y
 

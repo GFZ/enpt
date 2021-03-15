@@ -117,3 +117,8 @@ class Test_CLIParser(TestCase):
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": "None"}}'])
         config = self.get_config(parsed_args)
         self.assertEqual(config.CPUs, cpu_count())
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

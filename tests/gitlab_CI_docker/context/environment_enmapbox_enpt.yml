@@ -1,0 +1,21 @@
+name: enmapbox_enpt
+
+channels: &id1
+  - conda-forge
+
+dependencies:
+  - python=3.*.*
+  - pip  # avoids that conda uses the wrong pip
+  - enpt
+  - matplotlib
+  - netcdf4
+  - numba
+  - numpy
+  - pyopengl
+  - qgis
+  - scikit-learn
+
+  - pip:
+    - astropy
+    - enpt_enmapboxapp
+    - scipy

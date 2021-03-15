@@ -49,3 +49,8 @@ class Test_SRF(TestCase):
     def test_from_cwl_fwhm(self):
         srf = SRF.from_cwl_fwhm(cwls=[800, 1000], fwhms=[10, 20])
         self.assertIsInstance(srf, SRF)
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

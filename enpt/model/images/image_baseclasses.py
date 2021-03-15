@@ -153,7 +153,13 @@ class _EnMAP_Image(object):
 
     @property
     def mask_landwater(self) -> GeoArray:
-        """Return the water mask (0=background, 1=no water, 2=water).
+        """Return the land/water mask.
+
+        pixel values:
+        - 0: background within scene dimensions, e.g. due to missing values/errors
+        - 1: no water
+        - 2: water
+        - 3: background outside the scene dimensions (artifact from resampling between map and sensor geometry)
 
         :return: geoarray.GeoArray
         """
@@ -273,7 +279,7 @@ class _EnMAP_Image(object):
         :return: geoarray.GeoArray
         """
         if self._deadpixelmap is not None:
-            self._deadpixelmap.arr = self._deadpixelmap[:].astype(np.bool)  # ensure boolean map
+            self._deadpixelmap.arr = self._deadpixelmap[:].astype(bool)  # ensure boolean map
 
         return self._deadpixelmap
 

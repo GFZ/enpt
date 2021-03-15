@@ -192,5 +192,6 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         self.assertEquals(L1_obj.swir.detector_meta.nwvl, 130)
 
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

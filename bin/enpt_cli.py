@@ -62,7 +62,7 @@ def get_enpt_argparser():
              'https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
              'EnPT/blob/master/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
-        help='number of CPU cores to be used for processing (default: "None" -> use all available')
+        help='number of CPU cores to be used for processing (default: "None" -> use all available)')
     add('-im', '--path_l1b_enmap_image', type=str, default=None,
         help='input path of the EnMAP L1B image to be processed '
              '(zip-archive or root directory; must be given if not contained in --json-config.)')

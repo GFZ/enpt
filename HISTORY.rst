@@ -2,13 +2,38 @@
 History
 =======
 
-0.17.0 (coming soon)
+0.17.3 (coming soon)
 --------------------
+
+* Added documentation for pixel value 3 of land/water mask (#73).
+
+
+0.17.2 (2021-03-04)
+-------------------
+
+* Added "if __name__ == '__main__'" blocks below test modules to ensure tests are also running properly on Windows.
+
+
+0.17.1 (2021-02-23)
+-------------------
+
+* Fixed incorrectly pinned version of sicor.
+
+
+0.17.0 (2021-02-22)
+-------------------
 
 * Moved sicor download from build_enpt_testsuite_image.sh to new before_script.sh
   and adjusted 'make gitlab_CI_docker' accordingly.
 * Fixed wrong package name in environment_enpt.yml.
 * Added sicor as conda environment to environment_enpt.yml which also makes before_script.sh obsolete.
+* Coverage files are now completely deleted by running 'make clean-test'.
+* Implemented new methods to transform raster arrays between sensor and map geometry.
+* VNIR_SWIR_SensorGeometryTransformer now also allows to transform entire 3D data arrays.
+* Added test_images_sensorgeo.py
+* Removed deprecated config options 'enable_ice_retrieval' and 'auto_download_ecmwf'.
+* EnPT is now compatible with the latest SICOR algorithm which fixes EnMAP/sicor#40
+  ([EnMAP] SWIR parameter retrieval results are applied to wrong VNIR coordinates).
 
 * Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
 * Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
@@ -18,7 +43,7 @@ History
 0.16.4 (2020-12-10)
 -------------------
 
-* Added URL checker CI job and fixed all dead UR
+* Added URL checker CI job and fixed all dead URLs.
 
 
 0.16.3 (2020-11-03)

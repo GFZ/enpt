@@ -34,9 +34,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 import pprint
 import numpy as np
 from multiprocessing import cpu_count
-from os import path
 
-import sicor
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
@@ -60,22 +58,14 @@ class AtmosphericCorrector(object):
         path_opts = get_path_ac_options()
 
         try:
-            options = get_ac_options(path_opts, validation=False)  # FIXME validation is currently not implemented
+            options = get_ac_options(path_opts, validation=True)
 
             # adjust options
-            # FIXME this path should be already known to sicor
-            options["EnMAP"]["Retrieval"]["fn_LUT"] = \
-                path.join(path.abspath(sicor.__path__[0]), 'tables', 'EnMAP_LUT_MOD5_formatted_1nm')
-            # options["ECMWF"]["path_db"] = "./ecmwf"  # disbled as it is not needed at the moment
-
             if enmap_ImageL1.meta.aot is not None:
-                options["EnMAP"]["FO_settings"]["aot"] = enmap_ImageL1.meta.aot
+                options["retrieval"]["default_aot_value"] = enmap_ImageL1.meta.aot
 
-            # always use the fast implementation (the slow implementation was only a temporary solution)
-            options["EnMAP"]["Retrieval"]["fast"] = True
-            options["EnMAP"]["Retrieval"]["ice"] = self.cfg.enable_ice_retrieval
-            options["EnMAP"]["Retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
-            options["EnMAP"]["Retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
+            options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
+            options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
             return options
 
@@ -84,7 +74,7 @@ class AtmosphericCorrector(object):
 
     def run_ac(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL1Product_SensorGeo:
 
-        enmap_ImageL1.transform_vnir_to_swir_raster('mask_landwater')
+        enmap_ImageL1.set_SWIRattr_with_transformedVNIRattr('mask_landwater')
 
         # run AC
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "

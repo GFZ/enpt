@@ -119,15 +119,17 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
                 root_dir_main=td,
                 compute_snr=False)
 
-        cls.data2transform_vnir_sensorgeo = cls.L1_obj.vnir.data[:, :, 0]  # a single VNIR band in sensor geometry
+        cls.data2transform_vnir_sensorgeo_3D = cls.L1_obj.vnir.data
+        cls.data2transform_vnir_sensorgeo_2D = cls.L1_obj.vnir.data[:, :, 0]  # a single VNIR band in sensor geometry
         cls.gA2transform_vnir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
-        cls.data2transform_swir_sensorgeo = cls.L1_obj.swir.data[:, :, -1]  # a single SWIR band in sensor geometry
+        cls.data2transform_swir_sensorgeo_3D = cls.L1_obj.swir.data
+        cls.data2transform_swir_sensorgeo_2D = cls.L1_obj.swir.data[:, :, -1]  # a single SWIR band in sensor geometry
         cls.gA2transform_swir_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user
 
-        cls.VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=cls.L1_obj.meta.vnir.lons[:, :, 0],
-                                                         lats_vnir=cls.L1_obj.meta.vnir.lats[:, :, 0],
-                                                         lons_swir=cls.L1_obj.meta.swir.lons[:, :, 0],
-                                                         lats_swir=cls.L1_obj.meta.swir.lats[:, :, 0],
+        cls.VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=cls.L1_obj.meta.vnir.lons,
+                                                         lats_vnir=cls.L1_obj.meta.vnir.lats,
+                                                         lons_swir=cls.L1_obj.meta.swir.lons,
+                                                         lats_swir=cls.L1_obj.meta.swir.lats,
                                                          prj_vnir=32632,
                                                          prj_swir=32632,
                                                          res_vnir=(30, 30),
@@ -136,41 +138,57 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
                                                          # radius_of_influence=45
                                                          )
 
-    def test_transform_sensorgeo_VNIR_to_SWIR(self):
-        data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo)
+    def test_transform_sensorgeo_VNIR_to_SWIR_2D(self):
+        data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo_2D)
+
         self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
-        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_2D.shape)
         # GeoArray(data_swir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
         # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
         #     .save('enpt_testing/enpt_swir_sensorgeo.bsq')
 
-    def test_transform_sensorgeo_SWIR_to_VNIR(self):
-        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo)
+    def test_transform_sensorgeo_SWIR_to_VNIR_2D(self):
+        data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo_2D)
+
         self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEqual(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo.shape)
+        self.assertEqual(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_2D.shape)
         # GeoArray(data_vnir_sensorgeo, nodata=0)\
         #     .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
         # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_sensorgeo.bsq')
 
-    def test_transform_sensorgeo_SWIR_to_VNIR_3DInput_2DGeolayer(self):
-        data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo] * 2)
+    def test_transform_sensorgeo_SWIR_to_VNIR_2band3DInput_3DGeolayer(self):
+        data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo_2D] * 2)
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
-        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo.shape, 2))
 
-    def test_3D_geolayer(self):
-        with self.assertRaises(RuntimeError):
-            VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons,
-                                                lats_vnir=self.L1_obj.meta.vnir.lats,
-                                                lons_swir=self.L1_obj.meta.swir.lons,
-                                                lats_swir=self.L1_obj.meta.swir.lats,
-                                                prj_vnir=32632,
-                                                prj_swir=32632,
-                                                res_vnir=(30, 30),
-                                                res_swir=(30, 30),
-                                                )
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo_2D.shape, 2))
+
+    def test_transform_sensorgeo_SWIR_to_VNIR_2band3DInput_2DGeolayer(self):
+        VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons[:, :, 0],
+                                                     lats_vnir=self.L1_obj.meta.vnir.lats[:, :, 0],
+                                                     lons_swir=self.L1_obj.meta.swir.lons[:, :, 0],
+                                                     lats_swir=self.L1_obj.meta.swir.lats[:, :, 0],
+                                                     prj_vnir=32632,
+                                                     prj_swir=32632,
+                                                     res_vnir=(30, 30),
+                                                     res_swir=(30, 30),
+                                                     resamp_alg='nearest',
+                                                     # radius_of_influence=45
+                                                     )
+
+        data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo_2D] * 2)
+        data_vnir_sensorgeo = VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
+
+        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
+        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo_2D.shape, 2))
+
+    def test_transform_sensorgeo_VNIR_to_SWIR_3D(self):
+        data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo_3D)
+
+        self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
+        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_3D.shape)
 
 
 class Test_RPC_Geolayer_Generator(TestCase):
@@ -338,3 +356,8 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
         self.assertEqual(lons.shape, (1024, 1000, 6))
         self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
         self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()

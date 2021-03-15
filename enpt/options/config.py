@@ -95,7 +95,6 @@ config_for_testing = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=True,
     enable_ac=False,
-    enable_ice_retrieval=False,
     CPUs=16
 )
 

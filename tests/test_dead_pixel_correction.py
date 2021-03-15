@@ -47,10 +47,10 @@ class Test_Dead_Pixel_Corrector(TestCase):
     def setUp(self):
         """Set up the needed test data"""
         # create test data
-        self.im = np.random.randint(1, 10, (50, 1000, 88)).astype(np.float)  # VNIR test size
+        self.im = np.random.randint(1, 10, (50, 1000, 88)).astype(float)  # VNIR test size
 
         # create 2D dead pixel map
-        self.deadpixelmap_2D = np.zeros((self.im.shape[2], self.im.shape[1]), np.bool)
+        self.deadpixelmap_2D = np.zeros((self.im.shape[2], self.im.shape[1]), bool)
         for band, column in \
             [[0, 0],  # first band, first column
              [0, 2],  # first band, any column
@@ -243,3 +243,8 @@ class Test_interp_nodata_spatially_2d(TestCase):
             interp_nodata_spatially_2d(self.get_data2d(), nodata=np.array([1, 2, 3]))
         with self.assertRaises(ValueError):
             interp_nodata_spatially_2d(self.get_data2d(), implementation='invalid')
+
+
+if __name__ == '__main__':
+    import nose2
+    nose2.main()
