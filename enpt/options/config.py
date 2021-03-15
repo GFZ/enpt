@@ -64,7 +64,7 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 
 config_for_testing_water = dict(
     path_l1b_enmap_image=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-750.zip')),
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     path_dem=os.path.abspath(
@@ -75,7 +75,7 @@ config_for_testing_water = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=False,
     enable_ac=True,
-    mode_ac='combined',
+    mode_ac='water',
     blocksize=100,
     auto_download_ecmwf=True,
     enable_ice_retrieval=False,
