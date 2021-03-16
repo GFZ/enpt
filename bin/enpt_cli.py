@@ -105,6 +105,8 @@ def get_enpt_argparser():
         help='Enable VNIR/SWIR co-registration')
     add('--path_reference_image', type=str, default=None,
         help='Reference image for co-registration.')
+    add('--polymer_root', type=str, default=None,
+        help='Polymer root directory (that contains the subdirectory for ancillary data)')
     add('--enable_ac', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")

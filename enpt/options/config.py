@@ -238,6 +238,9 @@ class EnPTConfig(object):
         :key path_reference_image:
             Reference image for co-registration.
 
+        :key polymer root:
+            Polymer root directory (that contains the subdirectory for ancillary data).
+
         :key enable_ac:
             Enable atmospheric correction using SICOR algorithm (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
@@ -365,6 +368,7 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        self.polymer_root = gp('polymer_root')
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')

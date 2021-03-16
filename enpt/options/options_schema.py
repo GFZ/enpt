@@ -82,6 +82,7 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    polymer_root=dict(type='string', required=False),
                     enable_ac=dict(type='boolean', required=False),
                     mode_ac=dict(type='string', required=False, allowed=['land', 'water', 'combined']),
                     auto_download_ecmwf=dict(type='boolean', required=False),
@@ -157,6 +158,7 @@ parameter_mapping = dict(
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
+    polymer_root=('processors', 'atmospheric_correction', 'polymer_root'),
     enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
     mode_ac=('processors', 'atmospheric_correction', 'mode_ac'),
     auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),

@@ -52,6 +52,7 @@
         },
 
         "atmospheric_correction": {
+            "polymer_root": "",  /*Polymer root directory (that contains the subdirectory for ancillary data)*/
             "enable_ac": true,  /*enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A
                                   output contains top-of-atmosphere reflectance.*/
             "mode_ac": "land",  /*3 modes to determine which atmospheric correction is applied at which surfaces (default: 'land'):
