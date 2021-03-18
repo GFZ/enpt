@@ -7,6 +7,7 @@ History
 
 * Added documentation for pixel value 3 of land/water mask (#73).
 * 'make lint' now directly prints errors instead of only logging them to logfiles.
+* EnPTConfig and EnPT_Controller are now importable directly from the top level of EnPT.
 
 
 0.17.2 (2021-03-04)
