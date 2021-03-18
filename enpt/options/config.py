@@ -64,23 +64,41 @@ path_options_default = os.path.join(path_enptlib, 'options', 'options_default.js
 
 config_for_testing_water = dict(
     path_l1b_enmap_image=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     path_dem=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq')),
+        os.path.join(path_enptlib, '..', 'tests', 'data',
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq')),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
-    n_lines_to_append=0,
+    output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
     disable_progress_bars=True,
     is_dummy_dataformat=False,
-    enable_ac=True,
-    mode_ac='water',
-    blocksize=100,
     auto_download_ecmwf=True,
-    enable_ice_retrieval=False,
+    average_elevation=0,
+    deadpix_P_algorithm='spectral',
+    deadpix_P_interp_spatial='linear',
+    deadpix_P_interp_spectral='linear',
+    enable_cloud_screening=False,
+    enable_ice_retrieval=True,
+    enable_keystone_correction=False,
+    enable_vnir_swir_coreg=False,
+    n_lines_to_append=None,
+    ortho_resampAlg='bilinear',
+    run_deadpix_P=True,
+    run_smile_P=False,
+    scale_factor_boa_ref=10000,
+    scale_factor_toa_ref=10000,
+    enable_ac=True,
+    mode_ac='combined',
+    polymer_root='/home/bsilva/dev/acenmap/polymer',
+    threads=-1,
+    blocksize=100,
+    vswir_overlap_algorithm='swir_only',
     CPUs=16
 )
+
 
 config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(

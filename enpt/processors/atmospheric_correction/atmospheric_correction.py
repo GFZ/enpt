@@ -81,17 +81,19 @@ class AtmosphericCorrector(object):
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
 
         if self.cfg.mode_ac == 'land':
-            # run SICOR and apply the AC to land AND water surfaces
+            # run SICOR
             # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
-            #       - cwv_model, cwc_model, toa_model have the SWIR geometry
-            #       - currently, the fast method is implemented,
-            #           -> otherwise options["EnMAP"]["Retrieval"]["fast"] must be false
-            #       - ice_model is None if self.cfg.enable_ice_retrieval is False
-            options = self.get_ac_options(enmap_ImageL1)
-            enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
-
-            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
-                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+            #       - res: a dictionary containing retrieval maps with path lengths of the three water phases
+            #              and several retrieval uncertainty measures
+            #              -> cwv_model, liq_model, ice_model, intercept_model, slope_model, toa_model,
+            #                 sx (posterior predictive uncertainty matrix), scem (correlation error matrix),
+            #                 srem (relative error matrix)
+            #                 optional (if options["retrieval"]["inversion"]["full"] = True):
+            #                 jacobian, convergence, iterations, gain, averaging_kernel, cost_function,
+            #                 dof (degrees of freedom), information_content, retrieval_noise, smoothing_error
+            #              -> SWIR geometry (?)  # FIXME
+            enmap_l2a_vnir, enmap_l2a_swir, res = \
+                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, unknowns=True, logger=enmap_ImageL1.logger)
 
             # validate results
             for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
@@ -110,7 +112,10 @@ class AtmosphericCorrector(object):
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
 
+                # FIXME what about mask_clouds, mask_clouds_confidence, ac_errors?
                 # FIXME use cwv_model, cwc_model, toa_model also for EnPT?
+
+            return enmap_ImageL1
 
         elif self.cfg.mode_ac == 'water':
             # call acwater and runs polymer atmospheric correction
@@ -139,6 +144,8 @@ class AtmosphericCorrector(object):
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
 
+            return enmap_ImageL1
+
         elif self.cfg.mode_ac == 'combined':
             # call SICOR for land and acwater for water and combine results using the landmask
 
@@ -150,8 +157,8 @@ class AtmosphericCorrector(object):
             options = self.get_ac_options(enmap_ImageL1)
             enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
 
-            enmap_l2a_vnir, enmap_l2a_swir, cwv_model, cwc_model, ice_model, toa_model, se, scem, srem = \
-                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, logger=enmap_ImageL1.logger)
+            enmap_l2a_vnir, enmap_l2a_swir, res = \
+                sicor_ac_enmap(enmap_l1b=enmap_ImageL1, options=options, unknowns=True, logger=enmap_ImageL1.logger)
 
             # polymer_ac_enmap returns masked (nan) values for land
             enmap_l2a_vnir_water, enmap_l2a_swir_water = \
@@ -175,4 +182,6 @@ class AtmosphericCorrector(object):
                 in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                 in_detector.detector_meta.unitcode = 'BOARef'
 
-        return enmap_ImageL1
+            return enmap_ImageL1
+
+        raise AttributeError(self.cfg.mode_ac)
