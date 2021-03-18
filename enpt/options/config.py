@@ -61,7 +61,9 @@ __author__ = 'Daniel Scheffler'
 
 path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
+
 try:
+    # from acwater.acwater import polymer_ac_enmap
     path_polymer = os.path.abspath(os.path.join(os.path.dirname(pkgutil.get_loader("polymer").path), os.pardir))
 except:
     path_polymer = ''
@@ -92,8 +94,8 @@ config_for_testing_water = dict(
     ortho_resampAlg='bilinear',
     run_deadpix_P=True,
     run_smile_P=False,
-    scale_factor_boa_ref=10000,
-    scale_factor_toa_ref=10000,
+    scale_factor_boa_ref=1,
+    scale_factor_toa_ref=1,
     enable_ac=True,
     mode_ac='combined',
     polymer_root=path_polymer,

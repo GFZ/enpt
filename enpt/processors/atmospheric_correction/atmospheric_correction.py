@@ -86,11 +86,11 @@ class AtmosphericCorrector(object):
                 return enmap_ImageL1
 
         if self.cfg.mode_ac == 'land':
+            # mode 'land' runs SICOR for atmospheric correction
 
             if hasattr(enmap_ImageL1.vnir, 'mask_landwater') and 2 in enmap_ImageL1.vnir.mask_landwater[:]:
                 enmap_ImageL1.logger.warning("The atmospheric correction mode is set to 'land' "
-                                             "but the input image has also 'water' surfaces "
-                                             "according to the land/water image mask.")
+                                             "sicor is proper for land, uncertainty is expected for water surfaces ")
 
             options = self.get_ac_options(enmap_ImageL1)
             enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
@@ -132,13 +132,13 @@ class AtmosphericCorrector(object):
             return enmap_ImageL1
 
         elif self.cfg.mode_ac == 'water':
-            # call acwater and runs polymer atmospheric correction
+            # mode 'water' runs polymer for atmospheric correction
+
             # NOTE: - enmap_l2a_vnir and enmap_l2a_swir are the reflectance above the water surface
             #       - values are returned only for water masked surface, as in the condition bellow
             if hasattr(enmap_ImageL1.vnir, 'mask_landwater') and 1 in enmap_ImageL1.vnir.mask_landwater[:]:
                 enmap_ImageL1.logger.warning("The atmospheric correction mode is set to 'water' "
-                                             "but the input image has also 'land' surfaces "
-                                             "according to the land/water image mask.")
+                                             "polymer is proper for water, uncertainty is expected for land surfaces ")
             # load data as polymer object
             enmap_l2a_vnir, enmap_l2a_swir = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
@@ -161,7 +161,7 @@ class AtmosphericCorrector(object):
             return enmap_ImageL1
 
         elif self.cfg.mode_ac == 'combined':
-            # call SICOR for land and acwater for water and combine results using the landmask
+            # mode 'combined' runs SICOR for land and polymer for water, results are combined using the landmask
 
             assert hasattr(enmap_ImageL1.vnir, 'mask_landwater')
 
