@@ -85,6 +85,10 @@ class AtmosphericCorrector(object):
                 raise RuntimeError("Polymer is missing: Atmospheric correction not possible using %s mode" % self.cfg.mode_ac)
 
         if self.cfg.mode_ac == 'land':
+
+            options = self.get_ac_options(enmap_ImageL1)
+            enmap_ImageL1.logger.debug('AC options: \n' + pprint.pformat(options))
+
             # run SICOR
             # NOTE: - enmap_l2a_vnir, enmap_l2a_swir: reflectance between 0 and 1
             #       - res: a dictionary containing retrieval maps with path lengths of the three water phases
@@ -168,8 +172,13 @@ class AtmosphericCorrector(object):
             enmap_l2a_vnir_water, enmap_l2a_swir_water = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1, config=self.cfg, detector='merge')
 
-            enmap_l2a_vnir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_vnir, enmap_l2a_vnir_water)
-            enmap_l2a_swir = np.where(np.isnan(enmap_l2a_swir_water), enmap_l2a_swir, enmap_l2a_swir_water)
+            # use mask value 2 for replacing water corrected cells
+            enmap_l2a_vnir = np.where(enmap_ImageL1.vnir.mask_landwater == 2, enmap_l2a_vnir_water, enmap_l2a_vnir)
+            enmap_l2a_swir = np.where(enmap_ImageL1.swir.mask_landwater == 2, enmap_l2a_swir_water, enmap_l2a_swir)
+
+            # use nans in sicor corrected for replacing water corrected cells
+            # enmap_l2a_vnir = np.where(np.isnan(enmap_l2a_vnir_water), enmap_l2a_vnir, enmap_l2a_vnir_water)
+            # enmap_l2a_swir = np.where(np.isnan(enmap_l2a_swir_water), enmap_l2a_swir, enmap_l2a_swir_water)
 
             # validate results
             for detectordata, detectorname in zip([enmap_l2a_vnir, enmap_l2a_swir], ['VNIR', 'SWIR']):
