@@ -38,8 +38,6 @@ from multiprocessing import cpu_count
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
-from acwater.acwater import polymer_ac_enmap
-
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
 from ...utils.path_generator import get_path_ac_options
@@ -79,6 +77,12 @@ class AtmosphericCorrector(object):
         # run AC
         enmap_ImageL1.logger.info("Starting atmospheric correction for VNIR and SWIR detector. "
                                   "Source radiometric unit code is '%s'." % enmap_ImageL1.meta.vnir.unitcode)
+
+        if self.cfg.mode_ac != 'land':
+            try:
+                from acwater.acwater import polymer_ac_enmap
+            except:
+                raise RuntimeError("Polymer is missing: Atmospheric correction not possible using %s mode" % self.cfg.mode_ac)
 
         if self.cfg.mode_ac == 'land':
             # run SICOR
