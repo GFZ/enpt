@@ -62,10 +62,9 @@ __author__ = 'Daniel Scheffler'
 path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 try:
-    path_polymer = os.path.dirname(pkgutil.get_loader("polymers").path)
-    path_polymer = os.path.abspath(os.path.join(path_polymer, os.pardir))
+    path_polymer = os.path.abspath(os.path.join(os.path.dirname(pkgutil.get_loader("polymer").path), os.pardir))
 except:
-    path_polymer = None
+    path_polymer = ''
 
 config_for_testing_water = dict(
     path_l1b_enmap_image=os.path.abspath(
@@ -97,7 +96,7 @@ config_for_testing_water = dict(
     scale_factor_toa_ref=10000,
     enable_ac=True,
     mode_ac='combined',
-    polymer_root=os.path.dirname(pkgutil.get_loader("polymer").path),
+    polymer_root=path_polymer,
     threads=-1,
     blocksize=100,
     vswir_overlap_algorithm='swir_only',
