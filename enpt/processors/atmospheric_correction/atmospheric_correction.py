@@ -83,8 +83,7 @@ class AtmosphericCorrector(object):
                 from acwater.acwater import polymer_ac_enmap
             except:
                 enmap_ImageL1.logger.warning("Polymer is missing: Atmospheric correction is not possible using '%s' mode" % self.cfg.mode_ac)
-                self.cfg.mode_ac = 'land'
-                # return enmap_ImageL1
+                return enmap_ImageL1
 
         if self.cfg.mode_ac == 'land':
             # mode 'land' runs SICOR for atmospheric correction

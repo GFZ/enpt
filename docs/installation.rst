@@ -75,6 +75,17 @@ you through the process.
     EnPT has been tested with Python 3.6+., i.e., should be fully compatible to all Python versions from 3.6 onwards.
 
 
+.. note::
+
+    For atmospheric correction of water surfaces, also in combination with land (SICOR_),
+    the additional package Polymer_ is required.
+    The Polymer software is free for non-commercial use and
+    should be installed separately, as in `ACwater Polymer installation`_.
+
+.. _`ACwater Polymer installation`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
+.. _`Polymer`: https://forum.hygeos.com
+.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://conda.io/docs
