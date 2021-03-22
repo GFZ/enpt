@@ -63,7 +63,7 @@ path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 try:
     path_polymer = os.path.abspath(os.path.join(os.path.dirname(pkgutil.get_loader("polymer").path), os.pardir))
-except:
+except AttributeError:
     path_polymer = ''
 
 config_for_testing_water = dict(
@@ -71,10 +71,12 @@ config_for_testing_water = dict(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
                      'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
-    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
+    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+    #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data',
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq')),
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2'
+                     '__DEM_ASTER.bsq')),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
     disable_progress_bars=True,
