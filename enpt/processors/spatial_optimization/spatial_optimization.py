@@ -50,7 +50,7 @@ from ..spatial_transform import Geometry_Transformer, Geometry_Transformer_3D
 
 class Spatial_Optimizer(object):
     def __init__(self, config: EnPTConfig):
-        """Create an instance of Spatial_Optimizer"""
+        """Create an instance of Spatial_Optimizer."""
         self.cfg = config
         self._ref_Im: Optional[GeoArray, None] = GeoArray(self.cfg.path_reference_image)
 

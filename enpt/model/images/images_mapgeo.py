@@ -126,6 +126,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         - meta:
             - instance of EnMAP_Metadata_SensorGeo class
     """
+
     def __init__(self, config: EnPTConfig, logger=None):
         # protected attributes
         self._logger = None
@@ -200,9 +201,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         return L2_obj
 
     def get_paths(self, l2a_outdir: str):
-        """
-        Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
-        These information are read from the detector_meta.
+        """Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo.
+
+        NOTE: This information is read from the detector_meta.
 
         :param l2a_outdir:  output directory of EnMAP Level-2A dataset
         :return: paths as SimpleNamespace
@@ -225,8 +226,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         return paths
 
     def save(self, outdir: str, suffix="") -> str:
-        """
-        Save the product to disk using almost the same input format
+        """Save the product to disk using almost the same input format.
+
         :param outdir: path to the output directory
         :param suffix: suffix to be appended to the output filename (???)
         :return: root path (root directory) where products were written

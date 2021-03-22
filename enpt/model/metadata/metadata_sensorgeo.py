@@ -113,8 +113,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
-        """
-        Read the metadata of a specific EnMAP detector in sensor geometry
+        """Read the metadata of a specific EnMAP detector in sensor geometry.
 
         :param path_xml: file path of the metadata file
         :return: None
@@ -312,17 +311,22 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """Compute EnMAP SNR from radiance data for the given detector.
 
         SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].
+
         NOTE:   The SNR model files (SNR_D1.bsq/SNR_D2.bsq) contain polynomial coefficients needed to compute SNR.
+
                 SNR_D1.bsq: SNR model for EnMAP SWIR detector (contains high gain and low gain model coefficients)
-                            - 1000 columns (for 1000 EnMAP columns)
-                            - 88 bands for 88 EnMAP VNIR bands
-                            - 7 lines:  - 3 lines: high gain coefficients
-                                        - 3 lines: low gain coefficients
-                                        - 1 line: threshold needed to decide about high gain or low gain
+
+                - 1000 columns (for 1000 EnMAP columns)
+                - 88 bands for 88 EnMAP VNIR bands
+                - 7 lines:  - 3 lines: high gain coefficients
+                            - 3 lines: low gain coefficients
+                            - 1 line: threshold needed to decide about high gain or low gain
+
                 SNR_D2.bsq: SNR model for EnMAP SWIR detector
-                            - 1000 columns (for 1000 EnMAP columns)
-                            - x bands for x EnMAP SWIR bands
-                            - 3 lines for 3 coefficients
+
+                - 1000 columns (for 1000 EnMAP columns)
+                - x bands for x EnMAP SWIR bands
+                - 3 lines for 3 coefficients
 
         :param rad_data:        image radiance data of EnMAP_Detector_SensorGeo
         :param dir_snr_models:  root directory where SNR model data is stored (must contain SNR_D1.bsq/SNR_D2.bsq)
@@ -485,15 +489,15 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         return self._scene_basename
 
-    # Read common metadata method
     def read_common_meta(self, path_xml):
-        """Read the common metadata, principally stored in General Info
+        """Read the common metadata, principally stored in General Info.
+
         - the acquisition time
         - the geometrical observation and illumination
+
         :param path_xml: path to the main xml file
         :return: None
         """
-
         # load the metadata xml file
         xml = ElementTree.parse(path_xml).getroot()
 
@@ -542,7 +546,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
-        """Get earth sun distance (requires file of pre calculated earth sun distance per day)
+        """Get earth sun distance (requires file of pre calculated earth sun distance per day).
 
         :param acqDate:
         """
@@ -564,12 +568,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         return float(EA_dist_dict[acqDate.strftime('%Y-%m-%d')])
 
     def read_metadata(self):
-        """
-        Read the metadata of the entire EnMAP L1B product in sensor geometry
-
-        :return: None
-        """
-
+        """Read the metadata of the entire EnMAP L1B product in sensor geometry."""
         # first read common metadata
         self.read_common_meta(self.path_xml)
 
@@ -582,9 +581,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.swir.read_metadata(self.path_xml)
 
     def to_XML(self) -> str:
-        """
-        Generate an XML metadata string from the L1B metadata.
-        """
+        """Generate an XML metadata string from the L1B metadata."""
         from . import L1B_product_props, L1B_product_props_DLR
         xml = ElementTree.parse(self.path_xml).getroot()
 

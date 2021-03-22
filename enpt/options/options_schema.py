@@ -175,8 +175,7 @@ parameter_mapping = dict(
 
 def get_updated_schema(source_schema, key2update, new_value):
     def deep_update(schema, key2upd, new_val):
-        """Return true if update, else false"""
-
+        """Return true if update, else false."""
         for key in schema:
             if key == key2upd:
                 schema[key] = new_val
