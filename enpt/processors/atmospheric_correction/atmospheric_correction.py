@@ -191,8 +191,9 @@ class AtmosphericCorrector(object):
                ) -> EnMAPL1Product_SensorGeo:
         """Run atmospheric correction according to the specified 'mode_ac' parameter.
 
-        :param enmap_ImageL1:
-        :return:
+        :param enmap_ImageL1:   input EnMAP image containing TOA reflectance (an instance EnMAPL1Product_SensorGeo)
+        :return:    atmospherically corrected output EnMAP image containing BOA reflectance / water leaving reflectance
+                    (an instance EnMAPL1Product_SensorGeo)
         """
         enmap_ImageL1.set_SWIRattr_with_transformedVNIRattr('mask_landwater')
 

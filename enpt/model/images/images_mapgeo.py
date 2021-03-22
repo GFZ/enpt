@@ -142,7 +142,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
     @property
     def logger(self) -> EnPT_Logger:
-        """Get a an instance of enpt.utils.logging.EnPT_Logger.
+        """Get an instance of enpt.utils.logging.EnPT_Logger.
 
         NOTE:
             - The logging level will be set according to the user inputs of EnPT.
