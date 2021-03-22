@@ -1,0 +1,24 @@
+name: enpt_polymer
+
+channels: &id1
+  - conda-forge
+
+dependencies:
+  - python=3.*.*
+  - pip  # avoids that conda uses the wrong pip
+  - enpt
+
+  - cdsapi
+  - cython
+  - gdal
+  - netcdf4
+  - numpy
+  - pandas
+  - pygrib
+  - pyhdf
+  - scipy
+  - xarray
+
+  - pip:
+      - git+https://gitlab.awi.de/phytooptics/acwater.git
+      - ecmwf-api-client
