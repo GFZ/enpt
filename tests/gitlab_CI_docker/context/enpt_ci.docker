@@ -1,7 +1,7 @@
 FROM ci_base_centos:0.1
 
 RUN yum update -y && \
-    yum install -y texlive, make
+    yum install -y texlive make
 
 # copy some needed stuff to /root
 COPY *.yml /root/
@@ -15,7 +15,7 @@ RUN /bin/bash -i -c "\
     conda activate ci_env; \
     mamba env update -n ci_env -f /root/environment_enpt_polymer.yml"
 
-# install Polymer and copy pre-downloaded AUX data to Polymer root avoid at-runtime downloads
+# install Polymer
 RUN /bin/bash -i -c "\
     source /root/miniconda3/bin/activate ; \
     cd /root/ ; \
@@ -25,6 +25,7 @@ RUN /bin/bash -i -c "\
     pip install -e . ;\
     make auxdata_common ;\
     mkdir -p ANCILLARY/ERA5/ ANCILLARY/METEO/ ;\
-    mkdir -p ANCILLARY/ERA5/2017/02/18 ;\
-    cp era5_20170218*.nc ANCILLARY/ERA5/2017/02/18
-    "
+    mkdir -p ANCILLARY/ERA5/2017/02/18"
+
+# copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
+COPY era5_20170218*.nc /root/polymer-v4.13/ANCILLARY/ERA5/2017/02/18
