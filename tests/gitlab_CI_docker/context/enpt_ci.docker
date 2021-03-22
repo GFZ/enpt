@@ -28,4 +28,4 @@ RUN /bin/bash -i -c "\
     mkdir -p ANCILLARY/ERA5/2017/02/18"
 
 # copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
-COPY era5_20170218*.nc /root/polymer-v4.13/ANCILLARY/ERA5/2017/02/18
+COPY era5_20170218*.nc /root/polymer-v4.13/ANCILLARY/ERA5/2017/02/18/
