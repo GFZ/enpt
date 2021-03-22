@@ -109,13 +109,9 @@ Polymer AC is based on the optimization technique that considers atmospheric and
 normalized spectral reflectance above water. For details regarding the Polymer algorithm,
 users are referred to `Steinmetz F, Deschamps P-Y, Ramon R., Opt. Express. 2011; 19`__.
 
-The Polymer software should be installed separately.
-Installation instructions are available at the `ACwater Polymer`_ repository page
-and a free version of the Polymer software is available for non-commercial use at `Polymer`_ forum page.
-
 __ https://doi.org/10.1364/OE.19.009783
 
-.. _ACwater Polymer: https://gitlab.awi.de/phytooptics/acwater
+.. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
 .. _Polymer: https://www.hygeos.com/polymer
 
 Spatial Co-Registration

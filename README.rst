@@ -31,6 +31,7 @@ Feature overview
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
 * atmospheric correction (based on SICOR_)
+* atmospheric correction of water surfaces (based on Polymer_ via `ACwater Polymer`_).
 * conversion of top-of-atmosphere-radiance to top-of-atmosphere-reflectance
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
@@ -94,3 +95,5 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _nosetests: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
+.. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
+.. _Polymer: https://forum.hygeos.com
