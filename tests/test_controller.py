@@ -36,6 +36,7 @@ Tests for `execution.controller` module.
 """
 
 from unittest import TestCase
+from unittest.mock import patch
 import shutil
 
 from enpt.execution.controller import EnPT_Controller
@@ -78,6 +79,14 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
 
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
+
+    @patch('acwater.acwater.polymer_ac_enmap', None)
+    def test_run_all_processors_witout_acwater_installed(self):
+        self.CTR.run_all_processors()
+
+        self.assertTrue("packages ACWater/Polymer are missing. "
+                        "SICOR has to be used as fallback algorithm for water surfaces."
+                        in self.CTR.L1_obj.logger.captured_stream)
 
 
 if __name__ == '__main__':
