@@ -71,7 +71,12 @@ except AttributeError:
 config_for_testing_water = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
+                     # Arcachon
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
+
+                     # Arcachon full tile 2
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z.zip'
+                     )),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
     #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
@@ -81,7 +86,7 @@ config_for_testing_water = dict(
                      '__DEM_ASTER.bsq')),
     log_level='DEBUG',
     output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
-    disable_progress_bars=True,
+    disable_progress_bars=False,
     is_dummy_dataformat=False,
     auto_download_ecmwf=True,
     average_elevation=0,
@@ -93,7 +98,7 @@ config_for_testing_water = dict(
     enable_keystone_correction=False,
     enable_vnir_swir_coreg=False,
     n_lines_to_append=None,
-    ortho_resampAlg='bilinear',
+    ortho_resampAlg='gauss',
     run_deadpix_P=True,
     run_smile_P=False,
     scale_factor_boa_ref=10000,
