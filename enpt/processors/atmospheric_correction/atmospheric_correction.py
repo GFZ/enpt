@@ -163,10 +163,10 @@ class AtmosphericCorrector(object):
                              detector='merge')
 
         # use mask value 2 for replacing water corrected pixels
-        wlboa_ref_vnir = np.where(enmap_ImageL1.vnir.mask_landwater == 2,
+        wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
                                   wl_ref_vnir_water,
                                   boa_ref_vnir_land)
-        wlboa_ref_swir = np.where(enmap_ImageL1.swir.mask_landwater == 2,
+        wlboa_ref_swir = np.where((enmap_ImageL1.swir.mask_landwater[:] == 2)[:, :, None],
                                   wl_ref_swir_water,
                                   boa_ref_swir_land)
 
