@@ -1,8 +1,5 @@
 FROM ci_base_centos:0.1
 
-RUN yum update -y && \
-    yum install -y texlive make
-
 # copy some needed stuff to /root
 COPY *.yml /root/
 COPY polymer-v4.13.tar.gz /root/
@@ -13,7 +10,7 @@ RUN /bin/bash -i -c "\
     conda install -c conda-forge mamba ; \
     mamba update -n base -c conda-forge conda;\
     conda activate ci_env; \
-    mamba env update -n ci_env -f /root/environment_enpt_polymer.yml"
+    mamba env update -n ci_env -f /root/environment_enpt.yml"
 
 # install Polymer into the ci_env environment
 RUN /bin/bash -i -c "\

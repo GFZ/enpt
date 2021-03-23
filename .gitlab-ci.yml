@@ -30,8 +30,6 @@ test_enpt:
     # - cd ../../
     # - pip install -U sicor
 
-    - pip install sphinx-argparse sphinx_rtd_theme  # TODO remove after rebuilding CI container
-
     # run nosetests
     - make nosetests  # test are called here
 

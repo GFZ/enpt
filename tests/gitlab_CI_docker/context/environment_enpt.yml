@@ -18,6 +18,15 @@ dependencies:
   - sensormapgeo>=0.4.0
   - sicor>=0.16.0
 
+  # Polymer AC additional conda requirements
+  - cdsapi
+  - cython
+  - gdal
+  - netcdf4
+  - pygrib
+  - pyhdf
+  - xarray
+
   - pip:
     - cerberus
     - mvgavg
@@ -27,6 +36,10 @@ dependencies:
     - jsmin
     - tqdm
     - utm
+
+    # Polymer AC additional pip requirements
+    - git+https://gitlab.awi.de/phytooptics/acwater.git
+    - ecmwf-api-client
 
     # test/doc/lint requirements
     - coverage
