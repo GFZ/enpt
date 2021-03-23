@@ -81,7 +81,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         self.CTR.run_all_processors()
 
     @patch('acwater.acwater.polymer_ac_enmap', None)
-    def test_run_all_processors_witout_acwater_installed(self):
+    def test_run_all_processors_without_acwater_installed(self):
         self.CTR.run_all_processors()
 
         self.assertTrue("packages ACWater/Polymer are missing. "
