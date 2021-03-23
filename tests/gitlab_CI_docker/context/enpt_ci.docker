@@ -15,9 +15,9 @@ RUN /bin/bash -i -c "\
     conda activate ci_env; \
     mamba env update -n ci_env -f /root/environment_enpt_polymer.yml"
 
-# install Polymer
+# install Polymer into the ci_env environment
 RUN /bin/bash -i -c "\
-    source /root/miniconda3/bin/activate ; \
+    source /root/miniconda3/bin/activate ci_env; \
     cd /root/ ; \
     tar -zxvf polymer-*.tar.gz ; \
     cd polymer-v4.13 ;\
