@@ -72,6 +72,9 @@ class AtmosphericCorrector(object):
             options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
             options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
+            # temporarily disable uncertainty measures to avoid https://gitext.gfz-potsdam.de/EnMAP/sicor/-/issues/86
+            options["retrieval"]["inversion"]["full"] = False
+
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')
 
