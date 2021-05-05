@@ -59,7 +59,13 @@ class AtmosphericCorrector(object):
         self.cfg = config
         self.is_polymer_installed = polymer_ac_enmap is not None
 
-    def _get_sicor_options(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> dict:
+    def _get_sicor_options(self, enmap_ImageL1: EnMAPL1Product_SensorGeo, land_only=False) -> dict:
+        """Get a dictionary containing the SICOR options.
+
+        :param enmap_ImageL1:   EnMAP Level 1 product in sensor geometry
+        :param land_only:       True: SICOR is applied to land only; False: SICOR is applied to all pixels
+        :return:                dictionary of SICOR options
+        """
         path_opts = get_path_ac_options()
 
         try:
@@ -74,6 +80,9 @@ class AtmosphericCorrector(object):
 
             # temporarily disable uncertainty measures to avoid https://gitext.gfz-potsdam.de/EnMAP/sicor/-/issues/86
             options["retrieval"]["inversion"]["full"] = False
+
+            # set land_only mode
+            options["retrieval"]["land_only"] = land_only
 
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')
@@ -105,7 +114,7 @@ class AtmosphericCorrector(object):
         #              -> SWIR geometry (?)  # FIXME
         boa_ref_vnir, boa_ref_swir, land_additional_results = \
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1,
-                           options=self._get_sicor_options(enmap_ImageL1),
+                           options=self._get_sicor_options(enmap_ImageL1, land_only=False),
                            unknowns=True,
                            logger=enmap_ImageL1.logger)
 
@@ -154,7 +163,7 @@ class AtmosphericCorrector(object):
         # run SICOR for land surfaces only
         boa_ref_vnir_land, boa_ref_swir_land, land_additional_results = \
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1,
-                           options=self._get_sicor_options(enmap_ImageL1),
+                           options=self._get_sicor_options(enmap_ImageL1, land_only=True),
                            unknowns=True,
                            logger=enmap_ImageL1.logger)
 
