@@ -7,6 +7,11 @@ History
 
 * Added documentation for pixel value 3 of land/water mask (#73).
 * 'make lint' now directly prints errors instead of only logging them to logfiles.
+* EnPTConfig and EnPT_Controller are now importable directly from the top level of EnPT.
+
+* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
+* Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
+  land surfaces later.
 
 
 0.17.2 (2021-03-04)
@@ -35,10 +40,6 @@ History
 * Removed deprecated config options 'enable_ice_retrieval' and 'auto_download_ecmwf'.
 * EnPT is now compatible with the latest SICOR algorithm which fixes EnMAP/sicor#40
   ([EnMAP] SWIR parameter retrieval results are applied to wrong VNIR coordinates).
-
-* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
-* Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
-  land surfaces later.
 
 
 0.16.4 (2020-12-10)

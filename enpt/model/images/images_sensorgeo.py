@@ -92,9 +92,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta: EnMAP_Metadata_L1B_Detector_SensorGeo = meta
 
     def get_paths(self) -> SimpleNamespace:
-        """
-        Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo
-        These information are read from the detector_meta.
+        """Get all file paths associated with the current instance of EnMAP_Detector_SensorGeo.
+
+        NOTE: This information is read from the detector_meta.
+
         :return: paths
         """
         self.paths.root_dir = self._root_dir
@@ -362,11 +363,13 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                                        ) -> np.ndarray:
         """Transform the given input raster from SWIR to VNIR or from SWIR to VNIR sensor geometry.
 
-        NOTE: - The transformation target is always the EnMAP_Detector_SensorGeo instance sensor geometry
-                (e.g., VNIR sensorgeo if self.detector_name == 'VNIR').
-              - In case a 3D array is given and the array has the exact dimensions of the source detector,
-                the full geolayer is only used if 'respect_keystone' is set to True. This saves computation time
-                for input arrays where the keystone uncertainty does not matter.
+        NOTE:
+
+        - The transformation target is always the EnMAP_Detector_SensorGeo instance sensor geometry
+          (e.g., VNIR sensorgeo if self.detector_name == 'VNIR').
+        - In case a 3D array is given and the array has the exact dimensions of the source detector,
+          the full geolayer is only used if 'respect_keystone' is set to True. This saves computation time
+          for input arrays where the keystone uncertainty does not matter.
 
 
         :param array:               input array to be transformed (2- or 3-dimensional)
@@ -429,9 +432,7 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
         super().__init__(detector_name='VNIR', root_dir=root_dir, config=config, logger=logger, meta=meta)
 
     def read_masks(self):
-        """
-        Read the L1B masks.
-        """
+        """Read the L1B masks."""
         self.logger.info('Reading image masks in VNIR sensor geometry.')
 
         # water mask (0=backgr.; 1=land; 2=water)
@@ -603,9 +604,8 @@ class EnMAPL1Product_SensorGeo(object):
         # compute radiance
         self.DN2TOARadiance()
 
-    def get_paths(self):
-        """
-        Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo
+    def get_paths(self) -> SimpleNamespace:
+        """Get all file paths associated with the current instance of EnMAPL1Product_SensorGeo.
 
         :return: paths.SimpleNamespace()
         """

@@ -44,6 +44,7 @@ __author__ = 'Daniel Scheffler'
 
 class PathGenL1BProduct(object):
     """Path generator class for generating file pathes corresponding to the EnMAP L1B product."""
+
     # TODO update this class
 
     def __init__(self, root_dir: str, detector_name: str):
@@ -86,7 +87,7 @@ class PathGenL1BProduct(object):
 
 
 def get_path_ac_options() -> str:
-    """Returns the path of the options json file needed for atmospheric correction."""
+    """Return the path of the options json file needed for atmospheric correction."""
     from sicor import options
     path_ac = os.path.join(os.path.dirname(options.__file__), 'enmap_options.json')
     # FIXME temporarily disabled because not implemented at the moment:

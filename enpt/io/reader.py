@@ -71,11 +71,11 @@ class L1B_Reader(object):
                        root_dir_ext: str = None,
                        n_line_ext: int = None,
                        compute_snr: bool = True) -> EnMAPL1Product_SensorGeo:
-        """Read L1B EnMAP data. Extend the image by adding a second image [entire, partial]
+        """Read L1B EnMAP data. Extend the image by adding a second image (entire, partial).
 
         :param root_dir_main: Root directory of the main EnMAP Level-1B product
-        :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product [optional]
-        :param n_line_ext:    Number of lines to be added to the main image [if None, use the whole image]
+        :param root_dir_ext:  Root directory of the extended EnMAP Level-1B product (optional)
+        :param n_line_ext:    Number of lines to be added to the main image (if None, use the whole image)
         :param compute_snr:   whether to compute SNR or not (default: True)
         :return: instance of EnMAPL1Product_SensorGeo
         """
@@ -159,8 +159,9 @@ def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float = None, w
     """Read the given solar irradiance file and return an array of irradiances.
 
     :param path_solar_irr_model:    file path to solar irradiance model
+
                                     -> must be arranged like that:
-                                        col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm])
+                                       col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm])
     :param resol_nm:                spectral resolution for returned irradiances [nanometers]
     :param wvl_min_nm:              minimum wavelength of returned irradiances [nanometers]
     :param wvl_max_nm:              maximum wavelength of returned irradiances [nanometers]

@@ -334,7 +334,6 @@ class EnPTConfig(object):
         :key target_coord_grid:
             Custom target coordinate grid where the output is resampled to ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])
         """
-
         # fixed attributes
         self.version = __version__
         self.versionalias = __versionalias__
@@ -622,7 +621,7 @@ def python_to_json(value):
 
 class EnPTValidator(Validator):
     def __init__(self, *args, **kwargs):
-        """
+        """Get an instance of EnPTValidator.
 
         :param args:    Arguments to be passed to cerberus.Validator
         :param kwargs:  Keyword arguments to be passed to cerberus.Validator
@@ -641,7 +640,6 @@ def get_options(target: str, validation: bool = True):
     :param validation:  True / False, whether to validate options read from files or not
     :return: dictionary with options
     """
-
     if os.path.isfile(target):
         with open(target, "r") as fl:
             options = json_to_python(json.loads(jsmin(fl.read())))

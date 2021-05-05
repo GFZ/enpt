@@ -92,10 +92,11 @@ class _EnMAP_Image(object):
         Bundled with all the corresponding metadata.
 
         Attributes and functions (most important; for a full list check help(self.data)!):
+
             - ALL attributes of numpy.ndarray!
             - is_inmem(bool):
-                True if the image data are completely loaded into memory; False if GeoArray only holds a link to a file
-                on disk.
+              True if the image data are completely loaded into memory; False if GeoArray only holds a link to a file
+              on disk.
             - arr: np.ndarray holding the pixel values (if is_mem is True)
             - rows(int)
             - cols(int)
@@ -103,19 +104,19 @@ class _EnMAP_Image(object):
             - shape(tuple)
             - gt(list):  GDAL geotransform: contains the geocoding
             - prj(str): WKT projection string
-            - show(*args, **kwargs):  plot the image
-            - show_map(*args, **kwargs):  plot a map of the image (based on cartopy library)
-            - reproject_to_new_grid(*args, **kwargs)
+            - show():  plot the image
+            - show_map():  plot a map of the image (based on cartopy library)
+            - reproject_to_new_grid()
 
         Usage (there will soon be detailed instructions on usage at https://git.gfz-potsdam.de/danschef/geoarray):
 
             - Use self.data like a normal numpy.ndarray!
                 - NOTE: Operators like *, /, + , - will soon be implemented. In the meanwhile use:
-                    result = self.data[:] *10
+                        result = self.data[:] *10
 
             - How to set self.data?
                 - Link an image file to self.data -> all raster data is read into memory ON DEMAND:
-                    self.data = '/path/to/image.tif'  # sets self.data to GeoArray('/path/to/image.tif')
+                  self.data = '/path/to/image.tif'  # sets self.data to GeoArray('/path/to/image.tif')
 
                 - Link a numpy.ndarray instance with self.data (remaining attributes like geocoding, projection, etc.
                     are copied from the previous self.data attribute.

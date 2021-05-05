@@ -46,7 +46,8 @@ __author__ = 'Daniel Scheffler'
 
 
 class Dead_Pixel_Corrector(object):
-    """
+    """EnPT Dead Pixel Correction class.
+
     The EnPT dead pixel correction uses the pixel masks provided by DLR and interpolates the EnMAP image
     data at the indicated dead pixel positions. It supports two interpolation algorithms:
 

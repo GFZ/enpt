@@ -29,13 +29,18 @@
 
 """EnMAP processing tool (EnPT) software package developed by GFZ."""
 
-from .version import __version__, __versionalias__   # noqa (E402 + F401)
 import sensormapgeo as __smg  # noqa (E402 + F401)  # only to avoid later import error due to static TLS
+
+from .version import __version__, __versionalias__   # noqa (E402 + F401)
+from .options.config import EnPTConfig
+from .execution.controller import EnPT_Controller
 
 __author__ = """Daniel Scheffler"""
 __email__ = 'danschef@gfz-potsdam.de'
 __all__ = ['__version__',
            '__versionalias__',
            '__author__',
-           '__email__'
+           '__email__',
+           'EnPTConfig',
+           'EnPT_Controller'
            ]

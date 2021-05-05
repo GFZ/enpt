@@ -62,7 +62,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
         :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
-        :param grid_res_l2a         Coordinate grid resolution of the L2A product (x, y)
+        :param grid_res_l2a:        Coordinate grid resolution of the L2A product (x, y)
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
@@ -228,9 +228,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             self.fileinfos.append(fileinfo_dict)
 
     def to_XML(self) -> str:
-        """
-        Generate an XML metadata string from the L2A metadata.
-        """
+        """Generate an XML metadata string from the L2A metadata."""
         # use an XML parser that creates properly indented XML files even if new SubElements have been added
         parser = ElementTree.XMLParser(remove_blank_text=True)
 

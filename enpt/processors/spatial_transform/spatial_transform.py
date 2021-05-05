@@ -265,9 +265,8 @@ def move_extent_to_coord_grid(extent_utm: Tuple[float, float, float, float],
 
 
 class RPC_Geolayer_Generator(object):
-    """
-    Class for creating pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC).
-    """
+    """Class for creating pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC)."""
+
     def __init__(self,
                  rpc_coeffs: dict,
                  elevation: Union[str, GeoArray, int, float],
@@ -523,9 +522,8 @@ global_dem_sensorgeo: Optional[GeoArray] = None
 
 
 class RPC_3D_Geolayer_Generator(object):
-    """
-    Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coefficients (RPC).
-    """
+    """Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coeff. (RPC)."""
+
     def __init__(self,
                  rpc_coeffs_per_band: dict,
                  elevation: Union[str, GeoArray, int, float],
