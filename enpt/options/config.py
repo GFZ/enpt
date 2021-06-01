@@ -348,11 +348,12 @@ class EnPTConfig(object):
         EnPTValidator(allow_unknown=True, schema=enpt_schema_config_output).validate(self.to_dict())
 
         # check if given paths point to existing files
-        paths = {k: v for k, v in self.__dict__.items() if k.startswith('path_')}
-        for k, fp in paths.items():
-            if fp and not os.path.isfile(fp):
-                raise FileNotFoundError("The file path provided at the '%s' parameter does not point to an existing "
-                                        "file (%s)." % (k, fp))
+        if os.getenv('IS_ENPT_GUI_TEST') != "1":
+            paths = {k: v for k, v in self.__dict__.items() if k.startswith('path_')}
+            for k, fp in paths.items():
+                if fp and not os.path.isfile(fp):
+                    raise FileNotFoundError("The file path provided at the '%s' parameter does not point "
+                                            "to an existing file (%s)." % (k, fp))
 
         if not self.path_dem:
             warnings.warn('No digital elevation model provided. Note that this may cause uncertainties, e.g., '
