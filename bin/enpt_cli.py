@@ -41,16 +41,16 @@ __author__ = 'Daniel Scheffler'
 
 
 def get_enpt_argparser():
-    """Return argument parser for enpt_cli.py program."""
+    """Return argument parser for the 'enpt' program."""
 
     ##########################################################
     # CONFIGURE MAIN PARSER FOR THE EnPT PREPROCESSING CHAIN #
     ##########################################################
 
     parser = argparse.ArgumentParser(
-        prog='enpt_cli.py',
+        prog='enpt',
         description='=' * 70 + '\n' + 'EnMAP Processing Tool console argument parser. ',
-        epilog="use '>>> enpt_cli.py -h' for detailed documentation and usage hints.")
+        epilog="use '>>> enpt -h' for detailed documentation and usage hints.")
 
     add = parser.add_argument
     add('--version', action='version', version=__version__)
