@@ -59,7 +59,8 @@
         },
 
         "smile": {
-            "run_processor": false
+            /*FIXME currently not implemented*/
+            "run_processor": false  /*Smile detection and correction (provider smile coefficients are ignored)*/
         },
 
         "dead_pixel": {
@@ -74,7 +75,7 @@
         },
 
         "orthorectification": {
-            "resamp_alg": "bilinear",  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
+            "resamp_alg": "gauss",  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')*/
             "vswir_overlap_algorithm": "swir_only", /*Algorithm how to output the spectral bands in the VNIR/SWIR spectral overlap region
                                                       'order_by_wvl': keep spectral bands unchanged, order bands by wavelength
                                                       'average': average the spectral information within the overlap
