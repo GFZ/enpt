@@ -31,6 +31,7 @@
 """EnPT console argument parser."""
 
 import argparse
+import sys
 
 from enpt import __version__
 from enpt.options.config import EnPTConfig
@@ -40,16 +41,16 @@ __author__ = 'Daniel Scheffler'
 
 
 def get_enpt_argparser():
-    """Return argument parser for enpt_cli.py program."""
+    """Return argument parser for the 'enpt' program."""
 
     ##########################################################
     # CONFIGURE MAIN PARSER FOR THE EnPT PREPROCESSING CHAIN #
     ##########################################################
 
     parser = argparse.ArgumentParser(
-        prog='enpt_cli.py',
+        prog='enpt',
         description='=' * 70 + '\n' + 'EnMAP Processing Tool console argument parser. ',
-        epilog="use '>>> enpt_cli.py -h' for detailed documentation and usage hints.")
+        epilog="use '>>> enpt -h' for detailed documentation and usage hints.")
 
     add = parser.add_argument
     add('--version', action='version', version=__version__)
@@ -197,8 +198,23 @@ def _str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-if __name__ == '__main__':
-    parsed_args = get_enpt_argparser().parse_args()
+def main(parsed_args: argparse.Namespace = None) -> int:
+    """Run the argument parser and forward the arguments to the linked functions.
+
+    :param parsed_args:     argparse.Namespace instance of already parsed arguments
+                            (allows to call main() from test_cli_parser.py while passing specific arguments)
+
+    :return:  exitcode (0: all fine, >=1: failed)
+    """
+    if not parsed_args:
+        parsed_args = get_enpt_argparser().parse_args()  # type: argparse.Namespace
+
     parsed_args.func(get_config(parsed_args))
 
     print('\nready.')
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())  # pragma: no cover
