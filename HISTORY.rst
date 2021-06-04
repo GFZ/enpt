@@ -2,13 +2,16 @@
 History
 =======
 
-0.17.3 (coming soon)
---------------------
+0.17.3 (2021-06-04)
+-------------------
 
 * Added documentation for pixel value 3 of land/water mask (#73).
 * 'make lint' now directly prints errors instead of only logging them to logfiles.
 * EnPTConfig and EnPT_Controller are now importable directly from the top level of EnPT.
+* Added version pinnings to Python and QGIS.
 * Replaced entry point 'enpt-cli.py' with 'enpt' which allows to call the argument parser with 'enpt <args>'.
+* Don't assert existing file paths in config validation n case IS_ENPT_GUI_TEST==1.
+* Default orthorecification algorithm is now 'gauss'.
 
 
 0.17.2 (2021-03-04)
