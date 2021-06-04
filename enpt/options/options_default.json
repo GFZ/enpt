@@ -85,7 +85,7 @@
             "target_projection_type": "UTM",  /*projection type of the raster output files (default: 'UTM')
                                                 ('UTM': Universal Transverse Mercator, 'Geographic': Longitude/Latitude)*/
             "target_epsg": "None",  /*custom EPSG code of the target projection (overrides target_projection_type)*/
-            "target_coord_grid": "None"  /*custom target coordinate grid where is output is resampled to
+            "target_coord_grid": "None"  /*custom target coordinate grid to which the output is resampled
                                            ([x0, x1, y0, y1], e.g., [0, 30, 0, 30])*/
         }
     }
