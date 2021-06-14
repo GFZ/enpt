@@ -119,15 +119,15 @@ Note, that the processors are built on each other, so the order must be unchange
 Command line utilities
 **********************
 
-enpt_cli.py
------------
+enpt
+----
 
-At the command line, EnPT provides the **enpt_cli.py** command:
+At the command line, EnPT provides the **enpt** command:
 
 .. argparse::
    :filename: ./../bin/enpt_cli.py
    :func: get_enpt_argparser
-   :prog: enpt_cli.py
+   :prog: enpt
 
 
 ----

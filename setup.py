@@ -86,6 +86,11 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     description="EnMAP Processing Tool",
+    entry_points={
+        'console_scripts': [
+            'enpt=bin.enpt_cli:main',
+        ],
+    },
     extras_require={
         "doc": req_doc,
         "test": req_test,
@@ -103,7 +108,6 @@ setup(
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
-    scripts=['bin/enpt_cli.py'],
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
