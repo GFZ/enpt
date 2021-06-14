@@ -73,8 +73,9 @@ req_lint = ['flake8', 'pycodestyle', 'pydocstyle']
 req_dev = req_setup + req_test + req_doc + req_lint
 
 setup(
-    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso",
-    author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, stephane.guillaso@gfz-potsdam.de",
+    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso, Brenner Silva",
+    author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, "
+                 "stephane.guillaso@gfz-potsdam.de, brenner.silva@awi.de",
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
