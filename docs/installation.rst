@@ -77,13 +77,13 @@ you through the process.
 
 .. note::
 
-    For atmospheric correction of water surfaces, also in combination with land (SICOR_),
-    the additional package Polymer_ is required.
-    The Polymer software is free for non-commercial use and
-    should be installed separately, as in `ACwater Polymer installation`_.
+    For atmospheric correction of water surfaces using the Polymer algorithm instead of SICOR_ (which is mainly
+    designed for land surfaces), the additional package polymer_ is required. The Polymer software is free for
+    non-commercial use and should be installed separately, as described in the
+    `ACwater Polymer installation instructions`_.
 
-.. _`ACwater Polymer installation`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
-.. _`Polymer`: https://forum.hygeos.com
+.. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
+.. _`polymer`: https://forum.hygeos.com
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 
 .. _pip: https://pip.pypa.io

@@ -99,13 +99,10 @@ to BOA- (bottom-of-atmosphere / surface) reflectance. SICOR is a Python based op
 German Research Centre for Geosciences (GFZ) Potsdam. For details on the underlying algorithm, please refer to the
 `documentation pages of SICOR`_.
 
-Atmospheric correction for water
-*********************************
-
-Optionally, EnPT retrieves water reflectance above the surface using the `ACwater Polymer`_.
-The ACwater Polymer is a "wrapper" package (developed at the Alfred-Wegener-Institute, Bremerhaven)
+Optionally, EnPT retrieves water reflectance above the surface using `ACwater Polymer`_.
+ACwater Polymer is a "wrapper" package (developed at the Alfred-Wegener-Institute, Bremerhaven)
 for the `Polymer`_ atmospheric correction (AC) algorithm (developed by Hygeos, Inc).
-Polymer AC is based on the optimization technique that considers atmospheric and oceanic signals to retrieves the
+Polymer AC is based on an optimization technique that considers atmospheric and oceanic signals to retrieve
 normalized spectral reflectance above water. For details regarding the Polymer algorithm,
 users are referred to `Steinmetz F, Deschamps P-Y, Ramon R., Opt. Express. 2011; 19`__.
 

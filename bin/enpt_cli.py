@@ -123,7 +123,8 @@ def get_enpt_argparser():
     add('--scale_factor_boa_ref', type=int, default=10000,
         help='Scale factor to be applied to BOA reflectance result')
     add('--threads', type=int, default=-1,
-        help='Number of threads in ACwater Polymer: 0 for single thread; < 0 for as many as there are CPUs; and > 0 gives the number of threads')
+        help='Number of threads in ACwater Polymer: 0 for single thread; < 0 for as many as there are CPUs; '
+             'and > 0 gives the number of threads')
     add('--blocksize', type=int, default=100,
         help='Block size in ACwater Polymer')
     add('--run_smile_P', type=_str2bool, default=False, nargs='?', const=True,
