@@ -205,6 +205,8 @@ tests/linting/pydocstyle.log.log
 /docs/enpt.execution.rst
 /docs/enpt.io.rst
 /docs/enpt.model.rst
+/docs/enpt.model.images.rst
+/docs/enpt.model.metadata.rst
 /docs/enpt.options.rst
 /docs/enpt.processors.atmospheric_correction.rst
 /docs/enpt.processors.cloud_screening.rst
