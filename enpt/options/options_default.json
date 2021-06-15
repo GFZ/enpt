@@ -61,9 +61,7 @@
                                            (land surfaces are not included in the L2A product)
                                   'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                                               NOTE that this may result in edge effects, e.g., at coastlines*/
-            "auto_download_ecmwf": false,  /*FIXME this might be not needed anymore in future*/
-            "enable_ice_retrieval":  true,  /*enable ice retrieval (default); increases accuracy of water vapour retrieval*/
-            "enable_cloud_screening": false,  /*FIXME this is currently not implemented*/
+            "auto_download_ecmwf": false,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
             "threads": -1, /*number of threads for multiprocessing:
                                     'threads = 0': for single thread

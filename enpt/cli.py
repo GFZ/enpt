@@ -115,11 +115,7 @@ def get_enpt_argparser():
         help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
              "('land', water', 'combined')")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
-        help='Automatically download ECMWF data for atmospheric correction')
-    add('--enable_ice_retrieval', type=_str2bool, default=True, nargs='?', const=True,
-        help='Enable ice retrieval (default); increases accuracy of water vapour retrieval')
-    add('--enable_cloud_screening', type=_str2bool, default=False, nargs='?', const=True,
-        help='Enable cloud screening during atmospheric correction')
+        help='Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces')
     add('--scale_factor_boa_ref', type=int, default=10000,
         help='Scale factor to be applied to BOA reflectance result')
     add('--threads', type=int, default=-1,

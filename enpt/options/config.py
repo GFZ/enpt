@@ -93,8 +93,6 @@ config_for_testing_water = dict(
     deadpix_P_algorithm='spectral',
     deadpix_P_interp_spatial='linear',
     deadpix_P_interp_spectral='linear',
-    enable_cloud_screening=False,
-    enable_ice_retrieval=True,
     enable_keystone_correction=False,
     enable_vnir_swir_coreg=False,
     n_lines_to_append=None,
@@ -186,7 +184,6 @@ config_for_testing_dlr = dict(
     path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
     mode_ac='land',
-    enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
     vswir_overlap_algorithm='swir_only'
@@ -286,13 +283,7 @@ class EnPTConfig(object):
                           NOTE that this may result in edge effects, e.g., at coastlines
 
         :key auto_download_ecmwf:
-            Automatically download ECMWF data for atmospheric correction
-
-        :key enable_ice_retrieval:
-            Enable ice retrieval (default); increases accuracy of water vapour retrieval
-
-        :key enable_cloud_screening:
-            Enable cloud screening during atmospheric correction
+            Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces
 
         :key scale_factor_boa_ref:
             Scale factor to be applied to BOA reflectance result
@@ -403,8 +394,6 @@ class EnPTConfig(object):
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
-        self.enable_ice_retrieval = gp('enable_ice_retrieval')
-        self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
         self.threads = gp('threads')
         self.blocksize = gp('blocksize')
