@@ -62,6 +62,56 @@ __author__ = 'Daniel Scheffler'
 path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 
+try:
+    # from acwater.acwater import polymer_ac_enmap
+    path_polymer = os.path.abspath(os.path.join(os.path.dirname(pkgutil.get_loader("polymer").path), os.pardir))
+except AttributeError:
+    path_polymer = ''
+
+config_for_testing_water = dict(
+    path_l1b_enmap_image=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+                     # Arcachon
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
+
+                     # Arcachon full tile 2
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z.zip'
+                     )),
+    # path_l1b_enmap_image_gapfill=os.path.abspath(
+    #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
+    #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip')),
+    path_dem=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data',
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2'
+                     '__DEM_ASTER.bsq')),
+    log_level='DEBUG',
+    output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
+    disable_progress_bars=False,
+    is_dummy_dataformat=False,
+    auto_download_ecmwf=True,
+    average_elevation=0,
+    deadpix_P_algorithm='spectral',
+    deadpix_P_interp_spatial='linear',
+    deadpix_P_interp_spectral='linear',
+    enable_cloud_screening=False,
+    enable_ice_retrieval=True,
+    enable_keystone_correction=False,
+    enable_vnir_swir_coreg=False,
+    n_lines_to_append=None,
+    ortho_resampAlg='gauss',
+    run_deadpix_P=True,
+    run_smile_P=False,
+    scale_factor_boa_ref=10000,
+    scale_factor_toa_ref=10000,
+    enable_ac=True,
+    mode_ac='combined',
+    polymer_root=path_polymer,
+    threads=-1,
+    blocksize=100,
+    vswir_overlap_algorithm='swir_only',
+    CPUs=16
+)
+
 
 config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(
@@ -135,6 +185,8 @@ config_for_testing_dlr = dict(
     enable_absolute_coreg=True,
     path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
+    mode_ac='land',
+    enable_ice_retrieval=False,
     CPUs=32,
     ortho_resampAlg='gauss',
     vswir_overlap_algorithm='swir_only'
@@ -218,15 +270,41 @@ class EnPTConfig(object):
         :key path_reference_image:
             Reference image for co-registration.
 
+        :key polymer root:
+            Polymer root directory (that contains the subdirectory for ancillary data).
+
         :key enable_ac:
             Enable atmospheric correction using SICOR algorithm (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
+
+        :key mode_ac:
+            3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
+            - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
+            - 'water': POLYMER (developed for water surfaces) is applied to water only
+                       (land surfaces are no included in the L2A product)
+            - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
+                          NOTE that this may result in edge effects, e.g., at coastlines
+
+        :key auto_download_ecmwf:
+            Automatically download ECMWF data for atmospheric correction
+
+        :key enable_ice_retrieval:
+            Enable ice retrieval (default); increases accuracy of water vapour retrieval
 
         :key enable_cloud_screening:
             Enable cloud screening during atmospheric correction
 
         :key scale_factor_boa_ref:
             Scale factor to be applied to BOA reflectance result
+
+        :key threads:
+            number of threads for multiprocessing of blocks (see bellow):
+            - 'threads = 0': for single thread
+            - 'threads < 0': for as many threads as there are CPUs
+            - 'threads > 0': gives the number of threads
+
+        :key blocksize:
+            block size for multiprocessing
 
         :key run_smile_P:
             Enable extra smile detection and correction (provider smile coefficients are ignored)
@@ -321,9 +399,15 @@ class EnPTConfig(object):
         self.path_reference_image = gp('path_reference_image')
 
         # atmospheric_correction
+        self.polymer_root = gp('polymer_root')
         self.enable_ac = gp('enable_ac')
+        self.mode_ac = gp('mode_ac')
+        self.auto_download_ecmwf = gp('auto_download_ecmwf')
+        self.enable_ice_retrieval = gp('enable_ice_retrieval')
         self.enable_cloud_screening = gp('enable_cloud_screening')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
+        self.threads = gp('threads')
+        self.blocksize = gp('blocksize')
 
         # smile
         self.run_smile_P = gp('run_smile_P')

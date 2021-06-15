@@ -19,6 +19,10 @@ History
 * Don't assert existing file paths in config validation n case IS_ENPT_GUI_TEST==1.
 * Default orthorecification algorithm is now 'gauss'.
 
+* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
+* Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
+  land surfaces later.
+
 
 0.17.2 (2021-03-04)
 -------------------

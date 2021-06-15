@@ -36,10 +36,11 @@ Tests for `execution.controller` module.
 """
 
 from unittest import TestCase
+from unittest.mock import patch
 import shutil
 
 from enpt.execution.controller import EnPT_Controller
-from enpt.options.config import config_for_testing, config_for_testing_dlr
+from enpt.options.config import config_for_testing, config_for_testing_dlr, config_for_testing_water
 
 __author__ = 'Daniel Scheffler'
 
@@ -66,6 +67,27 @@ class Test_EnPT_Controller_DLR_testdata(TestCase):
 
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
+
+
+class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
+    def setUp(self):
+        self.CTR = EnPT_Controller(**config_for_testing_water)
+
+    def tearDown(self):
+        # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
+        shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
+
+    def test_run_all_processors(self):
+        self.CTR.run_all_processors()
+
+    @patch('enpt.processors.atmospheric_correction.atmospheric_correction.polymer_ac_enmap', None)
+    def test_run_all_processors_without_acwater_installed(self):
+        """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
+        self.CTR.run_all_processors()
+
+        self.assertTrue("packages ACWater/Polymer are missing. "
+                        "SICOR has to be used as fallback algorithm for water surfaces."
+                        in self.CTR.L1_obj.logger.captured_stream)
 
 
 if __name__ == '__main__':

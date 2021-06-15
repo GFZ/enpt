@@ -189,7 +189,7 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         RD = L1B_Reader(config=cfg)
 
         L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
-        self.assertEquals(L1_obj.swir.detector_meta.nwvl, 130)
+        self.assertEqual(L1_obj.swir.detector_meta.nwvl, 130)
 
 
 if __name__ == '__main__':

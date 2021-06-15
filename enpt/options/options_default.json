@@ -52,10 +52,26 @@
         },
 
         "atmospheric_correction": {
+            "polymer_root": "",  /*Polymer root directory (that contains the subdirectory for ancillary data)*/
             "enable_ac": true,  /*enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A
                                   output contains top-of-atmosphere reflectance.*/
+            "mode_ac": "land",  /*3 modes to determine which atmospheric correction is applied at which surfaces (default: 'land'):
+                                  'land': SICOR (developed for land surfaces) is applied to land AND water surfaces
+                                  'water': POLYMER (developed for water surfaces) is applied to water only
+                                           (land surfaces are not included in the L2A product)
+                                  'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
+                                              NOTE that this may result in edge effects, e.g., at coastlines*/
+            "auto_download_ecmwf": false,  /*FIXME this might be not needed anymore in future*/
+            "enable_ice_retrieval":  true,  /*enable ice retrieval (default); increases accuracy of water vapour retrieval*/
             "enable_cloud_screening": false,  /*FIXME this is currently not implemented*/
-            "scale_factor_boa_ref": 10000  /*scale factor to be applied to BOA reflectance result*/
+            "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
+            "threads": -1, /*number of threads for multiprocessing:
+                                    'threads = 0': for single thread
+                                    'threads < 0': for as many threads as there are CPUs
+                                    'threads > 0': gives the number of threads*/
+            "blocksize":100 /*block size for multiprocessing*/
+
+
         },
 
         "smile": {

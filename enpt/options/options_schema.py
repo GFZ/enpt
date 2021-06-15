@@ -82,9 +82,16 @@ enpt_schema_input = dict(
             atmospheric_correction=dict(
                 type='dict', required=False,
                 schema=dict(
+                    polymer_root=dict(type='string', required=False),
                     enable_ac=dict(type='boolean', required=False),
+                    mode_ac=dict(type='string', required=False, allowed=['land', 'water', 'combined']),
+                    auto_download_ecmwf=dict(type='boolean', required=False),
+                    enable_ice_retrieval=dict(type='boolean', required=False),
                     enable_cloud_screening=dict(type='boolean', required=False),
                     scale_factor_boa_ref=dict(type='integer', required=False, min=1),
+                    threads=dict(type='integer', required=False),
+                    blocksize=dict(type='integer', required=False),
+
                 )),
 
             smile=dict(
@@ -151,9 +158,15 @@ parameter_mapping = dict(
     path_reference_image=('processors', 'geometry', 'path_reference_image'),
 
     # processors > atmospheric_correction
+    polymer_root=('processors', 'atmospheric_correction', 'polymer_root'),
     enable_ac=('processors', 'atmospheric_correction', 'enable_ac'),
+    mode_ac=('processors', 'atmospheric_correction', 'mode_ac'),
+    auto_download_ecmwf=('processors', 'atmospheric_correction', 'auto_download_ecmwf'),
+    enable_ice_retrieval=('processors', 'atmospheric_correction', 'enable_ice_retrieval'),
     enable_cloud_screening=('processors', 'atmospheric_correction', 'enable_cloud_screening'),
     scale_factor_boa_ref=('processors', 'atmospheric_correction', 'scale_factor_boa_ref'),
+    threads=('processors', 'atmospheric_correction', 'threads'),
+    blocksize=('processors', 'atmospheric_correction', 'blocksize'),
 
     # processors > smile
     run_smile_P=('processors', 'smile', 'run_processor'),

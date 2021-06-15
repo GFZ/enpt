@@ -106,13 +106,27 @@ def get_enpt_argparser():
         help='Enable VNIR/SWIR co-registration')
     add('--path_reference_image', type=str, default=None,
         help='Reference image for co-registration.')
+    add('--polymer_root', type=str, default=None,
+        help='Polymer root directory (that contains the subdirectory for ancillary data)')
     add('--enable_ac', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")
+    add('--mode_ac', type=str, default=None, nargs='?',
+        help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
+             "('land', water', 'combined')")
+    add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
+        help='Automatically download ECMWF data for atmospheric correction')
+    add('--enable_ice_retrieval', type=_str2bool, default=True, nargs='?', const=True,
+        help='Enable ice retrieval (default); increases accuracy of water vapour retrieval')
     add('--enable_cloud_screening', type=_str2bool, default=False, nargs='?', const=True,
         help='Enable cloud screening during atmospheric correction')
     add('--scale_factor_boa_ref', type=int, default=10000,
         help='Scale factor to be applied to BOA reflectance result')
+    add('--threads', type=int, default=-1,
+        help='Number of threads in ACwater Polymer: 0 for single thread; < 0 for as many as there are CPUs; '
+             'and > 0 gives the number of threads')
+    add('--blocksize', type=int, default=100,
+        help='Block size in ACwater Polymer')
     add('--run_smile_P', type=_str2bool, default=False, nargs='?', const=True,
         help='Enable extra smile detection and correction (provider smile coefficients are ignored)')
     add('--run_deadpix_P', type=_str2bool, default=True, nargs='?', const=True,
