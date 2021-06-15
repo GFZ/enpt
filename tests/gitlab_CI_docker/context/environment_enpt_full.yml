@@ -1,0 +1,37 @@
+name: enpt_full
+
+channels: &id1
+  - conda-forge
+
+dependencies:
+  - python>=3.7.*
+  - pip  # avoids that conda uses the wrong pip
+  - enpt
+
+  # Polymer AC additional conda requirements
+  - cdsapi
+  - cython
+  - gdal
+  - netcdf4
+  - pygrib
+  - pyhdf
+  - xarray
+
+  # EnMAP-Box
+  - matplotlib
+  - netcdf4
+  - numba
+  - numpy
+  - pyopengl
+  - qgis>=3.16
+  - scikit-learn
+
+  - pip:
+    # Polymer AC additional pip requirements
+    - git+https://gitlab.awi.de/phytooptics/acwater.git
+    - ecmwf-api-client
+
+    # EnMAP-Box
+    - astropy
+    - enpt_enmapboxapp
+    - scipy
