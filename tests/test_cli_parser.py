@@ -32,7 +32,7 @@
 test_cli_parser
 ---------------
 
-Tests for enpt.bin.enpt_cli.py
+Tests for enpt.bin.cli.py
 """
 
 from unittest import TestCase
@@ -46,7 +46,7 @@ import enpt
 __author__ = 'Daniel Scheffler'
 
 
-path_run_enpt = os.path.abspath(os.path.join(enpt.__path__[0], '..', 'bin', 'enpt_cli.py'))
+path_run_enpt = os.path.abspath(os.path.join(enpt.__path__[0], 'cli.py'))
 
 
 class Test_CLIParser(TestCase):

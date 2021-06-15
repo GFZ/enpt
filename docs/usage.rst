@@ -125,7 +125,7 @@ enpt
 At the command line, EnPT provides the **enpt** command:
 
 .. argparse::
-   :filename: ./../bin/enpt_cli.py
+   :filename: ./../enpt/cli.py
    :func: get_enpt_argparser
    :prog: enpt
 
