@@ -207,9 +207,9 @@ class EnPT_Controller(object):
     @staticmethod
     def _write_to_stdout_stderr():
         """Write to STDOUT and STDERR to reveal Queue.name of these streams to enpt_enmapboxapp."""
-        sys.stdout.write('Connecting to EnPT STDOUT stream.')
+        sys.stdout.write('Connecting to EnPT STDOUT stream.\n')
         sys.stdout.flush()
-        sys.stderr.write('Connecting to EnPT STDERR stream.')
+        sys.stderr.write('Connecting to EnPT STDERR stream.\n')
         sys.stderr.flush()
 
     def _print_received_configuration(self):
