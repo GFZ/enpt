@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.1 (2021-06-16)
+-------------------
+
+* Added method to EnPT_Controller to reveal Queue names to enpt_enmapboxapp
+  (needed to fix missing log messages in EnPT GUI).
+
+
 0.18.0 (2021-06-15)
 -------------------
 
