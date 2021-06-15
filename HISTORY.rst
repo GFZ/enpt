@@ -2,6 +2,12 @@
 History
 =======
 
+0.17.4 (2021-06-15)
+-------------------
+
+* Moved bin/enpt_cli.py to enpt/cli.py to fix missing argparser when installed from conda.
+
+
 0.17.3 (2021-06-04)
 -------------------
 

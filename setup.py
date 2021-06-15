@@ -88,7 +88,7 @@ setup(
     description="EnMAP Processing Tool",
     entry_points={
         'console_scripts': [
-            'enpt=bin.enpt_cli:main',
+            'enpt=enpt.cli:main',
         ],
     },
     extras_require={
