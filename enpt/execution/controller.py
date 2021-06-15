@@ -30,6 +30,7 @@
 """EnPT process controller module."""
 
 import os
+import sys
 import tempfile
 import zipfile
 import shutil
@@ -156,6 +157,9 @@ class EnPT_Controller(object):
         """Run all processors at once."""
         if os.getenv('IS_ENPT_GUI_TEST') != "1":
             try:
+                if os.getenv('IS_ENPT_GUI_CALL') == "1":
+                    self._write_to_stdout_stderr()
+
                 if self.cfg.log_level == 'DEBUG':
                     self._print_received_configuration()
 
@@ -199,6 +203,14 @@ class EnPT_Controller(object):
                         kwargs=self.cfg.kwargs
                     ),
                     outF)
+
+    @staticmethod
+    def _write_to_stdout_stderr():
+        """Write to STDOUT and STDERR to reveal Queue.name of these streams to enpt_enmapboxapp."""
+        sys.stdout.write('Connecting to EnPT STDOUT stream.')
+        sys.stdout.flush()
+        sys.stderr.write('Connecting to EnPT STDERR stream.')
+        sys.stderr.flush()
 
     def _print_received_configuration(self):
         print('EnPT Controller received the following configuration:')
