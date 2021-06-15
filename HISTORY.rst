@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.0 (2021-06-15)
+-------------------
+
+* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
+* Added advanced atmospheric correction for water surfaces using ACwater/Polymer including tests and docs.
+
+
 0.17.4 (2021-06-15)
 -------------------
 
@@ -17,11 +24,7 @@ History
 * Added version pinnings to Python and QGIS.
 * Replaced entry point 'enpt-cli.py' with 'enpt' which allows to call the argument parser with 'enpt <args>'.
 * Don't assert existing file paths in config validation n case IS_ENPT_GUI_TEST==1.
-* Default orthorecification algorithm is now 'gauss'.
-
-* Added config parameters to run EnPT in 3 AC modes: 'land', 'water', 'combined'.
-* Added some boilerplate code in atmospheric_correction.py which is to be replaced by separate AC calls for water and
-  land surfaces later.
+* Default orthorectification algorithm is now 'gauss'.
 
 
 0.17.2 (2021-03-04)
