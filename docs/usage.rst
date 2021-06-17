@@ -141,7 +141,7 @@ To install it in QGIS, please refer to the separate repository enpt_enmapboxapp_
 
 Here is screenshot of the current version:
 
-.. image:: img/screenshot_enpt_enmapboxapp_1031x876.png
+.. image:: img/screenshot_enpt_enmapboxapp_v0.6.0.png
 
 .. _enpt_enmapboxapp: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _enpt/options/options_default.json: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/blob/master/enpt/options/options_default.json

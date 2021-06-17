@@ -2,6 +2,12 @@
 History
 =======
 
+0.18.2 (coming soon)
+--------------------
+
+* Updated installation instructions and GUI screenshots.
+
+
 0.18.1 (2021-06-16)
 -------------------
 

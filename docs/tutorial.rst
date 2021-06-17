@@ -119,7 +119,7 @@ raw format to geometrically and atmospherically corrected bottom-of-atmosphere r
 Open the EnPT GUI to run the processing chain. You can find it here:
 :menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> EnMAP-Box --> Pre-Processing --> EnMAP processing tool algorithm`.
 
-.. image:: img/tut__screenshot_enpt_enmapboxapp.png
+.. image:: img/screenshot_enpt_enmapboxapp_v0.6.0.png
 
 Select the :file:`ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip` downloaded
 above at the parameter **L1B EnMAP image** and check that the **Anaconda root directory** points to the correct
