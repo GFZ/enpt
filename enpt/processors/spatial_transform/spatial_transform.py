@@ -28,7 +28,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-
+import warnings
 from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
@@ -64,10 +64,15 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
         if not data_mapgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
-        return super().to_sensor_geometry(
-            data_mapgeo[:],
-            src_prj=src_prj or data_mapgeo.prj,
-            src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
+        with warnings.catch_warnings():
+            # FIXME remove that after removing pyresample pinning
+            warnings.filterwarnings('ignore', category=DeprecationWarning,
+                                    message='.*is a deprecated alias for the builtin.*')
+
+            return super().to_sensor_geometry(
+                data_mapgeo[:],
+                src_prj=src_prj or data_mapgeo.prj,
+                src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
 
     def to_map_geometry(self,
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
@@ -82,13 +87,18 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
-        out_data, out_gt, out_prj = \
-            super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:],
-                                                              tgt_prj=tgt_prj,
-                                                              tgt_extent=tgt_extent,
-                                                              tgt_res=tgt_res,
-                                                              tgt_coordgrid=tgt_coordgrid,
-                                                              area_definition=self.area_definition)
+        with warnings.catch_warnings():
+            # FIXME remove that after removing pyresample pinning
+            warnings.filterwarnings('ignore', category=DeprecationWarning,
+                                    message='.*is a deprecated alias for the builtin.*')
+
+            out_data, out_gt, out_prj = \
+                super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:],
+                                                                  tgt_prj=tgt_prj,
+                                                                  tgt_extent=tgt_extent,
+                                                                  tgt_res=tgt_res,
+                                                                  tgt_coordgrid=tgt_coordgrid,
+                                                                  area_definition=self.area_definition)
 
         return out_data, out_gt, out_prj
 
@@ -105,10 +115,15 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
         if not data_mapgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
-        return super().to_sensor_geometry(
-            data_mapgeo[:],
-            src_prj=src_prj or data_mapgeo.prj,
-            src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
+        with warnings.catch_warnings():
+            # FIXME remove that after removing pyresample pinning
+            warnings.filterwarnings('ignore', category=DeprecationWarning,
+                                    message='.*is a deprecated alias for the builtin.*')
+
+            return super().to_sensor_geometry(
+                data_mapgeo[:],
+                src_prj=src_prj or data_mapgeo.prj,
+                src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
 
     def to_map_geometry(self,
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
@@ -124,13 +139,18 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
-        out_data, out_gt, out_prj = \
-            super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:],
-                                                                 tgt_prj=tgt_prj,
-                                                                 tgt_extent=tgt_extent,
-                                                                 tgt_res=tgt_res,
-                                                                 tgt_coordgrid=tgt_coordgrid,
-                                                                 area_definition=area_definition)
+        with warnings.catch_warnings():
+            # FIXME remove that after removing pyresample pinning
+            warnings.filterwarnings('ignore', category=DeprecationWarning,
+                                    message='.*is a deprecated alias for the builtin.*')
+
+            out_data, out_gt, out_prj = \
+                super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:],
+                                                                     tgt_prj=tgt_prj,
+                                                                     tgt_extent=tgt_extent,
+                                                                     tgt_res=tgt_res,
+                                                                     tgt_coordgrid=tgt_coordgrid,
+                                                                     area_definition=area_definition)
 
         return out_data, out_gt, out_prj
 
