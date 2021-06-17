@@ -2,10 +2,11 @@
 History
 =======
 
-0.18.2 (coming soon)
---------------------
+0.18.2 (2021-06-17)
+-------------------
 
 * Updated installation instructions and GUI screenshots.
+* Muted np.bool DeprecationWarning.
 
 
 0.18.1 (2021-06-16)
