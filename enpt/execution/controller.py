@@ -84,16 +84,16 @@ class EnPT_Controller(object):
         outdir = os.path.join(self.tempDir, subdir) if not self.cfg.is_dummy_dataformat else self.tempDir
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
-            for file in zf.namelist():
-                f = file
             zf.extractall(outdir)
 
         # move the data one level up in case they are within a sub-folder in the zip file
-        content = glob(os.path.join(outdir, '*'))
-        if len(content) == 1 and os.path.isdir(content[0]):
-            for fp in glob(os.path.join(outdir, '**', '*')):
-                shutil.move(fp, outdir)
-            shutil.rmtree(content[0])
+        if not self.cfg.is_dummy_dataformat:
+            content = glob(os.path.join(outdir, '*'))
+
+            if len(content) == 1 and os.path.isdir(content[0]):
+                for fp in glob(os.path.join(outdir, '**', '*')):
+                    shutil.move(fp, outdir)
+                shutil.rmtree(content[0])
 
         if not os.path.isdir(outdir):
             raise NotADirectoryError(outdir)
