@@ -2,6 +2,12 @@
 History
 =======
 
+0.18.3 (2021-06-18)
+-------------------
+
+* Fixed #79 (FileNotFoundError when using the official EnMAP test data downloaded from enmap.org).
+
+
 0.18.2 (2021-06-17)
 -------------------
 

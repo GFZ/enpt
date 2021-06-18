@@ -127,24 +127,25 @@ class L1B_Reader(object):
         if not files:
             raise RuntimeError("The root directory of the EnMAP image %s is empty." % rootdir_l1b)
 
-        for pattern in ['*-HISTORY.XML',
-                        '*-LOG.XML',
-                        '*-METADATA.XML',
-                        '*-QL_PIXELMASK_SWIR.TIF',
-                        '*-QL_PIXELMASK_VNIR.TIF',
-                        '*-QL_QUALITY_CIRRUS.TIF',
-                        '*-QL_QUALITY_CLASSES.TIF',
-                        '*-QL_QUALITY_CLOUD.TIF',
-                        '*-QL_QUALITY_CLOUDSHADOW.TIF',
-                        '*-QL_QUALITY_HAZE.TIF',
-                        '*-QL_QUALITY_SNOW.TIF',
-                        '*-QL_QUALITY_TESTFLAGS_SWIR.TIF',
-                        '*-QL_QUALITY_TESTFLAGS_VNIR.TIF',
-                        '*-QL_SWIR.TIF',
-                        '*-QL_VNIR.TIF',
-                        '*-SPECTRAL_IMAGE_SWIR.TIF',
-                        '*-SPECTRAL_IMAGE_VNIR.TIF',
-                        ]:
+        for pattern in [
+            # '*-HISTORY.XML',  # only included in internal DLR test data, not in the zip archive on enmap.org
+            # '*-LOG.XML',  # only included in internal DLR test data, not in the zip archive on enmap.org
+            '*-METADATA.XML',
+            '*-QL_PIXELMASK_SWIR.TIF',
+            '*-QL_PIXELMASK_VNIR.TIF',
+            '*-QL_QUALITY_CIRRUS.TIF',
+            '*-QL_QUALITY_CLASSES.TIF',
+            '*-QL_QUALITY_CLOUD.TIF',
+            '*-QL_QUALITY_CLOUDSHADOW.TIF',
+            '*-QL_QUALITY_HAZE.TIF',
+            '*-QL_QUALITY_SNOW.TIF',
+            '*-QL_QUALITY_TESTFLAGS_SWIR.TIF',
+            '*-QL_QUALITY_TESTFLAGS_VNIR.TIF',
+            '*-QL_SWIR.TIF',
+            '*-QL_VNIR.TIF',
+            '*-SPECTRAL_IMAGE_SWIR.TIF',
+            '*-SPECTRAL_IMAGE_VNIR.TIF',
+        ]:
             if not filter(files, pattern) and not filter(files, pattern.replace('.TIF', '.GEOTIFF')):
                 raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern %s.'
                                         % (rootdir_l1b, pattern))

@@ -139,7 +139,7 @@ config_for_testing_dlr = dict(
                      # 'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z.zip'
 
                      # Arcachon
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip'
 
                      # Arcachon 1000x30
                      # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-730.zip'
@@ -149,6 +149,9 @@ config_for_testing_dlr = dict(
 
                      # Arcachon full tile 3, reprocessed 05/2020
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
+
+                     # Arcachon tile 3 (full), downloaded from enmap.org
+                     'L1B_Arcachon_3__enmap.org.zip',
                      )),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
@@ -164,10 +167,10 @@ config_for_testing_dlr = dict(
                      # 'DLR_L2A_DEM_UTM32.bsq'
 
                      # Arcachon tile 2 ASTER DEM (02/2020)
-                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
 
                      # Arcachon tile 3 ASTER DEM (05/2020)
-                     # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
+                     'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
                      # '15_DEM_UTM__with_prj.tif'
                      )),
     log_level='DEBUG',
