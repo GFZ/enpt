@@ -6,6 +6,7 @@ History
 --------------------
 
 * Updated installation instructions and GUI screenshots.
+* Removed required requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
 
 
 0.18.1 (2021-06-16)
