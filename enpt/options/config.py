@@ -149,6 +149,9 @@ config_for_testing_dlr = dict(
 
                      # Arcachon full tile 3, reprocessed 05/2020
                      # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z.zip'
+
+                     # Arcachon tile 3 (full), downloaded from enmap.org
+                     # 'L1B_Arcachon_3__enmap.org.zip',
                      )),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',

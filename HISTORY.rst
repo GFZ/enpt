@@ -2,11 +2,18 @@
 History
 =======
 
-0.18.2 (coming soon)
---------------------
+0.18.3 (2021-06-18)
+-------------------
+
+* Fixed #79 (FileNotFoundError when using the official EnMAP test data downloaded from enmap.org).
+* Removed required requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
+
+
+0.18.2 (2021-06-17)
+-------------------
 
 * Updated installation instructions and GUI screenshots.
-* Removed required requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
+* Muted np.bool DeprecationWarning.
 
 
 0.18.1 (2021-06-16)
