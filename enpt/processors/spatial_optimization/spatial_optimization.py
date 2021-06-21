@@ -113,7 +113,8 @@ class Spatial_Optimizer(object):
                           nodata=(self._ref_Im.nodata, 0),
                           footprint_poly_tgt=reproject_shapelyGeometry(self._EnMAP_Im.meta.vnir.ll_mapPoly,
                                                                        4326, self._EnMAP_band.epsg),
-                          mask_baddata_tgt=self._EnMAP_mask
+                          mask_baddata_tgt=self._EnMAP_mask,
+                          progress=self.cfg.disable_progress_bars is False
                           )
         TPG = CRL.tiepoint_grid
         # CRL.view_CoRegPoints(shapes2plot='vectors', hide_filtered=False, figsize=(20, 20),

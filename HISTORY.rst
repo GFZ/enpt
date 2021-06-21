@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.4 (2021-06-21)
+-------------------
+
+* The 'enable_absolute_coreg' parameter is now automatically set to True if a reference image is provided via the CLI.
+* Fixed that the 'progress' parameter was not correctly passed through to AROSICS.
+
+
 0.18.3 (2021-06-18)
 -------------------
 
