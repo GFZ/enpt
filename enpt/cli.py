@@ -165,9 +165,12 @@ def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
 
     :param cli_args:    options as parsed by the argparse.ArgumentParser
     """
-
     # convert argparse Namespace object to dictionary
     opts = {k: v for k, v in vars(cli_args).items() if not k.startswith('_') and k != 'func'}
+
+    # activate absolute coreg if a reference image is given (the argparser does not separate these two options)
+    if opts['path_reference_image']:
+        opts['enable_absolute_coreg'] = True
 
     # remove those options that have not been given explicitly (None values)
     user_opts = dict()

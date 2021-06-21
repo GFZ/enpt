@@ -68,8 +68,6 @@
                                     'threads < 0': for as many threads as there are CPUs
                                     'threads > 0': gives the number of threads*/
             "blocksize":100 /*block size for multiprocessing*/
-
-
         },
 
         "smile": {
