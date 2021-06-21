@@ -126,7 +126,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         self.wvl_center = np.array(wvls_l2a)
         self.fwhm = np.hstack([meta_l1b.vnir.fwhm, meta_l1b.swir.fwhm])[bandidx_order]
-        self.gains = np.full((dims_mapgeo[2],), 100)  # implies reflectance scaled between 0 and 10000
+        self.gains = np.full((dims_mapgeo[2],), 1. / self.cfg.scale_factor_boa_ref)  # => value range 0-1
         self.offsets = np.zeros((dims_mapgeo[2],))
         self.srf = SRF.from_cwl_fwhm(self.wvl_center, self.fwhm)
         self.solar_irrad = np.hstack([meta_l1b.vnir.solar_irrad, meta_l1b.swir.solar_irrad])[bandidx_order]
@@ -192,9 +192,10 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
     def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
         R, C, B = datastack_vnir_swir.shape
-        # NOTE:  DEVIDE by gains to get reflectance in percent
-        self.band_means = np.mean(datastack_vnir_swir.reshape((R * C, B)), axis=0) / self.gains
-        self.band_stds = np.std(datastack_vnir_swir.reshape((R * C, B)), axis=0) / self.gains
+        # NOTE:  Multiply by gains to get reflectance in the range 0-1
+        data = datastack_vnir_swir[datastack_vnir_swir.mask_nodata[:]]
+        self.band_means = np.mean(data, axis=0) * self.gains
+        self.band_stds = np.std(data, axis=0) * self.gains
 
     def add_product_fileinformation(self, filepaths: List[str], sizes: List[int] = None, versions: List[str] = None):
         self.fileinfos = []

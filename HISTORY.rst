@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.5 (2021-06-21)
+-------------------
+
+* Fixed incorrect gains in L2A output data.
+* Band statistics in L2A metadata now exclude the image background.
+
+
 0.18.4 (2021-06-21)
 -------------------
 
