@@ -169,7 +169,7 @@ class Orthorectifier(object):
                                                 logger=L2_obj.logger)
         L2_obj.meta.add_band_statistics(L2_obj.data)
 
-        L2_obj.data.meta.band_meta['bandwidths'] = list(L2_obj.meta.fwhm)
+        L2_obj.data.meta.band_meta['fwhm'] = list(L2_obj.meta.fwhm)
         L2_obj.data.meta.global_meta['wavelength_units'] = 'nanometers'
 
         # Get the paths according information delivered in the metadata
