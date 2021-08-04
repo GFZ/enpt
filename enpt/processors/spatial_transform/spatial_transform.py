@@ -402,7 +402,7 @@ class RPC_Geolayer_Generator(object):
     def _denormalize_image_coordinates(self,
                                        row_norm: np.ndarray,
                                        col_norm: np.ndarray) -> (np.ndarray, np.ndarray):
-        """De-normalize norrmalized sensor geometry coordinates to get valid image coordinates.
+        """De-normalize normalized sensor geometry coordinates to get valid image coordinates.
 
         :param row_norm:    normalized rows
         :param col_norm:    normalized columns
