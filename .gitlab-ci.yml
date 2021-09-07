@@ -10,7 +10,7 @@ stages:
 test_enpt:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate ci_env
+    - source /root/mambaforge/bin/activate ci_env
 
     # update geoarray and py_tools_ds
     # - pip install 'geoarray>=0.8.11'
@@ -48,7 +48,7 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate ci_env
+    - source /root/mambaforge/bin/activate ci_env
     - make lint
   artifacts:
     paths:
@@ -62,7 +62,7 @@ test_styles:
 test_urls:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate ci_env
+    - source /root/mambaforge/bin/activate ci_env
     - pip install -U urlchecker
     - make urlcheck
   when: always
@@ -71,8 +71,7 @@ test_urls:
 test_enpt_install:
   stage: test
   script:
-    - source /root/miniconda3/bin/activate
-    - conda install -c conda-forge mamba
+    - source /root/mambaforge/bin/activate
     - mamba update -n base -c conda-forge --all
 
     # create enpt environment from environment_enpt.yml
@@ -135,7 +134,7 @@ deploy_pypi:
   dependencies:
     - test_enpt
   script:
-    - source /root/miniconda3/bin/activate ci_env
+    - source /root/mambaforge/bin/activate ci_env
     - pip install -U twine
     - python setup.py sdist
     - twine upload dist/*  # requires creds as environment variables
