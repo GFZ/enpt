@@ -5,11 +5,13 @@ COPY *.yml /root/
 COPY polymer-v4.13.tar.gz /root/
 
 # update the ci_env environment (that already contains all packages installed via 'docker_pyenvs' repo)
+# NOTE: The pkgs directory (cache) is deleted because otherwise conda env create takes hours within a docker container.
 RUN /bin/bash -i -c "\
     source /root/mambaforge/bin/activate ; \
     mamba update -n base -c conda-forge --all;\
     conda activate ci_env; \
-    mamba env update -n ci_env -f /root/environment_enpt.yml"
+    mamba env update -n ci_env -f /root/environment_enpt.yml; \
+    rm -rf /root/mambaforge/pkgs"
 
 # install Polymer into the ci_env environment
 RUN /bin/bash -i -c "\
