@@ -298,7 +298,7 @@ class RPC_Geolayer_Generator(object):
         :param elevation:               digital elevation model in map geometry (file path or instance of GeoArray) OR
                                         average elevation in meters as integer or float
         :param enmapIm_cornerCoords:    corner coordinates as tuple of lon/lat pairs
-        :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, colunms)
+        :param enmapIm_dims_sensorgeo:  dimensions of the EnMAP image in sensor geometry (rows, columns)
         """
         self.row_off = rpc_coeffs['row_off']
         self.col_off = rpc_coeffs['col_off']
