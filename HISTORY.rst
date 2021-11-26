@@ -2,6 +2,12 @@
 History
 =======
 
+0.18.6 (2021-11-26)
+-------------------
+
+* Fixed AttributeError in DEM_Processor related to new pyproj version.
+
+
 0.18.5 (2021-06-21)
 -------------------
 

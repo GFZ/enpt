@@ -60,9 +60,9 @@ class DEM_Processor(object):
             raise ValueError((self.dem.gt, self.dem.prj),
                              'The provided digital elevation model has no valid geo-coding or projection.')
 
-        # check if provided as WGS-84
-        ell = CRS(self.dem.prj).datum.ellipsoid.name
-        if ell != 'WGS 84':
+        # check if provided projection is WGS-84
+        ell = CRS(self.dem.prj).datum.name
+        if not ell.startswith('World Geodetic System 1984'):
             raise ValueError(ell, "The digital elevation model must be provided with 'WGS84' as geographic datum.")
 
         # check overlap
