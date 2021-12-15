@@ -76,5 +76,5 @@ class Test_Radiometric_Transformer(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()

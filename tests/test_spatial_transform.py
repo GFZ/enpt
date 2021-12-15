@@ -359,5 +359,5 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()

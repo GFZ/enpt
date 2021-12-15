@@ -130,5 +130,5 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()
