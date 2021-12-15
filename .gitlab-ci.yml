@@ -12,6 +12,8 @@ test_enpt:
   script:
     - source /root/mambaforge/bin/activate ci_env
 
+    - pip install pytest pytest-cov pytest-reporter-html1  # TODO remove after recreating CI runner
+
     # update geoarray and py_tools_ds
     # - pip install 'geoarray>=0.8.11'
     # - pip install 'py_tools_ds>=0.14.23'
@@ -30,19 +32,23 @@ test_enpt:
     # - cd ../../
     # - pip install -U sicor
 
-    # run nosetests
-    - make nosetests  # test are called here
+    # run tests
+    - make pytest  # test are called here
 
     # create the docs
     - make docs
   artifacts:
+    expose_as: 'Test and coverage report'
     paths:
     - htmlcov/
+    - report.html
     - docs/_build/html/
-    - nosetests.html
-    - nosetests.xml
-    - tests/linting
-  when: always
+    reports:
+      cobertura: coverage.xml
+      junit: report.xml
+
+    expire_in: 30 days
+    when: always
 
 
 test_styles:
@@ -103,7 +109,7 @@ pages:
     - mkdir -p public/doc
     - mkdir -p public/img
     - mkdir -p public/coverage
-    - mkdir -p public/nosetests_reports
+    - mkdir -p public/test_reports
 
     # Copy over the docs
     - cp -r docs/_build/html/* public/doc/
@@ -112,14 +118,14 @@ pages:
     # Copy over the coverage reports
     - cp -r htmlcov/* public/coverage/
 
-    # Copy over the nosetests reports
-    - cp nosetests.* public/nosetests_reports/
+    # Copy over the test reports
+    - cp report.html public/test_reports/
 
     # Check if everything is working great
     - ls -al public
     - ls -al public/doc
     - ls -al public/coverage
-    - ls -al public/nosetests_reports
+    - ls -al public/test_reports
   artifacts:
     paths:
       - public
