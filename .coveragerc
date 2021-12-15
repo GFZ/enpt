@@ -3,6 +3,7 @@
 branch = False
 concurrency = multiprocessing
 parallel = True
+omit = */site-packages/*,*/tests/*,*/.eggs/*
 
 [report]
 show_missing = True
