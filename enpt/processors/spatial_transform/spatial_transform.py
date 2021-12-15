@@ -652,6 +652,8 @@ class RPC_3D_Geolayer_Generator(object):
                 # NOTE: With the small test dataset pickling has only a small effect on processing time.
                 with Pool(self.CPUs) as pool:
                     results = list(pool.imap_unordered(self._compute_geolayer_for_unique_coeffgroup, kwargs_list))
+                    pool.close()  # needed for coverage to work in multiprocessing
+                    pool.join()
 
             else:
                 # singleprocessing
