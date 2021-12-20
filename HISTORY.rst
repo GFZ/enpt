@@ -2,10 +2,15 @@
 History
 =======
 
-0.18.6 (2021-11-26)
+
+0.18.6 (2021-12-20)
 -------------------
 
 * Fixed AttributeError in DEM_Processor related to new pyproj version.
+* Fixed wrong FWHM metadata key in L2A data.
+* Fixed slow conda environment creation.
+* CI now uses Mambaforge.
+* Migrated test calls from nosetests to pytest and implemented new test report (!60).
 
 
 0.18.5 (2021-06-21)
