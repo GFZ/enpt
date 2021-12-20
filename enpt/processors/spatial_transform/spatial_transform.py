@@ -541,6 +541,15 @@ class RPC_Geolayer_Generator(object):
 global_dem_sensorgeo: Optional[GeoArray] = None
 
 
+def _initialize_mp(elevation: Union[float, np.ndarray]):
+    """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_unique_coeffgroup().
+
+    :param elevation:   elevation - either as average value (float) or as a numpy array
+    """
+    global global_dem_sensorgeo
+    global_dem_sensorgeo = elevation
+
+
 class RPC_3D_Geolayer_Generator(object):
     """Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coeff. (RPC)."""
 
@@ -650,8 +659,10 @@ class RPC_3D_Geolayer_Generator(object):
                 # FIXME: pickling back large lon/lat arrays to the main process may be an issue on small machines
                 #        -> results could be temporarily written to disk in that case
                 # NOTE: With the small test dataset pickling has only a small effect on processing time.
-                with Pool(self.CPUs) as pool:
+                with Pool(self.CPUs, initializer=_initialize_mp, initargs=[self.elevation]) as pool:
                     results = list(pool.imap_unordered(self._compute_geolayer_for_unique_coeffgroup, kwargs_list))
+                    pool.close()  # needed for coverage to work in multiprocessing
+                    pool.join()
 
             else:
                 # singleprocessing

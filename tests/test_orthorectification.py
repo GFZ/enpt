@@ -192,5 +192,5 @@ class Test_VNIR_SWIR_Stacker(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()

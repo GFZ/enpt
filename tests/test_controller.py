@@ -91,5 +91,5 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()

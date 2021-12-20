@@ -384,7 +384,12 @@ def interp_nodata_spatially_3d(data_3d: np.ndarray,
         with Pool(CPUs or cpu_count()) as pool:
             args = [[data_3d[:, :, band], axis, badmask_full[:, :, band], method, fill_value, implementation]
                     for band in range(data_3d.shape[2])]
-            return np.dstack(pool.starmap(interp_nodata_spatially_2d, args))
+            results = pool.starmap(interp_nodata_spatially_2d, args)
+
+            pool.close()  # needed for coverage to work in multiprocessing
+            pool.join()
+
+        return np.dstack(results)
 
     else:
         return \

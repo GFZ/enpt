@@ -193,5 +193,5 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()

@@ -246,5 +246,5 @@ class Test_interp_nodata_spatially_2d(TestCase):
 
 
 if __name__ == '__main__':
-    import nose2
-    nose2.main()
+    import pytest
+    pytest.main()
