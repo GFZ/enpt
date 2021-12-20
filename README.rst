@@ -68,7 +68,7 @@ Status
 .. |badge9| image:: https://zenodo.org/badge/253474970.svg
    :target: https://zenodo.org/badge/latestdoi/253474970
 
-See also the latest coverage_ report and the nosetests_ HTML report.
+See also the latest coverage_ report and the pytest_ HTML report.
 
 History / Changelog
 -------------------
@@ -91,7 +91,7 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 .. _documentation: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc
 .. _coverage: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
-.. _nosetests: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/nosetests_reports/nosetests.html
+.. _pytest: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/test_reports/report.html
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
