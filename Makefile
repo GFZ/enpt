@@ -64,6 +64,7 @@ lint: ## check style with flake8
 
 urlcheck: ## check for dead URLs
 	urlchecker check . \
+		--timeout 10 \
 		--file-types .py,.rst,.md,.json \
 		--white-listed-patterns www.enmap.org  # certificate checks fail although URLs work
 

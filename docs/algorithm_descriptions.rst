@@ -130,7 +130,8 @@ Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 
 In EnPT, AROSICS is used to automatically compute thousands of tie points between a selected EnMAP band the
 user-provided reference image. The computed shifts are considered in the orthorectification step.
 
-__ https://doi.org/10.3390/rs9070676
+__ https://www.mdpi.com/2072-4292/9/7/676
+
 
 
 .. VNIR/SWIR coregistration estimation???
