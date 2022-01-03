@@ -159,7 +159,7 @@ class Test_L1B_Reader(unittest.TestCase):
 
 
 class Test_L1B_Reader_DLR(unittest.TestCase):
-    """Tests for L1B_Reader class.."""
+    """Tests for L1B_Reader class."""
 
     def setUp(self):
         self.config = EnPTConfig(**config_for_testing_dlr)

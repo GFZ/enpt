@@ -108,6 +108,8 @@ class Test_Geometry_Transformer(TestCase):
 
 
 class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
+    L1_obj = None
+
     @classmethod
     def setUpClass(cls) -> None:
         config = EnPTConfig(**config_for_testing_dlr)

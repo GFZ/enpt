@@ -50,6 +50,9 @@ __author__ = 'Daniel Scheffler'
 
 
 class Test_EnMAPL1Product_SensorGeo(TestCase):
+    config = None
+    tmpdir = None
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.config = EnPTConfig(**config_for_testing_dlr)
