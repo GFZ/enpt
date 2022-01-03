@@ -167,7 +167,7 @@ requirement polymer_ as described above.
 .. _HYGEOS support forum: https://forum.hygeos.com
 .. _polymer: https://forum.hygeos.com
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
-.. _GUI: https://gitext.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
+.. _GUI: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _EnMAP-Box: https://bitbucket.org/hu-geomatics/enmap-box
 .. _QGIS: https://www.qgis.org
 .. _CDS registration page: https://cds.climate.copernicus.eu/
