@@ -3,7 +3,13 @@
 branch = False
 concurrency = multiprocessing
 parallel = True
-omit = */site-packages/*,*/tests/*,*/.eggs/*,*/polymer-*/*
+source = enpt
+# omit external libs (e.g., polymer causes coverage warnings due to missing pool.join())
+#  -> NOTE: This requires that --cov=enpt is not set via command-line in the Makefile but via the source parameter above
+omit =
+    */site-packages/*
+    *tests/*
+    */.eggs/*
 
 [report]
 show_missing = True

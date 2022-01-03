@@ -87,12 +87,12 @@ pytest: clean-test ## Runs pytest with coverage and creates coverage and test re
 	## - generates cobertura 'coverage.xml' (needed to show coverage in GitLab MR changes)
 	## - generates 'report.html' based on pytest-reporter-html1
 	## - generates JUnit 'report.xml' to show the test report as a new tab in a GitLab MR
-	## NOTE: additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc
+	## NOTE: - additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc
+	##       - setting --cov=enpt here would override the source- AND omit-parameter in .coveragerc
 	pytest tests \
 		--verbosity=3 \
 		--color=yes \
 		--tb=short \
-		--cov=enpt \
 		--cov-report html:htmlcov \
     	--cov-report term-missing \
     	--cov-report xml:coverage.xml \
