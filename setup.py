@@ -64,7 +64,7 @@ req = [
 
 req_setup = ['setuptools-git']  # needed for package_data version controlled by GIT
 
-req_test = ['pytest', 'pytest-cov', 'pytest-reporter-hmtl1', 'urlchecker']
+req_test = ['pytest', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker']
 
 req_doc = ['sphinx-argparse', 'sphinx_rtd_theme']
 
