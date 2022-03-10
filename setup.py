@@ -107,7 +107,8 @@ setup(
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},
-    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
+    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seem to work, therefore use MANIFEST.in
+    python_requires='>=3.6,<3.10',  # ImportError related to os.sep in Python 3.10
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,

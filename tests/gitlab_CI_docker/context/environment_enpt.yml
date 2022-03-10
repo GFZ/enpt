@@ -4,7 +4,7 @@ channels: &id1
   - conda-forge
 
 dependencies:
-  - python=3.*.*
+  - python<3.10  # issue with PyCharm debugger and Python 3.10 which could not be tracked down so far
   - pip  # avoids that conda uses the wrong pip
   - arosics>1.0.0
   - geoarray>=0.9.0
