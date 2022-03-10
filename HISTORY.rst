@@ -2,6 +2,17 @@
 History
 =======
 
+0.18.7 (2022-03-10)
+-------------------
+
+* Fixed some style issues.
+* Replaced deprecated URLs.
+* Fix typo in requirements.
+* Excluded Python 3.10 intermediately due to debugger issue.
+* Fixed indentation in Makefile.
+* Improved error message in case a requirement of ACwater is missing.
+* Fixed coverage issue.
+
 
 0.18.6 (2021-12-20)
 -------------------
@@ -31,7 +42,7 @@ History
 -------------------
 
 * Fixed #79 (FileNotFoundError when using the official EnMAP test data downloaded from enmap.org).
-* Removed required requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
+* Removed requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
 
 
 0.18.2 (2021-06-17)
