@@ -92,6 +92,7 @@ pytest: clean-test ## Runs pytest with coverage and creates coverage and test re
 		--verbosity=3 \
 		--color=yes \
 		--tb=short \
+		--cov=enpt \
 		--cov-report html:htmlcov \
 		--cov-report term-missing \
 		--cov-report xml:coverage.xml \
