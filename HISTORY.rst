@@ -2,12 +2,18 @@
 History
 =======
 
+0.18.8 (2022-03-16)
+-------------------
+
+* Fixed #84: Orthorectification fails if L1B data are pseudo-projected/rotated (!62).
+
+
 0.18.7 (2022-03-10)
 -------------------
 
 * Fixed some style issues.
 * Replaced deprecated URLs.
-* Fix typo in requirements.
+* Fixed typo in requirements.
 * Excluded Python 3.10 intermediately due to debugger issue.
 * Fixed indentation in Makefile.
 * Improved error message in case a requirement of ACwater is missing.

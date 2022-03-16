@@ -83,7 +83,7 @@ class Geometry_Transformer(SensorMapGeometryTransformer):
                         area_definition: AreaDefinition = None):
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
-        if data_sensorgeo.is_map_geo:
+        if data_sensorgeo.is_map_geo and not data_sensorgeo.is_rotated:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
@@ -135,7 +135,7 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
                         ) -> Tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
-        if data_sensorgeo.is_map_geo:
+        if data_sensorgeo.is_map_geo and not data_sensorgeo.is_rotated:
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)

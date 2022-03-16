@@ -109,13 +109,13 @@ class Orthorectifier(object):
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
         GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=0, **kw_init)
-        vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data[:], **kw_trafo),
+        vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data, **kw_trafo),
                                   nodata=0)
 
         enmap_ImageL1.logger.info("Orthorectifying SWIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
         GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=0, **kw_init)
-        swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data[:], **kw_trafo),
+        swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data, **kw_trafo),
                                   nodata=0)
 
         # combine VNIR and SWIR
