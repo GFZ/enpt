@@ -28,5 +28,5 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = '0.18.8'
-__versionalias__ = '20220316.01'
+__versionalias__ = '20220322.01'
 __author__ = 'Daniel Scheffler'
