@@ -135,12 +135,15 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
-        wl_ref_vnir, wl_ref_swir = \
+        #       - res: a dictionary containing retrieval maps with several additional retrieval measures
+        #              -> chla, bitmask, bbs, Rnir, Rgli
+
+        wl_ref_vnir, wl_ref_swir, water_additional_results = \
             polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                              config=self.cfg,
                              detector='merge')
 
-        return wl_ref_vnir, wl_ref_swir
+        return wl_ref_vnir, wl_ref_swir, water_additional_results
 
     def _run_AC__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
@@ -169,7 +172,7 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
-        wl_ref_vnir_water, wl_ref_swir_water = \
+        wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
             polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                              config=self.cfg,
                              detector='merge')
@@ -181,8 +184,15 @@ class AtmosphericCorrector(object):
         wlboa_ref_swir = np.where((enmap_ImageL1.swir.mask_landwater[:] == 2)[:, :, None],
                                   wl_ref_swir_water,
                                   boa_ref_swir_land)
+        waterboa_additional_results = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
+                                  water_additional_results,
+                                  boa_ref_vnir_land)
+        from geoarray import GeoArray
+        GeoArray(waterboa_additional_results).save(
+            '/home/alvarado/repositories/acwater/tests/data/output/EnPT_Chla.tif', fmt='GTiff')
+        data_geoarray = waterboa_additional_results
 
-        return wlboa_ref_vnir, wlboa_ref_swir, land_additional_results
+        return wlboa_ref_vnir, wlboa_ref_swir, waterboa_additional_results, land_additional_results
 
     @staticmethod
     def _validate_AC_results(reflectance_vnir: np.ndarray,
@@ -225,11 +235,11 @@ class AtmosphericCorrector(object):
 
         else:
             if self.cfg.mode_ac == 'combined':
-                reflectance_vnir, reflectance_swir, land_additional_results = \
+                reflectance_vnir, reflectance_swir, water_additional_results, land_additional_results = \
                     self._run_AC__combined_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'water':
-                reflectance_vnir, reflectance_swir = \
+                reflectance_vnir, reflectance_swir, water_additional_results = \
                     self._run_AC__water_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'land':
