@@ -141,7 +141,7 @@ class AtmosphericCorrector(object):
         wl_ref_vnir, wl_ref_swir, water_additional_results = \
             polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                              config=self.cfg,
-                             detector='merge')
+                             detector='vnir')
 
         return wl_ref_vnir, wl_ref_swir, water_additional_results
 
@@ -175,7 +175,7 @@ class AtmosphericCorrector(object):
         wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
             polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                              config=self.cfg,
-                             detector='merge')
+                             detector='vnir')
 
         # use mask value 2 for replacing water corrected pixels
         wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
