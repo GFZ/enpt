@@ -1,15 +1,18 @@
-FROM ci_base_centos:0.2
+FROM ci_base_centos:0.3
 
 # copy some needed stuff to /root
 COPY *.yml /root/
-COPY polymer-v4.13.tar.gz /root/
+COPY polymer-v4.14.tar.gz /root/
 
 # update the ci_env environment (that already contains all packages installed via 'docker_pyenvs' repo)
 # NOTE: The pkgs directory (cache) is deleted because otherwise conda env create takes hours within a docker container.
 RUN /bin/bash -i -c "\
     source /root/mambaforge/bin/activate ; \
-    mamba update -n base -c conda-forge --all;\
+    rm -rf /root/mambaforge/pkgs ; \
+    mamba update -n base --all;\
+    rm -rf /root/mambaforge/pkgs ; \
     conda activate ci_env; \
+    mamba update --all; \
     mamba env update -n ci_env -f /root/environment_enpt.yml; \
     rm -rf /root/mambaforge/pkgs"
 
@@ -18,7 +21,7 @@ RUN /bin/bash -i -c "\
     source /root/mambaforge/bin/activate ci_env; \
     cd /root/ ; \
     tar -zxvf polymer-*.tar.gz ; \
-    cd polymer-v4.13 ;\
+    cd polymer-v4.14 ;\
     make ;\
     pip install -e . ;\
     make auxdata_common ;\
@@ -26,4 +29,4 @@ RUN /bin/bash -i -c "\
     mkdir -p ANCILLARY/ERA5/2017/02/18"
 
 # copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
-COPY era5_20170218*.nc /root/polymer-v4.13/ANCILLARY/ERA5/2017/02/18/
+COPY era5_20170218*.nc /root/polymer-v4.14/ANCILLARY/ERA5/2017/02/18/
