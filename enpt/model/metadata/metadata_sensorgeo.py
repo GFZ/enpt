@@ -128,9 +128,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
 
             def get_filename(matching_exp: str):
-                matches = fnmatch.filter(all_filenames, '%s.GEOTIFF' % matching_exp)
-                if not matches:
-                    matches = fnmatch.filter(all_filenames, '%s.TIF' % matching_exp)
+                matches = []
+                for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
+                    matches.extend(fnmatch.filter(all_filenames, f'{matching_exp}{ext}'))
+
+                    if matches:
+                        break
+
                 if not matches:
                     raise FileNotFoundError("Could not find a file that matches the expression '%s'." % matching_exp)
 
