@@ -66,7 +66,8 @@ urlcheck: ## check for dead URLs
 	urlchecker check . \
 		--timeout 20 \
 		--file-types .py,.rst,.md,.json \
-		--white-listed-patterns www.enmap.org  # certificate checks fail although URLs work
+		--verbose \
+		--exclude-urls https://doi.org/10.1364/OE.19.009783  # exists but somehow urlchecker fails
 
 test: ## run tests quickly with the default Python
 	python setup.py test
