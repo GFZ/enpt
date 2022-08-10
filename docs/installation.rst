@@ -156,7 +156,7 @@ requirement polymer_ as described above.
 
 .. note::
 
-    EnPT has been tested with Python 3.6+ on Linux, Windows and Mac OSX.
+    EnPT has been tested with Python 3.7+ on Linux, Windows and Mac OSX.
 
 
 .. _pip: https://pip.pypa.io
