@@ -131,22 +131,29 @@ class L1B_Reader(object):
             # '*-HISTORY.XML',  # only included in internal DLR test data, not in the zip archive on enmap.org
             # '*-LOG.XML',  # only included in internal DLR test data, not in the zip archive on enmap.org
             '*-METADATA.XML',
-            '*-QL_PIXELMASK_SWIR.TIF',
-            '*-QL_PIXELMASK_VNIR.TIF',
-            '*-QL_QUALITY_CIRRUS.TIF',
-            '*-QL_QUALITY_CLASSES.TIF',
+            '*-QL_PIXELMASK_SWIR.?',
+            '*-QL_PIXELMASK_VNIR.?',
+            '*-QL_QUALITY_CIRRUS.?',
+            '*-QL_QUALITY_CLASSES.?',
             '*-QL_QUALITY_CLOUD.TIF',
-            '*-QL_QUALITY_CLOUDSHADOW.TIF',
-            '*-QL_QUALITY_HAZE.TIF',
-            '*-QL_QUALITY_SNOW.TIF',
-            '*-QL_QUALITY_TESTFLAGS_SWIR.TIF',
-            '*-QL_QUALITY_TESTFLAGS_VNIR.TIF',
-            '*-QL_SWIR.TIF',
-            '*-QL_VNIR.TIF',
-            '*-SPECTRAL_IMAGE_SWIR.TIF',
-            '*-SPECTRAL_IMAGE_VNIR.TIF',
+            '*-QL_QUALITY_CLOUDSHADOW.?',
+            '*-QL_QUALITY_HAZE.?',
+            '*-QL_QUALITY_SNOW.?',
+            '*-QL_QUALITY_TESTFLAGS_SWIR.?',
+            '*-QL_QUALITY_TESTFLAGS_VNIR.?',
+            '*-QL_SWIR.?',
+            '*-QL_VNIR.?',
+            '*-SPECTRAL_IMAGE_SWIR.?',
+            '*-SPECTRAL_IMAGE_VNIR.?',
         ]:
-            if not filter(files, pattern) and not filter(files, pattern.replace('.TIF', '.GEOTIFF')):
+            matches = []
+            for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
+                matches.extend(filter(files, pattern.replace('.?', ext)))
+
+                if matches:
+                    break
+
+            if not matches:
                 raise FileNotFoundError('The root directory of the EnMAP image %s misses a file with the pattern %s.'
                                         % (rootdir_l1b, pattern))
 
