@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.9 (2022-08-12)
+-------------------
+
+* Fixed #86: ValueError during SNR computation due to unexpected number of bands (!65).
+* Adapted the code to be compatible with real EnMAP data (!63).
+
+
 0.18.8 (2022-03-16)
 -------------------
 
