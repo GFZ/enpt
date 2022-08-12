@@ -36,13 +36,18 @@ import numpy as np
 from multiprocessing import cpu_count
 from typing import Optional
 from logging import Logger
+from warnings import warn
 
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 try:
     from acwater.acwater import polymer_ac_enmap
-except ImportError:
-    polymer_ac_enmap: Optional[callable] = None
+except ImportError as e:
+    try:
+        import acwater as _acwater  # noqa: F401
+        warn(f'ACwater is importable but following error occurred when importing polymer_ac_enmap: {e.msg}')
+    except ImportError:
+        polymer_ac_enmap: Optional[callable] = None
 
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
@@ -78,11 +83,17 @@ class AtmosphericCorrector(object):
             options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
             options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
 
+            # TODO: issue is closed -> revise
             # temporarily disable uncertainty measures to avoid https://git.gfz-potsdam.de/EnMAP/sicor/-/issues/86
+            # if set to False, uncertainty values are not contained in the additional output of SICOR
             options["retrieval"]["inversion"]["full"] = False
 
             # set land_only mode
             options["retrieval"]["land_only"] = land_only
+
+            # disable first guess water vapor retrieval for now
+            # options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
+            # options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = 2.5  # = already the default
 
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')

@@ -43,7 +43,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
 req = [
     'arosics>=1.0.0',
     'cerberus',
-    'geoarray>=0.9.0',
+    'geoarray>=0.15.8',
     'jsmin',
     'lxml',
     'matplotlib',
@@ -80,10 +80,10 @@ setup(
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     description="EnMAP Processing Tool",
     entry_points={
@@ -107,7 +107,8 @@ setup(
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},
-    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seems to work, therefore use MANIFEST.in
+    packages=find_packages(exclude=['tests*', 'examples*']),  # does not seem to work, therefore use MANIFEST.in
+    python_requires='>=3.7',
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,

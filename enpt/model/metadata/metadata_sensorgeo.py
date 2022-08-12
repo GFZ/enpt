@@ -128,9 +128,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
 
             def get_filename(matching_exp: str):
-                matches = fnmatch.filter(all_filenames, '%s.GEOTIFF' % matching_exp)
-                if not matches:
-                    matches = fnmatch.filter(all_filenames, '%s.TIF' % matching_exp)
+                matches = []
+                for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
+                    matches.extend(fnmatch.filter(all_filenames, f'{matching_exp}{ext}'))
+
+                    if matches:
+                        break
+
                 if not matches:
                     raise FileNotFoundError("Could not find a file that matches the expression '%s'." % matching_exp)
 
@@ -314,7 +318,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         NOTE:   The SNR model files (SNR_D1.bsq/SNR_D2.bsq) contain polynomial coefficients needed to compute SNR.
 
-                SNR_D1.bsq: SNR model for EnMAP SWIR detector (contains high gain and low gain model coefficients)
+                SNR_D1.bsq: SNR model for EnMAP VNIR detector (contains high gain and low gain model coefficients)
 
                 - 1000 columns (for 1000 EnMAP columns)
                 - 88 bands for 88 EnMAP VNIR bands
@@ -331,14 +335,13 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param rad_data:        image radiance data of EnMAP_Detector_SensorGeo
         :param dir_snr_models:  root directory where SNR model data is stored (must contain SNR_D1.bsq/SNR_D2.bsq)
         """
-        path_snr_model = os.path.join(dir_snr_models, "SNR_D1.bsq" if self.detector_name == 'VNIR' else "SNR_D2.bsq")
         rad_data = np.array(rad_data)
-
         assert self.unitcode == 'TOARad'
-        self.logger.info("Computing SNR for %s using %s" % (self.detector_name, path_snr_model))
+        self.logger.info(f"Computing SNR from {self.detector_name} TOA radiance.")
 
         if self.detector_name == 'VNIR':
-            gA = GeoArray(path_snr_model)
+            gA = self._get_snr_model(dir_snr_models)
+
             coeffs_highgain = gA[0:3, :, :]  # [3 x ncols x nbands]
             coeffs_lowgain = gA[3:6, :, :]  # [3 x ncols x nbands]
             gain_threshold = np.squeeze(gA[6, :, :])
@@ -360,18 +363,33 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                     coeffs_lowgain[2, lowgain_mask] * rad_lowgain ** 2
 
         else:
-            gA = GeoArray(path_snr_model)
-
-            # some SWIR bands may be missing -> find indices of bands we need for SNR computation
-            cwls_gA = gA.metadata.band_meta['wavelength']
-            cwls_needed = self.wvl_center
-
-            idxs_needed = [np.argmin(np.abs(cwls_gA - cwl)) for cwl in cwls_needed]
-            if not len(set(idxs_needed)) == len(idxs_needed) or len(idxs_needed) != self.nwvl:
-                raise RuntimeError('Unclear band allocation during SWIR SNR computation.')
-
-            coeffs = gA[:, :, idxs_needed]  # [3 x ncols x nbands]
+            gA = self._get_snr_model(dir_snr_models)
+            coeffs = gA[:]
             self.snr = coeffs[0, :, :] + coeffs[1, :, :] * rad_data[:, :, :] + coeffs[2, :, :] * rad_data[:, :, :] ** 2
+
+    def _get_snr_model(self, dir_snr_models: str) -> GeoArray:
+        """Get the SNR model coefficients for the current detector.
+
+        NOTE: Missing bands are linearly interpolated.
+
+        :param dir_snr_models:  directory containing the SNR models
+        """
+        path_snr_model = os.path.join(dir_snr_models, "SNR_D1.bsq" if self.detector_name == 'VNIR' else "SNR_D2.bsq")
+        gA = GeoArray(path_snr_model)
+
+        if gA.bands == self.nwvl:
+            return gA
+
+        else:
+            from scipy.interpolate import interp1d
+            coeffs_interp = \
+                interp1d(gA.meta.band_meta['wavelength'], gA[:],
+                         axis=2, kind='linear', fill_value="extrapolate", bounds_error=False)(self.wvl_center)
+
+            gA_ = GeoArray(coeffs_interp)
+            gA_.meta.band_meta['wavelength'] = self.wvl_center
+
+            return gA_
 
     @staticmethod
     def interpolate_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):

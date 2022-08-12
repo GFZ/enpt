@@ -2,6 +2,30 @@
 History
 =======
 
+0.18.9 (2022-08-12)
+-------------------
+
+* Fixed #86: ValueError during SNR computation due to unexpected number of bands (!65).
+* Adapted the code to be compatible with real EnMAP data (!63).
+
+
+0.18.8 (2022-03-16)
+-------------------
+
+* Fixed #84: Orthorectification fails if L1B data are pseudo-projected/rotated (!62).
+
+
+0.18.7 (2022-03-10)
+-------------------
+
+* Fixed some style issues.
+* Replaced deprecated URLs.
+* Fixed typo in requirements.
+* Excluded Python 3.10 intermediately due to debugger issue.
+* Fixed indentation in Makefile.
+* Improved error message in case a requirement of ACwater is missing.
+* Fixed coverage issue.
+
 
 0.18.6 (2021-12-20)
 -------------------
@@ -31,7 +55,7 @@ History
 -------------------
 
 * Fixed #79 (FileNotFoundError when using the official EnMAP test data downloaded from enmap.org).
-* Removed required requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
+* Removed requirements_dev.txt which not needed anymore (also closes https://github.com/GFZ/enpt/pull/1).
 
 
 0.18.2 (2021-06-17)
