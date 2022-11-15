@@ -678,13 +678,14 @@ class EnMAPL1Product_SensorGeo(object):
     #     :return:
     #     """
     #     # input validation
+    #     from zipfile import is_zipfile
     #     if not path.isdir(path_enmap_image) and \
-    #        not (path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
+    #        not (path.exists(path_enmap_image) and is_zipfile(path_enmap_image)):
     #         raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
     #                          "archive.")
     #
     #     # extract L1B image archive if needed
-    #     if path_enmap_image.endswith('.zip'):
+    #     if is_zipfile(path_enmap_image):
     #         path_enmap_image = self.extract_zip_archive(path_enmap_image)
     #         if not path.isdir(path_enmap_image):
     #             raise NotADirectoryError(path_enmap_image)
