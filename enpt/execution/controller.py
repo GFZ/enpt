@@ -101,7 +101,7 @@ class EnPT_Controller(object):
         if not self.cfg.is_dummy_dataformat:
             return outdir
         else:
-            return os.path.join(self.tempDir, os.path.basename(path_zipfile).split('.zip')[0])
+            return os.path.join(self.tempDir, os.path.splitext(os.path.basename(path_zipfile))[0])
 
     def read_L1B_data(self) -> None:
         """Read the provider L1B data given in config and return an EnMAP image object."""
@@ -110,16 +110,16 @@ class EnPT_Controller(object):
 
         # input validation
         if not os.path.isdir(path_enmap_image) and \
-           not (os.path.exists(path_enmap_image) and path_enmap_image.endswith('.zip')):
+           not (os.path.exists(path_enmap_image) and zipfile.is_zipfile(path_enmap_image)):
             raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
                              "archive. Received %s." % path_enmap_image)
 
         # extract L1B image archive if needed
-        if path_enmap_image.endswith('.zip'):
+        if zipfile.is_zipfile(path_enmap_image):
             path_enmap_image = self.extract_zip_archive(path_enmap_image, subdir='image_main')
 
         # extract L1B gap fill image archive if needed
-        if path_enmap_image_gapfill and path_enmap_image_gapfill.endswith('.zip'):
+        if path_enmap_image_gapfill and zipfile.is_zipfile(path_enmap_image_gapfill):
             path_enmap_image_gapfill = self.extract_zip_archive(path_enmap_image_gapfill, subdir='image_gapfill')
 
         # run the reader
