@@ -161,7 +161,7 @@ requirement polymer_ as described above.
 
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
-.. _conda: https://conda.io/docs
+.. _conda: https://docs.conda.io
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
 .. _HYGEOS support forum: https://forum.hygeos.com
