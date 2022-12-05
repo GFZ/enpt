@@ -196,12 +196,12 @@ class AtmosphericCorrector(object):
                                   wl_ref_swir_water,
                                   boa_ref_swir_land)
         waterboa_additional_results = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
-                                  water_additional_results,
-                                  boa_ref_vnir_land)
-        #from geoarray import GeoArray
-        #GeoArray(waterboa_additional_results[1]).save(
-        #    '/home/alvarado/repositories/acwater/tests/data/output/EnPT_Chla_new.tif', fmt='GTiff')
-        #data_geoarray = waterboa_additional_results
+                                               water_additional_results,
+                                               boa_ref_vnir_land)
+        # from geoarray import GeoArray
+        # GeoArray(waterboa_additional_results[1]).save(
+        #     '/home/alvarado/repositories/acwater/tests/data/output/EnPT_Chla_new.tif', fmt='GTiff')
+        # data_geoarray = waterboa_additional_results
 
         return wlboa_ref_vnir, wlboa_ref_swir, waterboa_additional_results, land_additional_results
 
