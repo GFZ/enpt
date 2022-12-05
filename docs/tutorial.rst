@@ -5,7 +5,7 @@ From EnMAP Level-1B to Level-2A
 *******************************
 
 In this tutorial, we generate EnMAP_ Level-2A from Level-1B data using the EnMAP processing tool (EnPT_).
-Please refer to the overview about EnMAP data products `here <https://www.enmap.org/mission/dataproducts/>`__ to learn
+Please refer to the overview about EnMAP data products `here <https://www.enmap.org/data_access/>`__ to learn
 more about the differences between EnMAP processing levels.
 
 As described in the :ref:`usage` section of this documentation, the input parameters of EnPT_ can be set using the

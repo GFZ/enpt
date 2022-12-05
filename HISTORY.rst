@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.10 (2022-11-15)
+--------------------
+
+* Fixed #89: ValueError due to capital letters in EnMAP Zipfile extension (!66).
+* Replaced deprecated URLs.
+
+
 0.18.9 (2022-08-12)
 -------------------
 
