@@ -25,7 +25,7 @@
 # details.
 #
 # You should have received a copy of the GNU Lesser General Public License along
-# with this program.  If not, see <http://www.gnu.org/licenses/>.
+# with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'options', containing all configuration related functions and parameter definitions."""
 
