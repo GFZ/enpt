@@ -25,7 +25,8 @@ test_enpt:
 
     # make sure we are testing with the develop branch of ACwater
     - pip uninstall acwater -y
-    - pip install git+https://gitlab.awi.de/phytooptics/acwater.git@develop
+    - git clone -b develop https://gitlab.awi.de/phytooptics/acwater.git /tmp/acwater
+    - pip install -e /tmp/acwater
 
     # update sicor
     # - rm -rf context/sicor
