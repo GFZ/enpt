@@ -45,8 +45,10 @@ try:
 except ImportError as e:
     try:
         import acwater as _acwater  # noqa: F401
-        warn(f'ACwater is importable but following error occurred when importing polymer_ac_enmap: {e.msg}')
-    except ImportError:
+        warn(f'ACwater is importable but the following error occurred when importing polymer_ac_enmap: {e.msg}')
+    except ImportError as e:
+        warn(f'ACwater cannot be imported. The following error occurred:  {e.msg}')
+    finally:
         polymer_ac_enmap: Optional[callable] = None
 
 from ...model.images import EnMAPL1Product_SensorGeo
