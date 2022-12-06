@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.11 (2022-12-06)
+--------------------
+
+* Fixed #91: "NameError: name 'polymer_ac_enmap' is not defined" in case acwater is installed but polymer is
+  missing (!67).
+
+
 0.18.10 (2022-11-15)
 --------------------
 
