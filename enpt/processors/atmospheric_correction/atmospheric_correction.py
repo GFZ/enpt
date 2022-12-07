@@ -148,10 +148,19 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
-        wl_ref_vnir, wl_ref_swir = \
-            polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
-                             config=self.cfg,
-                             detector='merge')
+        try:
+            wl_ref_vnir, wl_ref_swir = \
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
+                                 config=self.cfg,
+                                 detector='merge')
+        except:  # noqa
+            enmap_ImageL1.logger.error(
+                "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
+                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
+                "The error message is now raised:"
+            )
+            raise
 
         return wl_ref_vnir, wl_ref_swir
 
@@ -182,10 +191,19 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
-        wl_ref_vnir_water, wl_ref_swir_water = \
-            polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
-                             config=self.cfg,
-                             detector='merge')
+        try:
+            wl_ref_vnir_water, wl_ref_swir_water = \
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
+                                 config=self.cfg,
+                                 detector='merge')
+        except:  # noqa
+            enmap_ImageL1.logger.error(
+                "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
+                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
+                "The error message is now raised:"
+            )
+            raise
 
         # use mask value 2 for replacing water corrected pixels
         wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],

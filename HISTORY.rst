@@ -2,6 +2,12 @@
 History
 =======
 
+0.18.12 (2022-12-07)
+--------------------
+
+* !68: Added useful error message in case the externally developed ACwater code fails.
+
+
 0.18.11 (2022-12-06)
 --------------------
 
