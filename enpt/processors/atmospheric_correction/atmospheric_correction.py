@@ -94,8 +94,9 @@ class AtmosphericCorrector(object):
             options["retrieval"]["land_only"] = land_only
 
             # disable first guess water vapor retrieval for now
-            # options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
-            # options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = 2.5  # = already the default
+            options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
+            options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = \
+                enmap_ImageL1.meta.water_vapour  # = default = 2.5
 
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')
