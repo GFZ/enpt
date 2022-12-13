@@ -288,8 +288,12 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:
-                self.logger.warning("The '%s' attribute cannot be saved because it does not exist in the current EnMAP "
-                                    "image." % attrName)
+                if attrName.startswith('polymer_') and not self.cfg.polymer_additional_results:
+                    # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
+                    pass
+                else:
+                    self.logger.warning(f"The '{attrName}' attribute cannot be saved because it does not exist in the "
+                                        f"current EnMAP image.")
 
         # TODO remove GDAL's *.aux.xml files?
 
