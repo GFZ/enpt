@@ -114,6 +114,8 @@ def get_enpt_argparser():
     add('--mode_ac', type=str, default=None, nargs='?',
         help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
              "('land', water', 'combined')")
+    add('--polymer_additional_results', type=_str2bool, default=False, nargs='?', const=True,
+        help="Enable the generation of additional results when running ACwater/POLYMER (default: False)")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
         help='Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces')
     add('--scale_factor_boa_ref', type=int, default=10000,
