@@ -340,7 +340,7 @@ class _EnMAP_Image(object):
     @polymer_bbs.setter
     def polymer_bbs(self, *geoArr_initArgs):
         self._polymer_bbs = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'polymer_bbs',
-                                                                         nodataVal=-9999)
+                                                                      nodataVal=-9999)
 
     @polymer_bbs.deleter
     def polymer_bbs(self):
@@ -358,7 +358,7 @@ class _EnMAP_Image(object):
     @polymer_rgli.setter
     def polymer_rgli(self, *geoArr_initArgs):
         self._polymer_rgli = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'polymer_rgli',
-                                                                         nodataVal=-9999)
+                                                                       nodataVal=-9999)
 
     @polymer_rgli.deleter
     def polymer_rgli(self):
@@ -376,7 +376,7 @@ class _EnMAP_Image(object):
     @polymer_rnir.setter
     def polymer_rnir(self, *geoArr_initArgs):
         self._polymer_rnir = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'polymer_rnir',
-                                                                         nodataVal=-9999)
+                                                                       nodataVal=-9999)
 
     @polymer_rnir.deleter
     def polymer_rnir(self):
@@ -394,7 +394,7 @@ class _EnMAP_Image(object):
     @polymer_bitmask.setter
     def polymer_bitmask(self, *geoArr_initArgs):
         self._polymer_bitmask = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'polymer_bitmask',
-                                                                         nodataVal=-9999)
+                                                                          nodataVal=-9999)
 
     @polymer_bitmask.deleter
     def polymer_bitmask(self):
