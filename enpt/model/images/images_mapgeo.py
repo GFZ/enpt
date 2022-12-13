@@ -253,14 +253,31 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
-                         'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap']:
+                         'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
+                         'polymer_logchl', 'polymer_bbs', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
 
             if attrName == 'deadpixelmap':
                 # TODO VNIR and SWIR must be merged
                 self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
                 continue
 
-            outpath = path.join(product_dir, getattr(self.meta, 'filename_%s' % attrName))
+            if attrName.startswith('polymer_'):
+                ext = \
+                    'TIF' if self.cfg.output_format == 'GTiff' else \
+                    'bsq' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
+                    'bil' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
+                    'bip' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
+                    'NA'
+                dict_attr_fn = dict(
+                    polymer_logchl=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL.{ext}',
+                    polymer_bbs=f'{self.meta.scene_basename}-ACOUT_POLYMER_BBS.{ext}',
+                    polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
+                    polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
+                    polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',
+                )
+                outpath = path.join(product_dir, dict_attr_fn[attrName])
+            else:
+                outpath = path.join(product_dir, getattr(self.meta, 'filename_%s' % attrName))
 
             attr_gA = \
                 self.generate_quicklook(bands2use=self.meta.preview_bands_vnir) if attrName == 'quicklook_vnir' else \
