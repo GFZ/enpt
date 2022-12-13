@@ -306,7 +306,7 @@ class AtmosphericCorrector(object):
         #  (contains three phases of water maps and several retrieval uncertainty measures)
 
         # join additional results from ACwater/Polymer
-        if water_additional_results:
+        if water_additional_results and self.cfg.polymer_additional_results:
             enmap_ImageL1.vnir.polymer_logchl = water_additional_results['polymer_logchl']
             enmap_ImageL1.vnir.polymer_bbs = water_additional_results['polymer_bbs']
             enmap_ImageL1.vnir.polymer_rgli = water_additional_results['polymer_rgli']
