@@ -102,6 +102,7 @@ config_for_testing_water = dict(
     scale_factor_boa_ref=10000,
     scale_factor_toa_ref=10000,
     enable_ac=True,
+    mode_ac='combined',
     polymer_additional_results=True,
     polymer_root=path_polymer,
     threads=-1,
