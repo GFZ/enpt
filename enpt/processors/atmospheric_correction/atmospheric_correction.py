@@ -94,8 +94,9 @@ class AtmosphericCorrector(object):
             options["retrieval"]["land_only"] = land_only
 
             # disable first guess water vapor retrieval for now
-            # options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
-            # options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = 2.5  # = already the default
+            options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
+            options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = \
+                enmap_ImageL1.meta.water_vapour  # = default = 2.5
 
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')
@@ -150,11 +151,19 @@ class AtmosphericCorrector(object):
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
         #       - res: a dictionary containing retrieval maps with several additional retrieval measures
         #              -> chla, bitmask, bbs, Rnir, Rgli
-
-        wl_ref_vnir, wl_ref_swir, water_additional_results = \
-            polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
-                             config=self.cfg,
-                             detector='vnir')
+        try:
+            wl_ref_vnir, wl_ref_swir, water_additional_results = \
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
+                                 config=self.cfg,
+                                 detector='vnir')
+        except:  # noqa
+            enmap_ImageL1.logger.error(
+                "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
+                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
+                "The error message is now raised:"
+            )
+            raise
 
         return wl_ref_vnir, wl_ref_swir, water_additional_results
 
@@ -185,10 +194,21 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
-        wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
-            polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
-                             config=self.cfg,
-                             detector='vnir')
+        #       - res: a dictionary containing retrieval maps with several additional retrieval measures
+        #              -> chla, bitmask, bbs, Rnir, Rgli
+        try:
+            wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
+                polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
+                                 config=self.cfg,
+                                 detector='vnir')
+        except:  # noqa
+            enmap_ImageL1.logger.error(
+                "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
+                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
+                "The error message is now raised:"
+            )
+            raise
 
         # use mask value 2 for replacing water corrected pixels
         wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],

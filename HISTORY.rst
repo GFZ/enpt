@@ -2,6 +2,19 @@
 History
 =======
 
+0.18.13 (2022-12-08)
+--------------------
+
+* !69: Temporarily disabled the water vapor first guess retrieval implemented in SICOR
+  due to current incompatibilities with recently acquired EnMAP data.
+
+
+0.18.12 (2022-12-07)
+--------------------
+
+* !68: Added useful error message in case the externally developed ACwater code fails.
+
+
 0.18.11 (2022-12-06)
 --------------------
 
