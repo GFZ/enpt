@@ -210,22 +210,19 @@ class AtmosphericCorrector(object):
             )
             raise
 
-        # use mask value 2 for replacing water corrected pixels
-        wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
-                                  wl_ref_vnir_water,
-                                  boa_ref_vnir_land)
-        wlboa_ref_swir = np.where((enmap_ImageL1.swir.mask_landwater[:] == 2)[:, :, None],
-                                  wl_ref_swir_water,
-                                  boa_ref_swir_land)
-        waterboa_additional_results = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
-                                               water_additional_results,
-                                               boa_ref_vnir_land)
-        # from geoarray import GeoArray
-        # GeoArray(waterboa_additional_results[1]).save(
-        #     '/home/alvarado/repositories/acwater/tests/data/output/EnPT_Chla_new.tif', fmt='GTiff')
-        # data_geoarray = waterboa_additional_results
+        # Overwrite the SICOR output at water positions with the output from ACwater/Polymer
+        # -> output contains Water-leaving-reflectance over water and BOA-reflectance over land
+        water_mask_vnir_3D = (enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None]  # 2 = water
+        wlboa_ref_vnir = np.where(water_mask_vnir_3D, wl_ref_vnir_water, boa_ref_vnir_land)
+        wlboa_ref_swir = np.where(water_mask_vnir_3D, wl_ref_swir_water, boa_ref_swir_land)
 
-        return wlboa_ref_vnir, wlboa_ref_swir, waterboa_additional_results, land_additional_results
+        # set land pixels to nodata in all additional ACwater outputs
+        # water_additional_results = {
+        #     k: np.where(~water_mask_vnir_3D[:, :, 0], v, -9999)
+        #     for k, v in water_additional_results.items() if k != 'polymer_bitmask'
+        # }
+
+        return wlboa_ref_vnir, wlboa_ref_swir, water_additional_results, land_additional_results
 
     @staticmethod
     def _validate_AC_results(reflectance_vnir: np.ndarray,
