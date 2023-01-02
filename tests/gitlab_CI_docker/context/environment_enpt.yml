@@ -4,7 +4,7 @@ channels: &id1
   - conda-forge
 
 dependencies:
-  - python<3.10  # issue with PyCharm debugger and Python 3.10 which could not be tracked down so far
+  - python>=3.8
   - pip  # avoids that conda uses the wrong pip
   - arosics>1.0.0
   - geoarray>=0.15.8
@@ -39,7 +39,6 @@ dependencies:
 
     # Polymer AC additional pip requirements
     - git+https://gitlab.awi.de/phytooptics/acwater.git
-    - ecmwf-api-client
 
     # test/doc/lint requirements
     - flake8
