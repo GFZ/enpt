@@ -4,7 +4,7 @@ channels: &id1
   - conda-forge
 
 dependencies:
-  - python>=3.7,<=3.9
+  - python>=3.8
   - pip  # avoids that conda uses the wrong pip
   - enpt
 
@@ -18,20 +18,22 @@ dependencies:
   - xarray
 
   # EnMAP-Box
+  - astropy
+  - catboost
+  - lightgbm
   - matplotlib
   - netcdf4
   - numba
   - numpy
   - pyopengl
-  - qgis>=3.18,<3.28
-  - scikit-learn
+  - qgis>=3.28.2
+  - scikit-learn>=0.24
+  - scipy>=1.1
+  - xgboost
 
   - pip:
     # Polymer AC additional pip requirements
     - git+https://gitlab.awi.de/phytooptics/acwater.git
-    - ecmwf-api-client
 
     # EnMAP-Box
-    - astropy
     - enpt_enmapboxapp
-    - scipy
