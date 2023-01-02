@@ -1,0 +1,52 @@
+name: enpt_full
+
+channels: &id1
+  - conda-forge
+
+dependencies:
+  - python>=3.8
+  - pip  # avoids that conda uses the wrong pip
+  - enpt
+
+  # Polymer AC additional conda requirements
+  - cdsapi
+  - cython
+  - gdal
+  - netcdf4
+  - pygrib
+  - pyhdf
+  - xarray
+
+  # EnMAP-Box
+  - astropy
+  - catboost
+  - lightgbm
+  - matplotlib
+  - netcdf4
+  - numba
+  - numpy
+  - pyopengl
+  - qgis>=3.28.2
+  - scikit-learn>=0.24
+  - scipy>=1.1
+  - xgboost
+
+  - pip:
+    # Polymer AC additional pip requirements
+    - git+https://gitlab.awi.de/phytooptics/acwater.git
+
+    # EnMAP-Box
+    - enpt_enmapboxapp
+
+    # test/doc/lint requirements
+    - flake8
+    - pycodestyle
+    - pydocstyle
+    - pylint
+    - pytest
+    - pytest-cov
+    - pytest-reporter-html1
+    - sphinx-argparse
+    - sphinx_rtd_theme
+    - urlchecker
+
