@@ -20,11 +20,12 @@ This is the preferred way to install EnPT. It is the fastest one and it always i
 recent stable release and automatically resolves all the dependencies.
 
 1. Install Mambaforge_.
-2. Install enpt into a separate environment:
+2. Install enpt into a separate environment and activate it:
 
    .. code-block:: bash
 
     $ mamba create --name enpt enpt
+    $ mamba activate enpt
 
 
 Using Anaconda or Miniconda (slower)
@@ -35,6 +36,7 @@ Using conda_ (latest version recommended), EnPT is installed as follows:
 .. code-block:: bash
 
     $ conda create --name enpt -c conda-forge enpt
+    $ conda activate enpt
 
 
 Using pip (not recommended)
@@ -88,7 +90,7 @@ and polymer_ are required.
 
    .. code-block:: bash
 
-    $ conda activate enpt
+    $ mamba activate enpt
     $ mamba install -c conda-forge cdsapi cython ecmwf-api-client gdal netcdf4 pygrib pyhdf xarray
 
 2. Then register at the `HYGEOS support forum`_, download polymer_ from there, unpack it and
@@ -140,7 +142,7 @@ Then activate the newly created conda_ environment and start QGIS_:
 
 .. code-block:: bash
 
-  $ conda activate enpt_full
+  $ mamba activate enpt_full
   $ qgis
 
 The EnMAP-Box_ QGIS_ plugin can then be installed via the QGIS_ Plugin manager and the EnPT GUI_ can be started
