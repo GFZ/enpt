@@ -52,7 +52,7 @@ req = [
     'numpy',
     'numpy-indexed',
     'pandas',
-    'pyproj>=2.2.0',
+    'pyproj>=3.4.0',
     'py_tools_ds>=0.14.23',
     'scikit-image',
     'scipy',

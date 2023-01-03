@@ -13,29 +13,30 @@ Installing EnPT as a standalone package (backend code only)
 ***********************************************************
 
 
-Using Anaconda or Miniconda (recommended)
------------------------------------------
+Using Mambaforge (recommended)
+------------------------------
+
+This is the preferred way to install EnPT. It is the fastest one and it always installs the most
+recent stable release and automatically resolves all the dependencies.
+
+1. Install Mambaforge_.
+2. Install enpt into a separate environment and activate it:
+
+   .. code-block:: bash
+
+    $ mamba create --name enpt enpt
+    $ mamba activate enpt
+
+
+Using Anaconda or Miniconda (slower)
+------------------------------------
 
 Using conda_ (latest version recommended), EnPT is installed as follows:
 
+.. code-block:: bash
 
-1. Create virtual environment for enpt (optional but recommended):
-
-   .. code-block:: bash
-
-    $ conda create -c conda-forge --name enpt python=3
+    $ conda create --name enpt -c conda-forge enpt
     $ conda activate enpt
-
-
-2. Then install EnPT itself:
-
-   .. code-block:: bash
-
-    $ conda install -c conda-forge enpt
-
-
-This is the preferred method to install EnPT, as it always installs the most recent stable release and
-automatically resolves all the dependencies.
 
 
 Using pip (not recommended)
@@ -45,33 +46,33 @@ There is also a `pip`_ installer for EnPT. However, please note that EnPT depend
 open source packages that may cause problems when installed with pip. Therefore, we strongly recommend
 to resolve the following dependencies before the pip installer is run:
 
-    * cachetools
-    * cartopy
-    * gdal
-    * geopandas
-    * glymur
-    * h5py
-    * numba
-    * numpy
-    * llvmlite
-    * lxml
-    * matplotlib
-    * pandas
-    * pygrib
-    * pyhdf
-    * pyproj >2.2.0
-    * pyresample
-    * pytables
-    * scikit-image
-    * scikit-learn
-    * shapely
+* cachetools
+* cartopy
+* gdal
+* geopandas
+* glymur
+* h5py
+* numba
+* numpy
+* llvmlite
+* lxml
+* matplotlib
+* pandas
+* pygrib
+* pyhdf
+* pyproj >3.4.0
+* pyresample
+* pytables
+* scikit-image
+* scikit-learn
+* shapely
 
 
 Then, the pip installer can be run by:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    $ pip install enpt
+  $ pip install enpt
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -89,9 +90,8 @@ and polymer_ are required.
 
    .. code-block:: bash
 
-    $ conda activate enpt
-    $ conda install -c conda-forge cdsapi cython gdal netcdf4 pygrib pyhdf xarray
-    $ pip install ecmwf-api-client
+    $ mamba activate enpt
+    $ mamba install -c conda-forge cdsapi cython ecmwf-api-client gdal netcdf4 pygrib pyhdf xarray
 
 2. Then register at the `HYGEOS support forum`_, download polymer_ from there, unpack it and
    run the following commands from the unpacked root directory of polymer_:
@@ -129,20 +129,21 @@ Installing EnPT along with QGIS and the EnMAP-Box (backend + GUI)
 *****************************************************************
 
 If you want to use EnPT including the GUI_ in the EnMAP-Box_, it is highly recommended to install QGIS_,
-the EnMAP-Box_ requirements, the EnPT backend code and the EnPT GUI_ into a single conda_ environment.
+the EnMAP-Box_ requirements, the EnPT backend code and the EnPT GUI_ into a single conda_ environment
+within Mambaforge_.
 
-To do so, run the following command on a conda_ command line:
+To do so, run the following command on a Mambaforge_ conda_ command line:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    $ conda env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full.yml
 
 Then activate the newly created conda_ environment and start QGIS_:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    $ conda activate enpt_full
-    $ qgis
+  $ mamba activate enpt_full
+  $ qgis
 
 The EnMAP-Box_ QGIS_ plugin can then be installed via the QGIS_ Plugin manager and the EnPT GUI_ can be started
 from within the EnMAP-Box_ as described
@@ -152,6 +153,14 @@ If you want to use advanced atmospheric correction over water surfaces, please i
 requirement polymer_ as described above.
 
 
+.. hint::
+
+    **Contributors** of the EnPT source code or plugins may install EnPT along with all packages needed for development
+    with:
+
+    .. code-block:: bash
+
+      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::
@@ -159,6 +168,7 @@ requirement polymer_ as described above.
     EnPT has been tested with Python 3.7+ on Linux, Windows and Mac OSX.
 
 
+.. _Mambaforge: https://github.com/conda-forge/miniforge#mambaforge
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://docs.conda.io

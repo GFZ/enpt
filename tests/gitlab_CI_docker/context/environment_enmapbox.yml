@@ -1,16 +1,21 @@
 name: enmapbox
 
 channels: &id1
-  - http://conda.anaconda.org/conda-forge
+  - conda-forge
 
 dependencies:
   - python=3.*.*
   - pip  # avoids that conda uses the wrong pip
-  - qgis
-  - numpy
-  - scikit-learn
-  - matplotlib
 
-  - pip:
-    - scipy
-    - astropy
+  - astropy
+  - catboost
+  - lightgbm
+  - matplotlib
+  - netcdf4
+  - numba
+  - numpy
+  - pyopengl
+  - qgis>=3.28.2
+  - scikit-learn>=0.24
+  - scipy>=1.1
+  - xgboost
