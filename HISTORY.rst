@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.14 (coming soon)
+---------------------
+
+* !70: Updated installation instructions and environment files due to new upstream releases. This allows to install
+  EnPT along with the latest QGIS and EnMAP-Box. Included documentation to install EnPT with Mambaforge.
+
+
 0.18.13 (2022-12-08)
 --------------------
 
