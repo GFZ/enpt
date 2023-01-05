@@ -30,6 +30,7 @@
 """EnMAP processing tool (EnPT) software package developed by GFZ."""
 
 import sensormapgeo as __smg  # noqa (E402 + F401)  # only to avoid later import error due to static TLS
+import os as __os
 
 from .version import __version__, __versionalias__   # noqa (E402 + F401)
 from .options.config import EnPTConfig
@@ -44,3 +45,8 @@ __all__ = ['__version__',
            'EnPTConfig',
            'EnPT_Controller'
            ]
+
+# $PROJ_LIB was renamed to $PROJ_DATA in proj=9.1.1, which leads to issues with fiona>=1.8.20,<1.9
+# -> fix it by setting PROJ_DATA
+if 'GDAL_DATA' in __os.environ and 'PROJ_DATA' not in __os.environ and 'PROJ_LIB' not in __os.environ:
+    __os.environ['PROJ_DATA'] = __os.path.join(__os.path.dirname(__os.environ['GDAL_DATA']), 'proj')
