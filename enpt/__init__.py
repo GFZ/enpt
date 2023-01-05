@@ -47,6 +47,7 @@ __all__ = ['__version__',
            ]
 
 # $PROJ_LIB was renamed to $PROJ_DATA in proj=9.1.1, which leads to issues with fiona>=1.8.20,<1.9
+# https://github.com/conda-forge/pyproj-feedstock/issues/130
 # -> fix it by setting PROJ_DATA
 if 'GDAL_DATA' in __os.environ and 'PROJ_DATA' not in __os.environ and 'PROJ_LIB' not in __os.environ:
     __os.environ['PROJ_DATA'] = __os.path.join(__os.path.dirname(__os.environ['GDAL_DATA']), 'proj')
