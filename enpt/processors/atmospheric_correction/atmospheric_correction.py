@@ -96,7 +96,7 @@ class AtmosphericCorrector(object):
     def _is_acwater_operable(self, logger: Logger):
         """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
         try:
-            import acwater as _acwater
+            import acwater as _acwater  # noqa: F401
         except ImportError as e:
             if self.cfg.mode_ac in ['water', 'combined']:
                 logger.warning(f"The atmospheric correction mode was set to '{self.cfg.mode_ac}' but "
@@ -107,8 +107,8 @@ class AtmosphericCorrector(object):
         try:
             from acwater.acwater import polymer_ac_enmap as _polymer_ac_enmap
             if not _polymer_ac_enmap:
-                logger.warning(f"Polymer is not callable. "
-                               f"As a fallback, SICOR is applied to water surfaces instead.")
+                logger.warning("Polymer is not callable. "
+                               "As a fallback, SICOR is applied to water surfaces instead.")
                 return False
         except ImportError as e:
             if self.cfg.mode_ac in ['water', 'combined']:
