@@ -9,6 +9,7 @@ History
   EnPT along with the latest QGIS and EnMAP-Box. Included documentation to install EnPT with Mambaforge.
 * !71: Updated copyright.
 * !72: Added workaround for missing $PROJ_DATA environment variable.
+* !74: Temporarily disabled first guess retrieval for liquid water and ice.
 
 
 0.18.13 (2022-12-08)
