@@ -80,13 +80,12 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
-    @patch('enpt.processors.atmospheric_correction.atmospheric_correction.polymer_ac_enmap', None)
+    @patch('acwater.acwater.polymer_ac_enmap', None)
     def test_run_all_processors_without_acwater_installed(self):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
         self.CTR.run_all_processors()
 
-        self.assertTrue("packages ACWater/Polymer are missing. "
-                        "SICOR has to be used as fallback algorithm for water surfaces."
+        self.assertTrue("As a fallback, SICOR is applied to water surfaces instead."
                         in self.CTR.L1_obj.logger.captured_stream)
 
 
