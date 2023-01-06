@@ -34,22 +34,10 @@ Performs the atmospheric correction of EnMAP L1B data.
 import pprint
 import numpy as np
 from multiprocessing import cpu_count
-from typing import Optional
 from logging import Logger
-from warnings import warn
 
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
-try:
-    from acwater.acwater import polymer_ac_enmap
-except ImportError as e:
-    try:
-        import acwater as _acwater  # noqa: F401
-        warn(f'ACwater is importable but the following error occurred when importing polymer_ac_enmap: {e.msg}')
-    except ImportError as e:
-        warn(f'ACwater cannot be imported. The following error occurred:  {e.msg}')
-    finally:
-        polymer_ac_enmap: Optional[callable] = None
 
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
@@ -64,7 +52,6 @@ class AtmosphericCorrector(object):
     def __init__(self, config: EnPTConfig = None):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
-        self.is_polymer_installed = polymer_ac_enmap is not None
 
     def _get_sicor_options(self, enmap_ImageL1: EnMAPL1Product_SensorGeo, land_only=False) -> dict:
         """Get a dictionary containing the SICOR options.
@@ -106,6 +93,32 @@ class AtmosphericCorrector(object):
 
         return options
 
+    def _is_acwater_operable(self, logger: Logger):
+        """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
+        try:
+            import acwater as _acwater
+        except ImportError as e:
+            if self.cfg.mode_ac in ['water', 'combined']:
+                logger.warning(f"The atmospheric correction mode was set to '{self.cfg.mode_ac}' but "
+                               f"ACwater cannot be imported (Error was: {e.msg}). "
+                               f"As a fallback, SICOR is applied to water surfaces instead.")
+            return False
+
+        try:
+            from acwater.acwater import polymer_ac_enmap as _polymer_ac_enmap
+            if not _polymer_ac_enmap:
+                logger.warning(f"Polymer is not callable. "
+                               f"As a fallback, SICOR is applied to water surfaces instead.")
+                return False
+        except ImportError as e:
+            if self.cfg.mode_ac in ['water', 'combined']:
+                logger.warning(f"The atmospheric correction mode was set to '{self.cfg.mode_ac}' but "
+                               f"Polymer cannot be imported (Error was: {e.msg}). "
+                               f"As a fallback, SICOR is applied to water surfaces instead.")
+            return False
+
+        return True
+
     def _run_AC__land_mode(self,
                            enmap_ImageL1: EnMAPL1Product_SensorGeo
                            ) -> (np.ndarray, np.ndarray, dict):
@@ -142,6 +155,8 @@ class AtmosphericCorrector(object):
             - Land surfaces are NOT included in the EnMAP L2A product.
             - The output radiometric unit for water surfaces is 'water leaving reflectance'.
         """
+        from acwater.acwater import polymer_ac_enmap
+
         if 1 in enmap_ImageL1.vnir.mask_landwater[:]:
             enmap_ImageL1.logger.info(
                 "Running atmospheric correction in 'water' mode, i.e., ACWater/Polymer is applied to water "
@@ -176,6 +191,8 @@ class AtmosphericCorrector(object):
                 - 'water leaving reflectance' for water surfaces
             - There might be visible edge effects, e.g., at coastlines.
         """
+        from acwater.acwater import polymer_ac_enmap
+
         only = 'water' if 1 not in enmap_ImageL1.vnir.mask_landwater[:] else 'land'
         if 1 not in enmap_ImageL1.vnir.mask_landwater[:] or \
            2 not in enmap_ImageL1.vnir.mask_landwater[:]:
@@ -246,12 +263,8 @@ class AtmosphericCorrector(object):
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
         # run the AC
-        if not self.is_polymer_installed and self.cfg.mode_ac in ['water', 'combined']:
+        if self.cfg.mode_ac in ['water', 'combined'] and not self._is_acwater_operable(enmap_ImageL1.logger):
             # use SICOR as fallback AC for water surfaces if ACWater/Polymer is not installed
-            enmap_ImageL1.logger.warning(
-                f"The atmospheric correction mode was set to '{self.cfg.mode_ac}' but the packages ACWater/Polymer are "
-                f"missing. SICOR has to be used as fallback algorithm for water surfaces.")
-
             reflectance_vnir, reflectance_swir, land_additional_results = \
                 self._run_AC__land_mode(enmap_ImageL1)
 
