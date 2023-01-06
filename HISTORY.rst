@@ -10,7 +10,8 @@ History
 * !71: Updated copyright.
 * !72: Added workaround for missing $PROJ_DATA environment variable.
 * !73: The check if ACWater/Polymer are installed is now done at runtime. The corresponding warning will not show up
-   with the AC in 'land' mode anymore. 
+   with the AC in 'land' mode anymore.
+* !74: Temporarily disabled first guess retrieval for liquid water and ice.
 
 
 0.18.13 (2022-12-08)
