@@ -9,6 +9,8 @@ History
   EnPT along with the latest QGIS and EnMAP-Box. Included documentation to install EnPT with Mambaforge.
 * !71: Updated copyright.
 * !72: Added workaround for missing $PROJ_DATA environment variable.
+* !73: The check if ACWater/Polymer are installed is now done at runtime. The corresponding warning will not show up
+   with the AC in 'land' mode anymore. 
 
 
 0.18.13 (2022-12-08)
