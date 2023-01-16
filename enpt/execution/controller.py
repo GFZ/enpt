@@ -140,7 +140,7 @@ class EnPT_Controller(object):
         self.L1_obj.get_preprocessed_dem()
 
     def run_spatial_optimization(self):
-        # get a new instance of radiometric transformer
+        # get a new instance of Spatial_Optimizer
         from ..processors.spatial_optimization import Spatial_Optimizer
         SpO = Spatial_Optimizer(self.cfg)
 
