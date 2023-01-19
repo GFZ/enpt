@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.15 (coming soon)
+---------------------
+
+* !75: Disabled dead pixel correction by default and changed the default interpolation approach from spectral to spatial
+  interpolation.
+
+
 0.18.14 (2023-01-06)
 --------------------
 
