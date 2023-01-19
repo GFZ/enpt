@@ -60,7 +60,7 @@ class Dead_Pixel_Corrector(object):
     """
 
     def __init__(self,
-                 algorithm: str = 'spectral',
+                 algorithm: str = 'spatial',
                  interp_spectral: str = 'linear',
                  interp_spatial: str = 'linear',
                  CPUs: int = None,
