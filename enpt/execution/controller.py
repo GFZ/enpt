@@ -2,7 +2,7 @@
 
 # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2018-2022 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# Copyright (C) 2018-2023 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
 # (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
 # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
@@ -140,7 +140,7 @@ class EnPT_Controller(object):
         self.L1_obj.get_preprocessed_dem()
 
     def run_spatial_optimization(self):
-        # get a new instance of radiometric transformer
+        # get a new instance of Spatial_Optimizer
         from ..processors.spatial_optimization import Spatial_Optimizer
         SpO = Spatial_Optimizer(self.cfg)
 

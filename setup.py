@@ -3,7 +3,7 @@
 
 # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2018-2022 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# Copyright (C) 2018-2023 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
 # (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
 # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
@@ -52,7 +52,7 @@ req = [
     'numpy',
     'numpy-indexed',
     'pandas',
-    'pyproj>=2.2.0',
+    'pyproj>=3.4.0',
     'py_tools_ds>=0.14.23',
     'scikit-image',
     'scipy',
