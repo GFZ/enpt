@@ -321,7 +321,7 @@ class AtmosphericCorrector(object):
             water_mask = enmap_ImageL1.vnir.mask_landwater[:] == 2
             for k in water_additional_results.keys():
                 if k == 'polymer_bitmask':
-                    # the bitmask specifically declares land pixels with "1"
+                    # the bitmask already explicitly indicates land pixels with "1"
                     continue
                 else:
                     v = water_additional_results[k]
