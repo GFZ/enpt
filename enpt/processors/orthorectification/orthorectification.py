@@ -130,8 +130,16 @@ class Orthorectifier(object):
         ##################################################################
 
         # TODO allow to set geolayer band to be used for warping of 2D arrays
-        special_fill_vals = dict(mask_landwater=3, polymer_bitmask=512)
 
+        # set special fill values for the new image background if neeeded
+        special_fill_vals = dict(mask_landwater=3, polymer_bitmask=512)
+        # always use nearest neighbour resampling for masks and bitmasks with discrete values
+        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
+                            'mask_cirrus', 'polymer_bitmask']
+        kw_init_nearest = kw_init.copy()
+        kw_init_nearest['resamp_alg'] = 'nearest'
+
+        # run the ortorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
                          'polymer_logchl', 'polymer_bbs', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             attr = getattr(enmap_ImageL1.vnir, attrName)
@@ -141,7 +149,7 @@ class Orthorectifier(object):
                     lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
                     fill_value=special_fill_vals[attrName] if attrName in special_fill_vals else attr.nodata,
-                    **kw_init)  # FIXME bilinear resampling for masks with discrete values?
+                    **(kw_init if attrName not in rsp_nearest_list else kw_init_nearest))
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
                 attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
