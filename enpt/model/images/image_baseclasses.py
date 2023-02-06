@@ -173,7 +173,7 @@ class _EnMAP_Image(object):
 
     @mask_landwater.setter
     def mask_landwater(self, *geoArr_initArgs):
-        self._mask_landwater = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_landwater', nodataVal=0)
+        self._mask_landwater = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'mask_landwater', nodataVal=3)
 
     @mask_landwater.deleter
     def mask_landwater(self):
