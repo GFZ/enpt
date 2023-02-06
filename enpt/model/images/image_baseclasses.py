@@ -418,7 +418,7 @@ class _EnMAP_Image(object):
         | CASE2              | 1024        | Pixel was processed in "case2" mode        |
         +--------------------+-------------+--------------------------------------------+
         | INCONSISTENCY      | 2048        | Inconsistent result was detected           |
-        |                    |             | (atmospheric reflectance out of bounds     |
+        |                    |             | (atmospheric reflectance out of bounds)     |
         +--------------------+-------------+--------------------------------------------+
         | ANOMALY_RWMOD_BLUE | 4096        | Excessive difference was found at 412nm    |
         |                    |             | between Rw and Rwmod                       |
