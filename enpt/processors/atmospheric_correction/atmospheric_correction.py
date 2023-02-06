@@ -239,7 +239,7 @@ class AtmosphericCorrector(object):
         wlboa_ref_vnir = np.where(water_mask_vnir_3D, wl_ref_vnir_water, boa_ref_vnir_land)
         wlboa_ref_swir = np.where(water_mask_vnir_3D, wl_ref_swir_water, boa_ref_swir_land)
 
-        # set land pixels to nodata in all additional ACwater outputs
+        # # set land pixels to nodata in all additional ACwater outputs
         # water_additional_results = {
         #     k: np.where(~water_mask_vnir_3D[:, :, 0], v, -9999)
         #     for k, v in water_additional_results.items() if k != 'polymer_bitmask'
@@ -323,6 +323,19 @@ class AtmosphericCorrector(object):
 
         # join additional results from ACwater/Polymer
         if water_additional_results and self.cfg.polymer_additional_results:
+
+            water_mask = enmap_ImageL1.vnir.mask_landwater[:] == 2
+            for k in water_additional_results.keys():
+                if k == 'polymer_bitmask':
+                    # the bitmask specifically declares land pixels with "1"
+                    continue
+                else:
+                    v = water_additional_results[k]
+                    v[~water_mask] = -9999
+                    v[np.isnan(v)] = -9999
+
+                    water_additional_results[k] = v
+
             enmap_ImageL1.vnir.polymer_logchl = water_additional_results['polymer_logchl']
             enmap_ImageL1.vnir.polymer_bbs = water_additional_results['polymer_bbs']
             enmap_ImageL1.vnir.polymer_rgli = water_additional_results['polymer_rgli']
