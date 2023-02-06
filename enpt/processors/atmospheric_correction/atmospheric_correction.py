@@ -239,12 +239,6 @@ class AtmosphericCorrector(object):
         wlboa_ref_vnir = np.where(water_mask_vnir_3D, wl_ref_vnir_water, boa_ref_vnir_land)
         wlboa_ref_swir = np.where(water_mask_vnir_3D, wl_ref_swir_water, boa_ref_swir_land)
 
-        # # set land pixels to nodata in all additional ACwater outputs
-        # water_additional_results = {
-        #     k: np.where(~water_mask_vnir_3D[:, :, 0], v, -9999)
-        #     for k, v in water_additional_results.items() if k != 'polymer_bitmask'
-        # }
-
         return wlboa_ref_vnir, wlboa_ref_swir, water_additional_results, land_additional_results
 
     @staticmethod
