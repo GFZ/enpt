@@ -136,8 +136,7 @@ class Orthorectifier(object):
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
         rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                             'mask_cirrus', 'polymer_bitmask']
-        kw_init_nearest = kw_init.copy()
-        kw_init_nearest['resamp_alg'] = 'nearest'
+        kw_init_nearest = dict(resamp_alg='nearest', nprocs=self.cfg.CPUs)
 
         # run the ortorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
