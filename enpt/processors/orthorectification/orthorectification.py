@@ -130,17 +130,21 @@ class Orthorectifier(object):
         ##################################################################
 
         # TODO allow to set geolayer band to be used for warping of 2D arrays
-        GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
-                                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                                     ** kw_init)  # FIXME bilinear resampling for masks with discrete values?
+        special_fill_vals = dict(mask_landwater=3, polymer_bitmask=512)
 
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
                          'polymer_logchl', 'polymer_bbs', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:
+                GT = Geometry_Transformer(
+                    lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
+                    lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
+                    fill_value=special_fill_vals[attrName] if attrName in special_fill_vals else attr.nodata,
+                    **kw_init)  # FIXME bilinear resampling for masks with discrete values?
+
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
-                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
+                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?
