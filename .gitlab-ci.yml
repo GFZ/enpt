@@ -24,10 +24,7 @@ test_enpt:
     - pip install -e /tmp/sicor
 
     # make sure we are testing with the develop branch of ACwater
-    - pip uninstall acwater -y
-    - git clone -b develop https://gitlab.awi.de/phytooptics/acwater.git /tmp/acwater
-    - git -C /tmp/acwater checkout b13f0bc0  # later commits cannot handle CP EnMAP datasets
-    - pip install -e /tmp/acwater
+    - pip install --force-reinstall git+https://gitlab.awi.de/phytooptics/acwater.git@develop
 
     # update sicor
     # - rm -rf context/sicor
