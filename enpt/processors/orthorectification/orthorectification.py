@@ -131,8 +131,6 @@ class Orthorectifier(object):
 
         # TODO allow to set geolayer band to be used for warping of 2D arrays
 
-        # set special fill values for the new image background if neeeded
-        special_fill_vals = dict(mask_landwater=3, polymer_bitmask=512)
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
         rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                             'mask_cirrus', 'polymer_bitmask']
@@ -147,7 +145,7 @@ class Orthorectifier(object):
                 GT = Geometry_Transformer(
                     lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                    fill_value=special_fill_vals[attrName] if attrName in special_fill_vals else attr.nodata,
+                    fill_value=attr.nodata,
                     **(kw_init if attrName not in rsp_nearest_list else kw_init_nearest))
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
