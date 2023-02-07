@@ -1,3 +1,4 @@
+acwater>=0.3.0
 arosics>=1.0.0
 cerberus
 geoarray>=0.15.8

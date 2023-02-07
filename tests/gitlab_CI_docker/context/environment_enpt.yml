@@ -38,7 +38,7 @@ dependencies:
     - utm
 
     # Polymer AC additional pip requirements
-    - git+https://gitlab.awi.de/phytooptics/acwater.git
+    - acwater>=0.3.0
 
     # test/doc/lint requirements
     - flake8

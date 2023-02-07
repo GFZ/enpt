@@ -32,8 +32,5 @@ dependencies:
   - xgboost
 
   - pip:
-    # Polymer AC additional pip requirements
-    - git+https://gitlab.awi.de/phytooptics/acwater.git
-
     # EnMAP-Box
     - enpt_enmapboxapp
