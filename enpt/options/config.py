@@ -287,7 +287,7 @@ class EnPTConfig(object):
                           NOTE that this may result in edge effects, e.g., at coastlines
 
         :key polymer_additional_results:
-            Enable the generation of additional results when running ACwater/POLYMER (default: False)
+            Enable the generation of additional results when running ACwater/POLYMER (default: True)
 
         :key auto_download_ecmwf:
             Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces
