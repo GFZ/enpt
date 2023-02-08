@@ -176,7 +176,7 @@ class AtmosphericCorrector(object):
             wl_ref_vnir, wl_ref_swir, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='vnir')
+                                 detector=self.cfg.vswir_overlap_algorithm)
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
@@ -223,7 +223,7 @@ class AtmosphericCorrector(object):
             wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='vnir')
+                                 detector=self.cfg.vswir_overlap_algorithm)
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
