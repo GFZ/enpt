@@ -254,7 +254,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                          'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
-                         'polymer_logchl', 'polymer_bbs', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
 
             if attrName == 'deadpixelmap':
                 # TODO VNIR and SWIR must be merged
@@ -270,7 +270,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                     'NA'
                 dict_attr_fn = dict(
                     polymer_logchl=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL.{ext}',
-                    polymer_bbs=f'{self.meta.scene_basename}-ACOUT_POLYMER_BBS.{ext}',
+                    polymer_logfb=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGFB.{ext}',
                     polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
                     polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
                     polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',

@@ -81,7 +81,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BBS.TIF')))
+        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGFB.TIF')))
         self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BITMASK.TIF')))
         self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGCHL.TIF')))
         self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RGLI.TIF')))

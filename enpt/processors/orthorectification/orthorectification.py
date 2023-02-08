@@ -138,7 +138,7 @@ class Orthorectifier(object):
 
         # run the ortorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
-                         'polymer_logchl', 'polymer_bbs', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:

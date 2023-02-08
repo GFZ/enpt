@@ -171,7 +171,7 @@ class AtmosphericCorrector(object):
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
         #       - res: a dictionary containing retrieval maps with several additional retrieval measures
-        #              -> chla, bitmask, bbs, Rnir, Rgli
+        #              -> chla, bitmask, logfp, Rnir, Rgli
         try:
             wl_ref_vnir, wl_ref_swir, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
@@ -218,7 +218,7 @@ class AtmosphericCorrector(object):
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
         #       - res: a dictionary containing retrieval maps with several additional retrieval measures
-        #              -> chla, bitmask, bbs, Rnir, Rgli
+        #              -> chla, bitmask, logfp, Rnir, Rgli
         try:
             wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
@@ -331,7 +331,7 @@ class AtmosphericCorrector(object):
                     water_additional_results[k] = v
 
             enmap_ImageL1.vnir.polymer_logchl = water_additional_results['polymer_logchl']
-            enmap_ImageL1.vnir.polymer_bbs = water_additional_results['polymer_bbs']
+            enmap_ImageL1.vnir.polymer_logfb = water_additional_results['polymer_logfb']
             enmap_ImageL1.vnir.polymer_rgli = water_additional_results['polymer_rgli']
             enmap_ImageL1.vnir.polymer_rnir = water_additional_results['polymer_rnir']
             enmap_ImageL1.vnir.polymer_bitmask = water_additional_results['polymer_bitmask']
