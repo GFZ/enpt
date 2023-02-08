@@ -171,7 +171,7 @@ class AtmosphericCorrector(object):
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
         #       - res: a dictionary containing retrieval maps with several additional retrieval measures
-        #              -> chla, bitmask, logfp, Rnir, Rgli
+        #              -> chla, bitmask, logfb, Rnir, Rgli
         try:
             wl_ref_vnir, wl_ref_swir, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
@@ -218,7 +218,7 @@ class AtmosphericCorrector(object):
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
         #       - res: a dictionary containing retrieval maps with several additional retrieval measures
-        #              -> chla, bitmask, logfp, Rnir, Rgli
+        #              -> chla, bitmask, logfb, Rnir, Rgli
         try:
             wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
