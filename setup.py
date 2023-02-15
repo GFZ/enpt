@@ -43,7 +43,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
 req = [
     'arosics>=1.0.0',
     'cerberus',
-    'geoarray>=0.15.8',
+    'geoarray>=0.16.0',
     'jsmin',
     'lxml',
     'matplotlib',
