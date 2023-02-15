@@ -40,7 +40,7 @@ from typing import Optional
 
 from arosics import COREG_LOCAL
 from geoarray import GeoArray
-from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_coordArray
+from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_coordArray, get_utm_zone
 from py_tools_ds.geo.projection import EPSG2WKT
 
 from ...options.config import EnPTConfig
@@ -57,15 +57,18 @@ class Spatial_Optimizer(object):
         self._EnMAP_Im: Optional[EnMAPL1Product_SensorGeo, None] = None
         self._EnMAP_band: Optional[GeoArray, None] = None
         self._EnMAP_mask: Optional[GeoArray, None] = None
+        self._ref_band_prep: Optional[GeoArray, None] = None
 
     def _get_enmap_band_for_matching(self)\
             -> GeoArray:
-        """Return the EnMAP band to be used in co-registration in the projection of the reference image."""
+        """Return the EnMAP band to be used in co-registration in UTM projection at 15m resolution."""
         self._EnMAP_Im.logger.warning('Statically using band 40 for co-registration.')
         bandidx = 39  # FIXME hardcoded
         enmap_band_sensorgeo = self._EnMAP_Im.vnir.data[:, :, bandidx]
 
         # transform from sensor to map geometry to make it usable for tie point detection
+        # -> co-registration runs at 15m resolution to minimize information loss from resampling
+        # -> a UTM projection is used to have shift length in meters
         self._EnMAP_Im.logger.info('Temporarily transforming EnMAP band %d to map geometry for co-registration.'
                                    % (bandidx + 1))
         GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, bandidx],
@@ -77,15 +80,15 @@ class Spatial_Optimizer(object):
 
         self._EnMAP_band = \
             GeoArray(*GT.to_map_geometry(enmap_band_sensorgeo,
-                                         tgt_prj=self._ref_Im.prj,  # TODO correct?
-                                         tgt_coordgrid=self._ref_Im.xygrid_specs),
+                                         tgt_prj=self._get_optimal_utm_epsg(),
+                                         tgt_coordgrid=((0, 15), (0, -15))),
                      nodata=0)
 
         return self._EnMAP_band
 
     def _get_enmap_mask_for_matching(self)\
             -> GeoArray:
-        """Return the EnMAP mask to be used in co-registration in the projection of the reference image."""
+        """Return the EnMAP mask to be used in co-registration in UTM projection at 15m resolution."""
         # use the water mask
         enmap_mask_sensorgeo = self._EnMAP_Im.vnir.mask_landwater[:] == 2  # 2 is water here
 
@@ -99,14 +102,46 @@ class Spatial_Optimizer(object):
 
         self._EnMAP_mask = \
             GeoArray(*GT.to_map_geometry(enmap_mask_sensorgeo,
-                                         tgt_prj=self._ref_Im.prj,  # TODO correct?
-                                         tgt_coordgrid=self._ref_Im.xygrid_specs),
+                                         tgt_prj=self._get_optimal_utm_epsg(),
+                                         tgt_coordgrid=((0, 15), (0, -15))),
                      nodata=0)
 
         return self._EnMAP_mask
 
+    def _get_optimal_utm_epsg(self) -> int:
+        """Return the EPSG code of the UTM zone that optimally covers the given EnMAP image."""
+        x, y = [c.tolist()[0] for c in self._EnMAP_Im.meta.vnir.ll_mapPoly.centroid.xy]
+
+        return int(f'{326 if y > 0 else 327}{get_utm_zone(x)}')
+
+    def _get_reference_band_for_matching(self)\
+            -> GeoArray:
+        """Return the reference image band to be used in co-registration in UTM projection at 15m resolution."""
+        gA_ref = GeoArray(self.cfg.path_reference_image)
+
+        if self._EnMAP_band is None:
+            raise RuntimeError('To prepare the reference image band, the EnMAP band for matching needs to be computed '
+                               'first.')
+
+        self._EnMAP_Im.logger.info('Preparing reference image for co-registration.')
+        xmin, xmax, ymin, ymax = self._EnMAP_band.box.boundsMap
+        self._ref_band_prep = GeoArray(
+            *gA_ref.get_mapPos(
+                mapBounds=(xmin, ymin, xmax, ymax),
+                mapBounds_prj=self._EnMAP_band.prj,
+                band2get=0,  # TODO: select the most similar wavelength if CWLs are contained in the metadata
+                out_prj=self._EnMAP_band.prj,
+                out_gsd=(15, 15),  # co-registration runs at 15m resolution to minimize information loss from resampling
+                rspAlg='cubic',
+                fillVal=gA_ref.nodata
+            ),
+            nodata=gA_ref.nodata
+        )
+
+        return self._ref_band_prep
+
     def _compute_tie_points(self):
-        CRL = COREG_LOCAL(self.cfg.path_reference_image,
+        CRL = COREG_LOCAL(self._get_reference_band_for_matching(),
                           self._EnMAP_band,
                           grid_res=40,
                           max_shift=5,
@@ -181,6 +216,7 @@ class Spatial_Optimizer(object):
         self._EnMAP_Im = enmap_ImageL1
         self._get_enmap_band_for_matching()
         self._get_enmap_mask_for_matching()
+        self._get_reference_band_for_matching()
 
         enmap_ImageL1.logger.info('Computing tie points between the EnMAP image and the given spatial reference image.')
         tiepoints = self._compute_tie_points()
@@ -220,7 +256,7 @@ class Spatial_Optimizer(object):
                                            projection=self._EnMAP_band.prj))
 
         enmap_ImageL1.logger.info('Applying results of spatial optimization to geolayer.')
-        lons_coreg, lats_coreg = transform_coordArray(prj_src=self._ref_Im.prj,
+        lons_coreg, lats_coreg = transform_coordArray(prj_src=self._ref_band_prep.prj,
                                                       prj_tgt=EPSG2WKT(4326),
                                                       Xarr=geolayer_sensorgeo[:, :, 0],
                                                       Yarr=geolayer_sensorgeo[:, :, 1])
