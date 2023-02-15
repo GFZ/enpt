@@ -167,7 +167,7 @@ class Spatial_Optimizer(object):
         return self._ref_band_prep
 
     def _compute_tie_points(self):
-        CRL = COREG_LOCAL(self._get_reference_band_for_matching(),
+        CRL = COREG_LOCAL(self._ref_band_prep,
                           self._EnMAP_band,
                           grid_res=40,
                           max_shift=10,  # 5 EnMAP pixels (co-registration is running at 15m UTM grid)
