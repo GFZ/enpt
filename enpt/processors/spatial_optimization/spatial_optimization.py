@@ -35,6 +35,8 @@ Fits the VNIR detector data to the reference image. Corrects for keystone.
 
 __author__ = 'Daniel Scheffler'
 
+import os
+
 import numpy as np
 from typing import Optional
 
@@ -167,6 +169,16 @@ class Spatial_Optimizer(object):
         return self._ref_band_prep
 
     def _compute_tie_points(self):
+        # avoid to run RANSAC within AROSICS if more than 50 lines of a gapfill image were appended
+        # (since the RPC coefficients are computed for the main image, there may be decreasing geometry accuracy with
+        #  increasing distance from the main image)
+        if os.path.exists(self.cfg.path_l1b_enmap_image_gapfill) and \
+           (self.cfg.n_lines_to_append is None or self.cfg.n_lines_to_append > 50):
+            tieP_filter_level = 2
+        else:
+            tieP_filter_level = 3
+
+        # compute tie points within AROSICS
         CRL = COREG_LOCAL(self._ref_band_prep,
                           self._EnMAP_band,
                           grid_res=40,
@@ -175,6 +187,7 @@ class Spatial_Optimizer(object):
                           footprint_poly_tgt=reproject_shapelyGeometry(self._EnMAP_Im.meta.vnir.ll_mapPoly,
                                                                        4326, self._EnMAP_band.epsg),
                           mask_baddata_tgt=self._EnMAP_mask,
+                          tieP_filter_level=tieP_filter_level,
                           progress=self.cfg.disable_progress_bars is False
                           )
         TPG = CRL.tiepoint_grid
