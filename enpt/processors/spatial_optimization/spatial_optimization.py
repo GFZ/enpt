@@ -160,6 +160,9 @@ class Spatial_Optimizer(object):
         # -> only needed for AROSICS where setting a nodata value avoids warnings
         if self._ref_band_prep.nodata is None:
             self._ref_band_prep.nodata = self._get_suitable_nodata_value(self._ref_band_prep[:])
+        if self._ref_band_prep.nodata is None:
+            self._ref_band_prep.arr = self._ref_band_prep.astype(float)
+            self._ref_band_prep.nodata = self._get_suitable_nodata_value(self._ref_band_prep[:])
 
         return self._ref_band_prep
 
