@@ -114,6 +114,25 @@ class Spatial_Optimizer(object):
 
         return int(f'{326 if y > 0 else 327}{get_utm_zone(x)}')
 
+    @staticmethod
+    def _get_suitable_nodata_value(arr: np.ndarray):
+        """Get a suitable nodata value for the input array, which is not contained in the array data."""
+        dtype = str(np.dtype(arr.dtype))
+        try:
+            # use a suitable nodata value
+            nodata = dict(int8=-128, uint8=0, int16=-9999, uint16=9999, int32=-9999,
+                          uint32=9999, float32=-9999., float64=-9999.)[dtype]
+            if nodata not in arr:
+                return nodata
+            else:
+                # use a suitable alternative nodata value
+                alt_nodata = dict(int8=127, uint8=255, int16=32767, uint16=65535, int32=65535,
+                                  uint32=65535, float32=65535, float64=65535)[dtype]
+                if alt_nodata not in arr:
+                    return alt_nodata
+        except AttributeError:
+            return None
+
     def _get_reference_band_for_matching(self)\
             -> GeoArray:
         """Return the reference image band to be used in co-registration in UTM projection at 15m resolution."""
@@ -137,6 +156,10 @@ class Spatial_Optimizer(object):
             ),
             nodata=gA_ref.nodata
         )
+        # try to set a meaningful nodata value if it cannot be auto-detected
+        # -> only needed for AROSICS where setting a nodata value avoids warnings
+        if self._ref_band_prep.nodata is None:
+            self._ref_band_prep.nodata = self._get_suitable_nodata_value(self._ref_band_prep[:])
 
         return self._ref_band_prep
 
