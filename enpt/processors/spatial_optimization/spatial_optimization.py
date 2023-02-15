@@ -167,7 +167,7 @@ class Spatial_Optimizer(object):
         CRL = COREG_LOCAL(self._get_reference_band_for_matching(),
                           self._EnMAP_band,
                           grid_res=40,
-                          max_shift=5,
+                          max_shift=10,  # 5 EnMAP pixels (co-registration is running at 15m UTM grid)
                           nodata=(self._ref_Im.nodata, 0),
                           footprint_poly_tgt=reproject_shapelyGeometry(self._EnMAP_Im.meta.vnir.ll_mapPoly,
                                                                        4326, self._EnMAP_band.epsg),
