@@ -36,15 +36,16 @@ Fits the VNIR detector data to the reference image. Corrects for keystone.
 __author__ = 'Daniel Scheffler'
 
 import os
+from typing import Optional
 
 import numpy as np
-from typing import Optional
+from osgeo import gdal
 
 from arosics import COREG_LOCAL
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_coordArray, get_utm_zone
 from py_tools_ds.geo.projection import EPSG2WKT
-from py_tools_ds.geo.raster.reproject import warp_ndarray
+from py_tools_ds.processing.progress_mon import ProgressBar
 
 from ...options.config import EnPTConfig
 from ...model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
@@ -139,45 +140,54 @@ class Spatial_Optimizer(object):
     def _get_reference_band_for_matching(self) \
             -> GeoArray:
         """Return the reference image band to be used in co-registration in UTM projection at 15m resolution."""
-        # TODO: Using a VRT here would be faster for large arrays
         if self._EnMAP_band is None:
             raise RuntimeError('To prepare the reference image band, '
                                'the EnMAP band for matching needs to be computed first.')
 
-        # only read the first band of the reference image for co-registration
-        # TODO: select the most similar wavelength if CWLs are contained in the metadata
-        #       and provide a user option to specify the band
         self._EnMAP_Im.logger.info('Preparing reference image for co-registration.')
-        gA_ref = GeoArray(self.cfg.path_reference_image)
-        if gA_ref.bands > 1:
-            gA_ref = gA_ref.get_subset(zslice=[0])
+
+        try:
+            # get input nodata value if there is one defined in the metadata
+            src_nodata = GeoArray(self.cfg.path_reference_image)._nodata  # noqa
+
+            # only use the first band of the reference image for co-registration
+            # TODO: select the most similar wavelength if CWLs are contained in the metadata
+            #       and provide a user option to specify the band
+            src_ds = gdal.Translate('', self.cfg.path_reference_image, format='MEM', bandList=[1])
+
+            # set up the target dataset and coordinate grid
+            driver = gdal.GetDriverByName('MEM')
+            rows, cols = self._EnMAP_band.shape
+            dst_ds = driver.Create('', cols, rows, 1, gdal.GDT_Float32)
+            dst_ds.SetProjection(self._EnMAP_band.prj)
+            dst_ds.SetGeoTransform(self._EnMAP_band.gt)
+            if src_nodata is not None:
+                dst_ds.GetRasterBand(1).SetNoDataValue(int(src_nodata))
+                dst_ds.GetRasterBand(1).Fill(int(src_nodata))
+
+            # reproject the needed subset from the reference image to a UTM 15m grid (like self._EnMAP_band)
+            cb = ProgressBar(prefix='Warping progress    ', timeout=None) if ~self.cfg.disable_progress_bars else None
+            gdal.SetConfigOption('GDAL_NUM_THREADS', f'{self.cfg.CPUs}')
+            gdal.ReprojectImage(
+                src_ds,
+                dst_ds,
+                src_ds.GetProjection(),
+                self._EnMAP_band.prj, gdal.GRA_Cubic,
+                callback=cb
+            )
+            out_data = dst_ds.GetRasterBand(1).ReadAsArray()
+
+        finally:
+            del src_ds
+            del dst_ds
+            gdal.SetConfigOption('GDAL_NUM_THREADS', None)
+
+        self._ref_band_prep = GeoArray(out_data, self._EnMAP_band.gt, self._EnMAP_band.prj, nodata=src_nodata)
 
         # try to set a meaningful nodata value if it cannot be auto-detected
         # -> only needed for AROSICS where setting a nodata value avoids warnings
-        if gA_ref.nodata is None:
-            gA_ref.nodata = self._get_suitable_nodata_value(gA_ref[:])
-        if gA_ref._nodata is None:  # noqa
-            gA_ref.arr = gA_ref.astype(float)
-            gA_ref.nodata = self._get_suitable_nodata_value(gA_ref[:])
-
-        # resample reference image band to 15m UTM grid
-        xmin, xmax, ymin, ymax = self._EnMAP_band.box.boundsMap
-        self._ref_band_prep = GeoArray(
-            *warp_ndarray(
-                gA_ref[:, :, 0],
-                in_gt=gA_ref.gt,
-                in_prj=gA_ref.prj,
-                out_prj=self._EnMAP_band.prj,
-                rspAlg='cubic',
-                in_nodata=gA_ref.nodata,
-                out_nodata=gA_ref.nodata,
-                out_gsd=(15, 15),
-                out_bounds=(xmin, ymin, xmax, ymax),  # always returns an extent snapped to the target grid
-                out_bounds_prj=self._EnMAP_band.prj,
-                CPUs=self.cfg.CPUs,
-                progress=~self.cfg.disable_progress_bars),
-            nodata=gA_ref.nodata
-        )
+        if self._ref_band_prep.nodata is None:
+            self._ref_band_prep.nodata = self._get_suitable_nodata_value(out_data)
 
         return self._ref_band_prep
 
