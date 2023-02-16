@@ -2,6 +2,13 @@
 History
 =======
 
+0.18.15 (coming soon)
+---------------------
+
+* !77: Revised absolute co-registration module
+  (now much faster and more robust, especially for high-resolution reference images).
+
+
 0.18.14 (2023-01-06)
 --------------------
 
