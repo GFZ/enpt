@@ -62,21 +62,22 @@ class Spatial_Optimizer(object):
         self._EnMAP_band: Optional[GeoArray, None] = None
         self._EnMAP_mask: Optional[GeoArray, None] = None
         self._ref_band_prep: Optional[GeoArray, None] = None
+        self._EnMAP_bandIdx = 39  # FIXME hardcoded
 
     def _get_enmap_band_for_matching(self) \
             -> GeoArray:
         """Return the EnMAP band to be used in co-registration in UTM projection at 15m resolution."""
-        self._EnMAP_Im.logger.warning('Statically using band 40 for co-registration.')
-        bandidx = 39  # FIXME hardcoded
-        enmap_band_sensorgeo = self._EnMAP_Im.vnir.data[:, :, bandidx]
+        self._EnMAP_Im.logger.warning(f'Statically using band {self._EnMAP_bandIdx + 1} for co-registration.')
+
+        enmap_band_sensorgeo = self._EnMAP_Im.vnir.data[:, :, self._EnMAP_bandIdx]
 
         # transform from sensor to map geometry to make it usable for tie point detection
         # -> co-registration runs at 15m resolution to minimize information loss from resampling
         # -> a UTM projection is used to have shift length in meters
         self._EnMAP_Im.logger.info('Temporarily transforming EnMAP band %d to map geometry for co-registration.'
-                                   % (bandidx + 1))
-        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, bandidx],
-                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, bandidx],
+                                   % (self._EnMAP_bandIdx + 1))
+        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx],
+                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx],
                                   fill_value=0,
                                   resamp_alg='gauss',
                                   radius_of_influence=30,
@@ -98,8 +99,8 @@ class Spatial_Optimizer(object):
 
         # transform from sensor to map geometry to make it usable for tie point detection
         self._EnMAP_Im.logger.info('Temporarily transforming EnMAP water mask to map geometry for co-registration.')
-        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, 39],  # FIXME hardcoded
-                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, 39],
+        GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx],
+                                  lats=self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx],
                                   fill_value=0,
                                   resamp_alg='nearest',
                                   nprocs=self.cfg.CPUs)
@@ -302,8 +303,8 @@ class Spatial_Optimizer(object):
 
         # transform map to sensor geometry
         enmap_ImageL1.logger.info('Transforming spatial optimization results back to sensor geometry.')
-        lons_band = self._EnMAP_Im.meta.vnir.lons[:, :, 39]  # FIXME hardcoded
-        lats_band = self._EnMAP_Im.meta.vnir.lats[:, :, 39]
+        lons_band = self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx]
+        lats_band = self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx]
         GT = Geometry_Transformer_3D(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
                                      lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
                                      fill_value=0,
