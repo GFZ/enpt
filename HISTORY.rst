@@ -7,6 +7,7 @@ History
 
 * !77: Revised absolute co-registration module
   (now much faster and more robust, especially for high-resolution reference images).
+  This fixes #98 (Co-Registration computes way to many tie points in case of high resolution reference image).
 
 
 0.18.14 (2023-01-06)
