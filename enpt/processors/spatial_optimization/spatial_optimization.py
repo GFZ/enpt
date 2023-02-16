@@ -44,6 +44,7 @@ from arosics import COREG_LOCAL
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_coordArray, get_utm_zone
 from py_tools_ds.geo.projection import EPSG2WKT
+from py_tools_ds.geo.raster.reproject import warp_ndarray
 
 from ...options.config import EnPTConfig
 from ...model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
@@ -61,7 +62,7 @@ class Spatial_Optimizer(object):
         self._EnMAP_mask: Optional[GeoArray, None] = None
         self._ref_band_prep: Optional[GeoArray, None] = None
 
-    def _get_enmap_band_for_matching(self)\
+    def _get_enmap_band_for_matching(self) \
             -> GeoArray:
         """Return the EnMAP band to be used in co-registration in UTM projection at 15m resolution."""
         self._EnMAP_Im.logger.warning('Statically using band 40 for co-registration.')
@@ -88,7 +89,7 @@ class Spatial_Optimizer(object):
 
         return self._EnMAP_band
 
-    def _get_enmap_mask_for_matching(self)\
+    def _get_enmap_mask_for_matching(self) \
             -> GeoArray:
         """Return the EnMAP mask to be used in co-registration in UTM projection at 15m resolution."""
         # use the water mask
@@ -135,36 +136,48 @@ class Spatial_Optimizer(object):
         except AttributeError:
             return None
 
-    def _get_reference_band_for_matching(self)\
+    def _get_reference_band_for_matching(self) \
             -> GeoArray:
         """Return the reference image band to be used in co-registration in UTM projection at 15m resolution."""
-        gA_ref = GeoArray(self.cfg.path_reference_image)
-
+        # TODO: Using a VRT here would be faster for large arrays
         if self._EnMAP_band is None:
-            raise RuntimeError('To prepare the reference image band, the EnMAP band for matching needs to be computed '
-                               'first.')
+            raise RuntimeError('To prepare the reference image band, '
+                               'the EnMAP band for matching needs to be computed first.')
 
+        # only read the first band of the reference image for co-registration
+        # TODO: select the most similar wavelength if CWLs are contained in the metadata
+        #       and provide a user option to specify the band
         self._EnMAP_Im.logger.info('Preparing reference image for co-registration.')
-        xmin, xmax, ymin, ymax = self._EnMAP_band.box.boundsMap
-        self._ref_band_prep = GeoArray(
-            *gA_ref.get_mapPos(
-                mapBounds=(xmin, ymin, xmax, ymax),
-                mapBounds_prj=self._EnMAP_band.prj,
-                band2get=0,  # TODO: select the most similar wavelength if CWLs are contained in the metadata
-                out_prj=self._EnMAP_band.prj,
-                out_gsd=(15, 15),  # co-registration runs at 15m resolution to minimize information loss from resampling
-                rspAlg='cubic',
-                fillVal=gA_ref.nodata
-            ),
-            nodata=gA_ref.nodata
-        )
+        gA_ref = GeoArray(self.cfg.path_reference_image)
+        if gA_ref.bands > 1:
+            gA_ref = gA_ref.get_subset(zslice=[0])
+
         # try to set a meaningful nodata value if it cannot be auto-detected
         # -> only needed for AROSICS where setting a nodata value avoids warnings
-        if self._ref_band_prep.nodata is None:
-            self._ref_band_prep.nodata = self._get_suitable_nodata_value(self._ref_band_prep[:])
-        if self._ref_band_prep.nodata is None:
-            self._ref_band_prep.arr = self._ref_band_prep.astype(float)
-            self._ref_band_prep.nodata = self._get_suitable_nodata_value(self._ref_band_prep[:])
+        if gA_ref.nodata is None:
+            gA_ref.nodata = self._get_suitable_nodata_value(gA_ref[:])
+        if gA_ref._nodata is None:  # noqa
+            gA_ref.arr = gA_ref.astype(float)
+            gA_ref.nodata = self._get_suitable_nodata_value(gA_ref[:])
+
+        # resample reference image band to 15m UTM grid
+        xmin, xmax, ymin, ymax = self._EnMAP_band.box.boundsMap
+        self._ref_band_prep = GeoArray(
+            *warp_ndarray(
+                gA_ref[:, :, 0],
+                in_gt=gA_ref.gt,
+                in_prj=gA_ref.prj,
+                out_prj=self._EnMAP_band.prj,
+                rspAlg='cubic',
+                in_nodata=gA_ref.nodata,
+                out_nodata=gA_ref.nodata,
+                out_gsd=(15, 15),
+                out_bounds=(xmin, ymin, xmax, ymax),  # always returns an extent snapped to the target grid
+                out_bounds_prj=self._EnMAP_band.prj,
+                CPUs=self.cfg.CPUs,
+                progress=~self.cfg.disable_progress_bars),
+            nodata=gA_ref.nodata
+        )
 
         return self._ref_band_prep
 
@@ -173,7 +186,7 @@ class Spatial_Optimizer(object):
         # (since the RPC coefficients are computed for the main image, there may be decreasing geometry accuracy with
         #  increasing distance from the main image)
         if os.path.exists(self.cfg.path_l1b_enmap_image_gapfill) and \
-           (self.cfg.n_lines_to_append is None or self.cfg.n_lines_to_append > 50):
+                (self.cfg.n_lines_to_append is None or self.cfg.n_lines_to_append > 50):
             tieP_filter_level = 2
         else:
             tieP_filter_level = 3
