@@ -99,17 +99,18 @@ to BOA- (bottom-of-atmosphere / surface) reflectance. SICOR is a Python based op
 German Research Centre for Geosciences (GFZ) Potsdam. For details on the underlying algorithm, please refer to the
 `documentation pages of SICOR`_.
 
-Optionally, EnPT retrieves water reflectance above the surface using `ACwater Polymer`_.
-ACwater Polymer is a "wrapper" package (developed at the Alfred-Wegener-Institute, Bremerhaven)
-for the `Polymer`_ atmospheric correction (AC) algorithm (developed by Hygeos, Inc).
-Polymer AC is based on an optimization technique that considers atmospheric and oceanic signals to retrieve
-normalized spectral reflectance above water. For details regarding the Polymer algorithm,
-users are referred to `Steinmetz F, Deschamps P-Y, Ramon R., Opt. Express. 2011; 19`__.
+Optionally, EnPT uses the Polymer_ algorithm for atmospheric correction over water (`Steinmetz et al. (2011)`_).
+Polymer_ is a spectral matching algorithm in which atmospheric and oceanic signals are obtained simultaneously using
+the fully available visible spectrum. The algorithm was developed by Hygeos (https://www.hygeos.com/); it is available
+as a Python package and it has been largely applied to ocean colour sensors. The Polymer algorithm was integrated into
+EnPT using the wrapper module ACwater_ developed at AWI Bremerhaven in cooperation with GFZ. In addition, Polymer_
+was further adapted to process EnMAP L1B satellite data. For details on the underlying Polymer_ algorithm, please
+refer to `Steinmetz et al. (2011)`_ and `Soppa et al. (2021)`_.
 
-__ https://doi.org/10.1364/OE.19.009783
-
-.. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
 .. _Polymer: https://www.hygeos.com/polymer
+.. _ACwater: https://gitlab.awi.de/phytooptics/acwater
+.. _`Steinmetz et al. (2011)`: https://doi.org/10.1364/OE.19.009783
+.. _`Soppa et al. (2021)`: https://doi.org/10.3390/s21124125
 
 Spatial Co-Registration
 ***********************
