@@ -30,12 +30,11 @@ Feature overview
 * read EnMAP Level-1B input data
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
-* conversion of top-of-atmosphere-radiance to top-of-atmosphere-reflectance
 * atmospheric correction (based on SICOR_ for land and `ACwater Polymer`_ via Polymer_ for water surfaces)
 * optional export of additional results from atmospheric parameter retrieval
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
-* write EnMAP Level-2 output data
+* write EnMAP Level-2A output data
 
 Status
 ------
