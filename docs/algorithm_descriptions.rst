@@ -208,7 +208,7 @@ different Level-2A data format. The current differences are summarized below:
     +-----------------------------------------------+---------------------+----------+-----------------------------------------------------------------------------------+
     |ENMAP*L2A*-SPECTRAL_IMAGE.TIF                  |         yes         | yes      | EnMAP L2A bottom-of-atmosphere reflectance                                        |
     +-----------------------------------------------+---------------------+----------+-----------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_POLYMER_*RNIR.TIF             |         no          | optional | TOA reflectance at 865 nm corrected for Rayleigh scattering                       |
+    |ENMAP*L2A*-ACOUT_POLYMER_*RNIR.TIF             |         no          | optional | TOA reflectance at 863 nm corrected for Rayleigh scattering                       |
     +-----------------------------------------------+---------------------+----------+-----------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*RGLI.TIF             |         no          | optional | Reflectance of the sun glint predicted from ECMWF wind speed                      |
     +-----------------------------------------------+---------------------+----------+-----------------------------------------------------------------------------------+
