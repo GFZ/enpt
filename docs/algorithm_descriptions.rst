@@ -217,8 +217,43 @@ produces a slightly different Level-2A data format. The current differences are 
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*LOGFB.TIF            |         no          | optional | Particle scattering factor fb in `Park & Ruddick (2005)`_ (in 10-based logarithm)                 |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_POLYMER_*BITMASK.TIF          |         no          | optional | Polymer quality flags                                                                             |
+    |ENMAP*L2A*-ACOUT_POLYMER_*BITMASK.TIF          |         no          | optional | Polymer quality flags (more information below)                                                    |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+
+The **Polymer quality flags bitmask** represents a bit-encoded product with the following flag values:
+
+    +--------------------+-------------+--------------------------------------------+
+    | Flag name          | Flag value  | Description                                |
+    +====================+=============+============================================+
+    | LAND               | 1           | Land mask                                  |
+    +--------------------+-------------+--------------------------------------------+
+    | CLOUD_BASE         | 2           | Polymer's basic cloud mask                 |
+    +--------------------+-------------+--------------------------------------------+
+    | L1_INVALID         | 4           | Invalid level1 pixel                       |
+    +--------------------+-------------+--------------------------------------------+
+    | NEGATIVE_BB        | 8           | (deprecated flag)                          |
+    +--------------------+-------------+--------------------------------------------+
+    | OUT_OF_BOUNDS      | 16          | Retrieved marine parameters are outside    |
+    |                    |             | valid bounds                               |
+    +--------------------+-------------+--------------------------------------------+
+    | EXCEPTION          | 32          | A processing error was encountered         |
+    +--------------------+-------------+--------------------------------------------+
+    | THICK_AEROSOL      | 64          | Thick aerosol flag                         |
+    +--------------------+-------------+--------------------------------------------+
+    | HIGH_AIR_MASS      | 128         | Air mass exceeds 5                         |
+    +--------------------+-------------+--------------------------------------------+
+    | EXTERNAL_MASK      | 512         | Pixel was masked using external mask       |
+    +--------------------+-------------+--------------------------------------------+
+    | CASE2              | 1024        | Pixel was processed in "case2" mode        |
+    +--------------------+-------------+--------------------------------------------+
+    | INCONSISTENCY      | 2048        | Inconsistent result was detected           |
+    |                    |             | (atmospheric reflectance out of bounds)    |
+    +--------------------+-------------+--------------------------------------------+
+    | ANOMALY_RWMOD_BLUE | 4096        | Excessive difference was found at 412nm    |
+    |                    |             | between Rw and Rwmod                       |
+    +--------------------+-------------+--------------------------------------------+
+
+Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 
 
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
