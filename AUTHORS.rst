@@ -17,3 +17,4 @@ Contributors
 * André Hollstein
 * Stéphane Guillaso
 * Brenner Silva
+* Leonardo Alvarado

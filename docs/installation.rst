@@ -113,16 +113,7 @@ and polymer_ are required.
 
 
 Apart from that, you need to register at the `CDS registration page`_ and install a `CDS API key`_.
-Further details are given `here <https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst>`__.
-
-3. Finally install ACwater:
-
-   .. code-block:: bash
-
-    $ pip install git+https://gitlab.awi.de/phytooptics/acwater.git
-
-
-Further details about the installation of ACwater can be found in the `ACwater Polymer installation instructions`_.
+Further details are given in the `ACwater Polymer installation instructions`_.
 
 
 Installing EnPT along with QGIS and the EnMAP-Box (backend + GUI)

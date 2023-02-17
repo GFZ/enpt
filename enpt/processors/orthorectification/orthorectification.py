@@ -126,20 +126,30 @@ class Orthorectifier(object):
                                         swir_wvls=enmap_ImageL1.meta.swir.wvl_center
                                         ).compute_stack(algorithm=self.cfg.vswir_overlap_algorithm)
 
-        # transform masks #
-        ###################
+        # transform masks and additional AC results from Acwater/Polymer #
+        ##################################################################
 
         # TODO allow to set geolayer band to be used for warping of 2D arrays
-        GT_2D = Geometry_Transformer(lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
-                                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                                     ** kw_init)  # FIXME bilinear resampling for masks with discrete values?
 
-        for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus']:
+        # always use nearest neighbour resampling for masks and bitmasks with discrete values
+        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
+                            'mask_cirrus', 'polymer_bitmask']
+        kw_init_nearest = dict(resamp_alg='nearest', nprocs=self.cfg.CPUs)
+
+        # run the ortorectification
+        for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:
+                GT = Geometry_Transformer(
+                    lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
+                    lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
+                    fill_value=attr.nodata,
+                    **(kw_init if attrName not in rsp_nearest_list else kw_init_nearest))
+
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
-                attr_ortho = GeoArray(*GT_2D.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
+                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?

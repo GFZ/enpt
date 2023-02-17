@@ -170,11 +170,13 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
+        #       - res: a dictionary containing retrieval maps with several additional retrieval measures
+        #              -> chla, bitmask, logfb, Rnir, Rgli
         try:
-            wl_ref_vnir, wl_ref_swir = \
+            wl_ref_vnir, wl_ref_swir, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='merge')
+                                 detector='vnir')
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
@@ -184,7 +186,7 @@ class AtmosphericCorrector(object):
             )
             raise
 
-        return wl_ref_vnir, wl_ref_swir
+        return wl_ref_vnir, wl_ref_swir, water_additional_results
 
     def _run_AC__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
@@ -215,11 +217,13 @@ class AtmosphericCorrector(object):
 
         # run ACWater/Polymer for water surfaces only
         # NOTE: polymer_ac_enmap() returns masked (nan) values for land
+        #       - res: a dictionary containing retrieval maps with several additional retrieval measures
+        #              -> chla, bitmask, logfb, Rnir, Rgli
         try:
-            wl_ref_vnir_water, wl_ref_swir_water = \
+            wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='merge')
+                                 detector='vnir')
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
@@ -229,15 +233,13 @@ class AtmosphericCorrector(object):
             )
             raise
 
-        # use mask value 2 for replacing water corrected pixels
-        wlboa_ref_vnir = np.where((enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None],
-                                  wl_ref_vnir_water,
-                                  boa_ref_vnir_land)
-        wlboa_ref_swir = np.where((enmap_ImageL1.swir.mask_landwater[:] == 2)[:, :, None],
-                                  wl_ref_swir_water,
-                                  boa_ref_swir_land)
+        # Overwrite the SICOR output at water positions with the output from ACwater/Polymer
+        # -> output contains Water-leaving-reflectance over water and BOA-reflectance over land
+        water_mask_vnir_3D = (enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None]  # 2 = water
+        wlboa_ref_vnir = np.where(water_mask_vnir_3D, wl_ref_vnir_water, boa_ref_vnir_land)
+        wlboa_ref_swir = np.where(water_mask_vnir_3D, wl_ref_swir_water, boa_ref_swir_land)
 
-        return wlboa_ref_vnir, wlboa_ref_swir, land_additional_results
+        return wlboa_ref_vnir, wlboa_ref_swir, water_additional_results, land_additional_results
 
     @staticmethod
     def _validate_AC_results(reflectance_vnir: np.ndarray,
@@ -268,6 +270,10 @@ class AtmosphericCorrector(object):
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
+        # set initial values for land_additional_results and water_additional_results
+        land_additional_results = None
+        water_additional_results = None
+
         # run the AC
         if self.cfg.mode_ac in ['water', 'combined'] and not self._is_acwater_operable(enmap_ImageL1.logger):
             # use SICOR as fallback AC for water surfaces if ACWater/Polymer is not installed
@@ -276,11 +282,11 @@ class AtmosphericCorrector(object):
 
         else:
             if self.cfg.mode_ac == 'combined':
-                reflectance_vnir, reflectance_swir, land_additional_results = \
+                reflectance_vnir, reflectance_swir, water_additional_results, land_additional_results = \
                     self._run_AC__combined_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'water':
-                reflectance_vnir, reflectance_swir = \
+                reflectance_vnir, reflectance_swir, water_additional_results = \
                     self._run_AC__water_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'land':
@@ -308,5 +314,26 @@ class AtmosphericCorrector(object):
 
         # FIXME: Consider to also join SICOR's land_additional_results
         #  (contains three phases of water maps and several retrieval uncertainty measures)
+
+        # join additional results from ACwater/Polymer
+        if water_additional_results and self.cfg.polymer_additional_results:
+
+            water_mask = enmap_ImageL1.vnir.mask_landwater[:] == 2
+            for k in water_additional_results.keys():
+                if k == 'polymer_bitmask':
+                    # the bitmask already explicitly indicates land pixels with "1"
+                    continue
+                else:
+                    v = water_additional_results[k]
+                    v[~water_mask] = -9999
+                    v[np.isnan(v)] = -9999
+
+                    water_additional_results[k] = v
+
+            enmap_ImageL1.vnir.polymer_logchl = water_additional_results['polymer_logchl']
+            enmap_ImageL1.vnir.polymer_logfb = water_additional_results['polymer_logfb']
+            enmap_ImageL1.vnir.polymer_rgli = water_additional_results['polymer_rgli']
+            enmap_ImageL1.vnir.polymer_rnir = water_additional_results['polymer_rnir']
+            enmap_ImageL1.vnir.polymer_bitmask = water_additional_results['polymer_bitmask']
 
         return enmap_ImageL1

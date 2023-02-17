@@ -41,6 +41,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 req = [
+    'acwater>=0.3.0',
     'arosics>=1.0.0',
     'cerberus',
     'geoarray>=0.15.8',
@@ -73,9 +74,9 @@ req_lint = ['flake8', 'pycodestyle', 'pydocstyle']
 req_dev = req_setup + req_test + req_doc + req_lint
 
 setup(
-    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso, Brenner Silva",
+    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso, Brenner Silva, Leonardo Alvarado",
     author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, "
-                 "stephane.guillaso@gfz-potsdam.de, brenner.silva@awi.de",
+                 "stephane.guillaso@gfz-potsdam.de, brenner.silva@awi.de, leonardo.alvarado@awi.de",
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',

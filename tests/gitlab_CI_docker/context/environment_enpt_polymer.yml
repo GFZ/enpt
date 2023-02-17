@@ -20,5 +20,4 @@ dependencies:
   - xarray
 
   - pip:
-      - git+https://gitlab.awi.de/phytooptics/acwater.git
       - ecmwf-api-client

@@ -103,6 +103,7 @@ config_for_testing_water = dict(
     scale_factor_toa_ref=10000,
     enable_ac=True,
     mode_ac='combined',
+    polymer_additional_results=True,
     polymer_root=path_polymer,
     threads=-1,
     blocksize=100,
@@ -285,6 +286,9 @@ class EnPTConfig(object):
             - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                           NOTE that this may result in edge effects, e.g., at coastlines
 
+        :key polymer_additional_results:
+            Enable the generation of additional results when running ACwater/POLYMER (default: True)
+
         :key auto_download_ecmwf:
             Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces
 
@@ -396,6 +400,7 @@ class EnPTConfig(object):
         self.polymer_root = gp('polymer_root')
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
+        self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
         self.threads = gp('threads')
