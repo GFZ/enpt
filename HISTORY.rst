@@ -2,8 +2,8 @@
 History
 =======
 
-0.19.0 (coming soon)
---------------------
+0.19.0 (2023-02-17)
+-------------------
 
 * !58: Adapted implementation of water atmospheric correction (ACwater/Polymer) to optionally produce five additional
   output layers (LOGCHL - Chlorophyll concentration, LOGFB - Particle scattering factor fb in Park & Ruddick (2005),
