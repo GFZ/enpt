@@ -32,5 +32,8 @@ dependencies:
   - xgboost
 
   - pip:
+    # Polymer AC additional pip requirements
+    - acwater>=0.3.0
+
     # EnMAP-Box
     - enpt_enmapboxapp

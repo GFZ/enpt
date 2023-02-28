@@ -36,6 +36,7 @@ import numpy as np
 from multiprocessing import cpu_count
 from logging import Logger
 
+from packaging.version import parse as parse_version
 from sicor.sicor_enmap import sicor_ac_enmap
 from sicor.options import get_options as get_ac_options
 
@@ -103,6 +104,15 @@ class AtmosphericCorrector(object):
         """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
         try:
             import acwater as _acwater  # noqa: F401
+
+            if parse_version(_acwater.__version__) < parse_version('0.3.0'):
+                if self.cfg.mode_ac in ['water', 'combined']:
+                    logger.warning(f"The installed version of ACwater (v{_acwater.__version__}) is too old. "
+                                   f"At least version 0.3.0 is required. Instead of ACwater, SICOR is applied to water "
+                                   f"surfaces as a workaround.")
+
+                return False
+
         except ImportError as e:
             if self.cfg.mode_ac in ['water', 'combined']:
                 logger.warning(f"The atmospheric correction mode was set to '{self.cfg.mode_ac}' but "

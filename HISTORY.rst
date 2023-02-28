@@ -2,6 +2,12 @@
 History
 =======
 
+0.19.1 (2023-02-28)
+-------------------
+
+* !79: ACwater is installed from pip as long as it is not yet packaged within the EnPT conda-forge builds.
+
+
 0.19.0 (2023-02-17)
 -------------------
 

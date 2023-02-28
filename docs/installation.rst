@@ -57,6 +57,7 @@ to resolve the following dependencies before the pip installer is run:
 * llvmlite
 * lxml
 * matplotlib
+* packaging
 * pandas
 * pygrib
 * pyhdf
@@ -102,6 +103,12 @@ and polymer_ are required.
     $ make auxdata_common
     $ make ancillary
     $ pip install -e .
+
+3. Finally install ACwater:
+
+   .. code-block:: bash
+
+    $ pip install acwater>=0.3.0
 
   .. note::
 
