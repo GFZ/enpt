@@ -103,6 +103,12 @@ and polymer_ are required.
     $ make ancillary
     $ pip install -e .
 
+3. Finally install ACwater:
+
+   .. code-block:: bash
+
+    $ pip install acwater>=0.3.0
+
   .. note::
 
     When using a conda_ environment on Linux or Mac OSX, the needed compilers to build polymer_
