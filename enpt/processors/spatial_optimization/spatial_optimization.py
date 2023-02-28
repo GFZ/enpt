@@ -167,7 +167,7 @@ class Spatial_Optimizer(object):
                 dst_ds.GetRasterBand(1).Fill(int(src_nodata))
 
             # reproject the needed subset from the reference image to a UTM 15m grid (like self._EnMAP_band)
-            cb = ProgressBar(prefix='Warping progress    ', timeout=None) if ~self.cfg.disable_progress_bars else None
+            cb = ProgressBar(prefix='Warping progress    ') if not self.cfg.disable_progress_bars else None
             gdal.SetConfigOption('GDAL_NUM_THREADS', f'{self.cfg.CPUs}')
             gdal.ReprojectImage(
                 src_ds,
