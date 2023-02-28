@@ -6,7 +6,7 @@ History
 -------------------
 
 * !79: ACwater is installed from pip as long as it is not yet packaged within the EnPT conda-forge builds.
-
+* !80: Fixed #99 (Unexpected progress bar within co-registration).
 
 0.19.0 (2023-02-17)
 -------------------
