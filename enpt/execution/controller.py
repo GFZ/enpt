@@ -183,10 +183,11 @@ class EnPT_Controller(object):
                 if self.cfg.enable_ac:
                     self.run_atmospheric_correction()
 
-                    # re-apply dead pixel correction
-                    self.L1_obj.logger.info(
-                        'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
-                    self.L1_obj.correct_dead_pixels()
+                    if self.cfg.run_deadpix_P:
+                        # re-apply dead pixel correction
+                        self.L1_obj.logger.info(
+                            'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
+                        self.L1_obj.correct_dead_pixels()
                 else:
                     self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
                                             'computing top-of-atmosphere reflectance instead.')
