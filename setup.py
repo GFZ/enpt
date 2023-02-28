@@ -51,6 +51,7 @@ req = [
     'natsort',
     'numpy',
     'numpy-indexed',
+    'packaging',
     'pandas',
     'pyproj>=3.4.0',
     'py_tools_ds>=0.14.23',

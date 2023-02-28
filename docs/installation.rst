@@ -57,6 +57,7 @@ to resolve the following dependencies before the pip installer is run:
 * llvmlite
 * lxml
 * matplotlib
+* packaging
 * pandas
 * pygrib
 * pyhdf
