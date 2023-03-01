@@ -114,28 +114,29 @@ reasons:
 .. note::
 
     The EnMAP-Box features a tool to import EnMAP Level-1B data
-    (:menuselection:`EnMAP-Box --> Project --> Add product --> EnMAP L1B`)
+    (:menuselection:`EnMAP-Box --> Project Menu --> Add product --> EnMAP L1B`)
     which directly applies scales and offsets to each band and adds some metadata such as central wavelength positions.
     This is convenient as the data is directly shown in radiance units, however, users should keep in mind that the
-    actual (scaled) L1B pixel values are different.
+    actual (scaled) L1B pixel values are stretched to the unsigned integer 16-bit value range.
 
 
 Generate Level-2A data using EnPT
 ---------------------------------
 
 The EnMAP processing tool (EnPT) generates Level-2A from Level-1B data, i.e., processes the EnMAP data from the
-raw format to geometrically and atmospherically corrected bottom-of-atmosphere reflectance. Please refer to the
-:ref:`algorithm_description` section of this documentation for more information on the underlying algorithms.
+raw format (top-of-atmosphere radiance in sensor geometry) to geometrically and atmospherically corrected
+bottom-of-atmosphere reflectance. Please refer to the :ref:`algorithm_description` section of this documentation for
+more information on the underlying algorithms.
 
 Open the EnPT GUI to run the processing chain. You can find it here:
-:menuselection:`QGIS 3.xx --> EnMAP-Box --> Processing Toolbox --> EnMAP-Box --> Pre-Processing --> EnMAP processing tool algorithm`.
+:menuselection:`QGIS 3.xx --> EnMAP-Box --> Applications Menu --> EnPT (EnMAP Processing Tool) --> Start EnPT GUI`.
 
-.. image:: img/screenshot_enpt_enmapboxapp_v0.6.0.png
+.. image:: img/screenshot_enpt_enmapboxapp_v0.7.4.png
 
-Select the :file:`ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip` downloaded
-above at the parameter **L1B EnMAP image** and check that the **Anaconda root directory** points to the correct
-Anaconda directory which contains the `enpt` Python environment (see :ref:`installation`). All other parameters are
-set to a default or not strictly needed to generate Level-2A data. However, they may improve the output quality.
+Select the EnMAP L1B zip-archive (:file:`ENMAP01-____L1B*.ZIP`) at the parameter **L1B EnMAP image**. All other
+parameters are set to a default or not strictly needed to generate Level-2A data. However, they may improve the output
+quality. Documentation about the parameters is provided
+`here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/usage.html#command-line-utilities>`__.
 
 Press the **Run** button to start the processing. The current status is shown in the **Log** panel and the QGIS Python
 console. After processing, the output directory is indicated in the Log panel.
@@ -149,21 +150,30 @@ other files, such as metadata, quality layers, etc.:
 
 .. image:: img/tut__contents_l2a_output.png
 
+For descriptions of the individual files, see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/algorithm_descriptions.html#enmap-level-2a-data-writer>`__.
+
 .. note::
 
     The output directory will contain additional layers in future.
 
 Load the :file:`ENMAP*L2A*-SPECTRAL_IMAGE.TIF` into
 the EnMAP-Box_. Unfold the entry in the **Data sources** panel to explore some metadata of the Level-2A EnMAP-image.
-The image has a dimension of 972 x 378 pixels in x- and y-direction and contains 218 bands. The different image
+The image has a dimension of 1266 x 1204 pixels in x- and y-direction and contains 206 bands. The different image
 dimensions compared with Level-1B data are due to the geometric correction / orthorectification applied by EnPT.
-Furthermore, the image is now projected in WGS84 / UTM zone 32N.
+Furthermore, the image is now projected in WGS84 / UTM zone 33N.
 
-Visualize the first band of the image and open a Spectral Library window as described above. The spectral information
-now contains atmospherically corrected bottom-of-atmosphere reflectance data. The two detector images have been merged
-so that their spectral information can now be used together. Spatio-temporal varying interferences on the spectra have
-been corrected as far as possible.
+Right-click on the image in the **Data Sources** panel and select :menuselection:`Open in new map --> True Color` to
+visualize an RGB band combination and open a Spectral Library window as described above. The spectral information
+now contains atmospherically corrected bottom-of-atmosphere reflectance data (scaled between 0 and 10000 by default).
+The two detector images have been merged so that their spectral information can now be used together. Spatio-temporal
+varying interferences on the spectra have been corrected as far as possible.
 
 .. image:: img/tut__enmapbox_l2a_output.png
 
 The generated EnMAP Level-2A data can now be used for subsequent remote sensing applications.
+
+.. note::
+
+    Also for EnMAP Level 2A data, the EnMAP-Box provides a convenient data import dialog
+    (:menuselection:`EnMAP-Box --> Project Menu --> Add product --> EnMAP L2A`) which scales the EnPT L2A
+    output between 0 and 1.
