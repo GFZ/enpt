@@ -29,13 +29,11 @@ Software
 This tutorial requires some software to be installed on your machine:
 
     - QGIS_ and the EnMAP-Box_
-      (see `here <https://enmap-box.readthedocs.io/en/latest/usr_section/usr_installation.html>`__
-      for installation instructions)
-    - EnPT_ (see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html>`__
-      for installation instructions)
-    - `EnPT EnMAP-Box App (GUI)`_ (see `here
-      <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/installation.html>`__
-      for installation instructions)
+    - EnPT_
+    - `EnPT EnMAP-Box App (GUI)`_
+
+Please see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html#installing-enpt-along-with-qgis-and-the-enmap-box-backend-gui>`__
+for a description to install all together into a single MambaForge Conda environment.
 
 .. _`EnPT EnMAP-Box App (GUI)`: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 
@@ -43,23 +41,28 @@ This tutorial requires some software to be installed on your machine:
 Data
 """"
 
-You can download the input data for this tutorial
+You can download some a subset of an EnMAP Level-1B dataset from
 `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
-EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__.
+EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__,
+which that can be used to reproduce this tutorial. However, the actual EnMAP dataset that was used for this tutorial is
+not contained in the EnPT repository due to its file size.
 
 Inspect the Level-1B data
 -------------------------
 
-The downloaded zip-archive contains a subset of an EnMAP Level-1B dataset covering a rural region in Bavaria, Germany.
+The EnMAP L1B zip-archive used for this tutorial contains an acquisition covering Berlin and the surrounding area.
 
 Extract the zip-archive on your local disk and inspect the extracted files. An explanation of all the contained files
-is given `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/>`__.
+is given `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/algorithm_descriptions.html#enmap-level-1b-data-reader>`__.
 
 .. image:: img/tut__contents_test_dataset.png
 
 .. note::
 
     The contents of this zip-archive may change in future.
+
+    Depending on the data format in which the Level-1B data was ordered from the ground segment,
+    the raster data may also have different file extensions such as :file:`*.BSQ`.
 
 
 Open QGIS_, start the EnMAP-Box_ and load the :file:`ENMAP*L1B*-SPECTRAL_IMAGE_VNIR.TIF` and
@@ -116,8 +119,8 @@ reasons:
     The EnMAP-Box features a tool to import EnMAP Level-1B data
     (:menuselection:`EnMAP-Box --> Project Menu --> Add product --> EnMAP L1B`)
     which directly applies scales and offsets to each band and adds some metadata such as central wavelength positions.
-    This is convenient as the data is directly shown in radiance units, however, users should keep in mind that the
-    actual (scaled) L1B pixel values are stretched to the unsigned integer 16-bit value range.
+    This is convenient as the data is directly shown in radiance units. However, users should keep in mind that the
+    actual (scaled) L1B pixel values are different as they are stretched to the unsigned integer 16-bit value range.
 
 
 Generate Level-2A data using EnPT
