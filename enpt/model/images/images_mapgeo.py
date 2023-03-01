@@ -264,9 +264,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
             if attrName.startswith('polymer_'):
                 ext = \
                     'TIF' if self.cfg.output_format == 'GTiff' else \
-                    'bsq' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
-                    'bil' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
-                    'bip' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
+                    'BSQ' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
+                    'BIL' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
+                    'BIP' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
                     'NA'
                 dict_attr_fn = dict(
                     polymer_logchl=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL.{ext}',
