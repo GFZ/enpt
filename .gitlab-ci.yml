@@ -35,6 +35,8 @@ test_enpt:
     - pip uninstall acwater -y
     - pip install acwater>=0.3.0
 
+    - pip install packaging  # TODO remove as soon as docker runner is rebuilt
+
     # run tests
     - make pytest  # test are called here
 

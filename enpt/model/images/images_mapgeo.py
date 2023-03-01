@@ -264,9 +264,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
             if attrName.startswith('polymer_'):
                 ext = \
                     'TIF' if self.cfg.output_format == 'GTiff' else \
-                    'bsq' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
-                    'bil' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
-                    'bip' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
+                    'BSQ' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
+                    'BIL' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
+                    'BIP' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
                     'NA'
                 dict_attr_fn = dict(
                     polymer_logchl=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL.{ext}',
@@ -288,7 +288,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:
-                if attrName.startswith('polymer_') and not self.cfg.polymer_additional_results:
+                if attrName.startswith('polymer_') and \
+                        (not self.cfg.polymer_additional_results or self.cfg.mode_ac == 'land'):
                     # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
                     pass
                 else:

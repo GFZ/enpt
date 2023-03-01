@@ -29,8 +29,12 @@ dependencies:
   - qgis>=3.28.2
   - scikit-learn>=0.24
   - scipy>=1.1
+  - typeguard
   - xgboost
 
   - pip:
+    # Polymer AC additional pip requirements
+    - acwater>=0.3.0
+
     # EnMAP-Box
     - enpt_enmapboxapp

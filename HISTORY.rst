@@ -2,6 +2,17 @@
 History
 =======
 
+0.19.1 (2023-03-01)
+-------------------
+
+* !79: ACwater is installed from pip as long as it is not yet packaged within the EnPT conda-forge builds.
+* !80: Fixed #99 (Unexpected progress bar within co-registration).
+* !81: Fixed #100 (`run_deadpix_P=False` does not disable second run of dead pixel correction after AC).
+* !82: Fixed #101 (Lower case raster file extensions are incompatible with EnMAP-Box product import dialog)
+  by switching to uppercase file extensions in case of ENVI output format.
+* !83: Fixed #102 (Output writer raises warnings that Polymer results cannot be written although AC mode is 'land').
+
+
 0.19.0 (2023-02-17)
 -------------------
 

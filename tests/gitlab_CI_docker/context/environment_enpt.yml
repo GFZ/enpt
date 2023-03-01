@@ -32,6 +32,7 @@ dependencies:
     - mvgavg
     - natsort
     - numpy-indexed
+    - packaging
     - scipy
     - jsmin
     - tqdm
