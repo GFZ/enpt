@@ -288,7 +288,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:
-                if attrName.startswith('polymer_') and not self.cfg.polymer_additional_results:
+                if attrName.startswith('polymer_') and \
+                        (not self.cfg.polymer_additional_results or self.cfg.mode_ac == 'land'):
                     # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
                     pass
                 else:
