@@ -69,13 +69,15 @@ general handling instructions regarding the EnMAP-Box_ are given in `Exercise A 
 .. _`Exercise A of the EnMAP-Box tutorials`: https://enmap-box.readthedocs.io/en/latest/usr_section/application_tutorials/urban_unmixing/tutorial.html#exercise-a-urban-land-cover
 
 Unfold the respective entries in the **Data sources** panel to explore some metadata of both images. Both images have
-1000 x 100 pixels in x- and y-direction. The VNIR image contains 88 and the SWIR contains 130 spectral bands. Both
-images have no coordinate reference system (CRS). This is because EnMAP Level-1B data are provided in sensor geometry.
+1000 x 1024 pixels in x- and y-direction. The VNIR image contains 91 and the SWIR contains 133 spectral bands. Both
+images have no coordinate reference system (Arbitrary CRS). This is because EnMAP Level-1B data are provided in sensor
+geometry.
 
 To visualize the first spectral band of the VNIR hyperspectral image, unfold the **Bands** entry of the VNIR image in
-the **Data sources** tab, right-click on **Band 01:B1** and press **Open in new map**. Then click the Spectral Library
-icon in the EnMAP-Box toolbar to open a new Spectral Library window and click somewhere into the visualized image in
-the **Map** window. This makes the corresponding spectral signature show up in the **Spectral Library** window.
+the **Data sources** tab, right-click on **Band 01:Band 1 (418.24)** and press **Open in new map**. Then click the
+Spectral Library icon in the EnMAP-Box toolbar to open a new Spectral Library window and click somewhere into the
+visualized image in the **Map** window. This makes the corresponding spectral signature show up in the
+**Spectral Library** window.
 
 .. image:: img/tut__enmapbox_l1b_vnir.png
 
@@ -90,12 +92,13 @@ converted. Even if all bands were equally scaled, the spectra would not be compa
 because they are still affected by numerous spatio-temporal varying effects, e.g., originating from the atmospheric
 state at the acquisition time.
 
-Right-click into Map #1 and press **Link with other maps**. Then zoom into the image and compare the VNIR and SWIR
-images. At this point, a spatial offset between both images is clearly visible which means that the spectral
-information of both EnMAP detectors cannot be interpreted together. Panning through the image also reveals some
-vertical striping effects, i.e., dead image columns.
+Now open the VNIR and SWIR images in two different map views. Right-click into Map #1 and press
+**Link with other maps**. Then zoom into the image and compare the VNIR and SWIR images. At this point, a spatial
+offset between both images (around 20 pixels along-track and <1 pixel across-track) is clearly visible which means that
+the spectral information of both EnMAP detectors cannot be interpreted together. Panning through the image also reveals
+some vertical striping effects.
 
-.. image:: img/tut__enmapbox_l1b_vnir_swir_shift_deadpix.png
+.. image:: img/tut__enmapbox_l1b_vnir_swir_shift_striping.png
 
 To sum up, EnMAP Level-1B data cannot be directly used for downstream remote sensing applications due to the following
 reasons:
@@ -104,9 +107,17 @@ reasons:
     - images provided in sensor geometry, i.e., without coordinate reference system (CRS)
     - spectral information represents top-of-atmosphere radiance, separately scaled for each band
     - VNIR and SWIR images do not show the same spatial extent (offsets in along- and across-track direction)
-    - image artefacts such as vertical striping due to dead pixels
+    - image artefacts such as vertical striping
     - spectral information is affected by various spatio-temporal effects, e.g., originating from the atmospheric state
     - some sensor-induced effects that are not directly visible (spectral smile, keystone, ...)
+
+.. note::
+
+    The EnMAP-Box features a tool to import EnMAP Level-1B data
+    (:menuselection:`EnMAP-Box --> Project --> Add product --> EnMAP L1B`)
+    which directly applies scales and offsets to each band and adds some metadata such as central wavelength positions.
+    This is convenient as the data is directly shown in radiance units, however, users should keep in mind that the
+    actual (scaled) L1B pixel values are different.
 
 
 Generate Level-2A data using EnPT
