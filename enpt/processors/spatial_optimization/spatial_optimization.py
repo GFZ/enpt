@@ -231,7 +231,7 @@ class Spatial_Optimizer(object):
         from time import time
         t0 = time()
 
-        # https://github.com/agile-geoscience/xlines/blob/main/notebooks/11_Gridding_map_data.ipynb
+        # https://github.com/agile-geoscience/xlines/blob/master/notebooks/11_Gridding_map_data.ipynb
 
         from scipy.interpolate import Rbf
         # f = Rbf(cols, rows, data, function='linear')
