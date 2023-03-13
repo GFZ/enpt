@@ -17,7 +17,7 @@
 # version. Please note the following exception: `EnPT` depends on tqdm, which
 # is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
 # "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
-# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
+# Details can be found here: https://github.com/tqdm/tqdm/blob/main/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -231,7 +231,7 @@ class Spatial_Optimizer(object):
         from time import time
         t0 = time()
 
-        # https://github.com/agile-geoscience/xlines/blob/master/notebooks/11_Gridding_map_data.ipynb
+        # https://github.com/agile-geoscience/xlines/blob/main/notebooks/11_Gridding_map_data.ipynb
 
         from scipy.interpolate import Rbf
         # f = Rbf(cols, rows, data, function='linear')

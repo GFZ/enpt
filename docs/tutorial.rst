@@ -44,7 +44,7 @@ Data
 """"
 
 You can download the input data for this tutorial
-`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
+`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/main/tests/data/
 EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__.
 
 Inspect the Level-1B data
@@ -53,7 +53,7 @@ Inspect the Level-1B data
 The downloaded zip-archive contains a subset of an EnMAP Level-1B dataset covering a rural region in Bavaria, Germany.
 
 Extract the zip-archive on your local disk and inspect the extracted files. An explanation of all the contained files
-is given `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/>`__.
+is given `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/main/tests/data/>`__.
 
 .. image:: img/tut__contents_test_dataset.png
 

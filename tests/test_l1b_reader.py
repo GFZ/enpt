@@ -18,7 +18,7 @@
 # version. Please note the following exception: `EnPT` depends on tqdm, which
 # is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
 # "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
-# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
+# Details can be found here: https://github.com/tqdm/tqdm/blob/main/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS

@@ -18,7 +18,7 @@
 # version. Please note the following exception: `EnPT` depends on tqdm, which
 # is distributed under the Mozilla Public Licence (MPL) v2.0 except for the files
 # "tqdm/_tqdm.py", "setup.py", "README.rst", "MANIFEST.in" and ".gitignore".
-# Details can be found here: https://github.com/tqdm/tqdm/blob/master/LICENCE.
+# Details can be found here: https://github.com/tqdm/tqdm/blob/main/LICENCE.
 #
 # This program is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -61,7 +61,7 @@ def get_enpt_argparser():
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
              'https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
-             'EnPT/blob/master/enpt/options/options_default.json')
+             'EnPT/blob/main/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
         help='number of CPU cores to be used for processing (default: "None" -> use all available)')
     add('-im', '--path_l1b_enmap_image', type=str, default=None,

@@ -134,7 +134,7 @@ To do so, run the following command on a Mambaforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
 
 Then activate the newly created conda_ environment and start QGIS_:
 
@@ -158,7 +158,7 @@ requirement polymer_ as described above.
 
     .. code-block:: bash
 
-      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
+      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::
@@ -171,7 +171,7 @@ requirement polymer_ as described above.
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://docs.conda.io
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
-.. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
+.. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/main/docs/installation.rst
 .. _HYGEOS support forum: https://forum.hygeos.com
 .. _polymer: https://forum.hygeos.com
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
