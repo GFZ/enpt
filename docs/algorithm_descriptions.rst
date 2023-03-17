@@ -125,7 +125,7 @@ in version 0.19.0):
 Spatial Co-Registration
 ***********************
 
-.. image:: https://git.gfz-potsdam.de/danschef/arosics/raw/master/docs/images/arosics_logo.png
+.. image:: https://git.gfz-potsdam.de/danschef/arosics/raw/main/docs/images/arosics_logo.png
    :target: https://git.gfz-potsdam.de/danschef/arosics
    :width: 150px
    :alt: AROSICS Logo

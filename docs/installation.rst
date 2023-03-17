@@ -134,7 +134,7 @@ To do so, run the following command on a Mambaforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
 
 Then activate the newly created conda_ environment and start QGIS_:
 
@@ -158,7 +158,7 @@ requirement polymer_ as described above.
 
     .. code-block:: bash
 
-      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/master/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
+      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::

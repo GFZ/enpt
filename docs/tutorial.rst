@@ -41,10 +41,10 @@ for a description to install all together into a single MambaForge Conda environ
 Data
 """"
 
-You can download some a subset of an EnMAP Level-1B dataset from
+You can download a subset of an EnMAP Level-1B dataset from
 `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
 EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__,
-which that can be used to reproduce this tutorial. However, the actual EnMAP dataset that was used for this tutorial is
+which can be used to reproduce this tutorial. However, the actual EnMAP dataset that was used for this tutorial is
 not contained in the EnPT repository due to its file size.
 
 Inspect the Level-1B data
