@@ -2,6 +2,12 @@
 History
 =======
 
+0.19.2 (coming soon)
+--------------------
+
+* !78 / !84: Updated tutorial in the documentation.
+
+
 0.19.1 (2023-03-01)
 -------------------
 
