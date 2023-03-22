@@ -41,6 +41,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 req = [
+    'acwater>=0.3.0',
     'arosics>=1.0.0',
     'cerberus',
     'geoarray>=0.15.8',
