@@ -2,10 +2,12 @@
 History
 =======
 
-0.19.2 (coming soon)
---------------------
+0.19.2 (2023-03-22)
+-------------------
 
 * !78 / !84: Updated tutorial in the documentation.
+* !85: Updated installation instructions and environment files
+  since acwater is now directly included into the enpt conda-forge releases.
 
 
 0.19.1 (2023-03-01)
