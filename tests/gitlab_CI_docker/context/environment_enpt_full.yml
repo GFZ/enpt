@@ -8,15 +8,6 @@ dependencies:
   - pip  # avoids that conda uses the wrong pip
   - enpt
 
-  # Polymer AC additional conda requirements
-  - cdsapi
-  - cython
-  - gdal
-  - netcdf4
-  - pygrib
-  - pyhdf
-  - xarray
-
   # EnMAP-Box
   - astropy
   - catboost
@@ -33,8 +24,5 @@ dependencies:
   - xgboost
 
   - pip:
-    # Polymer AC additional pip requirements
-    - acwater>=0.3.0
-
     # EnMAP-Box
     - enpt_enmapboxapp

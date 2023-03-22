@@ -20,7 +20,8 @@ This is the preferred way to install EnPT. It is the fastest one and it always i
 recent stable release and automatically resolves all the dependencies.
 
 1. Install Mambaforge_.
-2. Install enpt into a separate environment and activate it:
+2. Open a Mambaforge command line prompt and proceed there (e.g., on Windows you can find it in the start menu).
+3. Install enpt into a separate environment and activate it:
 
    .. code-block:: bash
 
@@ -80,19 +81,19 @@ you through the process.
 
 
 
-Optional: Install ACwater for advanced atmospheric correction over water surfaces
+Optional: Install Polymer for advanced atmospheric correction over water surfaces
 ---------------------------------------------------------------------------------
 
 For atmospheric correction of water surfaces using the Polymer algorithm instead of SICOR_ (which is mainly
-designed for land surfaces), the additional packages ACwater_ (a Polymer wrapper developed by AWI Bremerhaven)
-and polymer_ are required.
+designed for land surfaces), the additional package polymer_ is required. The Polymer atmospheric correction is made
+available in EnPT by the ACwater_ package, a wrapper developed by AWI Bremerhaven, which is already contained in the
+default EnPT installation.
 
-1. Using a previously created enpt conda_ environment (as described above), first install some dependencies:
+1. To install the optional package polymer_, first activate the previously created enpt conda_ environment:
 
    .. code-block:: bash
 
     $ mamba activate enpt
-    $ mamba install -c conda-forge cdsapi cython ecmwf-api-client gdal netcdf4 pygrib pyhdf xarray
 
 2. Then register at the `HYGEOS support forum`_, download polymer_ from there, unpack it and
    run the following commands from the unpacked root directory of polymer_:
@@ -104,12 +105,6 @@ and polymer_ are required.
     $ make ancillary
     $ pip install -e .
 
-3. Finally install ACwater:
-
-   .. code-block:: bash
-
-    $ pip install acwater>=0.3.0
-
   .. note::
 
     When using a conda_ environment on Linux or Mac OSX, the needed compilers to build polymer_
@@ -119,8 +114,9 @@ and polymer_ are required.
     However, polymer_ is currently *not Windows compatible* and will likely not run as expected.
 
 
-Apart from that, you need to register at the `CDS registration page`_ and install a `CDS API key`_.
-Further details are given in the `ACwater Polymer installation instructions`_.
+Apart from that, you need to register at the `CDS registration page`_ and install a `CDS API key`_. This is required
+to automatically download atmospheric AUX data at runtime, which are needed to run Polymer. Further details are
+given in the `ACwater Polymer installation instructions`_.
 
 
 Installing EnPT along with QGIS and the EnMAP-Box (backend + GUI)
@@ -148,7 +144,7 @@ from within the EnMAP-Box_ as described
 `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/usage.html>`__.
 
 If you want to use advanced atmospheric correction over water surfaces, please install the optional
-requirement polymer_ as described above.
+requirement polymer_ into the enpt_full environment as described above.
 
 
 .. hint::
