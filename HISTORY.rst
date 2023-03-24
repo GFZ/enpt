@@ -2,6 +2,13 @@
 History
 =======
 
+0.19.3 (coming soon)
+--------------------
+
+* !87: Adapted conda environments to latest changes of enmapbox requirements.
+  enpt_enmapboxapp is now installed from conda-forge as this is now available.
+
+
 0.19.2 (2023-03-22)
 -------------------
 
