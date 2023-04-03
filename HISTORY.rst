@@ -2,11 +2,12 @@
 History
 =======
 
-0.19.3 (coming soon)
---------------------
+0.19.3 (2023-04-03)
+-------------------
 
 * !87: Adapted conda environments to latest changes of enmapbox requirements.
   enpt_enmapboxapp is now installed from conda-forge as this is now available.
+* !88: Fixed #103 ("ValueError: cannot convert float NaN to integer" within dead pixel correction).
 
 
 0.19.2 (2023-03-22)
