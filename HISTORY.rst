@@ -5,6 +5,10 @@ History
 0.19.4 (coming soon)
 --------------------
 
+* !89: Updated CI to use Ubuntu-based container. Updated environment files.
+* Fixed deprecated URL.
+* Fixed missing Polymer directory creation.
+* Added hint about supported Polymer version to installation instructions.
 * !90: Dropped Python 3.7 support and added 3.11 instead.
 
 

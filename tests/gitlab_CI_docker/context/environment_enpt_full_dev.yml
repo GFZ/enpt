@@ -25,15 +25,16 @@ dependencies:
   - typeguard<3  # https://github.com/EnMAP-Box/enmap-box/issues/398
   - xgboost
 
+  # test/doc/lint requirements
+  - flake8
+  - pycodestyle
+  - pydocstyle
+  - pylint
+  - pytest
+  - pytest-cov
+  - sphinx-argparse
+  - sphinx_rtd_theme
+  - urlchecker
+
   - pip:
-    # test/doc/lint requirements
-    - flake8
-    - pycodestyle
-    - pydocstyle
-    - pylint
-    - pytest
-    - pytest-cov
     - pytest-reporter-html1
-    - sphinx-argparse
-    - sphinx_rtd_theme
-    - urlchecker
