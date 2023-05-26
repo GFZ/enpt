@@ -22,6 +22,7 @@ test_enpt:
     - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     # - git clone -b dev https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
     - cd ./context/sicor
+    - git lfs install
     - git lfs pull
     - pip install -e .
     - cd ../../
