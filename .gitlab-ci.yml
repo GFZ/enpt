@@ -79,7 +79,7 @@ test_enpt_install:
 
     # create enpt environment from environment_enpt.yml
     - mamba env create --name enpt_test -f tests/gitlab_CI_docker/context/environment_enpt.yml
-    - conda activate enpt_test
+    - source activate enpt_test
 
     # install enpt
     - pip install -e .
