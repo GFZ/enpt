@@ -90,6 +90,9 @@ test_enpt_install:
     # test importability
     - python -c "import enpt; print(enpt)"
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+
+    # check if dependencies are properly installed
+    - pip check || exit
   only:
     - main
     - dev
