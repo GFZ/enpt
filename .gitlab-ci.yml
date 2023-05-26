@@ -11,7 +11,7 @@ test_enpt:
   stage: test
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
-    - source /root/mambaforge/bin/activate ci_env
+    - source activate ci_env
 
     # update geoarray and py_tools_ds
     # - pip install 'geoarray>=0.15.8'
@@ -30,12 +30,6 @@ test_enpt:
     # - python setup.py install
     # - cd ../../
     # - pip install -U sicor
-
-    # we need at least acwater 0.3.0
-    - pip uninstall acwater -y
-    - pip install acwater>=0.3.0
-
-    - pip install packaging  # TODO remove as soon as docker runner is rebuilt
 
     # run tests
     - make pytest  # test are called here
@@ -61,7 +55,7 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source /root/mambaforge/bin/activate ci_env
+    - source activate ci_env
     - make lint
   artifacts:
     paths:
@@ -75,7 +69,7 @@ test_styles:
 test_urls:
   stage: test
   script:
-    - source /root/mambaforge/bin/activate ci_env
+    - source activate ci_env
     - pip install -U urlchecker
     - make urlcheck
   when: always
@@ -84,8 +78,7 @@ test_urls:
 test_enpt_install:
   stage: test
   script:
-    - source /root/mambaforge/bin/activate
-    - mamba update -n base -c conda-forge --all
+    - mamba update -n base mamba conda
 
     # create enpt environment from environment_enpt.yml
     - mamba env create --name enpt_test -f tests/gitlab_CI_docker/context/environment_enpt.yml
@@ -147,7 +140,7 @@ deploy_pypi:
   dependencies:
     - test_enpt
   script:
-    - source /root/mambaforge/bin/activate ci_env
+    - source activate ci_env
     - pip install -U twine
     - python setup.py sdist
     - twine upload dist/*  # requires creds as environment variables
