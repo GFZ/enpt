@@ -95,14 +95,15 @@ default EnPT installation.
 
     $ mamba activate enpt
 
-2. Then register at the `HYGEOS support forum`_, download polymer_ from there, unpack it and
-   run the following commands from the unpacked root directory of polymer_:
+2. Then register at the `HYGEOS support forum`_, download polymer_ from there (currently, the latest version supported
+   by EnPT is polymer 4.14!), unpack it and run the following commands from the unpacked root directory of polymer_:
 
    .. code-block:: bash
 
     $ make
     $ make auxdata_common
     $ make ancillary
+    $ mkdir -p ANCILLARY/ERA5
     $ pip install -e .
 
   .. note::
