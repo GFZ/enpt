@@ -2,6 +2,12 @@
 History
 =======
 
+0.19.4 (coming soon)
+--------------------
+
+* !90: Dropped Python 3.7 support and added 3.11 instead.
+
+
 0.19.3 (2023-04-03)
 -------------------
 
