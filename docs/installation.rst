@@ -160,7 +160,7 @@ requirement polymer_ into the enpt_full environment as described above.
 
 .. note::
 
-    EnPT has been tested with Python 3.7+ on Linux, Windows and Mac OSX.
+    EnPT has been tested with Python 3.8+ on Linux, Windows and Mac OSX.
 
 
 .. _Mambaforge: https://github.com/conda-forge/miniforge#mambaforge
