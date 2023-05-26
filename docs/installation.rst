@@ -95,8 +95,8 @@ default EnPT installation.
 
     $ mamba activate enpt
 
-2. Then register at the `HYGEOS support forum`_, download polymer_ from there (currently, the latest version supported
-   by EnPT is polymer 4.14!), unpack it and run the following commands from the unpacked root directory of polymer_:
+2. Then register at the `HYGEOS support forum`_, download polymer_ from there (EnPT was tested with polymer v4.16.1,
+   later versions may fail), unpack it and run the following commands from the unpacked root directory of polymer_:
 
    .. code-block:: bash
 
