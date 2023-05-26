@@ -18,18 +18,13 @@ test_enpt:
     # - pip install 'py_tools_ds>=0.14.23'
 
     # install sicor and perhaps switch sicor branch
-    - rm -rf /tmp/sicor
-    - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
-    # - git clone -b dev https://git.gfz-potsdam.de/EnMAP/sicor.git /tmp/sicor
-    - pip install -e /tmp/sicor
-
-    # update sicor
-    # - rm -rf context/sicor
-    # - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-    # - cd ./context/sicor
-    # - python setup.py install
-    # - cd ../../
-    # - pip install -U sicor
+    - rm -rf context/sicor
+    - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+    # - git clone -b dev https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+    - cd ./context/sicor
+    - git lfs pull
+    - pip install -e .
+    - cd ../../
 
     # run tests
     - make pytest  # test are called here
