@@ -96,7 +96,6 @@ test_enpt_install:
   only:
     - main
     - dev
-    - maintenance/update_ci
 
 
 pages:
