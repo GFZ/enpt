@@ -2,6 +2,15 @@
 History
 =======
 
+0.19.4 (coming soon)
+--------------------
+
+* !89: Updated CI to use Ubuntu-based container. Updated environment files.
+* Fixed deprecated URL.
+* Fixed missing Polymer directory creation.
+* Added hint about supported Polymer version to installation instructions.
+
+
 0.19.3 (2023-04-03)
 -------------------
 
