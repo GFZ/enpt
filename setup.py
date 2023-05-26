@@ -82,10 +82,10 @@ setup(
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     description="EnMAP Processing Tool",
     entry_points={
@@ -110,7 +110,7 @@ setup(
     #       otherwise they are not included in the PyPi upload content
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seem to work, therefore use MANIFEST.in
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
