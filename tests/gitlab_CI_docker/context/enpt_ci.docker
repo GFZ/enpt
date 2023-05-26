@@ -27,7 +27,7 @@ RUN source activate ci_env && \
     pip install -e . ;\
     make auxdata_common ;\
     mkdir -p ANCILLARY/ERA5/ ANCILLARY/METEO/ ;\
-    mkdir -p ANCILLARY/ERA5/2017/02/18"
+    mkdir -p ANCILLARY/ERA5/2017/02/18
 
 # copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
 COPY era5_20170218*.nc /root/${polymer_v_str}/ANCILLARY/ERA5/2017/02/18/
