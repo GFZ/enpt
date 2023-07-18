@@ -37,6 +37,7 @@ Tests for `processors.spatial_transform.spatial_transform` module.
 
 import os
 from unittest import TestCase
+import pytest
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import pickle
@@ -79,18 +80,18 @@ class Test_Geometry_Transformer(TestCase):
         GT = Geometry_Transformer(lons=self.lons_vnir, lats=self.lats_vnir)
 
         # transforming map to map geometry must raise a RuntimeError
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             GT.to_map_geometry(self.gA2transform_mapgeo, tgt_prj=32632)
 
         # test transformation to UTM zone 32
         data_mapgeo, gt, prj = GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=32632,
                                                   tgt_coordgrid=(enmap_coordinate_grid_utm['x'],
                                                                  enmap_coordinate_grid_utm['y']))
-        self.assertEqual((gt[1], -gt[5]), (np.ptp(enmap_coordinate_grid_utm['x']),
-                                           np.ptp(enmap_coordinate_grid_utm['y'])))  # 30m output
-        self.assertTrue(is_point_on_grid((gt[0], gt[3]),
-                                         xgrid=enmap_coordinate_grid_utm['x'],
-                                         ygrid=enmap_coordinate_grid_utm['y']))
+        assert (gt[1], -gt[5]) == (np.ptp(enmap_coordinate_grid_utm['x']),
+                                   np.ptp(enmap_coordinate_grid_utm['y']))  # 30m output
+        assert is_point_on_grid((gt[0], gt[3]), 
+                                xgrid=enmap_coordinate_grid_utm['x'],
+                                ygrid=enmap_coordinate_grid_utm['y'])
 
         # test transformation to LonLat
         GT.to_map_geometry(self.gA2transform_sensorgeo, tgt_prj=4326)
@@ -99,12 +100,12 @@ class Test_Geometry_Transformer(TestCase):
         GT = Geometry_Transformer(lons=self.lons_vnir, lats=self.lats_vnir)
 
         # transforming sensor to sensor geometry must raise a RuntimeError
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             GT.to_sensor_geometry(self.gA2transform_sensorgeo)
 
         data_sensorgeo = GT.to_sensor_geometry(self.gA2transform_mapgeo)
 
-        self.assertEqual(data_sensorgeo.shape, self.gA2transform_sensorgeo.shape)
+        assert data_sensorgeo.shape == self.gA2transform_sensorgeo.shape
 
 
 class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
@@ -143,8 +144,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
     def test_transform_sensorgeo_VNIR_to_SWIR_2D(self):
         data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo_2D)
 
-        self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
-        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_2D.shape)
+        assert isinstance(data_swir_sensorgeo, np.ndarray)
+        assert data_swir_sensorgeo.shape == self.data2transform_vnir_sensorgeo_2D.shape
         # GeoArray(data_swir_sensorgeo, nodata=0)\
         #     .save('enpt_vnir_transformed_to_swir_sensorgeo_nearest.bsq')
         # GeoArray(self.data2transform_swir_sensorgeo, nodata=0)\
@@ -153,8 +154,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
     def test_transform_sensorgeo_SWIR_to_VNIR_2D(self):
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(self.data2transform_swir_sensorgeo_2D)
 
-        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEqual(data_vnir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_2D.shape)
+        assert isinstance(data_vnir_sensorgeo, np.ndarray)
+        assert data_vnir_sensorgeo.shape == self.data2transform_vnir_sensorgeo_2D.shape
         # GeoArray(data_vnir_sensorgeo, nodata=0)\
         #     .save('/home/gfz-fe/scheffler/temp/enpt_testing/enpt_swir_transformed_to_vnir_sensorgeo_nearest_v4.bsq')
         # GeoArray(self.data2transform_vnir_sensorgeo, nodata=0)\
@@ -164,8 +165,8 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo_2D] * 2)
         data_vnir_sensorgeo = self.VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
 
-        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo_2D.shape, 2))
+        assert isinstance(data_vnir_sensorgeo, np.ndarray)
+        assert data_vnir_sensorgeo.shape == (*self.data2transform_swir_sensorgeo_2D.shape, 2)
 
     def test_transform_sensorgeo_SWIR_to_VNIR_2band3DInput_2DGeolayer(self):
         VS_SGT = VNIR_SWIR_SensorGeometryTransformer(lons_vnir=self.L1_obj.meta.vnir.lons[:, :, 0],
@@ -183,14 +184,14 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
         data2transform_swir_sensorgeo_3D = np.dstack([self.data2transform_swir_sensorgeo_2D] * 2)
         data_vnir_sensorgeo = VS_SGT.transform_sensorgeo_SWIR_to_VNIR(data2transform_swir_sensorgeo_3D)
 
-        self.assertIsInstance(data_vnir_sensorgeo, np.ndarray)
-        self.assertEqual(data_vnir_sensorgeo.shape, (*self.data2transform_swir_sensorgeo_2D.shape, 2))
+        assert isinstance(data_vnir_sensorgeo, np.ndarray)
+        assert data_vnir_sensorgeo.shape == (*self.data2transform_swir_sensorgeo_2D.shape, 2)
 
     def test_transform_sensorgeo_VNIR_to_SWIR_3D(self):
         data_swir_sensorgeo = self.VS_SGT.transform_sensorgeo_VNIR_to_SWIR(self.data2transform_vnir_sensorgeo_3D)
 
-        self.assertIsInstance(data_swir_sensorgeo, np.ndarray)
-        self.assertEqual(data_swir_sensorgeo.shape, self.data2transform_vnir_sensorgeo_3D.shape)
+        assert isinstance(data_swir_sensorgeo, np.ndarray)
+        assert data_swir_sensorgeo.shape == self.data2transform_vnir_sensorgeo_3D.shape
 
 
 class Test_RPC_Geolayer_Generator(TestCase):
@@ -220,9 +221,9 @@ class Test_RPC_Geolayer_Generator(TestCase):
     def test_normalize_coordinates(self):
         lon_norm, lat_norm, height_norm = \
             self.RPCGG._normalize_map_coordinates(lon=self.lons, lat=self.lats, height=self.heights)
-        self.assertEqual(lon_norm.shape, self.lons.shape)
-        self.assertEqual(lat_norm.shape, self.lats.shape)
-        self.assertEqual(height_norm.shape, self.heights.shape)
+        assert lon_norm.shape == self.lons.shape
+        assert lat_norm.shape == self.lats.shape
+        assert height_norm.shape == self.heights.shape
 
     def test_compute_normalized_image_coordinates(self):
         row_norm, col_norm = self.RPCGG._compute_normalized_image_coordinates(
@@ -232,20 +233,20 @@ class Test_RPC_Geolayer_Generator(TestCase):
         )
 
         rows, cols = self.RPCGG._denormalize_image_coordinates(row_norm, col_norm)
-        self.assertIsInstance(rows, np.ndarray)
-        self.assertIsInstance(cols, np.ndarray)
+        assert isinstance(rows, np.ndarray)
+        assert isinstance(cols, np.ndarray)
 
     def test_transform_LonLatHeight_to_RowCol(self):
         rows, cols = self.RPCGG.transform_LonLatHeight_to_RowCol(lon=self.lons, lat=self.lats, height=self.heights)
-        self.assertIsInstance(rows, np.ndarray)
-        self.assertIsInstance(cols, np.ndarray)
+        assert isinstance(rows, np.ndarray)
+        assert isinstance(cols, np.ndarray)
 
     def test_compute_geolayer(self):
         lons_interp, lats_interp = self.RPCGG.compute_geolayer()
-        self.assertEqual(lons_interp.shape, lats_interp.shape)
-        self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
-        self.assertFalse(np.isnan(lons_interp).any())
-        self.assertFalse(np.isnan(lats_interp).any())
+        assert lons_interp.shape == lats_interp.shape
+        assert lons_interp.shape == self.dims_sensorgeo
+        assert not np.isnan(lons_interp).any()
+        assert not np.isnan(lats_interp).any()
 
     def test_compute_geolayer_average_elevation(self):
         RPCGG = RPC_Geolayer_Generator(self.rpc_coeffs,
@@ -254,10 +255,10 @@ class Test_RPC_Geolayer_Generator(TestCase):
                                        enmapIm_dims_sensorgeo=self.dims_sensorgeo)
 
         lons_interp, lats_interp = RPCGG.compute_geolayer()
-        self.assertEqual(lons_interp.shape, lats_interp.shape)
-        self.assertEqual(lons_interp.shape, self.dims_sensorgeo)
-        self.assertFalse(np.isnan(lons_interp).any())
-        self.assertFalse(np.isnan(lats_interp).any())
+        assert lons_interp.shape == lats_interp.shape
+        assert lons_interp.shape == self.dims_sensorgeo
+        assert not np.isnan(lons_interp).any()
+        assert not np.isnan(lats_interp).any()
 
 
 class Test_RPC_3D_Geolayer_Generator(TestCase):
@@ -302,10 +303,10 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo
                                                ).compute_geolayer()
-        self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (1024, 1000, 6))
-        self.assertTrue(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
-        self.assertTrue(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+        assert lons.shape == lats.shape
+        assert lons.shape == (1024, 1000, 6)
+        assert np.array_equal(lons[:, :, 0], lons[:, :, 2])
+        assert np.array_equal(lats[:, :, 0], lats[:, :, 2])
 
     def test_compute_geolayer_faulty_coeff_set(self):
         """
@@ -318,10 +319,10 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_cornerCoords=self.corner_coords,
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo
                                                ).compute_geolayer()
-        self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (1024, 1000, 6))
-        self.assertFalse(np.isnan(lons).any())
-        self.assertFalse(np.isnan(lats).any())
+        assert lons.shape == lats.shape
+        assert lons.shape == (1024, 1000, 6)
+        assert not np.isnan(lons).any()
+        assert not np.isnan(lats).any()
 
     def test_compute_geolayer_multiple_coeff_sets_singleprocessing(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
@@ -330,10 +331,10 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo,
                                                CPUs=1
                                                ).compute_geolayer()
-        self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (1024, 1000, 6))
-        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
-        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+        assert lons.shape == lats.shape
+        assert lons.shape == (1024, 1000, 6)
+        assert not np.array_equal(lons[:, :, 0], lons[:, :, 2])
+        assert not np.array_equal(lats[:, :, 0], lats[:, :, 2])
 
     def test_compute_geolayer_multiple_coeff_sets_multiprocessing(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
@@ -342,10 +343,10 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo,
                                                CPUs=6
                                                ).compute_geolayer()
-        self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (1024, 1000, 6))
-        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
-        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+        assert lons.shape == lats.shape
+        assert lons.shape == (1024, 1000, 6)
+        assert not np.array_equal(lons[:, :, 0], lons[:, :, 2])
+        assert not np.array_equal(lats[:, :, 0], lats[:, :, 2])
 
     def test_compute_geolayer_average_elevation(self):
         lons, lats = RPC_3D_Geolayer_Generator(self._get_rpc_coeffs_with_multiple_coeff_sets(),
@@ -354,12 +355,11 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
                                                enmapIm_dims_sensorgeo=self.dims_sensorgeo,
                                                CPUs=6
                                                ).compute_geolayer()
-        self.assertEqual(lons.shape, lats.shape)
-        self.assertEqual(lons.shape, (1024, 1000, 6))
-        self.assertFalse(np.array_equal(lons[:, :, 0], lons[:, :, 2]))
-        self.assertFalse(np.array_equal(lats[:, :, 0], lats[:, :, 2]))
+        assert lons.shape == lats.shape
+        assert lons.shape == (1024, 1000, 6)
+        assert not np.array_equal(lons[:, :, 0], lons[:, :, 2])
+        assert not np.array_equal(lats[:, :, 0], lats[:, :, 2])
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()

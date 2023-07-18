@@ -72,11 +72,11 @@ class Test_Spatial_Optimizer(TestCase):
         SO = Spatial_Optimizer(config=self.config)
         L1_obj = SO.optimize_geolayer(self.L1_obj)
 
-        self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-        self.assertNotEqual(np.mean(L1_obj.meta.vnir.lons), 0)
-        self.assertNotEqual(np.std(L1_obj.meta.vnir.lons), 0)
-        self.assertNotEqual(np.mean(L1_obj.meta.vnir.lats), 0)
-        self.assertNotEqual(np.std(L1_obj.meta.vnir.lats), 0)
+        assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+        assert np.mean(L1_obj.meta.vnir.lons) == 0
+        assert np.std(L1_obj.meta.vnir.lons) == 0
+        assert np.mean(L1_obj.meta.vnir.lats) == 0
+        assert np.std(L1_obj.meta.vnir.lats) == 0
 
 
 if __name__ == '__main__':

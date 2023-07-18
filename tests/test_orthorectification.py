@@ -37,6 +37,7 @@ Tests for `processors.orthorectification.orthorectification` module.
 
 import os
 from unittest import TestCase
+import pytest
 from zipfile import ZipFile
 import tempfile
 import shutil
@@ -78,15 +79,15 @@ class Test_Orthorectifier(TestCase):
         OR = Orthorectifier(config=self.config)
         L2_obj = OR.run_transformation(self.L1_obj)
 
-        self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
-        self.assertTrue(L2_obj.data.is_map_geo)
-        self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
-        self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
-        self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
-        self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
-                                   np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-                                   rtol=0.01
-                                   ))
+        assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
+        assert L2_obj.data.is_map_geo is True
+        assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
+        assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
+        assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
+        assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
+                          np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
+                          rtol=0.01
+                          ) is True
 
 
 class Test_Orthorectifier_DLR(TestCase):
@@ -112,15 +113,15 @@ class Test_Orthorectifier_DLR(TestCase):
         OR = Orthorectifier(config=self.config)
         L2_obj = OR.run_transformation(self.L1_obj)
 
-        self.assertIsInstance(L2_obj, EnMAPL2Product_MapGeo)
-        self.assertTrue(L2_obj.data.is_map_geo)
-        self.assertGreater(L2_obj.data.shape[0], self.L1_obj.vnir.data.shape[0])
-        self.assertNotEqual(L2_obj.data.shape[1], self.L1_obj.vnir.data.shape[1])
-        self.assertEqual(L2_obj.data.ndim, self.L1_obj.vnir.data.ndim)
-        self.assertTrue(np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
-                                   np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-                                   rtol=0.01
-                                   ))
+        assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
+        assert L2_obj.data.is_map_geo is True
+        assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
+        assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
+        assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
+        assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
+                          np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
+                          rtol=0.01
+                          ) is True
 
 
 class Test_VNIR_SWIR_Stacker(TestCase):
@@ -141,33 +142,32 @@ class Test_VNIR_SWIR_Stacker(TestCase):
         # unequal geotransform
         swir_gA = deepcopy(self.swir_gA)
         swir_gA.gt = (331185.0, 10.0, -0.0, 5840115.0, -0.0, -10.0)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=swir_gA,
                               vnir_wvls=self.vnir_wvls, swir_wvls=self.swir_wvls)
 
         # unequal projection
         swir_gA = deepcopy(self.swir_gA)
         swir_gA.prj = CRS(32632).to_wkt()
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=swir_gA,
                               vnir_wvls=self.vnir_wvls, swir_wvls=self.swir_wvls)
 
         # wrong length of provided wavelength
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=self.swir_gA,
                               vnir_wvls=np.array(list(self.vnir_wvls) + [1]), swir_wvls=self.swir_wvls)
-        with self.assertRaises(ValueError):
+        with pytest.raiess(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=self.swir_gA,
                               vnir_wvls=self.vnir_wvls, swir_wvls=np.array(list(self.swir_wvls) + [1]))
 
     def validate_output(self, gA_stacked: GeoArray):
-        self.assertIsInstance(gA_stacked, GeoArray)
-        self.assertEqual(gA_stacked.gt, self.vnir_gA.gt)
-        self.assertEqual(gA_stacked.prj, self.vnir_gA.prj)
-        self.assertEqual(gA_stacked.shape[:2], self.vnir_gA.shape[:2])
-        self.assertTrue('wavelength' in gA_stacked.meta.band_meta and
-                        gA_stacked.meta.band_meta['wavelength'])
-        self.assertEqual(gA_stacked.bands, len(gA_stacked.meta.band_meta['wavelength']))
+        assert isinstance(gA_stacked, GeoArray)
+        assert gA_stacked.gt == self.vnir_gA.gt
+        assert gA_stacked.prj == self.vnir_gA.prj
+        assert gA_stacked.shape[:2] == self.vnir_gA.shape[:2]
+        assert ('wavelength' in gA_stacked.meta.band_meta and gA_stacked.meta.band_meta['wavelength'])
+        assert gA_stacked.bands == len(gA_stacked.meta.band_meta['wavelength'])
 
     def test_get_stack_order_by_wvl(self):
         gA_stacked = self.VSSt.compute_stack(algorithm='order_by_wvl')
@@ -187,10 +187,9 @@ class Test_VNIR_SWIR_Stacker(TestCase):
 
     def test_compute_stack(self):
         # wrong input algorithm
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.VSSt.compute_stack(algorithm='mean')
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()

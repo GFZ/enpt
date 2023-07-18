@@ -81,11 +81,11 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGFB.TIF')))
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BITMASK.TIF')))
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGCHL.TIF')))
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RGLI.TIF')))
-        self.assertTrue(glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RNIR.TIF')))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGFB.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BITMASK.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGCHL.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RGLI.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RNIR.TIF'))
         # TODO: validate pixel values
 
     @patch('acwater.acwater.polymer_ac_enmap', None)
@@ -93,8 +93,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
         self.CTR.run_all_processors()
 
-        self.assertTrue("As a fallback, SICOR is applied to water surfaces instead."
-                        in self.CTR.L1_obj.logger.captured_stream)
+        assert "As a fallback, SICOR is applied to water surfaces instead." in self.CTR.L1_obj.logger.captured_stream
 
 
 if __name__ == '__main__':
