@@ -89,7 +89,7 @@ class Test_Geometry_Transformer(TestCase):
                                                                  enmap_coordinate_grid_utm['y']))
         assert (gt[1], -gt[5]) == (np.ptp(enmap_coordinate_grid_utm['x']),
                                    np.ptp(enmap_coordinate_grid_utm['y']))  # 30m output
-        assert is_point_on_grid((gt[0], gt[3]), 
+        assert is_point_on_grid((gt[0], gt[3]),
                                 xgrid=enmap_coordinate_grid_utm['x'],
                                 ygrid=enmap_coordinate_grid_utm['y'])
 
