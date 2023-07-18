@@ -80,14 +80,13 @@ class Test_Orthorectifier(TestCase):
         L2_obj = OR.run_transformation(self.L1_obj)
 
         assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
-        assert L2_obj.data.is_map_geo is True
+        assert L2_obj.data.is_map_geo
         assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
         assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
         assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
         assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-                          rtol=0.01
-                          ) is True
+                          rtol=0.01)
 
 
 class Test_Orthorectifier_DLR(TestCase):
@@ -114,14 +113,13 @@ class Test_Orthorectifier_DLR(TestCase):
         L2_obj = OR.run_transformation(self.L1_obj)
 
         assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
-        assert L2_obj.data.is_map_geo is True
+        assert L2_obj.data.is_map_geo
         assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
         assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
         assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
         assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-                          rtol=0.01
-                          ) is True
+                          rtol=0.01)
 
 
 class Test_VNIR_SWIR_Stacker(TestCase):
