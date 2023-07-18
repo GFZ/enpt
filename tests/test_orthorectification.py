@@ -155,7 +155,7 @@ class Test_VNIR_SWIR_Stacker(TestCase):
         with pytest.raises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=self.swir_gA,
                               vnir_wvls=np.array(list(self.vnir_wvls) + [1]), swir_wvls=self.swir_wvls)
-        with pytest.raiess(ValueError):
+        with pytest.raises(ValueError):
             VNIR_SWIR_Stacker(vnir=self.vnir_gA, swir=self.swir_gA,
                               vnir_wvls=self.vnir_wvls, swir_wvls=np.array(list(self.swir_wvls) + [1]))
 
