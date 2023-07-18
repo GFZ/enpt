@@ -81,7 +81,7 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
     def test_set_SWIRattr_with_transformedVNIRattr__attrIsNone(self):
         del self.L1_obj.vnir.mask_haze
 
-        with pytest.raises(RuntimeError, match='*.vnir.mask_haze has not yet been set.'):
+        with pytest.raises(RuntimeError, match='.vnir.mask_haze has not yet been set.'):
             self.L1_obj.set_SWIRattr_with_transformedVNIRattr('mask_haze')
 
     def test_transform_vnir_to_swir_raster_with_keystone(self):
