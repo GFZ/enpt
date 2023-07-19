@@ -36,6 +36,7 @@ Tests for `processors.dem_preprocessing` module.
 """
 
 from unittest import TestCase
+import pytest
 
 import numpy as np
 from pyproj import CRS
@@ -65,17 +66,17 @@ class Test_DEM_Processor(TestCase):
         dem = GeoArray(np.array([1, 2]))
 
         # no map info, no projection
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
         # no projection
         dem.gt = (10.6, 0.00036, -0.0, 47.5, -0.0, -0.00036)  # can be anything
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
     def test_init_noWGS84(self):
         # NAD83 projection ({'proj': 'longlat', 'ellps': 'GRS80', 'towgs84': '0,0,0,0,0,0,0'})
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             dem = GeoArray(np.array([1, 2]),
                            geotransform=(10.6, 0.00036, -0.0, 47.5, -0.0, -0.00036),  # can be anything
                            projection=CRS(4269).to_wkt())  # NAD83
@@ -87,14 +88,14 @@ class Test_DEM_Processor(TestCase):
                        geotransform=(626938.928052, 30.0, 0, 5267203.56579, 0, -30.0),
                        projection=CRS(32632).to_wkt())
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
     def test_get_flat_dem(self):
         DP = DEM_Processor.get_flat_dem_from_average_elevation(corner_coords_lonlat=self.ll_cornerCoords,
                                                                average_elevation=50)
-        self.assertIsInstance(DP.dem, GeoArray)
-        self.assertEqual(np.mean(DP.dem), 50)
+        assert isinstance(DP.dem, GeoArray)
+        assert np.mean(DP.dem) == 50
 
     def test_fill_gaps(self):
         pass
@@ -108,9 +109,8 @@ class Test_DEM_Processor(TestCase):
     def test_to_sensor_geometry(self):
         dem_sensor_geo = self.DP_mapgeo.to_sensor_geometry(lons=self.lons, lats=self.lats)
 
-        self.assertEqual(dem_sensor_geo.shape, (100, 1000))
+        assert dem_sensor_geo.shape == (100, 1000)
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()

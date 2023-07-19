@@ -60,14 +60,14 @@ class Test_CLIParser(TestCase):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--CPUs', '10'])
         config = self.get_config(parsed_args)
-        self.assertEqual(config.CPUs, 10)
+        assert config.CPUs == 10
 
         # test if parameter fallbacks are working ('CPUs' has a fallback)
         parsed_args = self.parser_run.parse_args(self.baseargs)
         config = self.get_config(parsed_args)
 
-        self.assertNotIsInstance(config.CPUs, str)
-        self.assertEqual(config.CPUs, cpu_count())
+        assert not isinstance(config.CPUs, str)
+        assert config.CPUs == cpu_count()
 
     def test_param_list(self):
         parsed_args = self.parser_run.parse_args(self.baseargs +
@@ -85,20 +85,20 @@ class Test_CLIParser(TestCase):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'True'])
         config = self.get_config(parsed_args)
-        self.assertIsInstance(config.enable_ac, bool)
-        self.assertEqual(config.enable_ac, True)
+        assert isinstance(config.enable_ac, bool)
+        assert config.enable_ac is True
 
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'false'])
         config = self.get_config(parsed_args)
-        self.assertIsInstance(config.enable_ac, bool)
-        self.assertEqual(config.enable_ac, False)
+        assert isinstance(config.enable_ac, bool)
+        assert config.enable_ac is False
 
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', '0'])
         config = self.get_config(parsed_args)
-        self.assertIsInstance(config.enable_ac, bool)
-        self.assertEqual(config.enable_ac, False)
+        assert isinstance(config.enable_ac, bool)
+        assert config.enable_ac is False
 
         try:
             self.parser_run.parse_args(self.baseargs + ['--enable_ac', 'treu'])
@@ -111,12 +111,12 @@ class Test_CLIParser(TestCase):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": 10}}'])
         config = self.get_config(parsed_args)
-        self.assertEqual(config.CPUs, 10)
+        assert config.CPUs == 10
 
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": "None"}}'])
         config = self.get_config(parsed_args)
-        self.assertEqual(config.CPUs, cpu_count())
+        assert config.CPUs == cpu_count()
 
 
 if __name__ == '__main__':
