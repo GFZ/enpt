@@ -84,51 +84,51 @@ class Test_L1B_Reader(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
             # read
             L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-            self.assertIsNone(L1_obj.vnir.detector_meta.snr)
-            self.assertIsNone(L1_obj.swir.detector_meta.snr)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert L1_obj.vnir.detector_meta.snr is None
+            assert L1_obj.swir.detector_meta.snr is None
 
             # save
             root_dir_written_L1_data = L1_obj.save(tempdir)
 
             # read saved result
             L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
     def test_read_and_save_single_image_with_snr(self):
         """Test to read test image 1, save it and read the saved result again - with SNR."""
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
             # read
             L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=True)
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-            self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
-            self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert L1_obj.vnir.detector_meta.snr is not None
+            assert L1_obj.swir.detector_meta.snr is not None
 
             # save
             root_dir_written_L1_data = L1_obj.save(tempdir)
 
             # read saved result
             L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
     def _test_append_n_lines(self, *reader_args, **reader_kwargs):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
             # read images and test append method
             L1_obj = self.RD.read_inputdata(*reader_args, **reader_kwargs)
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
             if reader_kwargs['compute_snr']:
-                self.assertIsNotNone(L1_obj.vnir.detector_meta.snr)
-                self.assertIsNotNone(L1_obj.swir.detector_meta.snr)
+                assert L1_obj.vnir.detector_meta.snr is not None
+                assert L1_obj.swir.detector_meta.snr is not None
             else:
-                self.assertIsNone(L1_obj.vnir.detector_meta.snr)
-                self.assertIsNone(L1_obj.swir.detector_meta.snr)
+                assert L1_obj.vnir.detector_meta.snr is None
+                assert L1_obj.swir.detector_meta.snr is None
 
             # save
             root_dir_written_L1_data = L1_obj.save(path.join(tempdir))
 
             # read saved result
             L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=reader_kwargs['compute_snr'])
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
     def _test_append_n_lines_allimagecombinations_withwithoutSNR(self, n_lines):
         # append second test image to first (with and without SNR)
@@ -189,7 +189,7 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         RD = L1B_Reader(config=cfg)
 
         L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
-        self.assertEqual(L1_obj.swir.detector_meta.nwvl, 130)
+        assert L1_obj.swir.detector_meta.nwvl == 130
 
 
 if __name__ == '__main__':

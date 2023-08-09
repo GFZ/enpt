@@ -36,6 +36,7 @@ Tests for `model.images.images_sensorgeo` module.
 """
 
 from unittest import TestCase
+import pytest
 from zipfile import ZipFile
 import tempfile
 import shutil
@@ -71,37 +72,37 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
         shutil.rmtree(cls.tmpdir)  # noqa
 
     def test_set_SWIRattr_with_transformedVNIRattr(self):
-        self.assertIsNone(self.L1_obj.swir.mask_snow)
+        assert self.L1_obj.swir.mask_snow is None
 
         self.L1_obj.set_SWIRattr_with_transformedVNIRattr('mask_snow')
 
-        self.assertIsInstance(self.L1_obj.swir.mask_snow, GeoArray)
+        assert isinstance(self.L1_obj.swir.mask_snow, GeoArray)
 
     def test_set_SWIRattr_with_transformedVNIRattr__attrIsNone(self):
         del self.L1_obj.vnir.mask_haze
 
-        with self.assertRaisesRegex(RuntimeError, '.vnir.mask_haze has not yet been set.'):
+        with pytest.raises(RuntimeError, match='.vnir.mask_haze has not yet been set.'):
             self.L1_obj.set_SWIRattr_with_transformedVNIRattr('mask_haze')
 
     def test_transform_vnir_to_swir_raster_with_keystone(self):
         vnirdata_swirgeo = self.L1_obj.transform_vnir_to_swir_raster(self.L1_obj.vnir.data[:],
                                                                      respect_keystone=True)
 
-        self.assertIsInstance(vnirdata_swirgeo, np.ndarray)
-        self.assertEqual(vnirdata_swirgeo.shape, self.L1_obj.vnir.data.shape)
+        assert isinstance(vnirdata_swirgeo, np.ndarray)
+        assert vnirdata_swirgeo.shape == self.L1_obj.vnir.data.shape
 
         # at least the last 10 lines must be zero due to the VNIR/SWIR shift
-        self.assertEqual(np.mean(vnirdata_swirgeo[-10:, :, :]), 0)
+        assert np.mean(vnirdata_swirgeo[-10:, :, :]) == 0
 
     def test_transform_swir_to_vnir_raster_no_keystone(self):
         swirdata_vnirgeo = self.L1_obj.transform_swir_to_vnir_raster(self.L1_obj.swir.data[:],
                                                                      respect_keystone=False)
 
-        self.assertIsInstance(swirdata_vnirgeo, np.ndarray)
-        self.assertEqual(swirdata_vnirgeo.shape, self.L1_obj.swir.data.shape)
+        assert isinstance(swirdata_vnirgeo, np.ndarray)
+        assert swirdata_vnirgeo.shape == self.L1_obj.swir.data.shape
 
         # at least the first 10 lines must be zero due to the VNIR/SWIR shift
-        self.assertEqual(np.mean(swirdata_vnirgeo[:10, :, :]), 0)
+        assert np.mean(swirdata_vnirgeo[:10, :, :]) == 0
 
     def test_transform_vnir_to_swir_raster__no_geolayer(self):
         vnir_lons = self.L1_obj.meta.vnir.lons
@@ -109,13 +110,13 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
         try:
             self.L1_obj.meta.vnir.lons = None
 
-            with self.assertRaisesRegex(RuntimeError, 'The VNIR/SWIR geolayers must be computed first '
-                                                      'to transform arrays from VNIR to SWIR sensor geometry.'):
+            with pytest.raises(RuntimeError, match='The VNIR/SWIR geolayers must be computed first '
+                                                   'to transform arrays from VNIR to SWIR sensor geometry.'):
                 self.L1_obj.transform_vnir_to_swir_raster(self.L1_obj.vnir.data[:])
 
         finally:
             self.L1_obj.meta.vnir.lons = vnir_lons
-            self.assertIsInstance(self.L1_obj.meta.vnir.lons, np.ndarray)
+            assert isinstance(self.L1_obj.meta.vnir.lons, np.ndarray)
 
     def test_transform_swir_to_vnir_raster__no_geolayer(self):
         vnir_lons = self.L1_obj.meta.vnir.lons
@@ -123,15 +124,14 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
         try:
             self.L1_obj.meta.vnir.lons = None
 
-            with self.assertRaisesRegex(RuntimeError, 'The VNIR/SWIR geolayers must be computed first '
-                                                      'to transform arrays from VNIR to SWIR sensor geometry.'):
+            with pytest.raises(RuntimeError, match='The VNIR/SWIR geolayers must be computed first '
+                                                   'to transform arrays from VNIR to SWIR sensor geometry.'):
                 self.L1_obj.transform_swir_to_vnir_raster(self.L1_obj.swir.data[:])
 
         finally:
             self.L1_obj.meta.vnir.lons = vnir_lons
-            self.assertIsInstance(self.L1_obj.meta.vnir.lons, np.ndarray)
+            assert isinstance(self.L1_obj.meta.vnir.lons, np.ndarray)
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()
