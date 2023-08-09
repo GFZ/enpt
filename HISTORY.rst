@@ -2,8 +2,8 @@
 History
 =======
 
-0.19.4 (coming soon)
---------------------
+0.19.4 (2023-08-09)
+-------------------
 
 * !89: Updated CI to use Ubuntu-based container. Updated environment files.
 * Fixed deprecated URL.
