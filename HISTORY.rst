@@ -10,6 +10,7 @@ History
 * Fixed missing Polymer directory creation.
 * Added hint about supported Polymer version to installation instructions.
 * !90: Dropped Python 3.7 support and added 3.11 instead.
+* Fixed warnings during PyPI packaging.
 
 
 0.19.3 (2023-04-03)
