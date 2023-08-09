@@ -104,10 +104,11 @@ setup(
     install_requires=req,
     license="GPL-3.0-or-later",
     long_description=readme,
+    long_description_content_type='text/x-rst',
     name='enpt',
     package_dir={'enpt': 'enpt'},
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
-    #       otherwise they are not included in the PyPi upload content
+    #       otherwise they are not included in the PyPI upload content
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seem to work, therefore use MANIFEST.in
     python_requires='>=3.8',
