@@ -172,10 +172,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             # read the band related information: wavelength, fwhm
             self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
-            # FIXME hardcoded - DLR does not provide any smile information
-            #   => smile coefficients are set to zero until we have valid ones
+            # read smile coefficients
             self.nsmile_coef = 5
             self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
+            for bindex, bID in enumerate(xml.findall("product/smileCorrection/%s/bandID" % lbl.upper())):
+                tmp = OrderedDict([(ele.tag.lower(), float(ele.text)) for ele in bID.findall('./')])
+                self.smile_coef[bindex, :] = np.array([v for k, v in tmp.items() if k.startswith('coeff')])
 
             startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
             subset = slice(startband, startband + self.nwvl)
