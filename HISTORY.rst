@@ -7,6 +7,7 @@ History
 
 * Added missing EnMAP-Box requirement h5py to  environment files.
 * Replaced deprecated direct calls of setup.py within Makefile.
+* Replaced deprecated URL.
 
 
 0.19.4 (2023-08-09)

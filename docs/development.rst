@@ -13,4 +13,4 @@ is therefore needed. The setup of the test docker image is defined in the file:
 `tests/gitlab_CI_docker/context/enpt_ci.docker`
 
 
-.. _CI: https://about.gitlab.com/features/gitlab-ci-cd/
+.. _CI: https://about.gitlab.com/topics/ci-cd/
