@@ -2,6 +2,12 @@
 History
 =======
 
+0.19.5 (coming soon)
+--------------------
+
+* Added missing EnMAP-Box requirement h5py to  environment files.
+
+
 0.19.4 (2023-08-09)
 -------------------
 

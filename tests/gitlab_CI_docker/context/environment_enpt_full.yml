@@ -12,6 +12,7 @@ dependencies:
   # EnMAP-Box
   - astropy
   - catboost
+  - h5py
   - lightgbm
   - matplotlib
   - netcdf4

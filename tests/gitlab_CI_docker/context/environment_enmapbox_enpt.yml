@@ -10,6 +10,7 @@ dependencies:
   - catboost
   - enpt
   - enpt_enmapboxapp>=0.7.6
+  - h5py
   - lightgbm
   - matplotlib
   - netcdf4
