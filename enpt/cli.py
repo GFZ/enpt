@@ -127,9 +127,9 @@ def get_enpt_argparser():
         help='Block size in ACwater Polymer')
     add('--run_smile_P', type=_str2bool, default=False, nargs='?', const=True,
         help='Enable extra smile detection and correction (provider smile coefficients are ignored)')
-    add('--run_deadpix_P', type=_str2bool, default=True, nargs='?', const=True,
+    add('--run_deadpix_P', type=_str2bool, default=False, nargs='?', const=True,
         help='Enable dead pixel correction')
-    add('--deadpix_P_algorithm', type=str, default="spectral",
+    add('--deadpix_P_algorithm', type=str, default="spatial",
         help="Algorithm for dead pixel correction ('spectral' or 'spatial')")
     add('--deadpix_P_interp_spectral', type=str, default="linear",
         help="Spectral interpolation algorithm to be used during dead pixel correction "
