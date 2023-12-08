@@ -107,24 +107,23 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	 $(MAKE) -C docs clean
 	 $(MAKE) -C docs html
 	#$(MAKE) -C docs latex
-#	$(MAKE) -C docs latexpdf
-	$(BROWSER) docs/_build/html/index.html
+	#$(MAKE) -C docs latexpdf
+	#$(BROWSER) docs/_build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
-release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+release: dist ## package and upload a release
+	twine upload dist/*
 
-dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+dist: clean ## builds source package (requires twine and build)
+	python -m build --sdist
+	twine check dist/*
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
 	pip install -r requirements.txt
-	python setup.py install
+	pip install .
 
 gitlab_CI_docker:  ## Build a docker image for CI use within gitlab
 	cd ./tests/gitlab_CI_docker/; bash ./before_script.sh

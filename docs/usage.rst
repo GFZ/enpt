@@ -144,5 +144,5 @@ Here is screenshot of the current version:
 .. image:: img/screenshot_enpt_enmapboxapp_v0.6.0.png
 
 .. _enpt_enmapboxapp: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
-.. _enpt/options/options_default.json: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/blob/master/enpt/options/options_default.json
+.. _enpt/options/options_default.json: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/blob/main/enpt/options/options_default.json
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor

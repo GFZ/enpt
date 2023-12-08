@@ -14,7 +14,7 @@ Ground Segment.
 
 * Please check the documentation_ for installation and usage instructions and in depth information.
 * Information on how to **cite the EnPT Python package** can be found in the
-  `CITATION <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/CITATION>`__ file.
+  `CITATION <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/CITATION>`__ file.
 
 
 License
@@ -31,20 +31,20 @@ Feature overview
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
 * atmospheric correction (based on SICOR_ for land and `ACwater Polymer`_ via Polymer_ for water surfaces)
-* conversion of top-of-atmosphere-radiance to top-of-atmosphere-reflectance
+* optional export of additional results from atmospheric parameter retrieval
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
-* write EnMAP Level-2 output data
+* write EnMAP Level-2A output data
 
 Status
 ------
 
 |badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8| |badge9|
 
-.. |badge1| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/pipeline.svg
+.. |badge1| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/pipeline.svg
     :target: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
 
-.. |badge2| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/master/coverage.svg
+.. |badge2| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/coverage.svg
     :target: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
 
 .. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
@@ -57,7 +57,7 @@ Status
         :target: https://anaconda.org/conda-forge/enpt
 
 .. |badge6| image:: https://img.shields.io/pypi/l/enpt.svg
-    :target: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/LICENSE
+    :target: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/LICENSE
 
 .. |badge7| image:: https://img.shields.io/pypi/pyversions/enpt.svg
     :target: https://img.shields.io/pypi/pyversions/enpt.svg
@@ -74,7 +74,7 @@ History / Changelog
 -------------------
 
 You can find the protocol of recent changes in the EnPT package
-`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/master/HISTORY.rst>`__.
+`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst>`__.
 
 Credits
 -------

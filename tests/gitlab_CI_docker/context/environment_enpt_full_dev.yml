@@ -7,46 +7,35 @@ dependencies:
   - python>=3.8
   - pip  # avoids that conda uses the wrong pip
   - enpt
-
-  # Polymer AC additional conda requirements
-  - cdsapi
-  - cython
-  - gdal
-  - netcdf4
-  - pygrib
-  - pyhdf
-  - xarray
+  - enpt_enmapboxapp>=0.7.6
 
   # EnMAP-Box
   - astropy
   - catboost
+  - h5py
   - lightgbm
   - matplotlib
   - netcdf4
-  - numba
+  - numba>=0.56.4
   - numpy
   - pyopengl
   - qgis>=3.28.2
   - scikit-learn>=0.24
   - scipy>=1.1
+  - sympy
+  - typeguard<3  # https://github.com/EnMAP-Box/enmap-box/issues/398
   - xgboost
 
+  # test/doc/lint requirements
+  - flake8
+  - pycodestyle
+  - pydocstyle
+  - pylint
+  - pytest
+  - pytest-cov
+  - sphinx-argparse
+  - sphinx_rtd_theme
+  - urlchecker
+
   - pip:
-    # Polymer AC additional pip requirements
-    - git+https://gitlab.awi.de/phytooptics/acwater.git
-
-    # EnMAP-Box
-    - enpt_enmapboxapp
-
-    # test/doc/lint requirements
-    - flake8
-    - pycodestyle
-    - pydocstyle
-    - pylint
-    - pytest
-    - pytest-cov
     - pytest-reporter-html1
-    - sphinx-argparse
-    - sphinx_rtd_theme
-    - urlchecker
-

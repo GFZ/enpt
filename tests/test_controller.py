@@ -34,10 +34,11 @@ test_controller
 
 Tests for `execution.controller` module.
 """
-
 from unittest import TestCase
 from unittest.mock import patch
 import shutil
+from glob import glob
+import os
 
 from enpt.execution.controller import EnPT_Controller
 from enpt.options.config import config_for_testing, config_for_testing_dlr, config_for_testing_water
@@ -80,13 +81,19 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGFB.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BITMASK.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGCHL.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RGLI.TIF'))
+        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RNIR.TIF'))
+        # TODO: validate pixel values
+
     @patch('acwater.acwater.polymer_ac_enmap', None)
     def test_run_all_processors_without_acwater_installed(self):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
         self.CTR.run_all_processors()
 
-        self.assertTrue("As a fallback, SICOR is applied to water surfaces instead."
-                        in self.CTR.L1_obj.logger.captured_stream)
+        assert "As a fallback, SICOR is applied to water surfaces instead." in self.CTR.L1_obj.logger.captured_stream
 
 
 if __name__ == '__main__':

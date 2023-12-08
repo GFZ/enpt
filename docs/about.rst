@@ -17,9 +17,10 @@ Feature overview
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
 * atmospheric correction (based on SICOR_ for land and `ACwater Polymer`_ via Polymer_ for water surfaces)
+* optional export of additional results from atmospheric parameter retrieval
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
-* write EnMAP Level-2 output data
+* write EnMAP Level-2A output data
 
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics

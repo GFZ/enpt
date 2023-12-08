@@ -345,8 +345,10 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray,
             data_2d = np.array(DataFrame(data2int)
                                .interpolate(method=method, axis=axis)).astype(data_2d.dtype)
 
-            if fill_value:
-                data_2d[np.isnan(data_2d)] = fill_value
+            if np.isfinite(fill_value):
+                mask_nan = np.isnan(data_2d)
+                if True in mask_nan:
+                    data_2d[mask_nan] = fill_value
 
         else:
             raise ValueError(implementation, 'Unknown implementation.')

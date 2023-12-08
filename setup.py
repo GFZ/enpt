@@ -41,6 +41,7 @@ with open("enpt/version.py", encoding='utf-8') as version_file:
     exec(version_file.read(), version)
 
 req = [
+    'acwater>=0.3.0',
     'arosics>=1.0.0',
     'cerberus',
     'geoarray>=0.15.8',
@@ -51,6 +52,7 @@ req = [
     'natsort',
     'numpy',
     'numpy-indexed',
+    'packaging',
     'pandas',
     'pyproj>=3.4.0',
     'py_tools_ds>=0.14.23',
@@ -73,17 +75,17 @@ req_lint = ['flake8', 'pycodestyle', 'pydocstyle']
 req_dev = req_setup + req_test + req_doc + req_lint
 
 setup(
-    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso, Brenner Silva",
+    author="Karl Segl, Daniel Scheffler, Niklas Bohn, Stéphane Guillaso, Brenner Silva, Leonardo Alvarado",
     author_email="segl@gfz-potsdam.de, danschef@gfz-potsdam.de, nbohn@gfz-potsdam.de, "
-                 "stephane.guillaso@gfz-potsdam.de, brenner.silva@awi.de",
+                 "stephane.guillaso@gfz-potsdam.de, brenner.silva@awi.de, leonardo.alvarado@awi.de",
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     description="EnMAP Processing Tool",
     entry_points={
@@ -102,13 +104,14 @@ setup(
     install_requires=req,
     license="GPL-3.0-or-later",
     long_description=readme,
+    long_description_content_type='text/x-rst',
     name='enpt',
     package_dir={'enpt': 'enpt'},
     # NOTE: if the 'package_data' files are not under CVS or Subversion version control, we need setuptools-git here,
-    #       otherwise they are not included in the PyPi upload content
+    #       otherwise they are not included in the PyPI upload content
     package_data={"enpt": ["resources/**/**/*"]},
     packages=find_packages(exclude=['tests*', 'examples*']),  # does not seem to work, therefore use MANIFEST.in
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,

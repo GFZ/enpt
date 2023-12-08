@@ -40,6 +40,7 @@ from glob import glob
 import utm
 from scipy.interpolate import interp2d
 from geoarray import GeoArray
+from py_tools_ds.geo.vector.topology import get_footprint_polygon
 
 from ...utils.logging import EnPT_Logger
 from .image_baseclasses import _EnMAP_Image
@@ -269,6 +270,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
                                                                              self.detector_meta.ncols,
                                                                              self.detector_meta.nrows)
+
+        # update map polygon
+        self.detector_meta.ll_mapPoly = \
+            get_footprint_polygon(tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
+                                            self.detector_meta.lat_UL_UR_LL_LR)), fix_invalid=True)
 
         # append the raster data
         self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)

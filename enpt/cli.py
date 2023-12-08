@@ -61,7 +61,7 @@ def get_enpt_argparser():
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
              'https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/'
-             'EnPT/blob/master/enpt/options/options_default.json')
+             'EnPT/blob/main/enpt/options/options_default.json')
     add('--CPUs', type=int, default=None,
         help='number of CPU cores to be used for processing (default: "None" -> use all available)')
     add('-im', '--path_l1b_enmap_image', type=str, default=None,
@@ -114,6 +114,8 @@ def get_enpt_argparser():
     add('--mode_ac', type=str, default=None, nargs='?',
         help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
              "('land', water', 'combined')")
+    add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
+        help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
         help='Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces')
     add('--scale_factor_boa_ref', type=int, default=10000,

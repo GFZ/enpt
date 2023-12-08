@@ -64,15 +64,15 @@ class Test_Radiometric_Transformer(TestCase):
                     L1_obj = L1B_Reader(config=self.cfg).read_inputdata(root_dir)
 
                     # input assertions
-                    self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
+                    assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
                     # run transformation
                     L1_obj = self.RT.transform_TOARad2TOARef(L1_obj)  # for now only test if its runnable without error
 
             # output assertions
-            self.assertIsInstance(L1_obj, EnMAPL1Product_SensorGeo)
-            self.assertTrue(L1_obj.vnir.detector_meta.unitcode == 'TOARef')
-            self.assertTrue(L1_obj.swir.detector_meta.unitcode == 'TOARef')
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+            assert L1_obj.vnir.detector_meta.unitcode == 'TOARef'
+            assert L1_obj.swir.detector_meta.unitcode == 'TOARef'
 
 
 if __name__ == '__main__':

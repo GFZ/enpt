@@ -253,14 +253,31 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         outpaths = dict(metaxml=path.join(product_dir, self.meta.filename_metaxml))
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
-                         'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap']:
+                         'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
 
             if attrName == 'deadpixelmap':
                 # TODO VNIR and SWIR must be merged
                 self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
                 continue
 
-            outpath = path.join(product_dir, getattr(self.meta, 'filename_%s' % attrName))
+            if attrName.startswith('polymer_'):
+                ext = \
+                    'TIF' if self.cfg.output_format == 'GTiff' else \
+                    'BSQ' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
+                    'BIL' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'line' else \
+                    'BIP' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'pixel' else \
+                    'NA'
+                dict_attr_fn = dict(
+                    polymer_logchl=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL.{ext}',
+                    polymer_logfb=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGFB.{ext}',
+                    polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
+                    polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
+                    polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',
+                )
+                outpath = path.join(product_dir, dict_attr_fn[attrName])
+            else:
+                outpath = path.join(product_dir, getattr(self.meta, 'filename_%s' % attrName))
 
             attr_gA = \
                 self.generate_quicklook(bands2use=self.meta.preview_bands_vnir) if attrName == 'quicklook_vnir' else \
@@ -271,8 +288,13 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:
-                self.logger.warning("The '%s' attribute cannot be saved because it does not exist in the current EnMAP "
-                                    "image." % attrName)
+                if attrName.startswith('polymer_') and \
+                        (not self.cfg.polymer_additional_results or self.cfg.mode_ac == 'land'):
+                    # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
+                    pass
+                else:
+                    self.logger.warning(f"The '{attrName}' attribute cannot be saved because it does not exist in the "
+                                        f"current EnMAP image.")
 
         # TODO remove GDAL's *.aux.xml files?
 
