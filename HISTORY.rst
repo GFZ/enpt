@@ -8,6 +8,8 @@ History
 * Added missing EnMAP-Box requirement h5py to  environment files.
 * Replaced deprecated direct calls of setup.py within Makefile.
 * Replaced deprecated URL.
+* !75: Disabled dead pixel correction by default and changed the default interpolation approach from spectral to spatial
+  interpolation.
 * Added missing requirement 'gdal'.
 
 

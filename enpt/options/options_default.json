@@ -77,8 +77,8 @@
         },
 
         "dead_pixel": {
-            "run_processor": true,
-            "algorithm": "spectral",  /*algorithm how to correct dead pixels
+            "run_processor": false,
+            "algorithm": "spatial",  /*algorithm how to correct dead pixels
                                         'spectral': interpolate in the spectral domain
                                         'spatial':  interpolate in the spatial domain*/
             "interp_method_spectral": "linear",  /*spectral interpolation algorithm
