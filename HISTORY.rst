@@ -2,12 +2,13 @@
 History
 =======
 
-0.19.5 (coming soon)
---------------------
+0.19.5 (2023-12-11)
+-------------------
 
 * Added missing EnMAP-Box requirement h5py to  environment files.
 * Replaced deprecated direct calls of setup.py within Makefile.
 * Replaced deprecated URL.
+* Added missing requirement 'gdal'.
 
 
 0.19.4 (2023-08-09)
