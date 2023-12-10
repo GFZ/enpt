@@ -12,6 +12,7 @@ History
   interpolation.
 * Added missing requirement 'gdal'.
 * Bumped version of CI base image.
+* Updated version pinnings of enmapbox requirements.
 
 
 0.19.4 (2023-08-09)
