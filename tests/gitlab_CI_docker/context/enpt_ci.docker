@@ -1,4 +1,4 @@
-FROM ci_base_ubuntu:0.2
+FROM ci_base_ubuntu:0.3
 
 # set Polymer version string
 ENV polymer_v_str='polymer-v4.16.1'

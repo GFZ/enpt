@@ -11,6 +11,7 @@ History
 * !75: Disabled dead pixel correction by default and changed the default interpolation approach from spectral to spatial
   interpolation.
 * Added missing requirement 'gdal'.
+* Bumped version of CI base image.
 
 
 0.19.4 (2023-08-09)
