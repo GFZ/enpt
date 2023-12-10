@@ -44,6 +44,7 @@ req = [
     'acwater>=0.3.0',
     'arosics>=1.0.0',
     'cerberus',
+    'gdal',
     'geoarray>=0.15.8',
     'jsmin',
     'lxml',
