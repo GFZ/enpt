@@ -16,11 +16,11 @@ dependencies:
   - lightgbm
   - matplotlib
   - netcdf4
-  - numba>=0.56.4
+  - numba>=0.57
   - numpy
   - pyopengl
-  - qgis>=3.28.2
-  - scikit-learn>=0.24
+  - qgis>=3.32
+  - scikit-learn>=1
   - scipy>=1.1
   - sympy
   - typeguard<3  # https://github.com/EnMAP-Box/enmap-box/issues/398
