@@ -39,6 +39,8 @@ from unittest.mock import patch
 import shutil
 from glob import glob
 import os
+from importlib.util import find_spec
+import pytest
 
 from enpt.execution.controller import EnPT_Controller
 from enpt.options.config import config_for_testing, config_for_testing_dlr, config_for_testing_water
@@ -78,16 +80,24 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
         shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
 
+    def test_import_polymer(self):
+        assert find_spec('polymer'), 'POLYMER is not installed.'
+        try:
+            import polymer  # noqa
+            from polymer.main import run_atm_corr  # noqa
+        except ModuleNotFoundError as e:
+            pytest.fail(f'POLYMER is not importable. Error was: {str(e)}.')
+
+    @pytest.mark.skipif(not find_spec('polymer'), reason='POLYMER is not installed.')
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
-        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGFB.TIF'))
-        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_BITMASK.TIF'))
-        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_LOGCHL.TIF'))
-        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RGLI.TIF'))
-        assert glob(os.path.join(self.CTR.cfg.output_dir, '*', 'ENMAP01*-ACOUT_POLYMER_RNIR.TIF'))
+        for bn in ['LOGFB', 'BITMASK', 'LOGCHL', 'RGLI', 'RNIR']:
+            if not glob(os.path.join(self.CTR.cfg.output_dir, '*', f'ENMAP01*-ACOUT_POLYMER_{bn}.TIF')):
+                pytest.fail(f"Polymer output 'ENMAP01*-ACOUT_POLYMER_{bn}.TIF' is missing.")
         # TODO: validate pixel values
 
+    @pytest.mark.skipif(not find_spec('polymer'), reason='POLYMER is not installed.')
     @patch('acwater.acwater.polymer_ac_enmap', None)
     def test_run_all_processors_without_acwater_installed(self):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
@@ -97,5 +107,4 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()
