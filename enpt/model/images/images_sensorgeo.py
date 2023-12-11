@@ -284,7 +284,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                             self.detector_meta.lat_UL_UR_LL_LR)), fix_invalid=True)
 
         # append the raster data
-        self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
+        self.data = np.append(self.data[:], img2.data[0:n_lines, :, :], axis=0)
 
         # only append masks for the VNIR as they are only provided in VNIR sensor geometry
         if self.detector_name == 'VNIR':
@@ -301,7 +301,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                         "as it does not exist in the current image." % attrName)
 
         if not self.cfg.is_dummy_dataformat:
-            self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
+            self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
