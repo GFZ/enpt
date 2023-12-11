@@ -2,6 +2,12 @@
 History
 =======
 
+0.19.6 (coming soon)
+--------------------
+
+* Fixed scipy warning by replacing deprecated interp2d-based interpolation with RegularGridInterpolator.
+
+
 0.19.5 (2023-12-11)
 -------------------
 
