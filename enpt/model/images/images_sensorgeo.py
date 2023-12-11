@@ -262,8 +262,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
             self.detector_meta.lat_UL_UR_LL_LR[2] = float(lats_LL_LR[0])
             self.detector_meta.lat_UL_UR_LL_LR[3] = float(lats_LL_LR[1])
-            self.detector_meta.lat_UL_UR_LL_LR[2] = float(lons_LL_LR[0])
-            self.detector_meta.lat_UL_UR_LL_LR[3] = float(lons_LL_LR[1])
+            self.detector_meta.lon_UL_UR_LL_LR[2] = float(lons_LL_LR[0])
+            self.detector_meta.lon_UL_UR_LL_LR[3] = float(lons_LL_LR[1])
 
             self.detector_meta.lats = (
                 self.detector_meta.interpolate_corners(
