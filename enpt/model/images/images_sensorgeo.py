@@ -38,7 +38,7 @@ import numpy as np
 from os import path, makedirs
 from glob import glob
 import utm
-from scipy.interpolate import interp2d
+from scipy.interpolate import RegularGridInterpolator
 from geoarray import GeoArray
 from py_tools_ds.geo.vector.topology import get_footprint_polygon
 
@@ -248,28 +248,35 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
             self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
             self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
         else:
-            # lats
-            interp_lats = interp2d(x=[0, 1],
-                                   y=[0, 1],
-                                   z=[[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[1]],
-                                      [img2.detector_meta.lat_UL_UR_LL_LR[2], img2.detector_meta.lat_UL_UR_LL_LR[3]]],
-                                   kind='linear')
-            self.detector_meta.lat_UL_UR_LL_LR[2] = np.array(interp_lats(0, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lat_UL_UR_LL_LR[3] = np.array(interp_lats(1, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR,
-                                                                             self.detector_meta.ncols,
-                                                                             self.detector_meta.nrows)
-            # lons
-            interp_lons = interp2d(x=[0, 1],
-                                   y=[0, 1],
-                                   z=[[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[1]],
-                                      [img2.detector_meta.lon_UL_UR_LL_LR[2], img2.detector_meta.lon_UL_UR_LL_LR[3]]],
-                                   kind='linear')
-            self.detector_meta.lon_UL_UR_LL_LR[2] = np.array(interp_lons(0, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lon_UL_UR_LL_LR[3] = np.array(interp_lons(1, int(n_lines / img2.detector_meta.nrows)))[0]
-            self.detector_meta.lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR,
-                                                                             self.detector_meta.ncols,
-                                                                             self.detector_meta.nrows)
+            cols_lowres, rows_lowres = [0, 1], [0, 1]
+            lats_lowres = [[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[2]],
+                           [img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lat_UL_UR_LL_LR[3]]]  # [x, y]
+            lons_lowres = [[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[2]],
+                           [img2.detector_meta.lon_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[3]]]  # [x, y]
+            RGI_lats = RegularGridInterpolator(points=[cols_lowres, rows_lowres], values=lats_lowres, method='linear')
+            RGI_lons = RegularGridInterpolator(points=[cols_lowres, rows_lowres], values=lons_lowres, method='linear')
+            cols_full = np.array([[0, 1]])
+            rows_full = np.array([[int(n_lines / img2.detector_meta.nrows)]])
+            lats_LL_LR = RGI_lats(np.dstack(np.meshgrid(cols_full, rows_full))).flatten()
+            lons_LL_LR = RGI_lons(np.dstack(np.meshgrid(cols_full, rows_full))).flatten()
+
+            self.detector_meta.lat_UL_UR_LL_LR[2] = float(lats_LL_LR[0])
+            self.detector_meta.lat_UL_UR_LL_LR[3] = float(lats_LL_LR[1])
+            self.detector_meta.lon_UL_UR_LL_LR[2] = float(lons_LL_LR[0])
+            self.detector_meta.lon_UL_UR_LL_LR[3] = float(lons_LL_LR[1])
+
+            self.detector_meta.lats = (
+                self.detector_meta.interpolate_corners(
+                    *self.detector_meta.lat_UL_UR_LL_LR,
+                    self.detector_meta.ncols,
+                    self.detector_meta.nrows)
+            )
+            self.detector_meta.lons = (
+                self.detector_meta.interpolate_corners(
+                    *self.detector_meta.lon_UL_UR_LL_LR,
+                    self.detector_meta.ncols,
+                    self.detector_meta.nrows)
+            )
 
         # update map polygon
         self.detector_meta.ll_mapPoly = \
@@ -277,7 +284,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                             self.detector_meta.lat_UL_UR_LL_LR)), fix_invalid=True)
 
         # append the raster data
-        self.data = np.append(self.data, img2.data[0:n_lines, :, :], axis=0)
+        self.data = np.append(self.data[:], img2.data[0:n_lines, :, :], axis=0)
 
         # only append masks for the VNIR as they are only provided in VNIR sensor geometry
         if self.detector_name == 'VNIR':
@@ -294,7 +301,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                         "as it does not exist in the current image." % attrName)
 
         if not self.cfg.is_dummy_dataformat:
-            self.deadpixelmap = np.append(self.deadpixelmap, img2.deadpixelmap[0:n_lines, :], axis=0)
+            self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
