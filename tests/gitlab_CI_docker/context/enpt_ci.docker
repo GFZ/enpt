@@ -1,6 +1,7 @@
 FROM ci_base_ubuntu:0.3
 
 # set Polymer version string
+# NOTE: Polymer 4.16.1 compilation fails with Cython 3, https://github.com/conda-forge/acwater-feedstock/pull/4
 ENV polymer_v_str='polymer-v4.16.1'
 
 # use bash shell instead of sh shell for all docker commands
