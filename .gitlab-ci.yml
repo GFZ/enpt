@@ -14,9 +14,10 @@ test_enpt:
   script:
     - source activate ci_env
 
-    # update geoarray and py_tools_ds
+    # update some dependencies
     # - pip install 'geoarray>=0.15.8'
     # - pip install 'py_tools_ds>=0.14.23'
+    - mamba update sicor
 
     # install sicor and perhaps switch sicor branch
     # - rm -rf context/sicor
