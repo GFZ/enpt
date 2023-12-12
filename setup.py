@@ -56,11 +56,11 @@ req = [
     'packaging',
     'pandas',
     'pyproj>=3.4.0',
-    'py_tools_ds>=0.14.23',
+    'py_tools_ds>=0.14.25',
     'scikit-image',
     'scipy',
     'sensormapgeo>=0.4.0',
-    'sicor>=0.16.0',
+    'sicor>=0.19.1',
     'tqdm',
     'utm',
 ]
