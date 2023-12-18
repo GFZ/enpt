@@ -36,6 +36,7 @@ import os
 import fnmatch
 from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
+from packaging.version import parse as parse_version
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
@@ -484,6 +485,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # defaults - Common
         self.proc_level: Optional[str] = None   # Dataset processing level
+        self.version_provider: Optional[str] = ''  # version of ground segment processing system
         self.observation_datetime: Optional[datetime] = None  # Date and Time of image observation
         self.geom_view_zenith: Optional[float] = None  # viewing zenith angle
         self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
@@ -527,6 +529,17 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             if self.proc_level != 'L1B':
                 raise RuntimeError(self.proc_level, "Unexpected input data processing level. Expected 'L1B'.")
 
+            # read version of ground segment processing system
+            self.version_provider = xml.find("base/revision").text
+
+            # raise a warning in case of old processing version (de-striping was implemented in version 01.02.00)
+            if parse_version(self.version_provider) < parse_version('01.02.00'):
+                self.logger.warning(
+                    f"The input EnMAP Level-1B image was processed with an old version of the ground segment "
+                    f"processing system (version {self.version_provider}), which, e.g. did not include de-striping. "
+                    f"It is highly recommended to re-download the dataset in the latest processing version from the "
+                    f"archive via the EOWEB GeoPortal (www.eoweb.dlr.de) before passing it to EnPT.")
+
             # read the acquisition time
             self.observation_datetime = \
                 datetime.strptime(xml.find("base/temporalCoverage/startTime").text, '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -564,7 +577,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
-        """Get earth sun distance (requires file of pre calculated earth sun distance per day).
+        """Get earth-sun distance (requires file of pre-calculated earth sun distance per day).
 
         :param acqDate:
         """
