@@ -577,7 +577,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
 
     def get_earth_sun_distance(self, acqDate: datetime):
-        """Get earth sun distance (requires file of pre calculated earth sun distance per day).
+        """Get earth-sun distance (requires file of pre-calculated earth sun distance per day).
 
         :param acqDate:
         """
