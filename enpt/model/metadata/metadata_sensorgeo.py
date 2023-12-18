@@ -484,6 +484,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         # defaults - Common
         self.proc_level: Optional[str] = None   # Dataset processing level
+        self.version_provider: Optional[str] = ''  # version of ground segment processing system
         self.observation_datetime: Optional[datetime] = None  # Date and Time of image observation
         self.geom_view_zenith: Optional[float] = None  # viewing zenith angle
         self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
@@ -526,6 +527,9 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.proc_level = xml.find("base/level").text
             if self.proc_level != 'L1B':
                 raise RuntimeError(self.proc_level, "Unexpected input data processing level. Expected 'L1B'.")
+
+            # read version of ground segment processing system
+            self.version_provider = xml.find("base/revision").text
 
             # read the acquisition time
             self.observation_datetime = \
