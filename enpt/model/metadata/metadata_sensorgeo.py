@@ -36,6 +36,7 @@ import os
 import fnmatch
 from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
+from packaging.version import parse as parse_version
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
 from geoarray import GeoArray
@@ -530,6 +531,14 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
             # read version of ground segment processing system
             self.version_provider = xml.find("base/revision").text
+
+            # raise a warning in case of old processing version (de-striping was implemented in version 01.02.00)
+            if parse_version(self.version_provider) < parse_version('01.02.00'):
+                self.logger.warning(
+                    f"The input EnMAP Level-1B image was processed with an old version of the ground segment "
+                    f"processing system (version {self.version_provider}), which, e.g. did not include de-striping. "
+                    f"It is highly recommended to re-download the dataset in the latest processing version from the "
+                    f"archive via the EOWEB GeoPortal (www.eoweb.dlr.de) before passing it to EnPT.")
 
             # read the acquisition time
             self.observation_datetime = \
