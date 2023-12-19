@@ -74,7 +74,7 @@ class Test_CLIParser(TestCase):
                                                  ['--target_coord_grid', '0', '30', '0', '30'])
         self.get_config(parsed_args)  # we don't check the result here as EnPT_Config generates a dict from it
 
-        try:
+        with (pytest.raises(SystemExit)):
             self.parser_run.parse_args(self.baseargs + ['--target_coord_grid', '0', '30'])
         except SystemExit as e:
             assert isinstance(e.__context__, ArgumentError)
@@ -117,6 +117,35 @@ class Test_CLIParser(TestCase):
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": "None"}}'])
         config = self.get_config(parsed_args)
         assert config.CPUs == cpu_count()
+
+    def test_tgtprj(self):
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtprj', 'Geographic'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'Geographic'
+        assert CTR.cfg.target_epsg == 4326
+
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtprj', 'UTM'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'UTM'
+
+    def test_tgtepsg(self):
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtepsg', '32617'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'UTM'
+        assert CTR.cfg.target_epsg == 32617
+
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtepsg', '4326'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'Geographic'
+        assert CTR.cfg.target_epsg == 4326
 
 
 if __name__ == '__main__':
