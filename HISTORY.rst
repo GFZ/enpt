@@ -13,7 +13,7 @@ History
 0.19.5 (2023-12-11)
 -------------------
 
-* Added missing EnMAP-Box requirement h5py to  environment files.
+* Added missing EnMAP-Box requirement h5py to environment files.
 * Replaced deprecated direct calls of setup.py within Makefile.
 * Replaced deprecated URL.
 * !75: Disabled dead pixel correction by default and changed the default interpolation approach from spectral to spatial
