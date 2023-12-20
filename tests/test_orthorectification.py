@@ -46,6 +46,7 @@ from copy import deepcopy
 from pyproj import CRS
 import numpy as np
 from geoarray import GeoArray
+from py_tools_ds.geo.projection import isProjectedOrGeographic
 
 from enpt.processors.orthorectification import Orthorectifier, VNIR_SWIR_Stacker
 from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
@@ -55,9 +56,10 @@ from enpt.model.images import EnMAPL2Product_MapGeo
 __author__ = 'Daniel Scheffler'
 
 
-class Test_Orthorectifier(TestCase):
-    def setUp(self):
-        self.config = EnPTConfig(**config_for_testing)
+class _Base_Test_Orthorectifier(TestCase):
+    def setup(self, config: dict, root_has_subdir: bool = False):
+        self.config_dict = config
+        self.config = EnPTConfig(**config)
 
         # create a temporary directory
         # NOTE: This must exist during the whole runtime of Test_Orthorectifier, otherwise
@@ -67,18 +69,16 @@ class Test_Orthorectifier(TestCase):
         # get lons / lats
         with ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
             zf.extractall(self.tmpdir)
+            subdirname = \
+                os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0] if root_has_subdir else ''
             self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
-                root_dir_main=os.path.join(self.tmpdir,
-                                           os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0]),
+                root_dir_main=os.path.join(self.tmpdir, subdirname),
                 compute_snr=False)
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
 
-    def test_run_transformation(self):
-        OR = Orthorectifier(config=self.config)
-        L2_obj = OR.run_transformation(self.L1_obj)
-
+    def validate_l2a_obj(self, L2_obj: EnMAPL2Product_MapGeo, prj_type: str):
         assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
         assert L2_obj.data.is_map_geo
         assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
@@ -87,39 +87,26 @@ class Test_Orthorectifier(TestCase):
         assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
                           rtol=0.01)
+        assert isProjectedOrGeographic(L2_obj.data.prj) == prj_type
 
+    def test_run_transformation_utm(self):
+        cfg = EnPTConfig(**dict(self.config_dict, **dict(target_projection_type='UTM')))
+        L2_obj = Orthorectifier(config=cfg).run_transformation(self.L1_obj)
+        self.validate_l2a_obj(L2_obj, 'projected')
 
-class Test_Orthorectifier_DLR(TestCase):
+    def test_run_transformation_ll(self):
+        cfg = EnPTConfig(**dict(self.config_dict, **dict(target_projection_type='Geographic')))
+        L2_obj = Orthorectifier(config=cfg).run_transformation(self.L1_obj)
+        self.validate_l2a_obj(L2_obj, 'geographic')
+
+class Test_Orthorectifier(_Base_Test_Orthorectifier):
     def setUp(self):
-        self.config = EnPTConfig(**config_for_testing_dlr)
+        super().setup(config_for_testing, root_has_subdir=True)
 
-        # create a temporary directory
-        # NOTE: This must exist during the whole runtime of Test_Orthorectifier, otherwise
-        #       Orthorectifier.run_transformation will fail to read some files.
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
 
-        # get lons / lats
-        with ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
-            zf.extractall(self.tmpdir)
-            self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
-                root_dir_main=self.tmpdir,
-                compute_snr=False)
-
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
-
-    def test_run_transformation(self):
-        OR = Orthorectifier(config=self.config)
-        L2_obj = OR.run_transformation(self.L1_obj)
-
-        assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
-        assert L2_obj.data.is_map_geo
-        assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
-        assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
-        assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
-        assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
-                          np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
-                          rtol=0.01)
+class Test_Orthorectifier_DLR(_Base_Test_Orthorectifier):
+    def setUp(self):
+        super().setup(config_for_testing_dlr)
 
 
 class Test_VNIR_SWIR_Stacker(TestCase):
