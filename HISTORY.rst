@@ -8,6 +8,7 @@ History
 * !92: Fixed #111 (DeprecationWarning: `interp2d` is deprecated!).
 * !93: Added a warning if the input dataset was processed with an old version of the ground segment processing system
   (closes #129).
+* !94: Improved all tests for the CLI and the Orthorectifier module that are related to the target projection type.
 
 
 0.19.5 (2023-12-11)
