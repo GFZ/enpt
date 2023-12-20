@@ -36,11 +36,13 @@ Tests for enpt.bin.cli.py
 """
 
 from unittest import TestCase
-from argparse import ArgumentError
 import os
 from runpy import run_path
 from multiprocessing import cpu_count
+from io import StringIO
+from unittest.mock import patch
 
+import pytest
 import enpt
 
 __author__ = 'Daniel Scheffler'
@@ -69,19 +71,19 @@ class Test_CLIParser(TestCase):
         assert not isinstance(config.CPUs, str)
         assert config.CPUs == cpu_count()
 
-    def test_param_list(self):
+    @patch('sys.stderr', new_callable=StringIO)  # catch STDERR so it does not pollute the test output
+    def test_param_list(self, mock_stderr):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--target_coord_grid', '0', '30', '0', '30'])
         self.get_config(parsed_args)  # we don't check the result here as EnPT_Config generates a dict from it
 
-        try:
+        with (pytest.raises(SystemExit)):
             self.parser_run.parse_args(self.baseargs + ['--target_coord_grid', '0', '30'])
-        except SystemExit as e:
-            assert isinstance(e.__context__, ArgumentError)
-        else:
-            raise ValueError("Exception not raised")
 
-    def test_param_boolean(self):
+        assert '-tgtgrid/--target_coord_grid: expected 4 arguments' in mock_stderr.getvalue()
+
+    @patch('sys.stderr', new_callable=StringIO)  # catch STDERR so it does not pollute the test output
+    def test_param_boolean(self, mock_stderr):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'True'])
         config = self.get_config(parsed_args)
@@ -100,12 +102,10 @@ class Test_CLIParser(TestCase):
         assert isinstance(config.enable_ac, bool)
         assert config.enable_ac is False
 
-        try:
+        with (pytest.raises(SystemExit)):
             self.parser_run.parse_args(self.baseargs + ['--enable_ac', 'treu'])
-        except SystemExit as e:
-            assert isinstance(e.__context__, ArgumentError)
-        else:
-            raise ValueError("Exception not raised")
+
+        assert '--enable_ac: Boolean value expected.' in mock_stderr.getvalue()
 
     def test_json_opts(self):
         parsed_args = self.parser_run.parse_args(
@@ -118,7 +118,35 @@ class Test_CLIParser(TestCase):
         config = self.get_config(parsed_args)
         assert config.CPUs == cpu_count()
 
+    def test_tgtprj(self):
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtprj', 'Geographic'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'Geographic'
+        assert CTR.cfg.target_epsg == 4326
+
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtprj', 'UTM'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'UTM'
+
+    def test_tgtepsg(self):
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtepsg', '32617'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'UTM'
+        assert CTR.cfg.target_epsg == 32617
+
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-tgtepsg', '4326'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.target_projection_type == 'Geographic'
+        assert CTR.cfg.target_epsg == 4326
+
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()
