@@ -99,6 +99,7 @@ class _Base_Test_Orthorectifier(TestCase):
         L2_obj = Orthorectifier(config=cfg).run_transformation(self.L1_obj)
         self.validate_l2a_obj(L2_obj, 'geographic')
 
+
 class Test_Orthorectifier(_Base_Test_Orthorectifier):
     def setUp(self):
         super().setup(config_for_testing, root_has_subdir=True)
