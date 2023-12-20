@@ -39,8 +39,8 @@ import os
 from unittest import TestCase
 import pytest
 from zipfile import ZipFile
-import tempfile
-import shutil
+from tempfile import TemporaryDirectory
+from glob import glob
 from copy import deepcopy
 
 from pyproj import CRS
@@ -57,57 +57,47 @@ __author__ = 'Daniel Scheffler'
 
 
 class _Base_Test_Orthorectifier(TestCase):
-    def setup(self, config: dict, root_has_subdir: bool = False):
-        self.config_dict = config
-        self.config = EnPTConfig(**config)
+    def _test_run_transformation(self, config_dict: dict, prj_type: str, prj_type_val: str, root_has_subdir: bool):
+        cfg_dict = dict(config_dict, **dict(target_projection_type=prj_type))
+        cfg = EnPTConfig(**cfg_dict)
 
-        # create a temporary directory
-        # NOTE: This must exist during the whole runtime of Test_Orthorectifier, otherwise
-        #       Orthorectifier.run_transformation will fail to read some files.
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
-
-        # get lons / lats
-        with ZipFile(self.config.path_l1b_enmap_image, "r") as zf:
-            zf.extractall(self.tmpdir)
-            subdirname = \
-                os.path.splitext(os.path.basename(self.config.path_l1b_enmap_image))[0] if root_has_subdir else ''
-            self.L1_obj = L1B_Reader(config=self.config).read_inputdata(
-                root_dir_main=os.path.join(self.tmpdir, subdirname),
+        with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \
+             TemporaryDirectory(cfg.working_dir) as td:
+            zf.extractall(td)
+            L1_obj = L1B_Reader(config=cfg).read_inputdata(
+                root_dir_main=td if not root_has_subdir else glob(os.path.join(td, '*'))[0],
                 compute_snr=False)
 
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
+            L2_obj = Orthorectifier(config=cfg).run_transformation(L1_obj)
+            self.validate_l2a_obj(L1_obj, L2_obj, prj_type_val)
 
-    def validate_l2a_obj(self, L2_obj: EnMAPL2Product_MapGeo, prj_type: str):
+    @staticmethod
+    def validate_l2a_obj(L1_obj, L2_obj: EnMAPL2Product_MapGeo, prj_type: str):
         assert isinstance(L2_obj, EnMAPL2Product_MapGeo)
         assert L2_obj.data.is_map_geo
-        assert L2_obj.data.shape[0] > self.L1_obj.vnir.data.shape[0]
-        assert L2_obj.data.shape[1] != self.L1_obj.vnir.data.shape[1]
-        assert L2_obj.data.ndim == self.L1_obj.vnir.data.ndim
-        assert np.isclose(np.mean(self.L1_obj.vnir.data[:, :, 0]),
+        assert L2_obj.data.shape[0] > L1_obj.vnir.data.shape[0]
+        assert L2_obj.data.shape[1] != L1_obj.vnir.data.shape[1]
+        assert L2_obj.data.ndim == L1_obj.vnir.data.ndim
+        assert np.isclose(np.mean(L1_obj.vnir.data[:, :, 0]),
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
                           rtol=0.01)
         assert isProjectedOrGeographic(L2_obj.data.prj) == prj_type
 
-    def test_run_transformation_utm(self):
-        cfg = EnPTConfig(**dict(self.config_dict, **dict(target_projection_type='UTM')))
-        L2_obj = Orthorectifier(config=cfg).run_transformation(self.L1_obj)
-        self.validate_l2a_obj(L2_obj, 'projected')
-
-    def test_run_transformation_ll(self):
-        cfg = EnPTConfig(**dict(self.config_dict, **dict(target_projection_type='Geographic')))
-        L2_obj = Orthorectifier(config=cfg).run_transformation(self.L1_obj)
-        self.validate_l2a_obj(L2_obj, 'geographic')
-
 
 class Test_Orthorectifier(_Base_Test_Orthorectifier):
-    def setUp(self):
-        super().setup(config_for_testing, root_has_subdir=True)
+    def test_run_transformation_utm(self):
+        self._test_run_transformation(config_for_testing, 'UTM', 'projected', True)
+
+    def test_run_transformation_ll(self):
+        self._test_run_transformation(config_for_testing, 'Geographic', 'geographic', True)
 
 
 class Test_Orthorectifier_DLR(_Base_Test_Orthorectifier):
-    def setUp(self):
-        super().setup(config_for_testing_dlr)
+    def test_run_transformation_utm(self):
+        self._test_run_transformation(config_for_testing_dlr, 'UTM', 'projected', False)
+
+    def test_run_transformation_ll(self):
+        self._test_run_transformation(config_for_testing_dlr, 'Geographic', 'geographic', False)
 
 
 class Test_VNIR_SWIR_Stacker(TestCase):
