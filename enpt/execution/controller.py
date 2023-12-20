@@ -52,7 +52,7 @@ __author__ = 'Daniel Scheffler'
 class EnPT_Controller(object):
     """Class of EnPT process controller."""
 
-    def __init__(self, config: EnPTConfig = None, **config_kwargs: dict):
+    def __init__(self, config: EnPTConfig = None, **config_kwargs):
         """Initialize the Process Controller.
 
         :param config:          an instance of the EnPTConfig class (overrides config_kwargs)
