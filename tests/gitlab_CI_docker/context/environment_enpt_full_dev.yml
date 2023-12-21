@@ -6,7 +6,7 @@ channels: &id1
 dependencies:
   - python>=3.8
   - pip  # avoids that conda uses the wrong pip
-  - enpt
+  - enpt>=0.19.5
   - enpt_enmapboxapp>=0.7.6
 
   # EnMAP-Box
