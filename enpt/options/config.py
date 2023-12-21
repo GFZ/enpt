@@ -271,7 +271,7 @@ class EnPTConfig(object):
         :key path_reference_image:
             Reference image for co-registration.
 
-        :key polymer root:
+        :key polymer_root:
             Polymer root directory (that contains the subdirectory for ancillary data).
 
         :key enable_ac:
