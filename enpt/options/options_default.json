@@ -62,7 +62,7 @@
                                   'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                                               NOTE that this may result in edge effects, e.g., at coastlines*/
             "polymer_additional_results": true,  /*enable the generation of additional results when running ACwater/POLYMER (default: True)*/
-            "auto_download_ecmwf": false,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
+            "auto_download_ecmwf": true,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
             "threads": -1, /*number of threads for multiprocessing:
                                     'threads = 0': for single thread
