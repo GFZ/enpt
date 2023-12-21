@@ -35,6 +35,7 @@ import pprint
 import numpy as np
 from multiprocessing import cpu_count
 from logging import Logger
+import sys
 
 from packaging.version import parse as parse_version
 from sicor.sicor_enmap import sicor_ac_enmap
@@ -121,6 +122,8 @@ class AtmosphericCorrector(object):
             return False
 
         try:
+            if self.cfg.polymer_root:
+                sys.path.append(self.cfg.polymer_root)
             from acwater.acwater import polymer_ac_enmap as _polymer_ac_enmap
             if not _polymer_ac_enmap:
                 logger.warning("Polymer is not callable. "
