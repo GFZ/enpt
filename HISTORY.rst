@@ -2,8 +2,8 @@
 History
 =======
 
-0.19.6 (coming soon)
---------------------
+0.19.6 (2023-12-21)
+-------------------
 
 * !92: Fixed #111 (DeprecationWarning: `interp2d` is deprecated!).
 * !93: Added a warning if the input dataset was processed with an old version of the ground segment processing system
