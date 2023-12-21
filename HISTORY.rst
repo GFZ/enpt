@@ -10,6 +10,7 @@ History
   (closes #129).
 * !94: Improved all tests for the CLI and the Orthorectifier module that are related to the target projection type.
 * !95: Fixed an issue where POLYMER could not be imported even if polymer_root was set to the correct directory.
+* !96: Set default of auto_download_ecmwf flag to True.
 
 
 0.19.5 (2023-12-11)
