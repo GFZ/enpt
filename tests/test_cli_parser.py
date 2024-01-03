@@ -147,6 +147,24 @@ class Test_CLIParser(TestCase):
         assert CTR.cfg.target_projection_type == 'Geographic'
         assert CTR.cfg.target_epsg == 4326
 
+    def test_output_nodata_value(self):
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-ond', '-32768'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.output_nodata_value == -32768
+
+        parsed_args = self.parser_run.parse_args(
+            self.baseargs + ['-ond', '0'])
+        config = self.get_config(parsed_args)
+        CTR = enpt.EnPT_Controller(config)
+        assert CTR.cfg.output_nodata_value == 0
+
+        with pytest.raises(ValueError, match='min value is -32768'):
+            parsed_args = self.parser_run.parse_args(
+                self.baseargs + ['-ond', '-100000'])
+            self.get_config(parsed_args)
+
 
 if __name__ == '__main__':
     pytest.main()

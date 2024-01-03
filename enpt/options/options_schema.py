@@ -55,7 +55,8 @@ enpt_schema_input = dict(
         schema=dict(
             output_dir=dict(type='string', required=False),
             output_format=dict(type='string', required=False, allowed=['GTiff', 'ENVI']),
-            output_interleave=dict(type='string', required=False, allowed=['band', 'line', 'pixel'])
+            output_interleave=dict(type='string', required=False, allowed=['band', 'line', 'pixel']),
+            output_nodata_value=dict(type='integer', required=False, min=-32768, max=32767)
         )),
 
     processors=dict(
@@ -144,6 +145,7 @@ parameter_mapping = dict(
     output_dir=('output', 'output_dir'),
     output_format=('output', 'output_format'),
     output_interleave=('output', 'output_interleave'),
+    output_nodata_value=('output', 'output_nodata_value'),
 
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),

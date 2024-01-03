@@ -28,10 +28,12 @@
         "output_format": "GTiff",  /*file format of all raster output files
                                      'GTiff': GeoTIFF
                                      'ENVI':  ENVI BSQ*/
-        "output_interleave": "pixel"  /*raster data interleaving type (default: 'pixel')
-                                        - 'band': band-sequential (BSQ),
-                                        - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
-                                        - 'pixel' data interleaved-by-pixel (BIP)*/
+        "output_interleave": "pixel",  /*raster data interleaving type (default: 'pixel')
+                                         - 'band': band-sequential (BSQ),
+                                         - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+                                         - 'pixel' data interleaved-by-pixel (BIP)*/
+        "output_nodata_value": -32768  /*output no-data/background value
+                                         (should be within the integer 16-bit range, default: -32768)*/
     },
 
     "processors": {

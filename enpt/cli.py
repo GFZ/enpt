@@ -85,6 +85,8 @@ def get_enpt_argparser():
         help="file format of all raster output files ('GTiff': GeoTIFF, 'ENVI':  ENVI BSQ; default: 'ENVI')")
     add('-ointlv', '--output_interleave', type=str, default='pixel',
         help="raster data interleaving type ('band', 'line', 'pixel'; default: 'pixel')")
+    add('-ond', '--output_nodata_value', type=int, default=-32768,
+        help="output no-data/background value (should be within the integer 16-bit range)")
     add('-wd', '--working_dir', type=str, default=None,
         help='directory to be used for temporary files')
     add('-nla', '--n_lines_to_append', type=int, default=None,

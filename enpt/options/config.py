@@ -236,6 +236,9 @@ class EnPTConfig(object):
             - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
             - 'pixel' data interleaved-by-pixel (BIP)
 
+        :key output_nodata_value:
+            output no-data/background value (should be within the integer 16-bit range, default: -32768)
+
         :key working_dir:
             directory to be used for temporary files
 
@@ -380,6 +383,7 @@ class EnPTConfig(object):
         self.output_dir = self.absPath(gp('output_dir', fallback=os.path.abspath(os.path.curdir)))
         self.output_format = gp('output_format')
         self.output_interleave = gp('output_interleave')
+        self.output_nodata_value = gp('output_nodata_value')
 
         ###########################
         # processor configuration #
