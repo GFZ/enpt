@@ -25,7 +25,7 @@
 # details.
 #
 # You should have received a copy of the GNU Lesser General Public License along
-# with this program.  If not, see <https://www.gnu.org/licenses/>.
+# with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
 import warnings

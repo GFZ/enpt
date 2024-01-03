@@ -25,7 +25,7 @@
 # details.
 #
 # You should have received a copy of the GNU Lesser General Public License along
-# with this program.  If not, see <https://www.gnu.org/licenses/>.
+# with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT metadata modules. All objects and functions regarding EnMAP metadata are implemented here."""
 
