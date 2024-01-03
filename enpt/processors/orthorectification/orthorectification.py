@@ -108,15 +108,15 @@ class Orthorectifier(object):
         # FIXME So far, the fill value is set to 0. Is this meaningful?
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=0, **kw_init)
+        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=self.cfg.output_nodata_value, **kw_init)
         vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data, **kw_trafo),
-                                  nodata=0)
+                                  nodata=self.cfg.output_nodata_value)
 
         enmap_ImageL1.logger.info("Orthorectifying SWIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=0, **kw_init)
+        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=self.cfg.output_nodata_value, **kw_init)
         swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data, **kw_trafo),
-                                  nodata=0)
+                                  nodata=self.cfg.output_nodata_value)
 
         # combine VNIR and SWIR
         enmap_ImageL1.logger.info('Merging VNIR and SWIR data...')
