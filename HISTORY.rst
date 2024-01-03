@@ -6,6 +6,9 @@ History
 --------------------
 
 * !97: Updated copyright.
+* !98: In analogy to the ground segment L2A product, the EnPT L2A background pixel value is now set to -32768
+  (fixes #85 (Nodata value of 0 causes L2A image to look holey in QGIS) and
+  closes #56 (Implement the correct nodata/saturation values)).
 
 
 0.19.6 (2023-12-21)
