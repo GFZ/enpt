@@ -2,7 +2,7 @@
 
 # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2018-2023 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
+# Copyright (C) 2018-2024 Karl Segl (GFZ Potsdam, segl@gfz-potsdam.de), Daniel Scheffler
 # (GFZ Potsdam, danschef@gfz-potsdam.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz-potsdam.de),
 # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz-potsdam.de)
 #
@@ -25,7 +25,7 @@
 # details.
 #
 # You should have received a copy of the GNU Lesser General Public License along
-# with this program.  If not, see <https://www.gnu.org/licenses/>.
+# with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 """
