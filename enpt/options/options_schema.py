@@ -55,7 +55,8 @@ enpt_schema_input = dict(
         schema=dict(
             output_dir=dict(type='string', required=False),
             output_format=dict(type='string', required=False, allowed=['GTiff', 'ENVI']),
-            output_interleave=dict(type='string', required=False, allowed=['band', 'line', 'pixel'])
+            output_interleave=dict(type='string', required=False, allowed=['band', 'line', 'pixel']),
+            output_nodata_value=dict(type='integer', required=False, min=-32768, max=32767)
         )),
 
     processors=dict(
