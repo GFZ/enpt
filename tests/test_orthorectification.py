@@ -78,6 +78,7 @@ class _Base_Test_Orthorectifier(TestCase):
         assert L2_obj.data.shape[0] > L1_obj.vnir.data.shape[0]
         assert L2_obj.data.shape[1] != L1_obj.vnir.data.shape[1]
         assert L2_obj.data.ndim == L1_obj.vnir.data.ndim
+        assert L2_obj.data.nodata == -32768
         assert np.isclose(np.mean(L1_obj.vnir.data[:, :, 0]),
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
                           rtol=0.01)
