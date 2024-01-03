@@ -9,6 +9,8 @@ History
 * !98: Added a new parameter 'output_nodata_value' and set the L2A background pixel value to -32768 in analogy
   to the ground segment L2A product (fixes #85 (Nodata value of 0 causes L2A image to look holey in QGIS) and
   closes #56 (Implement the correct nodata/saturation values)).
+* !99: Fixed #133 ("RuntimeWarning: invalid value encountered in cast" when joining POLYMER AC results) by overwriting
+  NaN values with the L2A nodata value.
 
 
 0.19.6 (2023-12-21)
