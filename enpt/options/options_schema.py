@@ -144,6 +144,7 @@ parameter_mapping = dict(
     output_dir=('output', 'output_dir'),
     output_format=('output', 'output_format'),
     output_interleave=('output', 'output_interleave'),
+    output_nodata_value=('output', 'output_nodata_value'),
 
     # processors > toa_ref
     path_earthSunDist=('processors', 'toa_ref', 'path_earthSunDist'),
