@@ -288,7 +288,9 @@ class AtmosphericCorrector(object):
         water_additional_results = None
 
         # run the AC
-        if self.cfg.mode_ac in ['water', 'combined'] and not self._is_acwater_operable(enmap_ImageL1.logger):
+        acwater_operable = self._is_acwater_operable(enmap_ImageL1.logger)
+
+        if self.cfg.mode_ac in ['water', 'combined'] and not acwater_operable:
             # use SICOR as fallback AC for water surfaces if ACWater/Polymer is not installed
             reflectance_vnir, reflectance_swir, land_additional_results = \
                 self._run_AC__land_mode(enmap_ImageL1)
@@ -319,8 +321,16 @@ class AtmosphericCorrector(object):
 
         for in_detector, out_detector in zip([enmap_ImageL1.vnir, enmap_ImageL1.swir],
                                              [reflectance_vnir, reflectance_swir]):
-            in_detector.data = (out_detector * self.cfg.scale_factor_boa_ref).astype(np.int16)
-            # NOTE: geotransform and projection are missing due to sensor geometry
+            data_ac_scaled_float = out_detector * self.cfg.scale_factor_boa_ref
+
+            if self.cfg.mode_ac in ['combined', 'water'] and acwater_operable:
+                # Overwrite the POLYMER output at land positions (set to NaN by POLYMER)
+                # AND other pixels which may also be set to NaN by POLYMER with the output nodata value
+                data_ac_scaled_float = np.nan_to_num(data_ac_scaled_float, nan=self.cfg.output_nodata_value)
+
+            # NOTE: - geotransform and projection are missing due to sensor geometry
+            #       - remaining NaNs not due to POLYMER intentionally cause a numpy warning when casting to int16
+            in_detector.data = data_ac_scaled_float.astype(np.int16)
 
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
