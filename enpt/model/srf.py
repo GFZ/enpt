@@ -117,7 +117,7 @@ class SRF(object):
             srf.srfs_wvl = gaussian_srf[:, 0].flatten()
             srf_norm01 = gaussian_srf[:, 1].flatten()
             srf.srfs_norm01[bN] = srf_norm01
-            with np.errstate(under='ignore'):  #  suppress Warning: "underflow encountered in divide due to small values
+            with np.errstate(under='ignore'):  # suppress Warning: "underflow encountered in divide due to small values
                 srf.srfs[bN] = srf_norm01 / np.trapz(x=srf.srfs_wvl, y=srf_norm01)
 
         srf.wvl = np.array(cwls)
