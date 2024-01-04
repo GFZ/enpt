@@ -69,10 +69,10 @@ class SRF(object):
     @staticmethod
     def compute_gaussian_srf(cwl: float, fwhm: float, wvl_min: float, wvl_max: float, wvl_res: float,
                              normalize: bool = True) -> np.ndarray:
-        """Compute a spectral response function based on center wavelength and band width using on a gaussian curve.
+        """Compute a spectral response function based on center wavelength and bandwidth using on a gaussian curve.
 
         :param cwl:         target center wavelength position
-        :param fwhm:        target band width (full width half maximum)
+        :param fwhm:        target bandwidth (full width half maximum)
         :param wvl_min:     minimum wavelength to compute spectral response for
         :param wvl_max:     maximum wavelength to compute spectral response for
         :param wvl_res:     spectral resolution at which spectral response is to be computed
@@ -81,10 +81,13 @@ class SRF(object):
         """
         x = np.arange(wvl_min, wvl_max, wvl_res)
         dist = stats.norm(cwl, fwhm)
-        y = dist.pdf(x)
 
-        if normalize:
-            y *= (1.0 / y.max())
+        with np.errstate(under='ignore'):
+            # This suppresses Numpy warnings: "underflow encountered in exp/divide/multiply" due to very small values
+            y = dist.pdf(x)
+
+            if normalize:
+                y *= (1.0 / y.max())
 
         rsp = np.empty((x.size, 2), dtype=float)
         rsp[:, 0] = x
@@ -94,10 +97,10 @@ class SRF(object):
 
     @classmethod
     def from_cwl_fwhm(cls, cwls: Union[list, np.ndarray], fwhms: Union[list, np.ndarray], **kwargs: dict) -> 'SRF':
-        """Create an instance of SRF based on center wavelength positions and band widths (using gaussian responses).
+        """Create an instance of SRF based on center wavelength positions and bandwidths (using gaussian responses).
 
         :param cwls:    center wavelength positions
-        :param fwhms:   band widths
+        :param fwhms:   bandwidths
         :param kwargs:  Keyword arguments to be passed to SRF.__init__().
         :return:        SRF instance
         """
@@ -114,7 +117,8 @@ class SRF(object):
             srf.srfs_wvl = gaussian_srf[:, 0].flatten()
             srf_norm01 = gaussian_srf[:, 1].flatten()
             srf.srfs_norm01[bN] = srf_norm01
-            srf.srfs[bN] = srf_norm01 / np.trapz(x=srf.srfs_wvl, y=srf_norm01)
+            with np.errstate(under='ignore'):  # suppress Warning: "underflow encountered in divide due to small values
+                srf.srfs[bN] = srf_norm01 / np.trapz(x=srf.srfs_wvl, y=srf_norm01)
 
         srf.wvl = np.array(cwls)
 
