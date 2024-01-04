@@ -13,6 +13,7 @@ History
   NaN values with the L2A nodata value.
 * !100: Suppressed numpy warnings "underflow encountered in exp/divide/multiply" when computing EnMAP SRFs.
 * !101: Fixed #134 (Missing water-leaving reflectance data at coast line in case EnPT runs in combined AC mode).
+* !102: Fixed #135 (POLYMER SWIR output is not 0 but 1).
 
 
 0.19.6 (2023-12-21)
