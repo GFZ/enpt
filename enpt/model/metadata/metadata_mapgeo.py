@@ -73,7 +73,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # defaults
         self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
         self.band_stds: Optional[np.ndarray] = None  # band-wise standard deviations in unscaled values
-        self.fileinfos: list = []  # file informations for each file beloning to the EnMAP L2A product
+        self.fileinfos: list = []  # file information for each file belonging to the EnMAP L2A product
 
         # input validation
         if not len(wvls_l2a) == dims_mapgeo[2]:
