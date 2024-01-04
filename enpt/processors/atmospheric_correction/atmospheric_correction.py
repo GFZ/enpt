@@ -248,9 +248,10 @@ class AtmosphericCorrector(object):
 
         # Overwrite the SICOR output at water positions with the output from ACwater/Polymer
         # -> output contains Water-leaving-reflectance over water and BOA-reflectance over land
-        water_mask_vnir_3D = (enmap_ImageL1.vnir.mask_landwater[:] == 2)[:, :, None]  # 2 = water
-        wlboa_ref_vnir = np.where(water_mask_vnir_3D, wl_ref_vnir_water, boa_ref_vnir_land)
-        wlboa_ref_swir = np.where(water_mask_vnir_3D, wl_ref_swir_water, boa_ref_swir_land)
+        water_mask_vnir = enmap_ImageL1.vnir.mask_landwater[:] == 2  # 2 = water
+        water_mask_swir = enmap_ImageL1.swir.mask_landwater[:] == 2  # 2 = water
+        wlboa_ref_vnir = np.where(water_mask_vnir[:, :, None], wl_ref_vnir_water, boa_ref_vnir_land)
+        wlboa_ref_swir = np.where(water_mask_swir[:, :, None], wl_ref_swir_water, boa_ref_swir_land)
 
         return wlboa_ref_vnir, wlboa_ref_swir, water_additional_results, land_additional_results
 
