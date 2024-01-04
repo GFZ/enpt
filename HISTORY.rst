@@ -2,8 +2,8 @@
 History
 =======
 
-0.19.7 (coming soon)
---------------------
+0.19.7 (2024-01-04)
+-------------------
 
 * !97: Updated copyright.
 * !98: Added a new parameter 'output_nodata_value' and set the L2A background pixel value to -32768 in analogy
