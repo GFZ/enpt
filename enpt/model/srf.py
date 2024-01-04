@@ -81,10 +81,13 @@ class SRF(object):
         """
         x = np.arange(wvl_min, wvl_max, wvl_res)
         dist = stats.norm(cwl, fwhm)
-        y = dist.pdf(x)
 
-        if normalize:
-            y *= (1.0 / y.max())
+        with np.errstate(under='ignore'):
+            # This suppresses Numpy warnings: "underflow encountered in exp/divide/multiply" due to very small values
+            y = dist.pdf(x)
+
+            if normalize:
+                y *= (1.0 / y.max())
 
         rsp = np.empty((x.size, 2), dtype=float)
         rsp[:, 0] = x
@@ -114,7 +117,8 @@ class SRF(object):
             srf.srfs_wvl = gaussian_srf[:, 0].flatten()
             srf_norm01 = gaussian_srf[:, 1].flatten()
             srf.srfs_norm01[bN] = srf_norm01
-            srf.srfs[bN] = srf_norm01 / np.trapz(x=srf.srfs_wvl, y=srf_norm01)
+            with np.errstate(under='ignore'):  #  suppress Warning: "underflow encountered in divide due to small values
+                srf.srfs[bN] = srf_norm01 / np.trapz(x=srf.srfs_wvl, y=srf_norm01)
 
         srf.wvl = np.array(cwls)
 
