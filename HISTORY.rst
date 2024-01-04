@@ -12,6 +12,7 @@ History
 * !99: Fixed #133 ("RuntimeWarning: invalid value encountered in cast" when joining POLYMER AC results) by overwriting
   NaN values with the L2A nodata value.
 * !100: Suppressed numpy warnings "underflow encountered in exp/divide/multiply" when computing EnMAP SRFs.
+* !101: Fixed #134 (Missing water-leaving reflectance data at coast line in case EnPT runs in combined AC mode).
 
 
 0.19.6 (2023-12-21)
