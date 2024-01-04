@@ -11,6 +11,7 @@ History
   closes #56 (Implement the correct nodata/saturation values)).
 * !99: Fixed #133 ("RuntimeWarning: invalid value encountered in cast" when joining POLYMER AC results) by overwriting
   NaN values with the L2A nodata value.
+* !100: Suppressed numpy warnings "underflow encountered in exp/divide/multiply" when computing EnMAP SRFs.
 
 
 0.19.6 (2023-12-21)
