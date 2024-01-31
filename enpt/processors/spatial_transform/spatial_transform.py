@@ -117,7 +117,9 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  res_vnir: Tuple[float, float],
                  res_swir: Tuple[float, float],
                  resamp_alg: str = 'nearest',
-                 **gt_opts) -> None:
+                 src_nodata: int = None,
+                 tgt_nodata: int = None,
+                 nprocs: int = cpu_count()) -> None:
         """Get an instance of VNIR_SWIR_SensorGeometryTransformer.
 
         :param lons_vnir:   VNIR longitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
@@ -130,8 +132,9 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         :param res_swir:    pixel dimensions of the SWIR if it would be transformed to map geometry (X, Y)
         :param resamp_alg:  resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
                             'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
-        :param gt_opts:     additional options to be passed to the Geometric_Transformer class,
-                            e.g., 'fill_value', 'radius_of_influence', 'nprocs'...
+        :param src_nodata:  nodata value of the input array
+        :param tgt_nodata:  pixel value to be used for undetermined pixels in the output
+        :param nprocs:      number of CPU cores to use
         """
         self.vnir_meta = dict(
             lons=lons_vnir,
@@ -146,7 +149,9 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
             res=res_swir
         )
         self.resamp_alg = resamp_alg
-        self.gt_opts = gt_opts
+        self.src_nodata = src_nodata
+        self.tgt_nodata = tgt_nodata
+        self.cpus = nprocs
 
     def transform_sensorgeo_VNIR_to_SWIR(self, data_vnirsensorgeo: np.ndarray) -> np.ndarray:
         """Transform any array in VNIR sensor geometry to SWIR sensor geometry to remove geometric shifts.
@@ -198,14 +203,27 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
             src_lons, src_lats = ensure_2d(src['lons']), ensure_2d(src['lats'])
             tgt_lons, tgt_lats = ensure_2d(tgt['lons']), ensure_2d(tgt['lats'])
 
-        GT_src = Geometry_Transformer(src_lons, src_lats, backend='gdal', resamp_alg=self.resamp_alg, **self.gt_opts)
-        GT_tgt = Geometry_Transformer(tgt_lons, tgt_lats, backend='gdal', resamp_alg=self.resamp_alg, **self.gt_opts)
+        GT_src = Geometry_Transformer(src_lons, src_lats, backend='gdal', resamp_alg=self.resamp_alg, nprocs=self.cpus)
+        GT_tgt = Geometry_Transformer(tgt_lons, tgt_lats, backend='gdal', resamp_alg=self.resamp_alg, nprocs=self.cpus)
 
         # temporarily transform the input sensor geometry array to map geometry
-        gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj']))
+        gA_mapgeo = GeoArray(
+            *GT_src.to_map_geometry(
+                data2transform,
+                tgt_prj=src['prj'],
+                src_nodata=self.src_nodata,
+                tgt_nodata=self.tgt_nodata
+            ),
+            nodata=self.tgt_nodata
+        )
 
-        # generate the target sensor geometry array (target lons/lats define the target swath definition)
-        tgt_data_sensorgeo = GT_tgt.to_sensor_geometry(gA_mapgeo)
+        # generate the target sensor geometry array (target lons/lats define the target swath definition
+        tgt_data_sensorgeo =\
+            GT_tgt.to_sensor_geometry(
+                gA_mapgeo,
+                src_nodata=gA_mapgeo.nodata,
+                tgt_nodata=self.tgt_nodata
+            )
 
         return tgt_data_sensorgeo
 
