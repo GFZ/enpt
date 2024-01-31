@@ -391,7 +391,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :param src_lats:            geolayer latitudes corresponding to the input array
                                     (same nbands like the source detector)
         :param src_epsg:            projection EPSG code of the source array
-        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
                                     in the dimension of the source detector is passed (default: False)
         :return:
@@ -486,7 +487,8 @@ class EnMAP_VNIR_SensorGeo(EnMAP_Detector_SensorGeo):
         :param swir_lons:           longitude geolayer array of the SWIR
         :param swir_lats:           latitude geolayer array of the SWIR
         :param swir_epsg:           EPSG code of the SWIR when transformed to map geometry
-        :param resamp_alg:          resampling algorith ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorith ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
                                     in the dimension of the SWIR detector is passed (default: False)
         """
@@ -521,7 +523,8 @@ class EnMAP_SWIR_SensorGeo(EnMAP_Detector_SensorGeo):
         :param vnir_lons:           longitude geolayer array of the VNIR
         :param vnir_lats:           latitude geolayer array of the VNIR
         :param vnir_epsg:           EPSG code of the VNIR when transformed to map geometry
-        :param resamp_alg:          resampling algorith ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorith ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
                                     in the dimension of the VNIR detector is passed (default: False)
         """
@@ -803,7 +806,8 @@ class EnMAPL1Product_SensorGeo(object):
         """Transform the given array from VNIR into SWIR sensor geometry.
 
         :param array_vnirsensorgeo: raster array in VNIR sensor geometry to be transformed into SWIR sensor geometry
-        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
                                     in the dimension of the VNIR detector is passed (default: False)
         """
@@ -826,7 +830,8 @@ class EnMAPL1Product_SensorGeo(object):
         """Transform the given array from SWIR into VNIR sensor geometry.
 
         :param array_swirsensorgeo: raster array in SWIR sensor geometry to be transformed into VNIR sensor geometry
-        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case a 3D array
                                     in the dimension of the VNIR detector is passed (default: False)
         """
@@ -849,7 +854,8 @@ class EnMAPL1Product_SensorGeo(object):
         """Set the specified SWIR raster attribute with a VNIR attribute transformed to SWIR sensor geometry.
 
         :param attrName:            name of the attribute to be set
-        :param resamp_alg:          resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
+        :param resamp_alg:          resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                                    'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
         :param respect_keystone:    whether to use the full geoarray (all bands) in case the attribute
                                     to be transformed is 'data' (default: False)
         """
