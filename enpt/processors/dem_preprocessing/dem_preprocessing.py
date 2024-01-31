@@ -127,7 +127,7 @@ class DEM_Processor(object):
     def to_sensor_geometry(self,
                            lons: np.ndarray,
                            lats: np.ndarray):
-        GT = Geometry_Transformer(lons=lons, lats=lats, nprocs=self.CPUs)
+        GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
         data_sensorgeo = GT.to_sensor_geometry(self.dem)
 
         return GeoArray(data_sensorgeo)
