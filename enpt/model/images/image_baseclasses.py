@@ -124,7 +124,7 @@ class _EnMAP_Image(object):
                   self.data = '/path/to/image.tif'  # sets self.data to GeoArray('/path/to/image.tif')
 
                 - Link a numpy.ndarray instance with self.data (remaining attributes like geocoding, projection, etc.
-                    are copied from the previous self.data attribute.
+                    are copied from the previous self.data attribute).
                     self.data = numpy.array([[1,2,3],[4,5,6]])
 
                 - Set self.data to an existing instance of GeoArray
@@ -197,7 +197,7 @@ class _EnMAP_Image(object):
 
     @property
     def mask_cloudshadow(self) -> GeoArray:
-        """Return the cloud shadow mask (0=no cloud shadow, 1=cloud shadow)..
+        """Return the cloud shadow mask (0=no cloud shadow, 1=cloud shadow).
 
         :return: geoarray.GeoArray
         """
@@ -230,7 +230,7 @@ class _EnMAP_Image(object):
 
     @property
     def mask_snow(self) -> GeoArray:
-        """Return the snow mask (0=no snow, 1=snow)..
+        """Return the snow mask (0=no snow, 1=snow).
 
         :return: geoarray.GeoArray
         """
@@ -246,7 +246,7 @@ class _EnMAP_Image(object):
 
     @property
     def mask_cirrus(self) -> GeoArray:
-        """Return the cirrus mask (0=none, 1=thin, 2=medium, 3=thick)..
+        """Return the cirrus mask (0=none, 1=thin, 2=medium, 3=thick).
 
         :return: geoarray.GeoArray
         """
