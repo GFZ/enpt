@@ -39,7 +39,7 @@ import os
 from typing import Optional
 
 import numpy as np
-from osgeo import gdal
+from osgeo import gdal  # noqa
 
 from arosics import COREG_LOCAL
 from geoarray import GeoArray
@@ -310,8 +310,9 @@ class Spatial_Optimizer(object):
         enmap_ImageL1.logger.info('Transforming spatial optimization results back to sensor geometry.')
         lons_band = self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx]
         lats_band = self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx]
-        GT = Geometry_Transformer(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
-                                  lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
+        GT = Geometry_Transformer(lons=lons_band,
+                                  lats=lats_band,
+                                  backend='gdal',
                                   resamp_alg='bilinear',
                                   nprocs=self.cfg.CPUs)
 
