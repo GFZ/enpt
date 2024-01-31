@@ -46,7 +46,6 @@ from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo
 from ..spatial_transform import \
     Geometry_Transformer, \
-    Geometry_Transformer_3D, \
     move_extent_to_coord_grid
 
 __author__ = 'Daniel Scheffler'
@@ -89,32 +88,44 @@ class Orthorectifier(object):
         # get target EPSG code and common extent
         tgt_epsg = enmap_ImageL1.meta.vnir.epsg_ortho
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
-        kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
-                       nprocs=self.cfg.CPUs,
-                       radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45
-                       )
-        if self.cfg.ortho_resampAlg == 'bilinear':
-            # increase that if the resampling result contains gaps (default is 32 but this is quite slow)
-            kw_init['neighbours'] = 8
 
-        kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent,
-                        tgt_coordgrid=((self.cfg.target_coord_grid['x'], self.cfg.target_coord_grid['y'])
-                                       if self.cfg.target_coord_grid else None)
-                        )
+        # set up parameters for Geometry_Transformer initialization and execution of the transformation
+        if self.cfg.ortho_resampAlg != 'gauss':
+            kw_init = dict(
+                backend='gdal',
+                resamp_alg=self.cfg.ortho_resampAlg,
+                nprocs=self.cfg.CPUs
+            )
+        else:
+            kw_init = dict(
+                backend='pyresample',
+                resamp_alg=self.cfg.ortho_resampAlg,
+                nprocs=self.cfg.CPUs,
+                fill_value=self.cfg.output_nodata_value
+            )
+
+        kw_trafo = dict(
+            tgt_prj=tgt_epsg,
+            tgt_extent=tgt_extent,
+            tgt_coordgrid=((self.cfg.target_coord_grid['x'],
+                            self.cfg.target_coord_grid['y'])
+                           if self.cfg.target_coord_grid else
+                           None)
+        )
+        if kw_init['backend'] == 'gdal':
+            kw_trafo['src_nodata'] = enmap_ImageL1.vnir.data.nodata
+            kw_trafo['tgt_nodata'] = self.cfg.output_nodata_value
 
         # transform VNIR and SWIR to map geometry
-        GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
-
-        # FIXME So far, the fill value is set to 0. Is this meaningful?
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=self.cfg.output_nodata_value, **kw_init)
+        GT_vnir = Geometry_Transformer(lons=lons_vnir, lats=lats_vnir, **kw_init)
         vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data, **kw_trafo),
                                   nodata=self.cfg.output_nodata_value)
 
         enmap_ImageL1.logger.info("Orthorectifying SWIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=self.cfg.output_nodata_value, **kw_init)
+        GT_swir = Geometry_Transformer(lons=lons_swir, lats=lats_swir, **kw_init)
         swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data, **kw_trafo),
                                   nodata=self.cfg.output_nodata_value)
 
@@ -134,7 +145,7 @@ class Orthorectifier(object):
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
         rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                             'mask_cirrus', 'polymer_bitmask']
-        kw_init_nearest = dict(resamp_alg='nearest', nprocs=self.cfg.CPUs)
+        kw_init_nearest = dict(backend='gdal', resamp_alg='nearest', nprocs=self.cfg.CPUs)
 
         # run the orthorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
@@ -142,11 +153,18 @@ class Orthorectifier(object):
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:
+                kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest
+                kw_trafo_attr = kw_trafo.copy()
+                if kw_init_attr['backend'] == 'gdal':
+                    kw_trafo_attr['src_nodata'] = attr.nodata
+                    kw_trafo_attr['tgt_nodata'] = attr.nodata
+                else:
+                    kw_init_attr['fill_value'] = attr.nodata
+
                 GT = Geometry_Transformer(
                     lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                    fill_value=attr.nodata,
-                    **(kw_init if attrName not in rsp_nearest_list else kw_init_nearest))
+                    **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
                 attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
