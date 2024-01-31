@@ -85,9 +85,9 @@ class Orthorectifier(object):
         lons_vnir, lats_vnir = enmap_ImageL1.vnir.detector_meta.lons, enmap_ImageL1.vnir.detector_meta.lats
         lons_swir, lats_swir = enmap_ImageL1.swir.detector_meta.lons, enmap_ImageL1.swir.detector_meta.lats
         if not enmap_ImageL1.vnir.detector_meta.geolayer_has_keystone:
-            lons_vnir, lats_vnir = lons_vnir[:, :, 0]
+            lons_vnir, lats_vnir = lons_vnir[:, :, 0], lats_vnir[:, :, 0]
         if not enmap_ImageL1.swir.detector_meta.geolayer_has_keystone:
-            lons_swir, lats_swir = lons_swir[:, :, 0]
+            lons_swir, lats_swir = lons_swir[:, :, 0], lats_swir[:, :, 0]
 
         # get target EPSG code and common extent
         tgt_epsg = enmap_ImageL1.meta.vnir.epsg_ortho

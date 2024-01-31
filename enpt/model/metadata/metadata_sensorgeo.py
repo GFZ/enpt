@@ -439,7 +439,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             )
         lons, lats = GeolayerGen.compute_geolayer()
 
-        self.geolayer_has_keystone = len(GeolayerGen.bandgroups_with_unique_rpc_coeffs > 1)
+        self.geolayer_has_keystone = len(GeolayerGen.bandgroups_with_unique_rpc_coeffs) > 1
 
         return lons, lats
 
