@@ -49,7 +49,7 @@ from py_tools_ds.processing.progress_mon import ProgressBar
 
 from ...options.config import EnPTConfig
 from ...model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
-from ..spatial_transform import Geometry_Transformer, Geometry_Transformer_3D
+from ..spatial_transform import Geometry_Transformer
 
 
 class Spatial_Optimizer(object):
@@ -78,15 +78,17 @@ class Spatial_Optimizer(object):
                                    % (self._EnMAP_bandIdx + 1))
         GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx],
                                   lats=self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx],
-                                  fill_value=0,
-                                  resamp_alg='gauss',
-                                  radius_of_influence=30,
+                                  backend='gdal',
+                                  resamp_alg='bilinear',
                                   nprocs=self.cfg.CPUs)
 
         self._EnMAP_band = \
             GeoArray(*GT.to_map_geometry(enmap_band_sensorgeo,
                                          tgt_prj=self._get_optimal_utm_epsg(),
-                                         tgt_coordgrid=((0, 15), (0, -15))),
+                                         tgt_coordgrid=((0, 15), (0, -15)),
+                                         src_nodata=self._EnMAP_Im.vnir.data.nodata,
+                                         tgt_nodata=0
+                                         ),
                      nodata=0)
 
         return self._EnMAP_band
@@ -101,14 +103,17 @@ class Spatial_Optimizer(object):
         self._EnMAP_Im.logger.info('Temporarily transforming EnMAP water mask to map geometry for co-registration.')
         GT = Geometry_Transformer(lons=self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx],
                                   lats=self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx],
-                                  fill_value=0,
+                                  backend='gdal',
                                   resamp_alg='nearest',
                                   nprocs=self.cfg.CPUs)
 
         self._EnMAP_mask = \
             GeoArray(*GT.to_map_geometry(enmap_mask_sensorgeo,
                                          tgt_prj=self._get_optimal_utm_epsg(),
-                                         tgt_coordgrid=((0, 15), (0, -15))),
+                                         tgt_coordgrid=((0, 15), (0, -15)),
+                                         src_nodata=0,  # 0=background
+                                         tgt_nodata=0
+                                         ),
                      nodata=0)
 
         return self._EnMAP_mask
@@ -305,18 +310,17 @@ class Spatial_Optimizer(object):
         enmap_ImageL1.logger.info('Transforming spatial optimization results back to sensor geometry.')
         lons_band = self._EnMAP_Im.meta.vnir.lons[:, :, self._EnMAP_bandIdx]
         lats_band = self._EnMAP_Im.meta.vnir.lats[:, :, self._EnMAP_bandIdx]
-        GT = Geometry_Transformer_3D(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
-                                     lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
-                                     fill_value=0,
-                                     # resamp_alg='bilinear',
-                                     resamp_alg='gauss',
-                                     nprocs=self.cfg.CPUs)
+        GT = Geometry_Transformer(lons=np.repeat(lons_band[:, :, np.newaxis], 2, axis=2),
+                                  lats=np.repeat(lats_band[:, :, np.newaxis], 2, axis=2),
+                                  resamp_alg='bilinear',
+                                  nprocs=self.cfg.CPUs)
 
         geolayer_sensorgeo = \
             GT.to_sensor_geometry(GeoArray(np.dstack([xgrid_map_coreg,
                                                       ygrid_map_coreg]),
                                            geotransform=self._EnMAP_band.gt,
-                                           projection=self._EnMAP_band.prj))
+                                           projection=self._EnMAP_band.prj),
+                                  tgt_nodata=0)
 
         enmap_ImageL1.logger.info('Applying results of spatial optimization to geolayer.')
         lons_coreg, lats_coreg = transform_coordArray(prj_src=self._ref_band_prep.prj,
