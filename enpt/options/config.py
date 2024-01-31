@@ -190,7 +190,7 @@ config_for_testing_dlr = dict(
     enable_ac=True,
     mode_ac='land',
     CPUs=32,
-    ortho_resampAlg='gauss',
+    ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
 )
 
