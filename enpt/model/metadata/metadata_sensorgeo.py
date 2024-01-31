@@ -105,8 +105,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
         self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
         self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
-        self.lats: Optional[np.ndarray] = None  # 2D array of latitude coordinates according to given lon/lat sampling
-        self.lons: Optional[np.ndarray] = None  # 2D array of longitude coordinates according to given lon/lat sampling
+        self.lats: Optional[np.ndarray] = None  # 2D/3D array of latitude coordinates
+        self.lons: Optional[np.ndarray] = None  # 2D/3D array of longitude coordinates
+        self.geolayer_has_keystone: Optional[bool] = None  # indicates if lon/lat geolayer considers keystone (3D array)
         self.unit: str = ''  # radiometric unit of pixel values
         self.unitcode: str = ''  # code of radiometric unit
         self.preview_wvls: Optional[List[float]] = None  # wavelengths to be used for quicklook images
@@ -267,6 +268,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
             self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
+            self.geolayer_has_keystone = False
             self.preview_wvls = np.array([self.wvl_center[i] for i in self.preview_bands])
 
         # drop bad bands from metadata if desired
@@ -427,13 +429,17 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
     def compute_geolayer_for_cube(self):
         self.logger.info('Computing %s geolayer...' % self.detector_name)
-        lons, lats = \
-            RPC_3D_Geolayer_Generator(rpc_coeffs_per_band=self.rpc_coeffs,
-                                      elevation=self.cfg.path_dem if self.cfg.path_dem else self.cfg.average_elevation,
-                                      enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
-                                      enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
-                                      CPUs=self.cfg.CPUs)\
-            .compute_geolayer()
+        GeolayerGen = \
+            RPC_3D_Geolayer_Generator(
+                rpc_coeffs_per_band=self.rpc_coeffs,
+                elevation=self.cfg.path_dem if self.cfg.path_dem else self.cfg.average_elevation,
+                enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
+                enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
+                CPUs=self.cfg.CPUs
+            )
+        lons, lats = GeolayerGen.compute_geolayer()
+
+        self.geolayer_has_keystone = len(GeolayerGen.bandgroups_with_unique_rpc_coeffs > 1)
 
         return lons, lats
 
