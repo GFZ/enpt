@@ -686,7 +686,7 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
                                            ) -> List[Tuple[float, float]]:
-    """Compute map coordinates for a given image coordinate pair of an EnMAP image in sensor geometry.
+    """Compute map coordinates for a given image coordinate-pair of an EnMAP image in sensor geometry.
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry

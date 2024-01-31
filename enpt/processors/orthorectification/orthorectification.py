@@ -216,7 +216,7 @@ class Orthorectifier(object):
 
         # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
         # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
-        #    (these pixels would be set to nodata later anyways, so we don't need to increase the extent for them)
+        #    (these pixels would be set to nodata later anyway, so we don't need to increase the extent for them)
         if V_lons.ndim == 3:
             V_X_prj = (V_X_prj[0].max(), V_X_prj[1].min(), V_X_prj[2].max(), V_X_prj[3].min())
             V_Y_prj = (V_Y_prj[0].min(), V_Y_prj[1].min(), V_Y_prj[2].max(), V_Y_prj[3].max())
