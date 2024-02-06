@@ -94,31 +94,21 @@ class Orthorectifier(object):
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
 
         # set up parameters for Geometry_Transformer initialization and execution of the transformation
-        if self.cfg.ortho_resampAlg != 'gauss':
-            kw_init = dict(
-                backend='gdal',
-                resamp_alg=self.cfg.ortho_resampAlg,
-                nprocs=self.cfg.CPUs
-            )
-        else:
-            kw_init = dict(
-                backend='pyresample',
-                resamp_alg=self.cfg.ortho_resampAlg,
-                nprocs=self.cfg.CPUs,
-                fill_value=self.cfg.output_nodata_value
-            )
-
+        kw_init = dict(
+            backend='gdal' if self.cfg.ortho_resampAlg != 'gauss' else 'pyresample',
+            resamp_alg=self.cfg.ortho_resampAlg,
+            nprocs=self.cfg.CPUs
+        )
         kw_trafo = dict(
             tgt_prj=tgt_epsg,
             tgt_extent=tgt_extent,
             tgt_coordgrid=((self.cfg.target_coord_grid['x'],
                             self.cfg.target_coord_grid['y'])
                            if self.cfg.target_coord_grid else
-                           None)
+                           None),
+            src_nodata = enmap_ImageL1.vnir.data.nodata,
+            tgt_nodata = self.cfg.output_nodata_value
         )
-        if kw_init['backend'] == 'gdal':
-            kw_trafo['src_nodata'] = enmap_ImageL1.vnir.data.nodata
-            kw_trafo['tgt_nodata'] = self.cfg.output_nodata_value
 
         # transform VNIR and SWIR to map geometry
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
@@ -159,11 +149,8 @@ class Orthorectifier(object):
             if attr is not None:
                 kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest
                 kw_trafo_attr = kw_trafo.copy()
-                if kw_init_attr['backend'] == 'gdal':
-                    kw_trafo_attr['src_nodata'] = attr.nodata
-                    kw_trafo_attr['tgt_nodata'] = attr.nodata
-                else:
-                    kw_init_attr['fill_value'] = attr.nodata
+                kw_trafo_attr['src_nodata'] = attr.nodata
+                kw_trafo_attr['tgt_nodata'] = attr.nodata
 
                 GT = Geometry_Transformer(
                     lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
@@ -171,7 +158,7 @@ class Orthorectifier(object):
                     **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
-                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
+                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo_attr), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?
