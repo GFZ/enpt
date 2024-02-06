@@ -467,12 +467,6 @@ class EnPTConfig(object):
             self.target_coord_grid if self.target_coord_grid else \
             enmap_coordinate_grid_utm if self.target_projection_type == 'UTM' else None
 
-        # bug warning regarding holes in bilinear resampling output
-        if self.target_projection_type == 'Geographic' and self.ortho_resampAlg == 'bilinear':
-            warnings.warn("There is currently a bug that causes holes in the bilinear resampling results if the "
-                          "target projection is 'Geographic'. It is recommended to use 'nearest' or 'gauss' instead.",
-                          UserWarning)
-
     @staticmethod
     def absPath(path):
         return path if not path or os.path.isabs(path) else os.path.abspath(os.path.join(path_enptlib, path))
