@@ -97,7 +97,7 @@ config_for_testing_water = dict(
     enable_keystone_correction=False,
     enable_vnir_swir_coreg=False,
     n_lines_to_append=None,
-    ortho_resampAlg='gauss',
+    ortho_resampAlg='bilinear',
     run_deadpix_P=True,
     run_smile_P=False,
     scale_factor_boa_ref=10000,
@@ -326,7 +326,8 @@ class EnPTConfig(object):
              ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
 
         :key ortho_resampAlg:
-            Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')
+            Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline',
+                                                      'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
 
         :key target_projection_type:
             Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')

@@ -114,7 +114,9 @@ enpt_schema_input = dict(
             orthorectification=dict(
                 type='dict', required=False,
                 schema=dict(
-                    resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss']),
+                    resamp_alg=dict(type='string', required=False, allowed=['nearest', 'bilinear', 'gauss', 'cubic',
+                                                                            'cubic_spline', 'lanczos', 'average',
+                                                                            'mode', 'max', 'min', 'med', 'q1', 'q3']),
                     vswir_overlap_algorithm=dict(type='string', required=False,
                                                  allowed=['order_by_wvl', 'average', 'vnir_only', 'swir_only']),
                     target_projection_type=dict(type='string', required=False, allowed=['UTM', 'Geographic']),

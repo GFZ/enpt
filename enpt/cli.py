@@ -140,7 +140,8 @@ def get_enpt_argparser():
         help="Spatial interpolation algorithm to be used during dead pixel correction "
              "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")
     add('--ortho_resampAlg', type=str, default='bilinear',
-        help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')")
+        help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline', "
+             "'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')")
     add('--vswir_overlap_algorithm', type=str, default='swir_only',
         help="Algorithm specifying how to deal with the spectral bands in the VNIR/SWIR spectral overlap region "
              "('order_by_wvl', 'average', 'vnir_only', 'swir_only')")
