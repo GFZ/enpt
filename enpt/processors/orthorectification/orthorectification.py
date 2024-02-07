@@ -36,6 +36,7 @@ from typing import Tuple, Union  # noqa: F401
 from types import SimpleNamespace
 
 import numpy as np
+from pyproj import Geod
 from mvgavg import mvgavg
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import transform_any_prj
@@ -71,6 +72,16 @@ class Orthorectifier(object):
                     raise RuntimeError('Expected a %s geolayer shape of %s or %s. Received %s.'
                                        % (detector.detector_name, str(datashape), str(datashape[:2]), str(XY.shape)))
 
+    @staticmethod
+    def get_enmap_coordinate_grid_ll(lon: float, lat: float
+                                     ) -> (Tuple[float, float], Tuple[float, float]):
+        """Return EnMAP-like (30x30m) longitude/latitude pixel grid specs at the given position."""
+        geod = Geod(ellps="WGS84")
+        delta_lon = abs(lon - geod.fwd(lon, lat, az=90, dist=30)[0])
+        delta_lat = abs(lat - geod.fwd(lon, lat, az=0, dist=30)[1])
+
+        return (lon, lon + delta_lon), (lat, lat + delta_lat)
+
     def run_transformation(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL2Product_MapGeo:
         self.validate_input(enmap_ImageL1)
 
@@ -90,6 +101,7 @@ class Orthorectifier(object):
             lons_swir, lats_swir = lons_swir[:, :, 0], lats_swir[:, :, 0]
 
         # get target EPSG code and common extent
+        # (VNIR/SWIR overlap, i.e., INNER extent - non-overlapping parts are cleared later)
         tgt_epsg = enmap_ImageL1.meta.vnir.epsg_ortho
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
 
@@ -109,6 +121,11 @@ class Orthorectifier(object):
             src_nodata = enmap_ImageL1.vnir.data.nodata,
             tgt_nodata = self.cfg.output_nodata_value
         )
+        # make sure VNIR and SWIR are also transformed to the same lon/lat pixel grid
+        if self.cfg.target_projection_type == 'Geographic' and kw_trafo['tgt_coordgrid'] is None:
+            center_row, center_col = lons_vnir.shape[0] // 2, lons_vnir.shape[1] // 2
+            center_lon, center_lat = lons_vnir[center_row, center_col], lats_vnir[center_row, center_col]
+            kw_trafo['tgt_coordgrid'] = self.get_enmap_coordinate_grid_ll(center_lon, center_lat)
 
         # transform VNIR and SWIR to map geometry
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
@@ -137,8 +154,8 @@ class Orthorectifier(object):
         # TODO allow to set geolayer band to be used for warping of 2D arrays
 
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
-        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
-                            'mask_cirrus', 'polymer_bitmask']
+        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow',
+                            'mask_haze', 'mask_snow', 'mask_cirrus', 'polymer_bitmask']
         kw_init_nearest = dict(backend='gdal', resamp_alg='nearest', nprocs=self.cfg.CPUs)
 
         # run the orthorectification
