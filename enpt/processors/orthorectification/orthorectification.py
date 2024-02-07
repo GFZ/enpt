@@ -118,8 +118,8 @@ class Orthorectifier(object):
                             self.cfg.target_coord_grid['y'])
                            if self.cfg.target_coord_grid else
                            None),
-            src_nodata = enmap_ImageL1.vnir.data.nodata,
-            tgt_nodata = self.cfg.output_nodata_value
+            src_nodata=enmap_ImageL1.vnir.data.nodata,
+            tgt_nodata=self.cfg.output_nodata_value
         )
         # make sure VNIR and SWIR are also transformed to the same lon/lat pixel grid
         if self.cfg.target_projection_type == 'Geographic' and kw_trafo['tgt_coordgrid'] is None:
