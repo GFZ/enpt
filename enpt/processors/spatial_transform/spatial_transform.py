@@ -221,7 +221,7 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         tgt_data_sensorgeo =\
             GT_tgt.to_sensor_geometry(
                 gA_mapgeo,
-                src_nodata=gA_mapgeo.nodata,
+                src_nodata=gA_mapgeo._nodata,  # noqa
                 tgt_nodata=self.tgt_nodata
             )
 
