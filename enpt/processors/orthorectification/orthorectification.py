@@ -232,9 +232,13 @@ class Orthorectifier(object):
         V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
         S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
 
-        # transform them to UTM
-        V_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in V_UL_UR_LL_LR_ll]
-        S_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in S_UL_UR_LL_LR_ll]
+        # transform them to tgt_epsg
+        if tgt_epsg != 4326:
+            V_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in V_UL_UR_LL_LR_ll]
+            S_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in S_UL_UR_LL_LR_ll]
+        else:
+            V_UL_UR_LL_LR_prj = V_UL_UR_LL_LR_ll
+            S_UL_UR_LL_LR_prj = S_UL_UR_LL_LR_ll
 
         # separate X and Y
         V_X_prj, V_Y_prj = zip(*V_UL_UR_LL_LR_prj)
