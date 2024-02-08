@@ -39,7 +39,8 @@ from natsort import natsorted
 import numpy_indexed as npi
 from pyproj import CRS
 
-from sensormapgeo import Transformer, AreaDefinition
+from sensormapgeo import Transformer
+from sensormapgeo.pyresample_backend.transformer_2d import AreaDefinition
 from py_tools_ds.geo.projection import prj_equal
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
