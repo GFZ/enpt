@@ -97,7 +97,7 @@ config_for_testing_water = dict(
     enable_keystone_correction=False,
     enable_vnir_swir_coreg=False,
     n_lines_to_append=None,
-    ortho_resampAlg='gauss',
+    ortho_resampAlg='bilinear',
     run_deadpix_P=True,
     run_smile_P=False,
     scale_factor_boa_ref=10000,
@@ -190,7 +190,7 @@ config_for_testing_dlr = dict(
     enable_ac=True,
     mode_ac='land',
     CPUs=32,
-    ortho_resampAlg='gauss',
+    ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
 )
 
@@ -326,7 +326,8 @@ class EnPTConfig(object):
              ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
 
         :key ortho_resampAlg:
-            Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss')
+            Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline',
+                                                      'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
 
         :key target_projection_type:
             Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')
@@ -465,12 +466,6 @@ class EnPTConfig(object):
         self.target_coord_grid = \
             self.target_coord_grid if self.target_coord_grid else \
             enmap_coordinate_grid_utm if self.target_projection_type == 'UTM' else None
-
-        # bug warning regarding holes in bilinear resampling output
-        if self.target_projection_type == 'Geographic' and self.ortho_resampAlg == 'bilinear':
-            warnings.warn("There is currently a bug that causes holes in the bilinear resampling results if the "
-                          "target projection is 'Geographic'. It is recommended to use 'nearest' or 'gauss' instead.",
-                          UserWarning)
 
     @staticmethod
     def absPath(path):

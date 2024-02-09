@@ -36,6 +36,7 @@ from typing import Tuple, Union  # noqa: F401
 from types import SimpleNamespace
 
 import numpy as np
+from pyproj import Geod
 from mvgavg import mvgavg
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import transform_any_prj
@@ -46,7 +47,6 @@ from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo
 from ..spatial_transform import \
     Geometry_Transformer, \
-    Geometry_Transformer_3D, \
     move_extent_to_coord_grid
 
 __author__ = 'Daniel Scheffler'
@@ -72,6 +72,16 @@ class Orthorectifier(object):
                     raise RuntimeError('Expected a %s geolayer shape of %s or %s. Received %s.'
                                        % (detector.detector_name, str(datashape), str(datashape[:2]), str(XY.shape)))
 
+    @staticmethod
+    def get_enmap_coordinate_grid_ll(lon: float, lat: float
+                                     ) -> (Tuple[float, float], Tuple[float, float]):
+        """Return EnMAP-like (30x30m) longitude/latitude pixel grid specs at the given position."""
+        geod = Geod(ellps="WGS84")
+        delta_lon = abs(lon - geod.fwd(lon, lat, az=90, dist=30)[0])
+        delta_lat = abs(lat - geod.fwd(lon, lat, az=0, dist=30)[1])
+
+        return (lon, lon + delta_lon), (lat, lat + delta_lat)
+
     def run_transformation(self, enmap_ImageL1: EnMAPL1Product_SensorGeo) -> EnMAPL2Product_MapGeo:
         self.validate_input(enmap_ImageL1)
 
@@ -85,36 +95,48 @@ class Orthorectifier(object):
 
         lons_vnir, lats_vnir = enmap_ImageL1.vnir.detector_meta.lons, enmap_ImageL1.vnir.detector_meta.lats
         lons_swir, lats_swir = enmap_ImageL1.swir.detector_meta.lons, enmap_ImageL1.swir.detector_meta.lats
+        if not enmap_ImageL1.vnir.detector_meta.geolayer_has_keystone and lons_vnir.ndim == 3:
+            lons_vnir, lats_vnir = lons_vnir[:, :, 0], lats_vnir[:, :, 0]
+        if not enmap_ImageL1.swir.detector_meta.geolayer_has_keystone and lons_swir.ndim == 3:
+            lons_swir, lats_swir = lons_swir[:, :, 0], lats_swir[:, :, 0]
 
         # get target EPSG code and common extent
+        # (VNIR/SWIR overlap, i.e., INNER extent - non-overlapping parts are cleared later)
         tgt_epsg = enmap_ImageL1.meta.vnir.epsg_ortho
         tgt_extent = self._get_common_extent(enmap_ImageL1, tgt_epsg, enmap_grid=True)
-        kw_init = dict(resamp_alg=self.cfg.ortho_resampAlg,
-                       nprocs=self.cfg.CPUs,
-                       radius_of_influence=30 if not self.cfg.ortho_resampAlg == 'bilinear' else 45
-                       )
-        if self.cfg.ortho_resampAlg == 'bilinear':
-            # increase that if the resampling result contains gaps (default is 32 but this is quite slow)
-            kw_init['neighbours'] = 8
 
-        kw_trafo = dict(tgt_prj=tgt_epsg, tgt_extent=tgt_extent,
-                        tgt_coordgrid=((self.cfg.target_coord_grid['x'], self.cfg.target_coord_grid['y'])
-                                       if self.cfg.target_coord_grid else None)
-                        )
+        # set up parameters for Geometry_Transformer initialization and execution of the transformation
+        kw_init = dict(
+            backend='gdal' if self.cfg.ortho_resampAlg != 'gauss' else 'pyresample',
+            resamp_alg=self.cfg.ortho_resampAlg,
+            nprocs=self.cfg.CPUs
+        )
+        kw_trafo = dict(
+            tgt_prj=tgt_epsg,
+            tgt_extent=tgt_extent,
+            tgt_coordgrid=((self.cfg.target_coord_grid['x'],
+                            self.cfg.target_coord_grid['y'])
+                           if self.cfg.target_coord_grid else
+                           None),
+            src_nodata=enmap_ImageL1.vnir.data.nodata,
+            tgt_nodata=self.cfg.output_nodata_value
+        )
+        # make sure VNIR and SWIR are also transformed to the same lon/lat pixel grid
+        if self.cfg.target_projection_type == 'Geographic' and kw_trafo['tgt_coordgrid'] is None:
+            center_row, center_col = lons_vnir.shape[0] // 2, lons_vnir.shape[1] // 2
+            center_lon, center_lat = lons_vnir[center_row, center_col], lats_vnir[center_row, center_col]
+            kw_trafo['tgt_coordgrid'] = self.get_enmap_coordinate_grid_ll(center_lon, center_lat)
 
         # transform VNIR and SWIR to map geometry
-        GeoTransformer = Geometry_Transformer if lons_vnir.ndim == 2 else Geometry_Transformer_3D
-
-        # FIXME So far, the fill value is set to 0. Is this meaningful?
         enmap_ImageL1.logger.info("Orthorectifying VNIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_vnir = GeoTransformer(lons=lons_vnir, lats=lats_vnir, fill_value=self.cfg.output_nodata_value, **kw_init)
+        GT_vnir = Geometry_Transformer(lons=lons_vnir, lats=lats_vnir, **kw_init)
         vnir_mapgeo_gA = GeoArray(*GT_vnir.to_map_geometry(enmap_ImageL1.vnir.data, **kw_trafo),
                                   nodata=self.cfg.output_nodata_value)
 
         enmap_ImageL1.logger.info("Orthorectifying SWIR data using '%s' resampling algorithm..."
                                   % self.cfg.ortho_resampAlg)
-        GT_swir = GeoTransformer(lons=lons_swir, lats=lats_swir, fill_value=self.cfg.output_nodata_value, **kw_init)
+        GT_swir = Geometry_Transformer(lons=lons_swir, lats=lats_swir, **kw_init)
         swir_mapgeo_gA = GeoArray(*GT_swir.to_map_geometry(enmap_ImageL1.swir.data, **kw_trafo),
                                   nodata=self.cfg.output_nodata_value)
 
@@ -132,9 +154,9 @@ class Orthorectifier(object):
         # TODO allow to set geolayer band to be used for warping of 2D arrays
 
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
-        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
-                            'mask_cirrus', 'polymer_bitmask']
-        kw_init_nearest = dict(resamp_alg='nearest', nprocs=self.cfg.CPUs)
+        rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow',
+                            'mask_haze', 'mask_snow', 'mask_cirrus', 'polymer_bitmask']
+        kw_init_nearest = dict(backend='gdal', resamp_alg='nearest', nprocs=self.cfg.CPUs)
 
         # run the orthorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
@@ -142,14 +164,18 @@ class Orthorectifier(object):
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:
+                kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest
+                kw_trafo_attr = kw_trafo.copy()
+                kw_trafo_attr['src_nodata'] = attr.nodata
+                kw_trafo_attr['tgt_nodata'] = attr.nodata
+
                 GT = Geometry_Transformer(
                     lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
                     lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
-                    fill_value=attr.nodata,
-                    **(kw_init if attrName not in rsp_nearest_list else kw_init_nearest))
+                    **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
-                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo), nodata=attr.nodata)
+                attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo_attr), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
 
         # TODO transform dead pixel map, quality test flags?
@@ -206,9 +232,13 @@ class Orthorectifier(object):
         V_UL_UR_LL_LR_ll = [(V_lons[y, x], V_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
         S_UL_UR_LL_LR_ll = [(S_lons[y, x], S_lats[y, x]) for y, x in [(0, 0), (0, -1), (-1, 0), (-1, -1)]]
 
-        # transform them to UTM
-        V_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in V_UL_UR_LL_LR_ll]
-        S_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in S_UL_UR_LL_LR_ll]
+        # transform them to tgt_epsg
+        if tgt_epsg != 4326:
+            V_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in V_UL_UR_LL_LR_ll]
+            S_UL_UR_LL_LR_prj = [transform_any_prj(4326, tgt_epsg, x, y) for x, y in S_UL_UR_LL_LR_ll]
+        else:
+            V_UL_UR_LL_LR_prj = V_UL_UR_LL_LR_ll
+            S_UL_UR_LL_LR_prj = S_UL_UR_LL_LR_ll
 
         # separate X and Y
         V_X_prj, V_Y_prj = zip(*V_UL_UR_LL_LR_prj)
@@ -216,7 +246,7 @@ class Orthorectifier(object):
 
         # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
         # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
-        #    (these pixels would be set to nodata later anyways, so we don't need to increase the extent for them)
+        #    (these pixels would be set to nodata later anyway, so we don't need to increase the extent for them)
         if V_lons.ndim == 3:
             V_X_prj = (V_X_prj[0].max(), V_X_prj[1].min(), V_X_prj[2].max(), V_X_prj[3].min())
             V_Y_prj = (V_Y_prj[0].min(), V_Y_prj[1].min(), V_Y_prj[2].max(), V_Y_prj[3].max())

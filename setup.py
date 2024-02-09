@@ -59,7 +59,7 @@ req = [
     'py_tools_ds>=0.14.25',
     'scikit-image',
     'scipy',
-    'sensormapgeo>=0.4.0',
+    'sensormapgeo>=1.0.0',
     'sicor>=0.19.1',
     'tqdm',
     'utm',

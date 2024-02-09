@@ -28,7 +28,6 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-import warnings
 from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
@@ -40,8 +39,8 @@ from natsort import natsorted
 import numpy_indexed as npi
 from pyproj import CRS
 
-from sensormapgeo import SensorMapGeometryTransformer, SensorMapGeometryTransformer3D
-from sensormapgeo.transformer_2d import AreaDefinition
+from sensormapgeo import Transformer
+from sensormapgeo.pyresample_backend.transformer_2d import AreaDefinition
 from py_tools_ds.geo.projection import prj_equal
 from py_tools_ds.geo.coord_grid import find_nearest
 from py_tools_ds.geo.coord_trafo import transform_any_prj, transform_coordArray
@@ -51,86 +50,38 @@ from ...options.config import enmap_coordinate_grid_utm
 __author__ = 'Daniel Scheffler'
 
 
-class Geometry_Transformer(SensorMapGeometryTransformer):
+class Geometry_Transformer(Transformer):
     # use Sentinel-2 grid (30m grid with origin at 0/0)
     # EnMAP geolayer contains pixel center coordinate
 
     def to_sensor_geometry(self,
                            path_or_geoarray_mapgeo: Union[str, GeoArray],
+                           src_gt: Tuple[float, float, float, float, float, float] = None,
                            src_prj: Union[str, int] = None,
-                           src_extent: Tuple[float, float, float, float] = None):
+                           src_nodata: int = None,
+                           tgt_nodata: int = None
+                           ) -> np.ndarray:
         data_mapgeo = GeoArray(path_or_geoarray_mapgeo)
 
         if not data_mapgeo.is_map_geo:
             raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
 
-        with warnings.catch_warnings():
-            # FIXME remove that after removing pyresample pinning
-            warnings.filterwarnings('ignore', category=DeprecationWarning,
-                                    message='.*is a deprecated alias for the builtin.*')
-
-            return super().to_sensor_geometry(
-                data_mapgeo[:],
-                src_prj=src_prj or data_mapgeo.prj,
-                src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
+        return super().to_sensor_geometry(
+            data_mapgeo[:],
+            src_gt=src_gt or data_mapgeo.gt,
+            src_prj=src_prj or data_mapgeo.prj,
+            src_nodata=src_nodata,
+            tgt_nodata=tgt_nodata
+        )
 
     def to_map_geometry(self,
                         path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
-                        tgt_prj:  Union[str, int] = None,
+                        tgt_prj: Union[str, int],
                         tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple[float, float] = None,
+                        tgt_res: Tuple = None,
                         tgt_coordgrid: Tuple[Tuple, Tuple] = None,
-                        area_definition: AreaDefinition = None):
-        data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
-
-        if data_sensorgeo.is_map_geo and not data_sensorgeo.is_rotated:
-            raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
-
-        # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
-        with warnings.catch_warnings():
-            # FIXME remove that after removing pyresample pinning
-            warnings.filterwarnings('ignore', category=DeprecationWarning,
-                                    message='.*is a deprecated alias for the builtin.*')
-
-            out_data, out_gt, out_prj = \
-                super(Geometry_Transformer, self).to_map_geometry(data_sensorgeo[:],
-                                                                  tgt_prj=tgt_prj,
-                                                                  tgt_extent=tgt_extent,
-                                                                  tgt_res=tgt_res,
-                                                                  tgt_coordgrid=tgt_coordgrid,
-                                                                  area_definition=self.area_definition)
-
-        return out_data, out_gt, out_prj
-
-
-class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
-    # use Sentinel-2 grid (30m grid with origin at 0/0)
-    # EnMAP geolayer contains pixel center coordinate
-    def to_sensor_geometry(self,
-                           path_or_geoarray_mapgeo: Union[str, GeoArray],
-                           src_prj: Union[str, int] = None,
-                           src_extent: Tuple[float, float, float, float] = None):
-        data_mapgeo = GeoArray(path_or_geoarray_mapgeo)
-
-        if not data_mapgeo.is_map_geo:
-            raise RuntimeError('The dataset to be transformed into sensor geometry already represents sensor geometry.')
-
-        with warnings.catch_warnings():
-            # FIXME remove that after removing pyresample pinning
-            warnings.filterwarnings('ignore', category=DeprecationWarning,
-                                    message='.*is a deprecated alias for the builtin.*')
-
-            return super().to_sensor_geometry(
-                data_mapgeo[:],
-                src_prj=src_prj or data_mapgeo.prj,
-                src_extent=src_extent or list(np.array(data_mapgeo.box.boundsMap)[[0, 2, 1, 3]]))
-
-    def to_map_geometry(self,
-                        path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
-                        tgt_prj:  Union[str, int] = None,
-                        tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple[float, float] = None,
-                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
+                        src_nodata: int = None,
+                        tgt_nodata: int = None,
                         area_definition: AreaDefinition = None
                         ) -> Tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
@@ -139,18 +90,17 @@ class Geometry_Transformer_3D(SensorMapGeometryTransformer3D):
             raise RuntimeError('The dataset to be transformed into map geometry already represents map geometry.')
 
         # run transformation (output extent/area definition etc. is internally computed from the geolayers if not given)
-        with warnings.catch_warnings():
-            # FIXME remove that after removing pyresample pinning
-            warnings.filterwarnings('ignore', category=DeprecationWarning,
-                                    message='.*is a deprecated alias for the builtin.*')
-
-            out_data, out_gt, out_prj = \
-                super(Geometry_Transformer_3D, self).to_map_geometry(data_sensorgeo[:],
-                                                                     tgt_prj=tgt_prj,
-                                                                     tgt_extent=tgt_extent,
-                                                                     tgt_res=tgt_res,
-                                                                     tgt_coordgrid=tgt_coordgrid,
-                                                                     area_definition=area_definition)
+        out_data, out_gt, out_prj = \
+            super().to_map_geometry(
+                data_sensorgeo[:],
+                tgt_prj=tgt_prj,
+                tgt_extent=tgt_extent,
+                tgt_res=tgt_res,
+                tgt_coordgrid=tgt_coordgrid,
+                src_nodata=src_nodata,
+                tgt_nodata=tgt_nodata,
+                area_definition=area_definition
+            )
 
         return out_data, out_gt, out_prj
 
@@ -168,7 +118,9 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  res_vnir: Tuple[float, float],
                  res_swir: Tuple[float, float],
                  resamp_alg: str = 'nearest',
-                 **gt_opts) -> None:
+                 src_nodata: int = None,
+                 tgt_nodata: int = None,
+                 nprocs: int = cpu_count()) -> None:
         """Get an instance of VNIR_SWIR_SensorGeometryTransformer.
 
         :param lons_vnir:   VNIR longitude array corresponding to the sensor geometry arrays passed later (2D or 3D)
@@ -179,9 +131,11 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         :param prj_swir:    projection of the SWIR if it would be transformed to map geometry (WKT string or EPSG code)
         :param res_vnir:    pixel dimensions of the VNIR if it would be transformed to map geometry (X, Y)
         :param res_swir:    pixel dimensions of the SWIR if it would be transformed to map geometry (X, Y)
-        :param resamp_alg:  resampling algorithm ('nearest', 'bilinear', 'gauss', 'custom')
-        :param gt_opts:     additional options to be passed to the Geometric_Transformer class,
-                            e.g., 'fill_value', 'radius_of_influence', 'nprocs'...
+        :param resamp_alg:  resampling algorithm ('nearest', 'near', 'bilinear', 'cubic', 'cubic_spline',
+                            'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
+        :param src_nodata:  nodata value of the input array
+        :param tgt_nodata:  pixel value to be used for undetermined pixels in the output
+        :param nprocs:      number of CPU cores to use
         """
         self.vnir_meta = dict(
             lons=lons_vnir,
@@ -196,7 +150,9 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
             res=res_swir
         )
         self.resamp_alg = resamp_alg
-        self.gt_opts = gt_opts
+        self.src_nodata = src_nodata
+        self.tgt_nodata = tgt_nodata
+        self.cpus = nprocs
 
     def transform_sensorgeo_VNIR_to_SWIR(self, data_vnirsensorgeo: np.ndarray) -> np.ndarray:
         """Transform any array in VNIR sensor geometry to SWIR sensor geometry to remove geometric shifts.
@@ -216,12 +172,15 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
     def _transform_sensorgeo(self,
                              data2transform: np.ndarray,
-                             inputgeo: str) -> np.ndarray:
+                             inputgeo: str,
+                             band_outputgeo: int = 0
+                             ) -> np.ndarray:
         """Transform the input array between VNIR and SWIR sensor geometry.
 
         :param data2transform:  input array to be transformed
         :param inputgeo:        'vnir' if data2transform is given in VNIR sensor geometry
                                 'swir' if data2transform is given in SWIR sensor geometry
+        :param band_outputgeo:  band index of the band from the sensor geometry should be used to generate the output
         """
         # TODO: Avoid the resampling here, maybe by replacing the lon/lat arrays by image coordinates for the source
         #       geometry and by image coordinate differences for the target geometry. Maybe also the proj string for
@@ -232,35 +191,40 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
         src, tgt = (self.vnir_meta, self.swir_meta) if inputgeo == 'vnir' else (self.swir_meta, self.vnir_meta)
 
-        # get 2D or 3D GeoTransformer
+        # get GeoTransformer
+        # NOTE: We can only use a 3D geolayer to temporarily transform to map geometry but not back to sensor geometry
+        #       of the other detector. For this, we need to select the band of which the sensor geometry should be used.
+        def ensure_2d(coord_array):
+            return coord_array if coord_array.ndim == 2 else coord_array[:, :, band_outputgeo]
+
         if data2transform.ndim == 3 and src['lons'].ndim == 3 and src['lons'].shape[2] == data2transform.shape[2]:
-            GT_src = Geometry_Transformer_3D(lons=src['lons'],
-                                             lats=src['lats'],
-                                             resamp_alg=self.resamp_alg,
-                                             **self.gt_opts)
-            GT_tgt = Geometry_Transformer_3D(lons=tgt['lons'],
-                                             lats=tgt['lats'],
-                                             resamp_alg=self.resamp_alg,
-                                             **self.gt_opts)
-
+            src_lons, src_lats = src['lons'], src['lats']
+            tgt_lons, tgt_lats = ensure_2d(tgt['lons']), ensure_2d(tgt['lats'])
         else:
-            def ensure_2D(coord_array):
-                return coord_array if coord_array.ndim == 2 else coord_array[:, :, 0]
+            src_lons, src_lats = ensure_2d(src['lons']), ensure_2d(src['lats'])
+            tgt_lons, tgt_lats = ensure_2d(tgt['lons']), ensure_2d(tgt['lats'])
 
-            GT_src = Geometry_Transformer(lons=ensure_2D(src['lons']),
-                                          lats=ensure_2D(src['lats']),
-                                          resamp_alg=self.resamp_alg,
-                                          **self.gt_opts)
-            GT_tgt = Geometry_Transformer(lons=ensure_2D(tgt['lons']),
-                                          lats=ensure_2D(tgt['lats']),
-                                          resamp_alg=self.resamp_alg,
-                                          **self.gt_opts)
+        GT_src = Geometry_Transformer(src_lons, src_lats, backend='gdal', resamp_alg=self.resamp_alg, nprocs=self.cpus)
+        GT_tgt = Geometry_Transformer(tgt_lons, tgt_lats, backend='gdal', resamp_alg=self.resamp_alg, nprocs=self.cpus)
 
         # temporarily transform the input sensor geometry array to map geometry
-        gA_mapgeo = GeoArray(*GT_src.to_map_geometry(data2transform, tgt_prj=src['prj']))
+        gA_mapgeo = GeoArray(
+            *GT_src.to_map_geometry(
+                data2transform,
+                tgt_prj=src['prj'],
+                src_nodata=self.src_nodata,
+                tgt_nodata=self.tgt_nodata
+            ),
+            nodata=self.tgt_nodata
+        )
 
-        # generate the target sensor geometry array (target lons/lats define the target swath definition)
-        tgt_data_sensorgeo = GT_tgt.to_sensor_geometry(gA_mapgeo)
+        # generate the target sensor geometry array (target lons/lats define the target swath definition
+        tgt_data_sensorgeo =\
+            GT_tgt.to_sensor_geometry(
+                gA_mapgeo,
+                src_nodata=gA_mapgeo._nodata,  # noqa
+                tgt_nodata=self.tgt_nodata
+            )
 
         return tgt_data_sensorgeo
 
@@ -686,7 +650,7 @@ def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float,
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
                                            ) -> List[Tuple[float, float]]:
-    """Compute map coordinates for a given image coordinate pair of an EnMAP image in sensor geometry.
+    """Compute map coordinates for a given image coordinate-pair of an EnMAP image in sensor geometry.
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
     :param rpc_coeffs:              RPC coefficients describing the relation between sensor and map geometry

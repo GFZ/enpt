@@ -292,7 +292,7 @@ class AtmosphericCorrector(object):
         :return:    atmospherically corrected output EnMAP image containing BOA reflectance / water leaving reflectance
                     (an instance EnMAPL1Product_SensorGeo)
         """
-        enmap_ImageL1.set_SWIRattr_with_transformedVNIRattr('mask_landwater')
+        enmap_ImageL1.set_SWIRattr_with_transformedVNIRattr('mask_landwater', src_nodata=0, tgt_nodata=0)
 
         enmap_ImageL1.logger.info(
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
