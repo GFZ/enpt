@@ -233,9 +233,10 @@ class EnPTConfig(object):
 
         :key output_interleave:
             raster data interleaving type (default: 'pixel')
-            - 'band': band-sequential (BSQ),
-            - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
-            - 'pixel' data interleaved-by-pixel (BIP)
+
+                - 'band': band-sequential (BSQ),
+                - 'line': data interleaved-by-line (BIL; only usable for ENVI output format),
+                - 'pixel' data interleaved-by-pixel (BIP)
 
         :key output_nodata_value:
             output no-data/background value (should be within the integer 16-bit range, default: -32768)
@@ -284,11 +285,12 @@ class EnPTConfig(object):
 
         :key mode_ac:
             3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
-            - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
-            - 'water': POLYMER (developed for water surfaces) is applied to water only
-                       (land surfaces are no included in the L2A product)
-            - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
-                          NOTE that this may result in edge effects, e.g., at coastlines
+
+                - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
+                - 'water': POLYMER (developed for water surfaces) is applied to water only
+                           (land surfaces are no included in the L2A product)
+                - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
+                              NOTE that this may result in edge effects, e.g., at coastlines
 
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
@@ -301,9 +303,10 @@ class EnPTConfig(object):
 
         :key threads:
             number of threads for multiprocessing of blocks (see bellow):
-            - 'threads = 0': for single thread
-            - 'threads < 0': for as many threads as there are CPUs
-            - 'threads > 0': gives the number of threads
+
+                - 'threads = 0': for single thread
+                - 'threads < 0': for as many threads as there are CPUs
+                - 'threads > 0': gives the number of threads
 
         :key blocksize:
             block size for multiprocessing
