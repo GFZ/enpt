@@ -2,8 +2,8 @@
 History
 =======
 
-0.20.0 (coming soon)
---------------------
+0.20.0 (2024-02-09)
+-------------------
 
 * !103: Revised the EnPT orthorectification to support the completely re-implemented sensormapgeo package (v1.0.0),
   which leads to 30-50x faster orthorectification and adds support for all GDAL-supported resampling techniques.
