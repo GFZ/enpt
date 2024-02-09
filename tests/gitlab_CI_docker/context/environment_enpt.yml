@@ -36,6 +36,7 @@ dependencies:
   - pylint
   - pytest
   - pytest-cov
+  - selenium  # temporary workaround for https://github.com/conda-forge/urlchecker-feedstock/pull/19
   - sphinx-argparse
   - sphinx_rtd_theme
   - urlchecker
