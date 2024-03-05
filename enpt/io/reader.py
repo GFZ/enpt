@@ -33,7 +33,6 @@ import logging
 import os
 from fnmatch import filter
 import numpy as np
-from scipy.interpolate import interp1d
 
 from ..model.images import EnMAPL1Product_SensorGeo
 from ..options.config import EnPTConfig
@@ -162,14 +161,14 @@ class L1B_Reader(object):
         pass
 
 
-def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float = None, wvl_min_nm: float = None,
-                            wvl_max_nm: float = None) -> np.ndarray:
+def read_solar_irradiance(path_solar_irr_model: str, resol_nm: float = None, wvl_min_nm: float = None,
+                          wvl_max_nm: float = None) -> np.ndarray:
     """Read the given solar irradiance file and return an array of irradiances.
 
     :param path_solar_irr_model:    file path to solar irradiance model
 
                                     -> must be arranged like that:
-                                       col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm])
+                                       col0 = Wavelength[nm]; col1 = Solar Irradiance [W/m2/µm]
     :param resol_nm:                spectral resolution for returned irradiances [nanometers]
     :param wvl_min_nm:              minimum wavelength of returned irradiances [nanometers]
     :param wvl_max_nm:              maximum wavelength of returned irradiances [nanometers]
@@ -180,5 +179,5 @@ def Solar_Irradiance_reader(path_solar_irr_model: str, resol_nm: float = None, w
         wvl_min = (np.min(sol_irr[:, 0]) if wvl_min_nm is None else wvl_min_nm)
         wvl_max = (np.max(sol_irr[:, 0]) if wvl_max_nm is None else wvl_max_nm)
         wvl_rsp = np.arange(wvl_min, wvl_max, resol_nm)
-        sol_irr = interp1d(sol_irr[:, 0], sol_irr[:, 1], kind='linear')(wvl_rsp)
+        sol_irr = np.interp(wvl_rsp, sol_irr[:, 0], sol_irr[:, 1])
     return sol_irr

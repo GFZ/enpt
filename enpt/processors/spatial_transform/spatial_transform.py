@@ -32,7 +32,7 @@ from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
-from scipy.interpolate import interp1d, LinearNDInterpolator
+from scipy.interpolate import LinearNDInterpolator, make_interp_spline
 from scipy.spatial import Delaunay
 from geoarray import GeoArray
 from natsort import natsorted
@@ -405,26 +405,27 @@ class RPC_Geolayer_Generator(object):
             raise ValueError(arr.ndim, '2D numpy array expected.')
         if along_axis not in [0, 1]:
             raise ValueError(along_axis, "The 'axis' parameter must be set to 0 or 1")
-
-        kw = dict(kind='linear', fill_value='extrapolate')
+        arr[0, 0] = np.nan
+        arr[0, 1] = np.nan
+        arr[1, 1] = np.nan
         nans = np.isnan(arr)
 
         if along_axis == 0:
-            # extrapolate in top/bottom direction
+            # extrapolate linearly in top/bottom direction
             cols_with_nan = np.arange(arr.shape[1])[np.any(nans, axis=0)]
 
             for col in cols_with_nan:
                 data = arr[:, col]
                 idx_goodvals = np.argwhere(~nans[:, col]).flatten()
-                arr[:, col] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
+                arr[:, col] = make_interp_spline(idx_goodvals, data[idx_goodvals], k=1)(range(data.size))
         else:
-            # extrapolate in left/right direction
+            # extrapolate linearly in left/right direction
             rows_with_nan = np.arange(arr.shape[0])[np.any(nans, axis=1)]
 
             for row in rows_with_nan:
                 data = arr[row, :]
                 idx_goodvals = np.argwhere(~nans[row, :]).flatten()
-                arr[row, :] = interp1d(idx_goodvals, data[idx_goodvals], **kw)(range(data.size))
+                arr[row, :] = make_interp_spline(idx_goodvals, data[idx_goodvals], k=1)(range(data.size))
 
         return arr
 
