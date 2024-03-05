@@ -117,7 +117,7 @@ class Dead_Pixel_Corrector(object):
         if deadpixel_map.shape != image2correct.shape:
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
 
-        band_indices_with_nodata = np.argwhere(np.any(np.any(deadpixel_map, axis=0), axis=0)).flatten()
+        band_indices_with_nodata = np.argwhere(np.any(np.any(deadpixel_map[:], axis=0), axis=0)).flatten()
         image_sub = image2correct[:, :, band_indices_with_nodata]
         deadpixel_map_sub = deadpixel_map[:, :, band_indices_with_nodata]
 
