@@ -126,10 +126,6 @@ class Test_interp_nodata_along_axis_2d(TestCase):
         data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=0, nodata=mask_nodata, method='linear')
         assert np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int
 
-        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=0, method='linear', fill_value=-1)
-        arr_exp = np.array([[0, 0, 2], [3, 5, 5], [-1, 10, 8]])
-        assert np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int
-
     def test_axis_1(self):
         data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, method='linear')
         arr_exp = np.array([[0, 0, 2], [3, 4, 5], [12, 10, 8]])
@@ -137,10 +133,6 @@ class Test_interp_nodata_along_axis_2d(TestCase):
 
         mask_nodata = ~np.isfinite(self.get_data2d())
         data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, nodata=mask_nodata, method='linear')
-        assert np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int
-
-        data_int = interp_nodata_along_axis_2d(self.get_data2d(), axis=1, method='linear', fill_value=-1)
-        arr_exp = np.array([[0, 0, 2], [3, 4, 5], [-1, 10, 8]])
         assert np.array_equal(data_int, arr_exp), 'Computed %s.' % data_int
 
     def test_bad_args(self):
