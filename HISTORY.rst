@@ -2,6 +2,12 @@
 History
 =======
 
+0.20.1 (2024-03-05)
+-------------------
+
+* !105: Replaced legacy scipy.interpolate.interp1d with similar 1-dimensional interpolation functions.
+
+
 0.20.0 (2024-02-09)
 -------------------
 

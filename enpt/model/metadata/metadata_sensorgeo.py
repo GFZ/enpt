@@ -384,11 +384,10 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             return gA
 
         else:
-            from scipy.interpolate import interp1d
-            coeffs_interp = \
-                interp1d(gA.meta.band_meta['wavelength'], gA[:],
-                         axis=2, kind='linear', fill_value="extrapolate", bounds_error=False)(self.wvl_center)
-
+            from scipy.interpolate import make_interp_spline
+            # equivalent to legacy scipy.interpolate.interp1d
+            # interp1d(wvl, gA[:], axis=2, kind='linear', fill_value="extrapolate", bounds_error=False)(self.wvl_center)
+            coeffs_interp = make_interp_spline(gA.meta.band_meta['wavelength'], gA[:], k=1, axis=2)(self.wvl_center)
             gA_ = GeoArray(coeffs_interp)
             gA_.meta.band_meta['wavelength'] = self.wvl_center
 
@@ -444,11 +443,11 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         return lons, lats
 
     def calc_solar_irradiance_CWL_FWHM_per_band(self) -> np.array:
-        from ...io.reader import Solar_Irradiance_reader
+        from ...io.reader import read_solar_irradiance
 
         self.logger.debug('Calculating solar irradiance...')
 
-        sol_irr = Solar_Irradiance_reader(path_solar_irr_model=self.cfg.path_solar_irr, wvl_min_nm=350, wvl_max_nm=2500)
+        sol_irr = read_solar_irradiance(path_solar_irr_model=self.cfg.path_solar_irr, wvl_min_nm=350, wvl_max_nm=2500)
 
         irr_bands = []
         for band in self.srf.bands:

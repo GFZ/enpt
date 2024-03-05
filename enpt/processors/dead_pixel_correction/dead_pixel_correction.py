@@ -34,13 +34,15 @@ Performs the Dead Pixel Correction using a linear interpolation in spectral dime
 from typing import Union
 from numbers import Number  # noqa: F401
 import logging
+from warnings import filterwarnings
 
 import numpy as np
 import numpy_indexed as npi
 from multiprocessing import Pool, cpu_count
-from scipy.interpolate import griddata, interp1d
-from pandas import DataFrame
-from geoarray import GeoArray
+from scipy.interpolate import griddata, make_interp_spline
+filterwarnings("ignore", "\nPyArrow", DeprecationWarning)  # mute pandas warning
+from pandas import DataFrame  # noqa: E402
+from geoarray import GeoArray  # noqa: E402
 
 __author__ = 'Daniel Scheffler'
 
@@ -70,8 +72,7 @@ class Dead_Pixel_Corrector(object):
         :param algorithm:           algorithm how to correct dead pixels
                                     'spectral': interpolate in the spectral domain
                                     'spatial':  interpolate in the spatial domain
-        :param interp_spectral:     spectral interpolation algorithm
-                                    (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
+        :param interp_spectral:     spectral interpolation algorithm (‘linear’, ‘quadratic’, ‘cubic’)
         :param interp_spatial:      spatial interpolation algorithm ('linear', 'bilinear', 'cubic', 'spline')
         :param CPUs:                number of CPUs to use for interpolation (only relevant if algorithm = 'spatial')
         :param logger:
@@ -106,7 +107,7 @@ class Dead_Pixel_Corrector(object):
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
 
         image_corrected = interp_nodata_along_axis(image2correct, axis=2, nodata=deadpixel_map[:],
-                                                   method=self.interp_alg_spectral, fill_value='extrapolate')
+                                                   method=self.interp_alg_spectral)
 
         return image_corrected
 
@@ -117,7 +118,7 @@ class Dead_Pixel_Corrector(object):
         if deadpixel_map.shape != image2correct.shape:
             raise ValueError("Dead pixel map and image to be corrected must have equal shape.")
 
-        band_indices_with_nodata = np.argwhere(np.any(np.any(deadpixel_map, axis=0), axis=0)).flatten()
+        band_indices_with_nodata = np.argwhere(np.any(np.any(deadpixel_map[:], axis=0), axis=0)).flatten()
         image_sub = image2correct[:, :, band_indices_with_nodata]
         deadpixel_map_sub = deadpixel_map[:, :, band_indices_with_nodata]
 
@@ -136,7 +137,7 @@ class Dead_Pixel_Corrector(object):
         # correct remaining nodata by spectral interpolation (e.g., outermost columns)
         if np.isnan(image2correct).any():
             image2correct = interp_nodata_along_axis(image2correct, axis=2, nodata=np.isnan(image2correct),
-                                                     method=self.interp_alg_spectral, fill_value='extrapolate')
+                                                     method=self.interp_alg_spectral)
 
         return image2correct
 
@@ -205,21 +206,24 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray,
                                 axis: int = 0,
                                 nodata: Union[np.ndarray, Number] = np.nan,
                                 method: str = 'linear',
-                                fill_value: Union[float, str] = 'extrapolate'):
-    """Interpolate a 2D array along the given axis (based on scipy.interpolate.interp1d).
+                                **kw):
+    """Interpolate a 2D array along the given axis (based on scipy.interpolate.make_interp_spline).
 
     :param data_2d:         data to interpolate
     :param axis:            axis to interpolate (0: along columns; 1: along rows)
     :param nodata:          nodata array in the shape of data or nodata value
-    :param method:          interpolation method (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
-    :param fill_value:      value to fill into positions where no interpolation is possible
-                            - if 'extrapolate': extrapolate the missing values
+    :param method:          interpolation method (‘linear’, ‘quadratic’, ‘cubic’)
+    :param kw:              keyword arguments to be passed to scipy.interpolate.make_interp_spline
     :return:    interpolated array
     """
     if data_2d.ndim != 2:
         raise ValueError('Expected a 2D array. Received a %dD array.' % data_2d.ndim)
     if axis > data_2d.ndim:
         raise ValueError("axis=%d is out of bounds for data with %d dimensions." % (axis, data_2d.ndim))
+    if method not in ['linear', 'quadratic', 'cubic']:
+        raise ValueError(f"'{method}' is not a valid interpolation method. "
+                         f"Choose between 'linear', 'quadratic', and 'cubic'.")
+    degree = 1 if method == 'linear' else 2 if method == 'quadratic' else 3
 
     data_2d = data_2d if axis == 1 else data_2d.T
 
@@ -240,10 +244,8 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray,
 
             if goodpos.size > 1:
                 data_2d_grouped_rows = data_2d[indices_unique_rows]
-
                 data_2d_grouped_rows[:, badpos] = \
-                    interp1d(goodpos, data_2d_grouped_rows[:, goodpos],
-                             axis=1, kind=method, fill_value=fill_value, bounds_error=False)(badpos)
+                    make_interp_spline(goodpos, data_2d_grouped_rows[:, goodpos], axis=1, k=degree, **kw)(badpos)
 
                 data_2d[indices_unique_rows, :] = data_2d_grouped_rows
 
@@ -254,15 +256,14 @@ def interp_nodata_along_axis(data,
                              axis=0,
                              nodata: Union[np.ndarray, Number] = np.nan,
                              method: str = 'linear',
-                             fill_value: Union[float, str] = 'extrapolate'):
-    """Interpolate a 2D or 3D array along the given axis (based on scipy.interpolate.interp1d).
+                             **kw):
+    """Interpolate a 2D or 3D array along the given axis (based on scipy.interpolate.make_interp_spline).
 
     :param data:            data to interpolate
     :param axis:            axis to interpolate (0: along columns; 1: along rows, 2: along bands)
     :param nodata:          nodata array in the shape of data or nodata value
-    :param method:          interpolation method (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, etc.)
-    :param fill_value:      value to fill into positions where no interpolation is possible
-                            - if 'extrapolate': extrapolate the missing values
+    :param method:          interpolation method (‘linear’, 'quadratic', 'cubic')
+    :param kw:              keyword arguments to be passed to scipy.interpolate.make_interp_spline
     :return:    interpolated array
     """
     assert axis <= 2
@@ -272,7 +273,7 @@ def interp_nodata_along_axis(data,
         raise ValueError('No-data mask and data must have the same shape.')
 
     if data.ndim == 2:
-        return interp_nodata_along_axis_2d(data, axis=axis, nodata=nodata, method=method, fill_value=fill_value)
+        return interp_nodata_along_axis_2d(data, axis=axis, nodata=nodata, method=method, **kw)
 
     else:
         def reshape_input(In):
@@ -293,7 +294,7 @@ def interp_nodata_along_axis(data,
                     data_2d=reshape_input(data),
                     nodata=reshape_input(nodata) if isinstance(nodata, np.ndarray) else nodata,
                     axis=axis if axis != 2 else 1,
-                    method=method, fill_value=fill_value))
+                    method=method, **kw))
 
 
 def interp_nodata_spatially_2d(data_2d: np.ndarray,
