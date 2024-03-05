@@ -106,7 +106,7 @@ enpt_schema_input = dict(
                     run_processor=dict(type='boolean', required=False),
                     algorithm=dict(type='string', required=False, allowed=['spectral', 'spatial']),
                     interp_method_spectral=dict(type='string', required=False,
-                                                allowed=['linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic']),
+                                                allowed=['linear', 'quadratic', 'cubic']),
                     interp_method_spatial=dict(type='string', required=False,
                                                allowed=['linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic']),
                 )),

@@ -84,7 +84,7 @@
                                         'spectral': interpolate in the spectral domain
                                         'spatial':  interpolate in the spatial domain*/
             "interp_method_spectral": "linear",  /*spectral interpolation algorithm
-                                                   ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
+                                                   ('linear', 'quadratic', 'cubic')*/
             "interp_method_spatial": "linear"  /*spatial interpolation algorithm
                                                  ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
         },

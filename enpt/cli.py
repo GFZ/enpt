@@ -135,7 +135,7 @@ def get_enpt_argparser():
         help="Algorithm for dead pixel correction ('spectral' or 'spatial')")
     add('--deadpix_P_interp_spectral', type=str, default="linear",
         help="Spectral interpolation algorithm to be used during dead pixel correction "
-             "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")
+             "('linear', 'quadratic', 'cubic')")
     add('--deadpix_P_interp_spatial', type=str, default="linear",
         help="Spatial interpolation algorithm to be used during dead pixel correction "
              "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")

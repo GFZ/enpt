@@ -322,7 +322,7 @@ class EnPTConfig(object):
 
         :key deadpix_P_interp_spectral:
             Spectral interpolation algorithm to be used during dead pixel correction
-             ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
+             ('linear', 'quadratic', 'cubic')
 
         :key deadpix_P_interp_spatial:
             Spatial interpolation algorithm to be used during dead pixel correction
