@@ -34,13 +34,15 @@ Performs the Dead Pixel Correction using a linear interpolation in spectral dime
 from typing import Union
 from numbers import Number  # noqa: F401
 import logging
+from warnings import filterwarnings
 
 import numpy as np
 import numpy_indexed as npi
 from multiprocessing import Pool, cpu_count
 from scipy.interpolate import griddata, make_interp_spline
-from pandas import DataFrame
-from geoarray import GeoArray
+filterwarnings("ignore", "\nPyArrow", DeprecationWarning)  # mute pandas warning
+from pandas import DataFrame  # noqa: E402
+from geoarray import GeoArray  # noqa: E402
 
 __author__ = 'Daniel Scheffler'
 
