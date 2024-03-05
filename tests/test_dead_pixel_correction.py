@@ -143,6 +143,7 @@ class Test_interp_nodata_along_axis_2d(TestCase):
         with pytest.raises(ValueError):
             interp_nodata_along_axis_2d(self.get_data2d(), method='unsupported_method')
 
+
 class Test_interp_nodata_along_axis(TestCase):
     @staticmethod
     def get_data3d():
