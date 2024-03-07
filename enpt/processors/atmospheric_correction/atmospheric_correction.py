@@ -298,8 +298,7 @@ class AtmosphericCorrector(object):
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
-        # set initial values for land_additional_results and water_additional_results
-        land_additional_results = None
+        # set initial value water_additional_results
         water_additional_results = None
 
         # run the AC
