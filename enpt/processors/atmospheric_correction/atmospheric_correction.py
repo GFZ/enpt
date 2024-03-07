@@ -138,7 +138,7 @@ class AtmosphericCorrector(object):
 
         return True
 
-    def _run_AC__land_mode(self,
+    def _run_ac__land_mode(self,
                            enmap_ImageL1: EnMAPL1Product_SensorGeo
                            ) -> (np.ndarray, np.ndarray, dict):
         """Run atmospheric correction in 'land' mode, i.e., use SICOR for all surfaces."""
@@ -166,7 +166,7 @@ class AtmosphericCorrector(object):
 
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
-    def _run_AC__water_mode(self, enmap_ImageL1: EnMAPL1Product_SensorGeo
+    def _run_ac__water_mode(self, enmap_ImageL1: EnMAPL1Product_SensorGeo
                             ) -> (np.ndarray, np.ndarray):
         """Run atmospheric correction in 'water' mode, i.e., use ACWater/Polymer for water surfaces only.
 
@@ -208,7 +208,7 @@ class AtmosphericCorrector(object):
 
         return wl_ref_vnir, wl_ref_swir, water_additional_results
 
-    def _run_AC__combined_mode(self,
+    def _run_ac__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
                                ) -> (np.ndarray, np.ndarray, dict):
         """Run atmospheric corr. in 'combined' mode, i.e., use SICOR for land and ACWater/Polymer for water surfaces.
@@ -270,7 +270,7 @@ class AtmosphericCorrector(object):
         return wlboa_ref_vnir, wlboa_ref_swir, water_additional_results, land_additional_results
 
     @staticmethod
-    def _validate_AC_results(reflectance_vnir: np.ndarray,
+    def _validate_ac_results(reflectance_vnir: np.ndarray,
                              reflectance_swir: np.ndarray,
                              logger: Logger):
         for detectordata, detectorname in zip([reflectance_vnir, reflectance_swir],
@@ -298,8 +298,7 @@ class AtmosphericCorrector(object):
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
-        # set initial values for land_additional_results and water_additional_results
-        land_additional_results = None
+        # set initial value water_additional_results
         water_additional_results = None
 
         # run the AC
@@ -308,20 +307,20 @@ class AtmosphericCorrector(object):
         if self.cfg.mode_ac in ['water', 'combined'] and not acwater_operable:
             # use SICOR as fallback AC for water surfaces if ACWater/Polymer is not installed
             reflectance_vnir, reflectance_swir, land_additional_results = \
-                self._run_AC__land_mode(enmap_ImageL1)
+                self._run_ac__land_mode(enmap_ImageL1)
 
         else:
             if self.cfg.mode_ac == 'combined':
                 reflectance_vnir, reflectance_swir, water_additional_results, land_additional_results = \
-                    self._run_AC__combined_mode(enmap_ImageL1)
+                    self._run_ac__combined_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'water':
                 reflectance_vnir, reflectance_swir, water_additional_results = \
-                    self._run_AC__water_mode(enmap_ImageL1)
+                    self._run_ac__water_mode(enmap_ImageL1)
 
             elif self.cfg.mode_ac == 'land':
                 reflectance_vnir, reflectance_swir, land_additional_results = \
-                    self._run_AC__land_mode(enmap_ImageL1)
+                    self._run_ac__land_mode(enmap_ImageL1)
 
             else:
                 raise ValueError(self.cfg.mode_ac,
@@ -329,7 +328,7 @@ class AtmosphericCorrector(object):
                                  "Choose one out of 'land', 'water', 'combined'.")
 
         # validate outputs
-        self._validate_AC_results(reflectance_vnir, reflectance_swir, logger=enmap_ImageL1.logger)
+        self._validate_ac_results(reflectance_vnir, reflectance_swir, logger=enmap_ImageL1.logger)
 
         # join results
         enmap_ImageL1.logger.info('Joining results of atmospheric correction.')
