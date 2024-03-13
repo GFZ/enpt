@@ -34,6 +34,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from multiprocessing import cpu_count
+from typing import List
 
 from isofit.utils.apply_oe import apply_oe
 
@@ -58,50 +59,37 @@ class IsofitEnMAP(object):
                   input_loc: str,
                   input_obs: str,
                   working_directory: str,
-                  surface_path: str,
-                  wavelength_path: str,
-                  log_file: str,
+                  sensor: str = 'enmap',
+                  copy_input_files: bool = False,
+                  modtran_path: str = None,
+                  wavelength_path: str = None,
+                  surface_category: str = 'multicomponent_surface',
+                  aerosol_climatology_path: str = None,
+                  rdn_factors_path: str = None,
+                  surface_path: str = None,
+                  atmosphere_type: str = 'ATM_MIDLAT_SUMMER',
+                  channelized_uncertainty_path: str = None,
+                  model_discrepancy_path: str = None,
+                  lut_config_file: str = None,
+                  multiple_restarts: bool = False,
+                  logging_level: str = 'INFO',
+                  log_file: str = None,
                   n_cores: int = cpu_count(),
-                  lut_config_file: str = None
+                  num_cpus: int = 1,
+                  memory_gb: int = -1,
+                  presolve: bool = False,
+                  empirical_line: bool = False,
+                  analytical_line: bool = False,
+                  ray_temp_dir: str = "/tmp/ray",
+                  emulator_base: str = None,
+                  segmentation_size: int = 40,
+                  num_neighbors: List[int] = None,
+                  atm_sigma: List[float] = [2],
+                  pressure_elevation: bool = False,
+                  prebuilt_lut: str = None
                   ):
-        apply_oe(
-            SimpleNamespace(**dict(
-                input_radiance=input_radiance,
-                input_loc=input_loc,
-                input_obs=input_obs,
-                working_directory=working_directory,
-                sensor='enmap',
-                surface_path=surface_path,
-                wavelength_path=wavelength_path,
-                n_cores=n_cores,
-                presolve=True,
-                emulator_base='',
-                log_file=log_file,
-                pressure_elevation=True,
-                lut_config_file=lut_config_file,
-
-                # defaults
-                copy_input_files=False,
-                modtran_path=None,
-                surface_category='multicomponent_surface',
-                aerosol_climatology_path=None,
-                rdn_factors_path=None,
-                atmosphere_type='ATM_MIDLAT_SUMMER',
-                channelized_uncertainty_path=None,
-                model_discrepancy_path=None,
-                multiple_restarts=False,
-                logging_level='INFO',
-                num_cpus=1,
-                memory_gb=-1,
-                empirical_line=False,
-                analytical_line=False,
-                ray_temp_dir="/tmp/ray",
-                segmentation_size=40,
-                num_neighbors=None,
-                atm_sigma=[2],
-                prebuilt_lut=''
-            ))
-        )
+        params = dict([x for x in locals().items() if not x[0].startswith('__')])
+        apply_oe(SimpleNamespace(**params))
 
     def run(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         with TemporaryDirectory() as td:
