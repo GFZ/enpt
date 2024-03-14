@@ -33,8 +33,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 """
 from types import SimpleNamespace
 from tempfile import TemporaryDirectory
-from multiprocessing import cpu_count
-from typing import List
+from typing import Tuple
 
 from isofit.utils.apply_oe import apply_oe
 
@@ -74,7 +73,7 @@ class IsofitEnMAP(object):
                   multiple_restarts: bool = False,
                   logging_level: str = 'INFO',
                   log_file: str = None,
-                  n_cores: int = cpu_count(),
+                  n_cores: int = 1,
                   num_cpus: int = 1,
                   memory_gb: int = -1,
                   presolve: bool = False,
@@ -83,8 +82,8 @@ class IsofitEnMAP(object):
                   ray_temp_dir: str = "/tmp/ray",
                   emulator_base: str = None,
                   segmentation_size: int = 40,
-                  num_neighbors: List[int] = None,
-                  atm_sigma: List[float] = [2],
+                  num_neighbors: Tuple[int] = (),
+                  atm_sigma: Tuple[float] = (2.0,),
                   pressure_elevation: bool = False,
                   prebuilt_lut: str = None
                   ):
