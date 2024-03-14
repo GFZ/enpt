@@ -34,16 +34,19 @@ Performs the atmospheric correction of EnMAP L1B data.
 from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from typing import Tuple
+from fnmatch import fnmatch
+import os
+import subprocess
+from glob import glob
 
 from isofit.utils.apply_oe import apply_oe
+import isofit
+import ray
 
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
 
 __author__ = 'Daniel Scheffler'
-
-
-
 
 
 class IsofitEnMAP(object):
@@ -52,6 +55,19 @@ class IsofitEnMAP(object):
     def __init__(self, config: EnPTConfig = None):
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
+
+        os.environ['SIXS_DIR'] = "/home/gfz-fe/scheffler/6sV2.1"
+
+        # workaround for current bug in ISOFIT
+        # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/
+        isofit_root = isofit.__path__[0]  # .../site-packages/isofit
+        os.environ['ISOFIT_DIR'] = isofit_root
+
+        if not glob(os.path.join(isofit_root, '..', 'data', '*')):
+            subprocess.call('isofit download data', shell=True)
+        if not glob(os.path.join(isofit_root, '..', 'examples', '*')):
+            subprocess.call('isofit download examples', shell=True)
+
 
     @staticmethod
     def _apply_oe(input_radiance: str,
@@ -87,8 +103,25 @@ class IsofitEnMAP(object):
                   pressure_elevation: bool = False,
                   prebuilt_lut: str = None
                   ):
-        params = dict([x for x in locals().items() if not x[0].startswith('__')])
-        apply_oe(SimpleNamespace(**params))
+        params = {k: v for k, v in locals().items() if not k.startswith('__')}
+
+        try:
+            apply_oe(SimpleNamespace(**params))
+
+        except FileNotFoundError as e:
+            print('Attempt to run apply_oe() failed due to FileNotFoundError. Stopping ray.')
+            if fnmatch(os.path.dirname(e.filename), '*/site-packages/data'):
+                raise FileNotFoundError(e.filename,
+                                        'The ISOFIT extra-files (data directory) are not properly downloaded.')
+            elif fnmatch(os.path.dirname(e.filename), '*/site-packages/examples'):
+                raise FileNotFoundError(e.filename,
+                                        'The ISOFIT extra-files (examples directory) are not properly downloaded.')
+            else:
+                raise
+        
+        finally:
+            print('Stopping ray due to unsuccessful apply_oe call.')
+            ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def run(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         with TemporaryDirectory() as td:
