@@ -63,9 +63,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
     def test_run_isofit(self):
         with TemporaryDirectory() as td:
-            from geoarray import GeoArray
-            gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
-            gA.show()
+            # from geoarray import GeoArray
+            # gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
+            # gA.show()
 
             IsofitEnMAP()._apply_oe(
                 # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil',
