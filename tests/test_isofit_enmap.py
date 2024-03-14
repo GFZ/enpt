@@ -76,7 +76,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
                 wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
                 log_file=os.path.join(td, 'isofit.log'),
-                # lut_config_file=os.path.join(td, 'lut_config_file.nc'),
+                presolve=True,
+                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',  # FIXME why not /home/gfz-fe/scheffler/sRTMnet_v100/
+                n_cores=30
             )
 
 
