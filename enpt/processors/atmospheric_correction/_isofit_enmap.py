@@ -56,13 +56,12 @@ class IsofitEnMAP(object):
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
 
-        os.environ['SIXS_DIR'] = "/home/gfz-fe/scheffler/6sV2.1"
+        os.environ['SIXS_DIR'] = "/home/gfz-fe/scheffler/6sV2.1"  # FIXME hardcoded
+        # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100'  # duplicate of emulator_base
 
-        # workaround for current bug in ISOFIT
-        # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/
+        # make sure ISOFIT's extra-files are downloaded
+        # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/, not at ../site-packages/isofit
         isofit_root = isofit.__path__[0]  # .../site-packages/isofit
-        os.environ['ISOFIT_DIR'] = isofit_root
-
         if not glob(os.path.join(isofit_root, '..', 'data', '*')):
             subprocess.call('isofit download data', shell=True)
         if not glob(os.path.join(isofit_root, '..', 'examples', '*')):
