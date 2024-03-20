@@ -121,7 +121,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
             path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
         )
-        breakpoint()
 
 
 if __name__ == '__main__':
