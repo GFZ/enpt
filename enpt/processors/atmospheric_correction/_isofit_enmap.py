@@ -259,8 +259,10 @@ class IsofitEnMAP(object):
                     #         prior_mean='TBD',  # TODO
                     #     )
                     # ),
-                    surface=path_surface_file
-                )
+                ),
+                surface=dict(
+                    surface_file=path_surface_file
+                ),
             ),
             implementation=dict(
                 debug_mode=False,
