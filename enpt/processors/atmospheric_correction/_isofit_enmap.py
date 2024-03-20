@@ -108,7 +108,7 @@ class IsofitEnMAP(object):
             apply_oe(SimpleNamespace(**params))
 
         except FileNotFoundError as e:
-            print('Attempt to run apply_oe() failed due to FileNotFoundError. Stopping ray.')
+            print('Attempt to run apply_oe() failed due to FileNotFoundError.')
             if fnmatch(os.path.dirname(e.filename), '*/site-packages/data'):
                 raise FileNotFoundError(e.filename,
                                         'The ISOFIT extra-files (data directory) are not properly downloaded.')
@@ -119,7 +119,7 @@ class IsofitEnMAP(object):
                 raise
         
         finally:
-            print('Stopping ray due to unsuccessful apply_oe call.')
+            print('Stopping ray.')
             ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def run(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
