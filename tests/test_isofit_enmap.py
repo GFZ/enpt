@@ -110,6 +110,19 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
         IsofitEnMAP().apply_oe_on_map_geometry(L2_obj)
 
+    def test_run(self):
+        IsofitEnMAP().run(
+            path_toarad='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ__subX0-10Y0-10.bsq',
+            path_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub__subX0-10Y0-10.bsq',
+            path_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq',
+            path_outdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/output/',
+            path_workdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/workdir/',
+            path_enmap_wavelengths='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
+            path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+            path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
+        )
+        breakpoint()
+
 
 if __name__ == '__main__':
     import pytest

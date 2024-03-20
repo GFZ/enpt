@@ -31,20 +31,25 @@
 
 Performs the atmospheric correction of EnMAP L1B data.
 """
+import shutil
 from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from typing import Tuple
 from fnmatch import fnmatch
 import os
+from os.path import join as pjoin
 import subprocess
 from glob import glob
+import json
+from collections.abc import Mapping
 
+from isofit.core.isofit import Isofit
 from isofit.utils.apply_oe import apply_oe
 import isofit
 import ray
 
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
-from ...options.config import EnPTConfig
+from ...options.config import EnPTConfig, path_enptlib
 
 __author__ = 'Daniel Scheffler'
 
@@ -62,9 +67,9 @@ class IsofitEnMAP(object):
         # make sure ISOFIT's extra-files are downloaded
         # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/, not at ../site-packages/isofit
         isofit_root = isofit.__path__[0]  # .../site-packages/isofit
-        if not glob(os.path.join(isofit_root, '..', 'data', '*')):
+        if not glob(pjoin(isofit_root, '..', 'data', '*')):
             subprocess.call('isofit download data', shell=True)
-        if not glob(os.path.join(isofit_root, '..', 'examples', '*')):
+        if not glob(pjoin(isofit_root, '..', 'examples', '*')):
             subprocess.call('isofit download examples', shell=True)
 
 
@@ -137,3 +142,105 @@ class IsofitEnMAP(object):
 
 
             self._apply_oe()
+
+    @staticmethod
+    def run(path_toarad: str,
+            path_loc: str,
+            path_obs: str,
+            path_outdir: str,
+            path_workdir: str,
+            path_enmap_wavelengths: str,
+            path_emulator_basedir: str,
+            path_surface_file: str
+            ):
+        path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
+        path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
+        path_isofit_root = isofit.__path__[0]
+        path_data = os.path.abspath(pjoin(path_isofit_root, '..', 'data'))
+        path_examples = os.path.abspath(pjoin(path_isofit_root, '..', 'examples'))
+
+        shutil.rmtree(path_workdir)
+
+        for d in [
+            path_workdir,
+            pjoin(path_workdir, 'config'),
+            pjoin(path_workdir, 'lut_full'),
+            path_outdir
+        ]:
+            os.makedirs(d, exist_ok=True)
+
+        enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
+
+        with open(path_isocfg_default) as json_file:
+            isocfg_default = json.load(json_file)
+
+        updatedict = dict(
+            ISOFIT_base=os.path.dirname(isofit.__path__[0]),
+            forward_model=dict(
+                instrument=dict(
+                    wavelength_file=path_enmap_wavelengths,
+                ),
+                radiative_transfer=dict(
+                    radiative_transfer_engines=dict(
+                        vswir=dict(
+                            aerosol_model_file=pjoin(path_data, 'aerosol_model.txt'),
+                            aerosol_template_file=pjoin(path_data, 'aerosol_template.json'),
+                            earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
+                            emulator_aux_file=pjoin(os.path.dirname(path_emulator_basedir), 'sRTMnet_v100_aux.npz'),
+                            emulator_file=path_emulator_basedir,
+                            engine_base_dir=os.environ['SIXS_DIR'],
+                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v100_vi'),
+                            irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
+                            lut_path=pjoin(path_workdir, 'lut_full', 'lut.nc'),
+                            sim_path=pjoin(path_workdir, 'lut_full'),
+                            template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
+                        )
+                    ),
+                    # statevector=dict(
+                    #     AOT550=dict(
+                    #         init='TBD',  # TODO
+                    #         prior_mean='TBD',  # TODO
+                    #     ),
+                    #     H2OSTR=dict(
+                    #         init='TBD',  # TODO
+                    #         prior_mean='TBD',  # TODO
+                    #     )
+                    # ),
+                    surface=path_surface_file
+                )
+            ),
+            implementation=dict(
+                debug_mode=False,
+                n_cores=30,
+                ray_temp_dir='/tmp/ray',
+            ),
+            input=dict(
+                measured_radiance_file=path_toarad,
+                loc_file=path_loc,
+                obs_file=path_obs
+            ),
+            output=dict(
+                estimated_reflectance_file=pjoin(path_outdir, f'{enmap_timestamp}_estimated_reflectance.bsq'),
+                estimated_state_file=pjoin(path_outdir, f'{enmap_timestamp}_estimated_state.bsq'),
+                posterior_uncertainty_file=pjoin(path_outdir, f'{enmap_timestamp}_posterior_uncertainty.bsq'),
+            )
+        )
+
+        def update_nested_dict(d, u):
+            for k, v in u.items():
+                if isinstance(v, Mapping):
+                    d[k] = update_nested_dict(d.get(k, {}), v)
+                else:
+                    d[k] = v
+            return d
+
+        isocfg = update_nested_dict(isocfg_default, updatedict)
+
+        with open(path_isocfg, 'w') as json_file:
+            json.dump(isocfg, json_file, skipkeys=False, indent=4)
+
+        Isofit(
+            config_file=path_isocfg,
+            level='INFO',
+            logfile=pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
+        ).run(row_column=None)
