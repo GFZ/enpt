@@ -42,10 +42,18 @@ import subprocess
 from glob import glob
 import json
 from collections.abc import Mapping
+from datetime import datetime
 
+import numpy as np
+import isofit
 from isofit.core.isofit import Isofit
 from isofit.utils.apply_oe import apply_oe
-import isofit
+from isofit.utils.template_construction import (
+    write_modtran_template,
+    get_metadata_from_obs,
+    get_metadata_from_loc,
+    LUTConfig
+)
 import ray
 
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
@@ -144,7 +152,52 @@ class IsofitEnMAP(object):
             self._apply_oe()
 
     @staticmethod
-    def run(path_toarad: str,
+    def _build_modtran_template_file(path_emulator_basedir: str,
+                                     path_obs: str,
+                                     path_loc: str,
+                                     path_workdir: str,
+                                     enmap_timestamp: str):
+        lut_params = LUTConfig(lut_config_file=None, emulator=path_emulator_basedir)
+        (
+            h_m_s,
+            day_increment,
+            mean_path_km,
+            mean_to_sensor_azimuth,
+            mean_to_sensor_zenith,
+            mean_to_sun_zenith,
+            mean_relative_azimuth,
+            valid,
+            to_sensor_zenith_lut_grid,
+            to_sun_zenith_lut_grid,
+            relative_azimuth_lut_grid,
+        ) = get_metadata_from_obs(path_obs, lut_params)
+
+        (
+            mean_latitude,
+            mean_longitude,
+            mean_elevation_km,
+            elevation_lut_grid,
+        ) = get_metadata_from_loc(
+            path_loc, lut_params, pressure_elevation=False
+        )
+
+        write_modtran_template(
+            atmosphere_type='ATM_MIDLAT_SUMMER',
+            fid=enmap_timestamp,
+            altitude_km=mean_elevation_km + np.cos(np.deg2rad(180 - mean_to_sensor_zenith)) * mean_path_km,
+            dayofyear=datetime.strptime(enmap_timestamp[:15], "%Y%m%dt%H%M%S").timetuple().tm_yday,
+            to_sun_zenith=mean_to_sun_zenith,
+            to_sensor_azimuth=mean_to_sensor_azimuth,
+            to_sensor_zenith=mean_to_sensor_zenith,
+            relative_azimuth=mean_relative_azimuth,
+            gmtime=float(h_m_s[0] + h_m_s[1] / 60.0),
+            elevation_km=mean_elevation_km,
+            output_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json'),
+            ihaze_type="AER_NONE",
+        )
+
+    def run(self,
+            path_toarad: str,
             path_loc: str,
             path_obs: str,
             path_outdir: str,
@@ -238,6 +291,8 @@ class IsofitEnMAP(object):
 
         with open(path_isocfg, 'w') as json_file:
             json.dump(isocfg, json_file, skipkeys=False, indent=4)
+
+        self._build_modtran_template_file(path_emulator_basedir, path_obs, path_loc, path_workdir, enmap_timestamp)
 
         Isofit(
             config_file=path_isocfg,
