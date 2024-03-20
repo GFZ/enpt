@@ -91,6 +91,25 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         print(t / 60)
         a = 1
 
+    def test_apply_oe_on_map_geometry(self):
+        from zipfile import ZipFile
+        from enpt.io.reader import L1B_Reader
+        from enpt.processors.orthorectification import Orthorectifier
+        from enpt.options.config import config_for_testing_dlr
+        cfg_dict = dict(config_for_testing_dlr, **dict(target_projection_type='UTM'))
+        cfg = EnPTConfig(**cfg_dict)
+
+        with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \
+                TemporaryDirectory(cfg.working_dir) as td:
+            zf.extractall(td)
+            L1_obj = L1B_Reader(config=cfg).read_inputdata(
+                root_dir_main=td,
+                compute_snr=False)
+
+            L2_obj = Orthorectifier(config=cfg).run_transformation(L1_obj)
+
+        IsofitEnMAP().apply_oe_on_map_geometry(L2_obj)
+
 
 if __name__ == '__main__':
     import pytest

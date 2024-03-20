@@ -43,7 +43,7 @@ from isofit.utils.apply_oe import apply_oe
 import isofit
 import ray
 
-from ...model.images import EnMAPL1Product_SensorGeo
+from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig
 
 __author__ = 'Daniel Scheffler'
@@ -122,8 +122,18 @@ class IsofitEnMAP(object):
             print('Stopping ray.')
             ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
-    def run(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+    def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         with TemporaryDirectory() as td:
             breakpoint()
+
+            self._apply_oe()
+
+    def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
+        from geoarray import GeoArray
+
+        with TemporaryDirectory() as td:
+            toa_rad = enmap_ImageL2.data
+            # TODO
+
 
             self._apply_oe()

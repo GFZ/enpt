@@ -177,7 +177,7 @@ class AtmosphericCorrector(object):
 
         from ._isofit_enmap import IsofitEnMAP
         boa_ref_vnir, boa_ref_swir, land_additional_results = (
-            IsofitEnMAP(self.cfg).run(enmap_ImageL1))
+            IsofitEnMAP(self.cfg).apply_oe_on_sensor_geometry(enmap_ImageL1))
 
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
