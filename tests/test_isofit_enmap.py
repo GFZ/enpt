@@ -61,25 +61,35 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         if os.path.isdir(self.config.output_dir):
             shutil.rmtree(self.config.output_dir)
 
-    def test_run_isofit(self):
-        with TemporaryDirectory() as td:
-            # from geoarray import GeoArray
-            # gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
-            # gA.show()
+    def test_apply_oe__direct_call(self):
+        # from geoarray import GeoArray
+        # gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
+        # gA.show()
 
-            IsofitEnMAP()._apply_oe(
-                # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil',
-                input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ.bil',
-                input_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub.bil',
-                input_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub.bil',
-                working_directory=td,
-                surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
-                wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-                log_file=os.path.join(td, 'isofit.log'),
-                presolve=True,
-                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',  # FIXME why not /home/gfz-fe/scheffler/sRTMnet_v100/
-                n_cores=30
-            )
+        from time import time
+        t0 = time()
+
+        IsofitEnMAP()._apply_oe(
+            # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil',
+            # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ.bil',
+            # input_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub.bil',
+            # input_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub.bil',
+
+            input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ__subX0-10Y0-10.bsq',
+            input_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub__subX0-10Y0-10.bsq',
+            input_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq',
+            working_directory='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_out__subX0-10Y0-10/',
+            surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
+            wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
+            log_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_out/isofit.log',
+            presolve=True,
+            emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',  # FIXME why not /home/gfz-fe/scheffler/sRTMnet_v100/
+            n_cores=30
+        )
+
+        t = time() - t0
+        print(t / 60)
+        a = 1
 
 
 if __name__ == '__main__':
