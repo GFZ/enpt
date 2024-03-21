@@ -131,3 +131,22 @@ class DEM_Processor(object):
         data_sensorgeo = GT.to_sensor_geometry(self.dem)
 
         return GeoArray(data_sensorgeo)
+
+    def get_dem_in_map_geometry(self,
+                                mapBounds: tuple,
+                                mapBounds_prj: Union[str, int],
+                                out_prj: Union[str, int],
+                                out_gsd: tuple
+                                ):
+        return (
+            GeoArray(
+                *self.dem.get_mapPos(
+                    mapBounds=mapBounds,
+                    mapBounds_prj=mapBounds_prj,
+                    out_prj=out_prj,
+                    out_gsd=out_gsd,
+                    rspAlg='bilinear'
+                ),
+                nodata=self.dem.nodata
+            )
+        )
