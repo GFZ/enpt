@@ -45,6 +45,7 @@ from collections.abc import Mapping
 from datetime import datetime
 
 import numpy as np
+from pyproj.crs import CRS
 import isofit
 from isofit.core.isofit import Isofit
 from isofit.utils.apply_oe import apply_oe
@@ -55,6 +56,9 @@ from isofit.utils.template_construction import (
     LUTConfig
 )
 import ray
+from py_tools_ds.geo.coord_grid import get_coord_grid
+from py_tools_ds.geo.coord_trafo import transform_coordArray
+from geoarray import GeoArray
 
 from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig, path_enptlib
