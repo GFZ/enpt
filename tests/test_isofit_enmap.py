@@ -61,6 +61,26 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         if os.path.isdir(self.config.output_dir):
             shutil.rmtree(self.config.output_dir)
 
+    @staticmethod
+    def _get_enmap_l2a_obj():
+        from zipfile import ZipFile
+        from enpt.io.reader import L1B_Reader
+        from enpt.processors.orthorectification import Orthorectifier
+        from enpt.options.config import config_for_testing_dlr
+        cfg_dict = dict(config_for_testing_dlr, **dict(target_projection_type='UTM'))
+        cfg = EnPTConfig(**cfg_dict)
+
+        with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \
+                TemporaryDirectory(cfg.working_dir) as td:
+            zf.extractall(td)
+            L1_obj = L1B_Reader(config=cfg).read_inputdata(
+                root_dir_main=td,
+                compute_snr=False)
+
+            L2_obj = Orthorectifier(config=cfg).run_transformation(L1_obj)
+
+        return L2_obj
+
     def test_apply_oe__direct_call(self):
         # from geoarray import GeoArray
         # gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
@@ -92,23 +112,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         a = 1
 
     def test_apply_oe_on_map_geometry(self):
-        from zipfile import ZipFile
-        from enpt.io.reader import L1B_Reader
-        from enpt.processors.orthorectification import Orthorectifier
-        from enpt.options.config import config_for_testing_dlr
-        cfg_dict = dict(config_for_testing_dlr, **dict(target_projection_type='UTM'))
-        cfg = EnPTConfig(**cfg_dict)
-
-        with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \
-                TemporaryDirectory(cfg.working_dir) as td:
-            zf.extractall(td)
-            L1_obj = L1B_Reader(config=cfg).read_inputdata(
-                root_dir_main=td,
-                compute_snr=False)
-
-            L2_obj = Orthorectifier(config=cfg).run_transformation(L1_obj)
-
-        IsofitEnMAP().apply_oe_on_map_geometry(L2_obj)
+        IsofitEnMAP().apply_oe_on_map_geometry(self._get_enmap_l2a_obj())
 
     def test_run(self):
         IsofitEnMAP().run(
