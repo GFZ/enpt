@@ -266,8 +266,8 @@ class IsofitEnMAP(object):
             ),
             implementation=dict(
                 debug_mode=False,
-                n_cores=30,
-                ray_temp_dir='/tmp/ray',
+                n_cores=30,  # FIXME harcoded
+                ray_temp_dir='/tmp/ray',  # TODO not Windows-compatible
             ),
             input=dict(
                 measured_radiance_file=path_toarad,
