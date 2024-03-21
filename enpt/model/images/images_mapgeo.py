@@ -193,6 +193,46 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
         self.logger.captured_stream = string
 
+    @property
+    def dem(self) -> GeoArray:
+        from ...processors.dem_preprocessing import DEM_Processor
+
+        if self.cfg.path_dem:
+            self.logger.info('Pre-processing DEM in map geometry...')
+            DP = DEM_Processor(
+                self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
+                                               self.meta.lat_UL_UR_LL_LR)),
+                CPUs=self.cfg.CPUs)
+            DP.fill_gaps()  # FIXME this will also be needed at other places
+            self._dem =\
+                DP.get_dem_in_map_geometry(
+                    mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
+                    mapBounds_prj=self.data.epsg,
+                    out_prj=self.data.epsg,
+                    out_gsd=(self.data.xgsd, self.data.ygsd)
+                )
+
+        else:
+            self.logger.info(f'No DEM provided. '
+                             f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
+            self._dem = DEM_Processor.get_flat_dem_from_average_elevation(
+                tuple(zip(self.meta.lon_UL_UR_LL_LR,
+                          self.meta.lat_UL_UR_LL_LR)),
+                self.cfg.average_elevation,
+                xres=30, yres=30
+            ).dem
+
+        return self._dem
+
+    @dem.setter
+    def dem(self, *geoArr_initArgs):
+        self._dem = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'dem', nodataVal=0)  # FIXME 0?
+
+    @dem.deleter
+    def dem(self):
+        self._dem = None
+
     @classmethod
     def from_L1B_sensorgeo(cls, config: EnPTConfig, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         from ...processors.orthorectification import Orthorectifier
