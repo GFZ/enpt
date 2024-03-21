@@ -163,7 +163,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                         lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
 
                 self.logger.info(('Transforming DEM to %s sensor geometry%s...' % (self.detector_name, msg_bandinfo)))
-                self.dem = DP.to_sensor_geometry(lons=lons, lats=lats)
+                self.dem = DP.get_dem_in_sensor_geometry(lons=lons, lats=lats)
             else:
                 self.dem = DP.dem
 
