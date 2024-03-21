@@ -107,7 +107,7 @@ class DEM_Processor(object):
         rows = int(np.ceil((max(y_all) - min(y_all)) / yres)) + 2
 
         # get a GeoArray instance
-        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation),
+        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation).astype(np.int16),
                           geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
                           projection=CRS(tgt_utm_epsg).to_wkt())
 
