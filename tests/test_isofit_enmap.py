@@ -126,6 +126,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
         )
 
+    def test_generate_input_files(self):
+        with TemporaryDirectory() as td:
+            IsofitEnMAP().generate_input_files(self._get_enmap_l2a_obj(), td)
 
 if __name__ == '__main__':
     import pytest

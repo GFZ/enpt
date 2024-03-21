@@ -196,6 +196,56 @@ class IsofitEnMAP(object):
             ihaze_type="AER_NONE",
         )
 
+    def generate_input_files(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        self._generate_radiance_file(enmap_ImageL2, path_outdir)
+        self._generate_loc_file(enmap_ImageL2, path_outdir)
+        self._generate_obs_file(enmap_ImageL2, path_outdir)
+
+    @staticmethod
+    def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        # ISOFIT expects radiance in uW/cm²/sr/nm, EnPT provides mW/m²/sr/nm
+        # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
+        radiance = enmap_ImageL2.data[:] / 10.0  # TODO consider nodata value
+
+        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj
+                 ).save(os.path.join(path_outdir, f'{timestamp}_rdn.bsq'))
+
+    @staticmethod
+    def _generate_loc_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        xmin, xmax, ymin, ymax = enmap_ImageL2.data.box.boundsMap
+        xgsd, ygsd = (enmap_ImageL2.data.xgsd, enmap_ImageL2.data.ygsd)
+        x_grid, ygrid = get_coord_grid((xmin, ymax), (xmax, ymin), (xgsd, -ygsd))
+        if enmap_ImageL2.data.epsg == 4326:
+            lons = x_grid
+            lats = ygrid
+        else:
+            lons, lats = transform_coordArray(
+                CRS(enmap_ImageL2.data.epsg).to_wkt(),
+                CRS(4326).to_wkt(),
+                x_grid, ygrid
+            )
+
+        elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
+
+        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        GeoArray(np.dstack([lons, lats, elev]), enmap_ImageL2.data.gt, enmap_ImageL2.data.prj
+                 ).save(os.path.join(path_outdir, f'{timestamp}_loc.bsq'))
+
+    @staticmethod
+    def _generate_obs_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        path_length = 650000  # from ~650km EnMAP flight height
+        vaa = None
+        vza = None
+        saa = None
+        sza = None
+        phase = None
+        slope = 90
+        aspect = 0
+        cos_i = None
+        utc = None
+        earth_sun_dist = enmap_ImageL2.meta.earthSunDist
+
     def run(self,
             path_toarad: str,
             path_loc: str,

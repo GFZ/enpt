@@ -34,6 +34,7 @@ from types import SimpleNamespace
 from typing import Tuple, Optional  # noqa: F401
 from os import path, makedirs
 
+import numpy as np
 from geoarray import GeoArray, NoDataMask
 
 from .image_baseclasses import _EnMAP_Image
