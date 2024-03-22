@@ -234,7 +234,13 @@ class IsofitEnMAP(object):
         elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
 
         timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
-        GeoArray(np.dstack([lons, lats, elev]), enmap_ImageL2.data.gt, enmap_ImageL2.data.prj
+        GeoArray(np.dstack([lons, lats, elev]),
+                 enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
+                 bandnames=[
+                     'Longitude (WGS-84)',
+                     'Latitude (WGS-84)',
+                     'Elevation (m)'
+                 ]
                  ).save(os.path.join(path_outdir, f'{timestamp}_loc.bsq'))
 
     @staticmethod
