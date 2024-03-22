@@ -212,8 +212,9 @@ class IsofitEnMAP(object):
         radiance = enmap_ImageL2.data[:] / 10.0  # TODO consider nodata value
 
         timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
-        GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj
-                 ).save(os.path.join(path_outdir, f'{timestamp}_rdn.bsq'))
+        gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj)
+        gA.meta.band_meta = enmap_ImageL2.data.meta.band_meta
+        gA.save(os.path.join(path_outdir, f'{timestamp}_rdn.bsq'))
 
     @staticmethod
     def _generate_loc_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
