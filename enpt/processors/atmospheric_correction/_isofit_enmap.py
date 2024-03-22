@@ -243,19 +243,59 @@ class IsofitEnMAP(object):
                  ]
                  ).save(os.path.join(path_outdir, f'{timestamp}_loc.bsq'))
 
+    def _generate_obs_file(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        path_length = np.full(enmap_ImageL2.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
+        vaa = enmap_ImageL2.meta.geom_view_azimuth_array  # TODO pixel-wise values
+        vza = enmap_ImageL2.meta.geom_view_zenith_array  # TODO pixel-wise values
+        saa = enmap_ImageL2.meta.geom_sun_azimuth_array  # TODO pixel-wise values
+        sza = enmap_ImageL2.meta.geom_sun_zenith_array  # TODO pixel-wise values
+        phase = self._compute_solar_phase(vaa, vza, saa, sza)
+        slope = np.full(enmap_ImageL2.data.shape[:2], fill_value=90)
+        aspect = np.zeros(enmap_ImageL2.data.shape[:2])
+        cos_i = self._compute_cos_i(saa, sza, slope=90, aspect=0)
+        utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
+        earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)  # TODO pixel-wise values
+
+        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        GeoArray(np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist]),
+                 enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
+                 bandnames=[
+                     'Path length (m)',
+                     'To-sensor azimuth (0 to 360 degrees cw from N)',
+                     'To-sensor zenith (0 to 90 degrees from zenith)',
+                     'To-sun azimuth (0 to 360 degrees cw from N)',
+                     'To-sun zenith (0 to 90 degrees from zenith)',
+                     'Solar phase',
+                     'Slope',
+                     'Aspect',
+                     'Cosine(i)',
+                     'UTC Time',
+                     'Earth-sun distance (AU)'
+                 ]
+                 ).save(os.path.join(path_outdir, f'{timestamp}_obs.bsq'))
+
     @staticmethod
-    def _generate_obs_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
-        path_length = 650000  # from ~650km EnMAP flight height
-        vaa = None
-        vza = None
-        saa = None
-        sza = None
-        phase = None
-        slope = 90
-        aspect = 0
-        cos_i = None
-        utc = None
-        earth_sun_dist = enmap_ImageL2.meta.earthSunDist
+    def _compute_solar_phase(vaa, vza, saa, sza):
+        vaa_r, vza_r, saa_r, sza_r = (np.deg2rad(i) for i in (vaa, vza, saa, sza))
+        vx = np.sin(vza_r) * np.cos(vaa_r)
+        vy = np.sin(vza_r) * np.sin(vaa_r)
+        vz = np.cos(vza_r)
+        sx = np.sin(sza_r) * np.cos(saa_r)
+        sy = np.sin(sza_r) * np.sin(saa_r)
+        sz = np.cos(sza_r)
+        phase_r = np.arccos(
+            (vx * sx + vy * sy + vz * sz) / np.sqrt((vx ** 2 + vy ** 2 + vz ** 2) * (sx **2 + sy ** 2 + sz ** 2)))
+        phase = np.rad2deg(phase_r)
+
+        return phase
+
+    @staticmethod
+    def _compute_cos_i(saa, sza, slope: float, aspect: float):
+        saa_r, sza_r, slope_r = (np.deg2rad(i) for i in (saa, sza, slope))
+        saa_asp_r = saa_r if aspect == 0 else np.deg2rad(saa - aspect)
+        cos_i = np.cos(sza_r) * np.cos(slope_r) + np.sin(sza_r) * np.sin(slope_r) * np.cos(saa_asp_r)
+
+        return cos_i
 
     def run(self,
             path_toarad: str,
