@@ -84,91 +84,6 @@ class IsofitEnMAP(object):
         if not glob(pjoin(isofit_root, '..', 'examples', '*')):
             subprocess.call('isofit download examples', shell=True)
 
-
-    @staticmethod
-    def _apply_oe(input_radiance: str,
-                  input_loc: str,
-                  input_obs: str,
-                  working_directory: str,
-                  sensor: str = 'enmap',
-                  copy_input_files: bool = False,
-                  modtran_path: str = None,
-                  wavelength_path: str = None,
-                  surface_category: str = 'multicomponent_surface',
-                  aerosol_climatology_path: str = None,
-                  rdn_factors_path: str = None,
-                  surface_path: str = None,
-                  atmosphere_type: str = 'ATM_MIDLAT_SUMMER',
-                  channelized_uncertainty_path: str = None,
-                  model_discrepancy_path: str = None,
-                  lut_config_file: str = None,
-                  multiple_restarts: bool = False,
-                  logging_level: str = 'INFO',
-                  log_file: str = None,
-                  n_cores: int = 1,
-                  num_cpus: int = 1,
-                  memory_gb: int = -1,
-                  presolve: bool = False,
-                  empirical_line: bool = False,
-                  analytical_line: bool = False,
-                  ray_temp_dir: str = "/tmp/ray",
-                  emulator_base: str = None,
-                  segmentation_size: int = 40,
-                  num_neighbors: Tuple[int] = (),
-                  atm_sigma: Tuple[float] = (2.0,),
-                  pressure_elevation: bool = False,
-                  prebuilt_lut: str = None
-                  ):
-        params = {k: v for k, v in locals().items() if not k.startswith('__')}
-
-        try:
-            apply_oe(SimpleNamespace(**params))
-
-        except FileNotFoundError as e:
-            print('Attempt to run apply_oe() failed due to FileNotFoundError.')
-            if fnmatch(os.path.dirname(e.filename), '*/site-packages/data'):
-                raise FileNotFoundError(e.filename,
-                                        'The ISOFIT extra-files (data directory) are not properly downloaded.')
-            elif fnmatch(os.path.dirname(e.filename), '*/site-packages/examples'):
-                raise FileNotFoundError(e.filename,
-                                        'The ISOFIT extra-files (examples directory) are not properly downloaded.')
-            else:
-                raise
-        
-        finally:
-            print('Stopping ray.')
-            ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
-
-    def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
-        with TemporaryDirectory() as td:
-            breakpoint()
-
-            self._apply_oe()
-
-    def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
-        with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs = self.generate_input_files(enmap_ImageL2, td)
-
-            os.makedirs(pjoin(td, 'work'), exist_ok=True)
-            os.makedirs(pjoin(td, 'output'), exist_ok=True)
-
-            self._apply_oe(
-                input_radiance=fp_rad,
-                input_loc=fp_loc,
-                input_obs=fp_obs,
-                working_directory=pjoin(td, 'workdir'),
-                surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
-                # wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-                log_file=pjoin(td, 'output', 'isofit.log'),
-                presolve=True,
-                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
-                n_cores=30  # FIXME hardcoded
-            )
-
-            # read the AC results back into memory
-            pass
-            a = 1
-
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
                                      path_obs: str,
@@ -320,6 +235,90 @@ class IsofitEnMAP(object):
         cos_i = np.cos(sza_r) * np.cos(slope_r) + np.sin(sza_r) * np.sin(slope_r) * np.cos(saa_asp_r)
 
         return cos_i
+
+    @staticmethod
+    def _apply_oe(input_radiance: str,
+                  input_loc: str,
+                  input_obs: str,
+                  working_directory: str,
+                  sensor: str = 'enmap',
+                  copy_input_files: bool = False,
+                  modtran_path: str = None,
+                  wavelength_path: str = None,
+                  surface_category: str = 'multicomponent_surface',
+                  aerosol_climatology_path: str = None,
+                  rdn_factors_path: str = None,
+                  surface_path: str = None,
+                  atmosphere_type: str = 'ATM_MIDLAT_SUMMER',
+                  channelized_uncertainty_path: str = None,
+                  model_discrepancy_path: str = None,
+                  lut_config_file: str = None,
+                  multiple_restarts: bool = False,
+                  logging_level: str = 'INFO',
+                  log_file: str = None,
+                  n_cores: int = 1,
+                  num_cpus: int = 1,
+                  memory_gb: int = -1,
+                  presolve: bool = False,
+                  empirical_line: bool = False,
+                  analytical_line: bool = False,
+                  ray_temp_dir: str = "/tmp/ray",
+                  emulator_base: str = None,
+                  segmentation_size: int = 40,
+                  num_neighbors: Tuple[int] = (),
+                  atm_sigma: Tuple[float] = (2.0,),
+                  pressure_elevation: bool = False,
+                  prebuilt_lut: str = None
+                  ):
+        params = {k: v for k, v in locals().items() if not k.startswith('__')}
+
+        try:
+            apply_oe(SimpleNamespace(**params))
+
+        except FileNotFoundError as e:
+            print('Attempt to run apply_oe() failed due to FileNotFoundError.')
+            if fnmatch(os.path.dirname(e.filename), '*/site-packages/data'):
+                raise FileNotFoundError(e.filename,
+                                        'The ISOFIT extra-files (data directory) are not properly downloaded.')
+            elif fnmatch(os.path.dirname(e.filename), '*/site-packages/examples'):
+                raise FileNotFoundError(e.filename,
+                                        'The ISOFIT extra-files (examples directory) are not properly downloaded.')
+            else:
+                raise
+
+        finally:
+            print('Stopping ray.')
+            ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
+
+    def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+        with TemporaryDirectory() as td:
+            breakpoint()
+
+            self._apply_oe()
+
+    def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
+        with TemporaryDirectory() as td:
+            fp_rad, fp_loc, fp_obs = self.generate_input_files(enmap_ImageL2, td)
+
+            os.makedirs(pjoin(td, 'work'), exist_ok=True)
+            os.makedirs(pjoin(td, 'output'), exist_ok=True)
+
+            self._apply_oe(
+                input_radiance=fp_rad,
+                input_loc=fp_loc,
+                input_obs=fp_obs,
+                working_directory=pjoin(td, 'workdir'),
+                surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
+                # wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
+                log_file=pjoin(td, 'output', 'isofit.log'),
+                presolve=True,
+                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+                n_cores=30  # FIXME hardcoded
+            )
+
+            # read the AC results back into memory
+            pass
+            a = 1
 
     def run(self,
             path_toarad: str,
