@@ -146,14 +146,28 @@ class IsofitEnMAP(object):
             self._apply_oe()
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
-        from geoarray import GeoArray
-
         with TemporaryDirectory() as td:
-            toa_rad = enmap_ImageL2.data
-            # TODO
+            fp_rad, fp_loc, fp_obs = self.generate_input_files(enmap_ImageL2, td)
 
+            os.makedirs(pjoin(td, 'work'), exist_ok=True)
+            os.makedirs(pjoin(td, 'output'), exist_ok=True)
 
-            self._apply_oe()
+            self._apply_oe(
+                input_radiance=fp_rad,
+                input_loc=fp_loc,
+                input_obs=fp_obs,
+                working_directory=pjoin(td, 'workdir'),
+                surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
+                # wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
+                log_file=pjoin(td, 'output', 'isofit.log'),
+                presolve=True,
+                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+                n_cores=30  # FIXME hardcoded
+            )
+
+            # read the AC results back into memory
+            pass
+            a = 1
 
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
@@ -201,9 +215,11 @@ class IsofitEnMAP(object):
         )
 
     def generate_input_files(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
-        self._generate_radiance_file(enmap_ImageL2, path_outdir)
-        self._generate_loc_file(enmap_ImageL2, path_outdir)
-        self._generate_obs_file(enmap_ImageL2, path_outdir)
+        fp_rad = self._generate_radiance_file(enmap_ImageL2, path_outdir)
+        fp_loc = self._generate_loc_file(enmap_ImageL2, path_outdir)
+        fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
+
+        return fp_rad, fp_loc, fp_obs
 
     @staticmethod
     def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
@@ -211,10 +227,12 @@ class IsofitEnMAP(object):
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
         radiance = enmap_ImageL2.data[:] / 10.0  # TODO consider nodata value
 
-        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        fp_out = pjoin(path_outdir, enmap_ImageL2.meta.scene_basename)
         gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj)
         gA.meta.band_meta = enmap_ImageL2.data.meta.band_meta
-        gA.save(os.path.join(path_outdir, f'{timestamp}_rdn.bsq'))
+        gA.save(fp_out)
+
+        return fp_out
 
     @staticmethod
     def _generate_loc_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
@@ -234,6 +252,7 @@ class IsofitEnMAP(object):
         elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
 
         timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        fp_out = os.path.join(path_outdir, f'{timestamp}_loc')  # ISOFIT does not support a file extension
         GeoArray(np.dstack([lons, lats, elev]),
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
@@ -241,7 +260,9 @@ class IsofitEnMAP(object):
                      'Latitude (WGS-84)',
                      'Elevation (m)'
                  ]
-                 ).save(os.path.join(path_outdir, f'{timestamp}_loc.bsq'))
+                 ).save(fp_out)
+
+        return fp_out
 
     def _generate_obs_file(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
         path_length = np.full(enmap_ImageL2.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
@@ -257,6 +278,7 @@ class IsofitEnMAP(object):
         earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)  # TODO pixel-wise values
 
         timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
+        fp_out = os.path.join(path_outdir, f'{timestamp}_obs')  # ISOFIT does not support a file extension
         GeoArray(np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist]),
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
@@ -272,7 +294,9 @@ class IsofitEnMAP(object):
                      'UTC Time',
                      'Earth-sun distance (AU)'
                  ]
-                 ).save(os.path.join(path_outdir, f'{timestamp}_obs.bsq'))
+                 ).save(fp_out)
+
+        return fp_out
 
     @staticmethod
     def _compute_solar_phase(vaa, vza, saa, sza):
