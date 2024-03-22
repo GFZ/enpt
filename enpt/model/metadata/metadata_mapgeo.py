@@ -66,9 +66,16 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
-        self._meta_l1b = meta_l1b
         self.grid_res = grid_res_l2a
         self.logger = logger or logging.getLogger()
+
+        # privates
+        self._meta_l1b = meta_l1b
+        self._geom_view_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing zenith angles
+        self._geom_view_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing azimuth angles
+        self._geom_sun_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar zenith angles
+        self._geom_sun_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar azimuth angles
+        self._aqtime_utc_array: Optional[np.ndarray] = None  # 2D array of pixel-wise UTC times (decimal hours)
 
         # defaults
         self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
@@ -189,6 +196,69 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 (max([vnir_urx, swir_urx]), max([vnir_ury, swir_ury])),
                 (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
                 (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
+
+    def _get_view_acq_geometry_arrays(self):
+        if not self.cfg.is_dummy_dataformat:
+            # read Geometry (observation/illumination) angle
+            # NOTE: EnMAP metadata provide also the angles for the image corners
+            #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
+            # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
+            # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
+            vza_all = self._meta_l1b.geom_angles_all['view_zenith']
+            vaa_all = self._meta_l1b.geom_angles_all['view_azimuth']
+            sza_all = self._meta_l1b.geom_angles_all['sun_zenith']
+            saa_all = self._meta_l1b.geom_angles_all['sun_azimuth']
+
+            rows, cols = self.nrows, self.ncols
+
+            # TODO replace this by interpolating all angles
+            self._geom_view_zenith_array = np.full((rows, cols), fill_value=vza_all['center'])
+            self._geom_view_azimuth_array = np.full((rows, cols), fill_value=vaa_all['center'])
+            self._geom_sun_zenith_array = np.full((rows, cols), fill_value=sza_all['center'])
+            self._geom_sun_azimuth_array = np.full((rows, cols), fill_value=saa_all['center'])
+        else:
+            raise NotImplementedError()
+
+    def _get_aqtime_utc_array(self):
+        if not self.cfg.is_dummy_dataformat:
+            rows, cols = self.nrows, self.ncols
+
+            # TODO replace this by interpolating all angles
+            dt = self._meta_l1b.observation_datetime
+            decimal_hours = dt.hour + dt.minute / 60. * dt.second / 3600
+            self._aqtime_utc_array = np.full((rows, cols), fill_value=decimal_hours)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def geom_view_zenith_array(self) -> np.ndarray:
+        if self._geom_view_zenith_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_view_zenith_array
+
+    @property
+    def geom_view_azimuth_array(self) -> np.ndarray:
+        if self._geom_view_azimuth_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_view_azimuth_array
+
+    @property
+    def geom_sun_zenith_array(self) -> np.ndarray:
+        if self._geom_sun_zenith_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_sun_zenith_array
+
+    @property
+    def geom_sun_azimuth_array(self) -> np.ndarray:
+        if self._geom_sun_azimuth_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_sun_azimuth_array
+
+    @property
+    def aqtime_utc_array(self) -> np.ndarray:
+        if self._aqtime_utc_array is None:
+            self._get_aqtime_utc_array()
+        return self._aqtime_utc_array
 
     def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
         R, C, B = datastack_vnir_swir.shape
