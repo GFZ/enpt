@@ -41,6 +41,8 @@ import tempfile
 import shutil
 from tempfile import TemporaryDirectory
 
+import numpy as np
+
 from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
 from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
 
@@ -129,6 +131,29 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
     def test_generate_input_files(self):
         with TemporaryDirectory() as td:
             IsofitEnMAP().generate_input_files(self._get_enmap_l2a_obj(), td)
+
+    def test__compute_solar_phase(self):
+        from geoarray import GeoArray
+        gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq')
+        vaa = gA[:, :, 1]
+        vza = gA[:, :, 2]
+        saa = gA[:, :, 3]
+        sza = gA[:, :, 4]
+        phase_karl = gA[:, :, 5]
+
+        phase_py = IsofitEnMAP()._compute_solar_phase(vaa, vza, saa, sza)
+        assert np.allclose(phase_karl, phase_py)
+
+    def test__compute_cos_i(self):
+        from geoarray import GeoArray
+        gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq')
+        saa = gA[:, :, 3]
+        sza = gA[:, :, 4]
+        cos_i_karl = gA[:, :, 8]
+
+        cos_i_py = IsofitEnMAP()._compute_cos_i(saa, sza, slope=90, aspect=0)
+        assert np.allclose(cos_i_karl, cos_i_py)
+
 
 if __name__ == '__main__':
     import pytest
