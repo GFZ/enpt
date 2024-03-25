@@ -46,6 +46,7 @@ from datetime import datetime
 
 import numpy as np
 from pyproj.crs import CRS
+from pandas import DataFrame
 import isofit
 from isofit.core.isofit import Isofit
 from isofit.utils.apply_oe import apply_oe
@@ -133,8 +134,9 @@ class IsofitEnMAP(object):
         fp_rad = self._generate_radiance_file(enmap_ImageL2, path_outdir)
         fp_loc = self._generate_loc_file(enmap_ImageL2, path_outdir)
         fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
+        fp_wvl = self._generate_wavelength_file(enmap_ImageL2, path_outdir)
 
-        return fp_rad, fp_loc, fp_obs
+        return fp_rad, fp_loc, fp_obs, fp_wvl
 
     @staticmethod
     def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
@@ -210,6 +212,16 @@ class IsofitEnMAP(object):
                      'Earth-sun distance (AU)'
                  ]
                  ).save(fp_out)
+
+        return fp_out
+
+    @staticmethod
+    def _generate_wavelength_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+        fp_out = pjoin(path_outdir, 'enmap_wavelength_fwhm.txt')
+        wvl = enmap_ImageL2.meta.wvl_center
+        fwhm = enmap_ImageL2.meta.fwhm
+        df = DataFrame(np.hstack([wvl.reshape(-1, 1), fwhm.reshape(-1, 1)]))
+        df.to_csv(fp_out, header=False, sep='\t')
 
         return fp_out
 
@@ -298,7 +310,7 @@ class IsofitEnMAP(object):
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs = self.generate_input_files(enmap_ImageL2, td)
+            fp_rad, fp_loc, fp_obs, fp_wvl = self.generate_input_files(enmap_ImageL2, td)
 
             os.makedirs(pjoin(td, 'work'), exist_ok=True)
             os.makedirs(pjoin(td, 'output'), exist_ok=True)
@@ -309,7 +321,7 @@ class IsofitEnMAP(object):
                 input_obs=fp_obs,
                 working_directory=pjoin(td, 'workdir'),
                 surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
-                # wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
+                wavelength_path=fp_wvl,
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 presolve=True,
                 emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
