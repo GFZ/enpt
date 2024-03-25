@@ -328,8 +328,6 @@ class IsofitEnMAP(object):
 
     def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         with TemporaryDirectory() as td:
-            breakpoint()
-
             self._apply_oe()
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):

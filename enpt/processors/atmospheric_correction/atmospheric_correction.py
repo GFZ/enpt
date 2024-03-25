@@ -184,11 +184,11 @@ class AtmosphericCorrector(object):
     def _run_ac__land_mode(self,
                            enmap_ImageL1: EnMAPL1Product_SensorGeo
                            ) -> (np.ndarray, np.ndarray, dict):
-        # boa_ref_vnir, boa_ref_swir, land_additional_results = \
-        #     self.run_sicor(enmap_ImageL1)
-
         boa_ref_vnir, boa_ref_swir, land_additional_results = \
-            self.run_isofit(enmap_ImageL1)
+            self.run_sicor(enmap_ImageL1)
+
+        # boa_ref_vnir, boa_ref_swir, land_additional_results = \
+        #     self.run_isofit(enmap_ImageL1)
 
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
