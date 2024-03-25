@@ -116,8 +116,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
     def test_apply_oe_on_map_geometry(self):
         IsofitEnMAP().apply_oe_on_map_geometry(self._get_enmap_l2a_obj())
 
-    def test_run(self):
-        IsofitEnMAP().run(
+    def test__run(self):
+        IsofitEnMAP()._run(
             path_toarad='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ__subX0-10Y0-10.bsq',
             path_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub__subX0-10Y0-10.bsq',
             path_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq',
@@ -127,6 +127,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
             path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
         )
+
+    def test_run_on_map_geometry(self):
+        IsofitEnMAP().run_on_map_geometry(self._get_enmap_l2a_obj())
 
     def test_generate_input_files(self):
         with TemporaryDirectory() as td:

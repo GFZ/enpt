@@ -332,23 +332,24 @@ class IsofitEnMAP(object):
             pass
             a = 1
 
-    def run(self,
-            path_toarad: str,
-            path_loc: str,
-            path_obs: str,
-            path_outdir: str,
-            path_workdir: str,
-            path_enmap_wavelengths: str,
-            path_emulator_basedir: str,
-            path_surface_file: str
-            ):
+    def _run(self,
+             path_toarad: str,
+             path_loc: str,
+             path_obs: str,
+             path_outdir: str,
+             path_workdir: str,
+             path_enmap_wavelengths: str,
+             path_emulator_basedir: str,
+             path_surface_file: str
+             ):
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
         path_isofit_root = isofit.__path__[0]
         path_data = os.path.abspath(pjoin(path_isofit_root, '..', 'data'))
         path_examples = os.path.abspath(pjoin(path_isofit_root, '..', 'examples'))
 
-        shutil.rmtree(path_workdir)
+        if os.path.isdir(path_workdir):
+            shutil.rmtree(path_workdir)
 
         for d in [
             path_workdir,
@@ -401,7 +402,8 @@ class IsofitEnMAP(object):
                 ),
             ),
             implementation=dict(
-                debug_mode=False,
+                # debug_mode=False,
+                debug_mode=True,  # TODO deactivate if done
                 n_cores=30,  # FIXME harcoded
                 ray_temp_dir='/tmp/ray',  # TODO not Windows-compatible
             ),
@@ -437,3 +439,22 @@ class IsofitEnMAP(object):
             level='INFO',
             logfile=pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
         ).run(row_column=None)
+
+    def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
+        with TemporaryDirectory() as td:
+            fp_rad, fp_loc, fp_obs, fp_wvl = self.generate_input_files(enmap_ImageL2, td)
+
+            self._run(
+                path_toarad=fp_rad,
+                path_loc=fp_loc,
+                path_obs=fp_obs,
+                path_outdir=pjoin(td, 'output'),
+                path_workdir=pjoin(td, 'workdir'),
+                path_enmap_wavelengths=fp_wvl,
+                path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+                path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
+            )
+
+            # read the AC results back into memory
+            pass
+            a = 1
