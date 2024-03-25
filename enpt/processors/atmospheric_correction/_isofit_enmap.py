@@ -353,8 +353,12 @@ class IsofitEnMAP(object):
             )
 
             # read the AC results back into memory
-            pass
-            a = 1
+            boa_rfl = GeoArray(glob(pjoin(td, 'output', 'estimated_reflectance.bsq'))[0])
+            # state = GeoArray(glob(pjoin(td, 'output', 'estimated_state.bsq'))[0])
+            # uncert = GeoArray(glob(pjoin(td, 'output', 'posterior_uncertainty.bsq'))[0])
+            boa_rfl.to_mem()
+
+            return boa_rfl
 
     def _run(self,
              path_toarad: str,
@@ -464,7 +468,7 @@ class IsofitEnMAP(object):
             logfile=pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
         ).run(row_column=None)
 
-    def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
+    def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo) -> GeoArray:
         with TemporaryDirectory() as td:
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, td)
 
@@ -480,5 +484,9 @@ class IsofitEnMAP(object):
             )
 
             # read the AC results back into memory
-            pass
-            a = 1
+            boa_rfl = GeoArray(glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0])
+            # state = GeoArray(glob(pjoin(td, 'output', '*estimated_state.bsq'))[0])
+            # uncert = GeoArray(glob(pjoin(td, 'output', '*posterior_uncertainty.bsq'))[0])
+            boa_rfl.to_mem()
+
+            return boa_rfl
