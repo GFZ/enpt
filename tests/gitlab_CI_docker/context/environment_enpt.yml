@@ -42,3 +42,5 @@ dependencies:
 
   - pip:
     - pytest-reporter-html1
+
+    - git+https://github.com/isofit/isofit.git@dev

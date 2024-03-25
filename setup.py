@@ -46,6 +46,7 @@ req = [
     'cerberus',
     'gdal',
     'geoarray>=0.15.8',
+    'git+https://github.com/isofit/isofit.git@dev',
     'jsmin',
     'lxml',
     'matplotlib',

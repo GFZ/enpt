@@ -3,6 +3,7 @@ arosics>=1.0.0
 cerberus
 gdal
 geoarray>=0.15.8
+git+https://github.com/isofit/isofit.git@dev
 jsmin
 lxml
 matplotlib
