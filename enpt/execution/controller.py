@@ -189,8 +189,9 @@ class EnPT_Controller(object):
                     import numpy as np
 
                     boa_ref = IsofitEnMAP(config=self.cfg).run_on_map_geometry(self.L2_obj)
-                    self.L2_obj.data[:] = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
-                    self.L2_obj.data[~self.L2_obj.data.mask_nodata] = self.cfg.output_nodata_value
+                    boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
+                    self.L2_obj.data.arr = (boa_ref * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                    self.L2_obj.data.nodata = self.cfg.output_nodata_value
                     self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                     self.L2_obj.meta.unitcode = 'BOARef'
 
