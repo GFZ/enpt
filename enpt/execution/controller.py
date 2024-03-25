@@ -180,20 +180,36 @@ class EnPT_Controller(object):
                     # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
                     self.run_spatial_optimization()
                 self.run_dem_processor()
-                if self.cfg.enable_ac:
-                    self.run_atmospheric_correction()
 
-                    if self.cfg.run_deadpix_P:
-                        # re-apply dead pixel correction
-                        self.L1_obj.logger.info(
-                            'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
-                        self.L1_obj.correct_dead_pixels()
+                isofit = True  # FIXME hardcoded / revise implementation here
+                if isofit:
+                    self.L2_obj = EnMAPL2Product_MapGeo.from_L1B_sensorgeo(config=self.cfg, enmap_ImageL1=self.L1_obj)
+
+                    from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
+                    import numpy as np
+
+                    boa_ref = IsofitEnMAP(config=self.cfg).run_on_map_geometry(self.L2_obj)
+                    self.L2_obj.data[:] = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                    self.L2_obj.data[~self.L2_obj.data.mask_nodata] = self.cfg.output_nodata_value
+                    self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                    self.L2_obj.meta.unitcode = 'BOARef'
+
                 else:
-                    self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                            'computing top-of-atmosphere reflectance instead.')
-                    self.run_toaRad2toaRef()
-                # self.run_spatial_optimization()
-                self.run_orthorectification()
+                    if self.cfg.enable_ac:
+                        self.run_atmospheric_correction()
+
+                        if self.cfg.run_deadpix_P:
+                            # re-apply dead pixel correction
+                            self.L1_obj.logger.info(
+                                'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
+                            self.L1_obj.correct_dead_pixels()
+                    else:
+                        self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                                'computing top-of-atmosphere reflectance instead.')
+                        self.run_toaRad2toaRef()
+                    # self.run_spatial_optimization()
+                    self.run_orthorectification()
+
                 self.write_output()
 
                 self.L1_obj.logger.info('Total runtime of the processing chain: %s'
