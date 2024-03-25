@@ -43,12 +43,14 @@ from glob import glob
 import json
 from collections.abc import Mapping
 from datetime import datetime
+from zipfile import ZipFile
 
 import numpy as np
 from pyproj.crs import CRS
 from pandas import DataFrame
 import isofit
 from isofit.core.isofit import Isofit
+from isofit.utils import surface_model
 from isofit.utils.apply_oe import apply_oe
 from isofit.utils.template_construction import (
     write_modtran_template,
@@ -135,8 +137,9 @@ class IsofitEnMAP(object):
         fp_loc = self._generate_loc_file(enmap_ImageL2, path_outdir)
         fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
         fp_wvl = self._generate_wavelength_file(enmap_ImageL2, path_outdir)
+        fp_surf = self._generate_surface_file(fp_wvl, path_outdir)
 
-        return fp_rad, fp_loc, fp_obs, fp_wvl
+        return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf
 
     @staticmethod
     def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
@@ -226,6 +229,27 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
+    def _generate_surface_file(path_wavelength_file: str, path_outdir: str):
+        fp_out = pjoin(path_outdir, 'surface_enmap.mat')
+        fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
+
+        with ZipFile(pjoin(path_enptlib,
+                           'resources', 'isofit_surface_spectra', 'isofit_surface_spectra.zip'), "r") as zf, \
+                TemporaryDirectory() as td:
+            zf.extractall(td)
+            fp_surfjson_tmp = pjoin(td, os.path.basename(fp_surfjson))
+            shutil.copyfile(fp_surfjson, fp_surfjson_tmp)
+
+            surface_model(
+                config_path=fp_surfjson_tmp,
+                wavelength_path=path_wavelength_file,
+                output_path=fp_out
+            )
+            assert os.path.isfile(fp_out)
+
+        return fp_out
+
+    @staticmethod
     def _compute_solar_phase(vaa, vza, saa, sza):
         vaa_r, vza_r, saa_r, sza_r = (np.deg2rad(i) for i in (vaa, vza, saa, sza))
         vx = np.sin(vza_r) * np.cos(vaa_r)
@@ -310,7 +334,7 @@ class IsofitEnMAP(object):
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs, fp_wvl = self.generate_input_files(enmap_ImageL2, td)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, td)
 
             os.makedirs(pjoin(td, 'work'), exist_ok=True)
             os.makedirs(pjoin(td, 'output'), exist_ok=True)
@@ -320,7 +344,7 @@ class IsofitEnMAP(object):
                 input_loc=fp_loc,
                 input_obs=fp_obs,
                 working_directory=pjoin(td, 'workdir'),
-                surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
+                surface_path=fp_surf,
                 wavelength_path=fp_wvl,
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 presolve=True,
@@ -442,7 +466,7 @@ class IsofitEnMAP(object):
 
     def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs, fp_wvl = self.generate_input_files(enmap_ImageL2, td)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, td)
 
             self._run(
                 path_toarad=fp_rad,
@@ -452,7 +476,7 @@ class IsofitEnMAP(object):
                 path_workdir=pjoin(td, 'workdir'),
                 path_enmap_wavelengths=fp_wvl,
                 path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
-                path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
+                path_surface_file=fp_surf
             )
 
             # read the AC results back into memory
