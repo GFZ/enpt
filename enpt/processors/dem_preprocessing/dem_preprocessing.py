@@ -37,6 +37,7 @@ from pyproj import CRS
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
 from py_tools_ds.geo.vector.topology import get_footprint_polygon, get_overlap_polygon
+from py_tools_ds.geo.projection import prj_equal
 
 from ..spatial_transform import Geometry_Transformer, get_UTMEPSG_from_LonLat, get_center_coord
 
@@ -138,15 +139,29 @@ class DEM_Processor(object):
                                 out_prj: Union[str, int],
                                 out_gsd: tuple
                                 ):
-        return (
+        # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
+        xmin, ymin, xmax, ymax = mapBounds
+        dem = GeoArray(self.dem.filePath)  # do not overwrite self.dem due to in-place reprojection below
+
+        if not prj_equal(self.dem.prj, out_prj):
+            dem.reproject_to_new_grid(
+                tgt_prj=out_prj,
+                # FIXME tgt_xygrid asserts mapbounds to be in suitable projection  # noqa
+                tgt_xygrid=[[xmin, xmin + out_gsd[0]], [ymax, ymax - out_gsd[1]]],
+                rspAlg='bilinear',
+                CPUs=self.CPUs
+            )
+
+        dem_mapgeo = (
             GeoArray(
-                *self.dem.get_mapPos(
+                *dem.get_mapPos(
                     mapBounds=mapBounds,
                     mapBounds_prj=mapBounds_prj,
                     out_prj=out_prj,
                     out_gsd=out_gsd,
                     rspAlg='bilinear'
                 ),
-                nodata=self.dem.nodata
+                nodata=dem.nodata
             )
         )
+        return dem_mapgeo
