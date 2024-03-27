@@ -147,7 +147,7 @@ class IsofitEnMAP(object):
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
         radiance = enmap_ImageL2.data[:] / 10.0  # TODO consider nodata value
 
-        fp_out = pjoin(path_outdir, enmap_ImageL2.meta.scene_basename)
+        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_rdn")
         gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj)
         gA.meta.band_meta = enmap_ImageL2.data.meta.band_meta
         gA.save(fp_out)
@@ -171,8 +171,7 @@ class IsofitEnMAP(object):
 
         elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
 
-        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
-        fp_out = os.path.join(path_outdir, f'{timestamp}_loc')  # ISOFIT does not support a file extension
+        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_loc")  # no file extension supported
         GeoArray(np.dstack([lons, lats, elev]),
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
@@ -197,8 +196,7 @@ class IsofitEnMAP(object):
         utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
         earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)  # TODO pixel-wise values
 
-        timestamp = enmap_ImageL2.meta.scene_basename.split('____')[1].split('_')[1]
-        fp_out = os.path.join(path_outdir, f'{timestamp}_obs')  # ISOFIT does not support a file extension
+        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_obs")  # no file extension supported
         GeoArray(np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist]),
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
