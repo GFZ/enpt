@@ -370,11 +370,13 @@ class IsofitEnMAP(object):
              aot: float = None,
              cwv: float = None
              ):
+        enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
         path_isofit_root = isofit.__path__[0]
         path_data = os.path.abspath(pjoin(path_isofit_root, '..', 'data'))
         path_examples = os.path.abspath(pjoin(path_isofit_root, '..', 'examples'))
+        path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
         if os.path.isdir(path_workdir):
             shutil.rmtree(path_workdir)
@@ -387,8 +389,6 @@ class IsofitEnMAP(object):
             os.path.dirname(path_toarad)  # input directory
         ]:
             os.makedirs(d, exist_ok=True)
-
-        enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
 
         with open(path_isocfg_default) as json_file:
             isocfg_default = json.load(json_file)
@@ -468,7 +468,7 @@ class IsofitEnMAP(object):
         Isofit(
             config_file=path_isocfg,
             level='INFO',  # FIXME hardcoded
-            logfile=pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
+            logfile=path_logfile
         ).run(row_column=None)
 
     def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo) -> GeoArray:
