@@ -332,9 +332,11 @@ class IsofitEnMAP(object):
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, td)
+            path_indir = pjoin(td, 'input')
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
 
             os.makedirs(pjoin(td, 'work'), exist_ok=True)
+            os.makedirs(pjoin(td, 'input'), exist_ok=True)
             os.makedirs(pjoin(td, 'output'), exist_ok=True)
 
             self._apply_oe(
@@ -383,7 +385,8 @@ class IsofitEnMAP(object):
             path_workdir,
             pjoin(path_workdir, 'config'),
             pjoin(path_workdir, 'lut_full'),
-            path_outdir
+            path_outdir,
+            os.path.dirname(path_toarad)  # input directory
         ]:
             os.makedirs(d, exist_ok=True)
 
@@ -472,7 +475,8 @@ class IsofitEnMAP(object):
 
     def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo) -> GeoArray:
         with TemporaryDirectory() as td:
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, td)
+            path_indir = pjoin(td, 'input')
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
 
             self._run(
                 path_toarad=fp_rad,
