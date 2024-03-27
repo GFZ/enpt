@@ -145,10 +145,12 @@ class IsofitEnMAP(object):
     def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
         # ISOFIT expects radiance in uW/cm²/sr/nm, EnPT provides mW/m²/sr/nm
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
-        radiance = enmap_ImageL2.data[:] / 10.0  # TODO consider nodata value
+        mask_nodata = ~enmap_ImageL2.data.mask_nodata[:]
+        radiance = enmap_ImageL2.data[:] / 10.0
+        radiance[mask_nodata] = -9999
 
         fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_rdn")
-        gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj)
+        gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj, nodata=-9999)
         gA.meta.band_meta = enmap_ImageL2.data.meta.band_meta
         gA.save(fp_out)
 

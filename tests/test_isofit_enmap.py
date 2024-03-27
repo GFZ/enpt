@@ -129,7 +129,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         )
 
     def test_run_on_map_geometry(self):
-        IsofitEnMAP().run_on_map_geometry(self._get_enmap_l2a_obj())
+        IsofitEnMAP().run_on_map_geometry(self._get_enmap_l2a_obj(), segmentation=True)
 
     def test_generate_input_files(self):
         with TemporaryDirectory() as td:
