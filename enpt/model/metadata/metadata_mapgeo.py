@@ -54,7 +54,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
                  wvls_l2a: Union[List, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
-                 grid_res_l2a: Tuple[float, float],
+                 geotransform_l2a: Tuple[float, float, float, float, float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
@@ -62,11 +62,12 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
         :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
-        :param grid_res_l2a:        Coordinate grid resolution of the L2A product (x, y)
+        :param geotransform_l2a:    GDAL GeoTransform tuple of EnMAP raster data in map geometry
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
-        self.grid_res = grid_res_l2a
+        self.geotransform = geotransform_l2a
+        self.grid_res = geotransform_l2a[1], abs(geotransform_l2a[5])
         self.logger = logger or logging.getLogger()
 
         # privates
