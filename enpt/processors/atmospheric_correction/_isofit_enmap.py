@@ -467,7 +467,7 @@ class IsofitEnMAP(object):
 
         Isofit(
             config_file=path_isocfg,
-            level='INFO',
+            level='INFO',  # FIXME hardcoded
             logfile=pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
         ).run(row_column=None)
 
