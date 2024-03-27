@@ -38,6 +38,8 @@ from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
+from py_tools_ds.geo.coord_trafo import mapXY2imXY
+from py_tools_ds.geo.coord_trafo import transform_any_prj
 from geoarray import GeoArray
 
 from .metadata_sensorgeo import EnMAP_Metadata_L1B_SensorGeo
@@ -202,6 +204,70 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
     def _get_view_acq_geometry_arrays(self):
         if not self.cfg.is_dummy_dataformat:
+            ll_cornerCoords = tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR))
+            if self.epsg == 4326:
+                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in ll_cornerCoords]
+            else:
+                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in
+                                   [transform_any_prj(4326, self.epsg, x, y) for x, y in ll_cornerCoords]]
+
+            def _interpolate(cols_in, rows_in, data_in, outshape):
+                # from scipy.interpolate import griddata, interp2d, bi
+                #
+                # rows_full = np.arange(outshape[0])
+                # cols_full = np.arange(outshape[1])
+                # x_out, y_out = np.meshgrid(cols_full, rows_full)
+                # data_interpolated = griddata((cols_in, rows_in), data_in, (x_out, y_out), method='linear')
+
+
+                import numpy as np
+                from scipy.linalg import lstsq
+
+                # Given data
+                x = np.array(cols_in)
+                y = np.array(rows_in)
+                data = np.array(data_in)
+
+                # Create matrix A for the plane equation coefficients
+                A = np.column_stack((x, y, np.ones_like(x)))
+
+                # Solve Ax = b, where x contains coefficients of the plane equation
+                coefficients, _, _, _ = lstsq(A, data)
+
+                # Extract coefficients
+                a, b, c = coefficients
+
+                # Define output grid
+                rows_full = np.arange(outshape[0])
+                cols_full = np.arange(outshape[1])
+                x_out, y_out = np.meshgrid(cols_full, rows_full)
+
+                # Evaluate plane equation to get interpolated values
+                data_interpolated = a * x_out + b * y_out + c
+
+                return data_interpolated
+
+
+                # data_2d[badmask_full] = \
+                #     griddata(np.array([x[~badmask_full], y[~badmask_full]]).T,  # points we know
+                #              data_2d[~badmask_full],  # values we know
+                #              np.array([x[badmask_full], y[badmask_full]]).T,  # points to interpolate
+                #              method=method, fill_value=fill_value)
+                #
+                # RGI = RegularGridInterpolator(points=[cols_in, rows_in],
+                #                               values=np.array(data_in).T,  # must be in shape [x, y]
+                #                               method='linear',
+                #                               bounds_error=False)
+                # rows_full = np.arange(outshape[0])
+                # cols_full = np.arange(outshape[1])
+                # data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full)))
+                # return data_full
+
+            def interpolate_between_corners(corners_xy, data):
+                cols_in, rows_in = zip(*corners_xy)  # UL, UR, LL, LR
+                data_in = data['upper_left'], data['upper_right'], data['lower_left'], data['lower_right']
+                return _interpolate(cols_in, rows_in, data_in, (self.nrows, self.ncols))
+
             # read Geometry (observation/illumination) angle
             # NOTE: EnMAP metadata provide also the angles for the image corners
             #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
@@ -211,16 +277,19 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             vaa_all = self._meta_l1b.geom_angles_all['view_azimuth']
             sza_all = self._meta_l1b.geom_angles_all['sun_zenith']
             saa_all = self._meta_l1b.geom_angles_all['sun_azimuth']
+            self._geom_view_zenith_array = interpolate_between_corners(im_cornerCoords, vza_all)
+            self._geom_view_azimuth_array = interpolate_between_corners(im_cornerCoords, vaa_all)
+            self._geom_sun_zenith_array = interpolate_between_corners(im_cornerCoords, sza_all)
+            self._geom_sun_azimuth_array = interpolate_between_corners(im_cornerCoords, saa_all)
 
+        else:
+            # static values for  dummy EnMAP data format
             rows, cols = self.nrows, self.ncols
 
-            # TODO replace this by interpolating all angles
-            self._geom_view_zenith_array = np.full((rows, cols), fill_value=vza_all['center'])
-            self._geom_view_azimuth_array = np.full((rows, cols), fill_value=vaa_all['center'])
-            self._geom_sun_zenith_array = np.full((rows, cols), fill_value=sza_all['center'])
-            self._geom_sun_azimuth_array = np.full((rows, cols), fill_value=saa_all['center'])
-        else:
-            raise NotImplementedError()
+            self._geom_view_zenith_array = np.full((rows, cols), fill_value=self.geom_view_zenith)
+            self._geom_view_azimuth_array = np.full((rows, cols), fill_value=self.geom_view_azimuth)
+            self._geom_sun_zenith_array = np.full((rows, cols), fill_value=self.geom_sun_zenith)
+            self._geom_sun_azimuth_array = np.full((rows, cols), fill_value=self.geom_sun_azimuth)
 
     def _get_aqtime_utc_array(self):
         if not self.cfg.is_dummy_dataformat:

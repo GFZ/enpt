@@ -186,10 +186,10 @@ class IsofitEnMAP(object):
 
     def _generate_obs_file(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
         path_length = np.full(enmap_ImageL2.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
-        vaa = enmap_ImageL2.meta.geom_view_azimuth_array  # TODO pixel-wise values
-        vza = enmap_ImageL2.meta.geom_view_zenith_array  # TODO pixel-wise values
-        saa = enmap_ImageL2.meta.geom_sun_azimuth_array  # TODO pixel-wise values
-        sza = enmap_ImageL2.meta.geom_sun_zenith_array  # TODO pixel-wise values
+        vaa = enmap_ImageL2.meta.geom_view_azimuth_array
+        vza = enmap_ImageL2.meta.geom_view_zenith_array
+        saa = enmap_ImageL2.meta.geom_sun_azimuth_array
+        sza = enmap_ImageL2.meta.geom_sun_zenith_array
         phase = self._compute_solar_phase(vaa, vza, saa, sza)
         slope = np.full(enmap_ImageL2.data.shape[:2], fill_value=90)
         aspect = np.zeros(enmap_ImageL2.data.shape[:2])
