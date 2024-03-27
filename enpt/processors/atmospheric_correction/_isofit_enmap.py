@@ -44,6 +44,7 @@ import json
 from collections.abc import Mapping
 from datetime import datetime
 from zipfile import ZipFile
+from multiprocessing import cpu_count
 
 import numpy as np
 from pyproj.crs import CRS
@@ -370,7 +371,8 @@ class IsofitEnMAP(object):
              path_emulator_basedir: str,
              path_surface_file: str,
              aot: float = None,
-             cwv: float = None
+             cwv: float = None,
+             n_cores: int = cpu_count()
              ):
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
@@ -437,7 +439,7 @@ class IsofitEnMAP(object):
             implementation=dict(
                 # debug_mode=False,
                 debug_mode=True,  # TODO deactivate if done
-                n_cores=30,  # FIXME harcoded
+                n_cores=n_cores,
                 ray_temp_dir='/tmp/ray',  # TODO not Windows-compatible
             ),
             input=dict(
@@ -473,7 +475,10 @@ class IsofitEnMAP(object):
             logfile=path_logfile
         ).run(row_column=None)
 
-    def run_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo) -> GeoArray:
+    def run_on_map_geometry(self,
+                            enmap_ImageL2: EnMAPL2Product_MapGeo,
+                            n_cores: int = cpu_count()
+                            ) -> GeoArray:
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
