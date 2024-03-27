@@ -96,6 +96,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.geom_sun_azimuth: float = meta_l1b.geom_sun_azimuth  # sun azimuth angle
         self.mu_sun: float = meta_l1b.mu_sun  # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: float = meta_l1b.earthSunDist  # earth-sun distance
+        self.aot: float = meta_l1b.aot
+        self.water_vapour: float = meta_l1b.water_vapour
 
         # generate file names for L2A output
         file_ext_l1b = os.path.splitext(meta_l1b.vnir.filename_data)[1]
