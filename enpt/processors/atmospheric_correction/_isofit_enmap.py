@@ -367,8 +367,8 @@ class IsofitEnMAP(object):
              path_enmap_wavelengths: str,
              path_emulator_basedir: str,
              path_surface_file: str,
-             aot: float,
-             water_vapour: float
+             aot: float = None,
+             cwv: float = None
              ):
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
@@ -420,11 +420,11 @@ class IsofitEnMAP(object):
                         AOT550=dict(
                             init=aot,
                             prior_mean=aot,
-                        ),
+                        ) if aot else isocfg_default['forward_model']['radiative_transfer']['statevector']['AOT550'],
                         H2OSTR=dict(
-                            init=water_vapour,
-                            prior_mean=water_vapour
-                        )
+                            init=cwv,
+                            prior_mean=cwv
+                        ) if cwv else isocfg_default['forward_model']['radiative_transfer']['statevector']['H2OSTR'],
                     ),
                 ),
                 surface=dict(
@@ -484,7 +484,7 @@ class IsofitEnMAP(object):
                 path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
                 path_surface_file=fp_surf,
                 aot=enmap_ImageL2.meta.aot,
-                water_vapour=enmap_ImageL2.meta.water_vapour,
+                cwv=enmap_ImageL2.meta.water_vapour,
             )
 
             # read the AC results back into memory
