@@ -397,7 +397,7 @@ class IsofitEnMAP(object):
             forward_model=dict(
                 instrument=dict(
                     # SNR=500,  # use noise file instead of static SNR
-                    parametric_noise_file=pjoin(path_enptlib, 'resources', 'parametric_noise.txt'),
+                    parametric_noise_file=pjoin(path_enptlib, 'resources', 'EnMAP_Sensor', 'parametric_noise.txt'),
                     wavelength_file=path_enmap_wavelengths,
                 ),
                 radiative_transfer=dict(
