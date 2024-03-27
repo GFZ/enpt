@@ -2,7 +2,7 @@
     "ISOFIT_base": "/path/to/lib/python3.11/site-packages",
     "forward_model": {
         "instrument": {
-            "SNR": 500,
+            "parametric_noise_file": "/path/to/parametric_noise.txt",
             "integrations": 1,
             "unknowns": {
                 "uncorrelated_radiometric_uncertainty": 0.01
