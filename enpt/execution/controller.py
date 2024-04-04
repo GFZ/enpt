@@ -196,8 +196,9 @@ class EnPT_Controller(object):
                             n_cores=self.cfg.CPUs - 2
                         )
                     )
+                    boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
                     boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
-                    self.L2_obj.data.arr = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                    self.L2_obj.data.arr = boa_ref
                     self.L2_obj.data.nodata = self.cfg.output_nodata_value
                     self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                     self.L2_obj.meta.unitcode = 'BOARef'
