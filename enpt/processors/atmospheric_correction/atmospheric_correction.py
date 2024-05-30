@@ -73,6 +73,7 @@ class AtmosphericCorrector(object):
 
             options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
             options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
+            options["retrieval"]["segmentation"] = True
 
             # TODO: issue is closed -> revise
             # temporarily disable uncertainty measures to avoid https://git.gfz-potsdam.de/EnMAP/sicor/-/issues/86
@@ -82,16 +83,16 @@ class AtmosphericCorrector(object):
             # set land_only mode
             options["retrieval"]["land_only"] = land_only
 
-            # disable first guess water vapor retrieval for now
-            options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
-            options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = \
-                enmap_ImageL1.meta.water_vapour  # = default = 2.5
+            # disable first guess water vapor retrieval
+            # options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
+            # options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = \
+            #     enmap_ImageL1.meta.water_vapour  # = default = 2.5
 
             # disable first guess liquid water retrieval for now
-            options["retrieval"]["state_vector"]["liquid_water"]["use_prior_mean"] = True
+            # options["retrieval"]["state_vector"]["liquid_water"]["use_prior_mean"] = True
 
             # disable first guess ice retrieval for now
-            options["retrieval"]["state_vector"]["ice"]["use_prior_mean"] = True
+            # options["retrieval"]["state_vector"]["ice"]["use_prior_mean"] = True
 
         except FileNotFoundError:
             raise FileNotFoundError(f'Could not locate options file for atmospheric correction at {path_opts}')
