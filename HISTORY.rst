@@ -2,6 +2,12 @@
 History
 =======
 
+0.20.2 (2024-05-30)
+-------------------
+
+* !107: Re-enabled first guess retrievals for water vapour, liquid water, and ice after fixing issues #90 and #92.
+
+
 0.20.1 (2024-03-05)
 -------------------
 
