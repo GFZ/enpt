@@ -52,6 +52,7 @@ from pandas import DataFrame
 import isofit
 from isofit.core.isofit import Isofit
 from isofit.utils import surface_model, analytical_line, empirical_line, extractions, segment
+from isofit.utils.downloads import download_data, download_examples
 from isofit.utils.apply_oe import apply_oe, CHUNKSIZE
 from isofit.utils.template_construction import (
     write_modtran_template,
@@ -85,9 +86,9 @@ class IsofitEnMAP(object):
         # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/, not at ../site-packages/isofit
         isofit_root = isofit.__path__[0]  # .../site-packages/isofit
         if not glob(pjoin(isofit_root, '..', 'data', '*')):
-            subprocess.call('isofit download data', shell=True)
+            download_data(output=pabs(pjoin(isofit_root, '..', 'data')), tag="latest")
         if not glob(pjoin(isofit_root, '..', 'examples', '*')):
-            subprocess.call('isofit download examples', shell=True)
+            download_examples(output=pabs(pjoin(isofit_root, '..', 'examples')), tag="latest")
 
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
