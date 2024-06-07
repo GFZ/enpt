@@ -340,7 +340,7 @@ class IsofitEnMAP(object):
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
 
-            os.makedirs(pjoin(td, 'work'), exist_ok=True)
+            os.makedirs(pjoin(td, 'workdir'), exist_ok=True)
             os.makedirs(pjoin(td, 'input'), exist_ok=True)
             os.makedirs(pjoin(td, 'output'), exist_ok=True)
 
