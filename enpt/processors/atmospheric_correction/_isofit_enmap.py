@@ -489,99 +489,104 @@ class IsofitEnMAP(object):
             )
         )
 
-        # Superpixel segmentation
-        if segmentation:
-            if not os.path.exists(paths.lbl_working_path) or \
-               not os.path.exists(paths.radiance_working_path
-            ):
-                # logging.info("Segmenting...")
-                segment(
-                    spectra=(paths.radiance_working_path, paths.lbl_working_path),
-                    nodata_value=-9999,  # as set in self._generate_radiance_file()
-                    npca=5,
-                    segsize=segmentation_size,
-                    nchunk=CHUNKSIZE,
-                    n_cores=n_cores,
-                    loglevel='INFO',  # FIXME hardcoded
-                    logfile=path_logfile,
-                )
-
-            # Extract input data per segment
-            for inp, outp in [
-                (paths.radiance_working_path, paths.rdn_subs_path),
-                (paths.obs_working_path, paths.obs_subs_path),
-                (paths.loc_working_path, paths.loc_subs_path),
-            ]:
-                if not os.path.exists(outp):
-                    # logging.info("Extracting " + outp)
-                    extractions(
-                        inputfile=inp,
-                        labels=paths.lbl_working_path,
-                        output=outp,
-                        chunksize=CHUNKSIZE,
-                        flag=-9999,
+        try:
+            # Superpixel segmentation
+            if segmentation:
+                if not os.path.exists(paths.lbl_working_path) or \
+                   not os.path.exists(paths.radiance_working_path
+                ):
+                    # logging.info("Segmenting...")
+                    segment(
+                        spectra=(paths.radiance_working_path, paths.lbl_working_path),
+                        nodata_value=-9999,  # as set in self._generate_radiance_file()
+                        npca=5,
+                        segsize=segmentation_size,
+                        nchunk=CHUNKSIZE,
                         n_cores=n_cores,
                         loglevel='INFO',  # FIXME hardcoded
                         logfile=path_logfile,
                     )
 
-            # enable segmentation and update input/output files accordingly
-            update_nested_dict(
-                isocfg,
-                dict(
-                    forward_model=dict(
-                        instrument=dict(
-                            integrations=segmentation_size
+                # Extract input data per segment
+                for inp, outp in [
+                    (paths.radiance_working_path, paths.rdn_subs_path),
+                    (paths.obs_working_path, paths.obs_subs_path),
+                    (paths.loc_working_path, paths.loc_subs_path),
+                ]:
+                    if not os.path.exists(outp):
+                        # logging.info("Extracting " + outp)
+                        extractions(
+                            inputfile=inp,
+                            labels=paths.lbl_working_path,
+                            output=outp,
+                            chunksize=CHUNKSIZE,
+                            flag=-9999,
+                            n_cores=n_cores,
+                            loglevel='INFO',  # FIXME hardcoded
+                            logfile=path_logfile,
                         )
-                    ),
-                    input=dict(
-                        measured_radiance_file = paths.rdn_subs_path,
-                        loc_file = paths.loc_subs_path,
-                        obs_file = paths.obs_subs_path,
-                    ),
-                    output=dict(
-                        estimated_reflectance_file = paths.rfl_subs_path,
-                        estimated_state_file = paths.state_subs_path,
-                        posterior_uncertainty_file = paths.uncert_subs_path,
-                        atmospheric_coefficients_file = paths.atm_coeff_path
+
+                # enable segmentation and update input/output files accordingly
+                update_nested_dict(
+                    isocfg,
+                    dict(
+                        forward_model=dict(
+                            instrument=dict(
+                                integrations=segmentation_size
+                            )
+                        ),
+                        input=dict(
+                            measured_radiance_file = paths.rdn_subs_path,
+                            loc_file = paths.loc_subs_path,
+                            obs_file = paths.obs_subs_path,
+                        ),
+                        output=dict(
+                            estimated_reflectance_file = paths.rfl_subs_path,
+                            estimated_state_file = paths.state_subs_path,
+                            posterior_uncertainty_file = paths.uncert_subs_path,
+                            atmospheric_coefficients_file = paths.atm_coeff_path
+                        )
                     )
                 )
-            )
 
-        with open(path_isocfg, 'w') as json_file:
-            json.dump(isocfg, json_file, skipkeys=False, indent=4)
+            with open(path_isocfg, 'w') as json_file:
+                json.dump(isocfg, json_file, skipkeys=False, indent=4)
 
-        self._build_modtran_template_file(path_emulator_basedir, path_obs, path_loc, path_workdir, enmap_timestamp)
+            self._build_modtran_template_file(path_emulator_basedir, path_obs, path_loc, path_workdir, enmap_timestamp)
 
-        Isofit(
-            config_file=path_isocfg,
-            level='INFO',  # FIXME hardcoded
-            logfile=path_logfile
-        ).run(row_column=None)
+            Isofit(
+                config_file=path_isocfg,
+                level='INFO',  # FIXME hardcoded
+                logfile=path_logfile
+            ).run(row_column=None)
 
-        if segmentation:
-            # NOTE: There is also the alternative "analytical_line"
-            empirical_line(
-                reference_radiance_file=paths.rdn_subs_path,
-                reference_reflectance_file=paths.rfl_subs_path,
-                reference_uncertainty_file=paths.uncert_subs_path,
-                reference_locations_file=paths.loc_subs_path,
-                segmentation_file=paths.lbl_working_path,
-                input_radiance_file=paths.radiance_working_path,
-                input_locations_file=paths.loc_working_path,
-                output_reflectance_file=paths.rfl_working_path,
-                output_uncertainty_file=paths.uncert_working_path,
-                isofit_config=path_isocfg,  # FIXME equalize with paths.isofit_full_config_path
-                nneighbors=int(round(3950 / 9 - 35 / 36 * segmentation_size)),
-                n_cores=n_cores,
-            )
-            return dict(
-                estimated_reflectance_file=paths.rfl_working_path,
-                estimated_state_file='NA',  # FIXME not sure why this is not created
-                posterior_uncertainty_file=paths.uncert_working_path
-            )
-        else:
-            return isocfg['output']
+            if segmentation:
+                # NOTE: There is also the alternative "analytical_line"
+                empirical_line(
+                    reference_radiance_file=paths.rdn_subs_path,
+                    reference_reflectance_file=paths.rfl_subs_path,
+                    reference_uncertainty_file=paths.uncert_subs_path,
+                    reference_locations_file=paths.loc_subs_path,
+                    segmentation_file=paths.lbl_working_path,
+                    input_radiance_file=paths.radiance_working_path,
+                    input_locations_file=paths.loc_working_path,
+                    output_reflectance_file=paths.rfl_working_path,
+                    output_uncertainty_file=paths.uncert_working_path,
+                    isofit_config=path_isocfg,  # FIXME equalize with paths.isofit_full_config_path
+                    nneighbors=int(round(3950 / 9 - 35 / 36 * segmentation_size)),
+                    n_cores=n_cores,
+                )
+                return dict(
+                    estimated_reflectance_file=paths.rfl_working_path,
+                    estimated_state_file='NA',  # FIXME not sure why this is not created
+                    posterior_uncertainty_file=paths.uncert_working_path
+                )
+            else:
+                return isocfg['output']
+
+        finally:
+            print('Stopping ray.')
+            ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def run_on_map_geometry(self,
                             enmap_ImageL2: EnMAPL2Product_MapGeo,
