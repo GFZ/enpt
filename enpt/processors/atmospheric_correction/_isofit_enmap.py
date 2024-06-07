@@ -83,7 +83,9 @@ class IsofitEnMAP(object):
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100'  # duplicate of emulator_base
 
         # make sure ISOFIT's extra-files are downloaded
-        # FIXME: somehow ISOFIT expects the data and examples dirs at .../site-packages/, not at ../site-packages/isofit
+        # FIXME: Somehow ISOFIT expects the data and examples dirs at .../site-packages/,
+        #        not at ../site-packages/isofit, and also not at the default download directory at ~/.isofit/
+        #        -> https://github.com/isofit/isofit/issues/509
         isofit_root = isofit.__path__[0]  # .../site-packages/isofit
         if not glob(pjoin(isofit_root, '..', 'data', '*')):
             download_data(output=pabs(pjoin(isofit_root, '..', 'data')), tag="latest")
