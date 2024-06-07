@@ -26,7 +26,7 @@ RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
 # force to install latest sicor version which is currently not available from PyPI/conda-forge
 RUN source activate ci_env && \
     mamba remove sicor --force && \
-    pip install sicor*.whl
+    pip install /root/sicor*.whl
 
 # install Polymer into the ci_env environment
 RUN source activate ci_env && \
