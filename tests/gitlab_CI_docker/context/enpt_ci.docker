@@ -57,6 +57,7 @@ RUN wget -nc -P /root/.isofit/sixs https://github.com/ashiklom/isofit/releases/d
     cd /root/.isofit/sixs &&\
     tar -xf 6sv-2.1.tar &&\
     rm 6sv-2.1.tar &&\
+    mamba install gfortran &&\
     sed -i Makefile -e 's/FFLAGS.*/& -std=legacy/' &&\
     make
 ENV SIXS_DIR="/root/.isofit/sixs"
