@@ -10,6 +10,8 @@ SHELL ["/bin/bash", "-c"]
 # copy some needed stuff to /root
 COPY *.yml /root/
 COPY ${polymer_v_str}.tar.gz /root/
+COPY sRTMnet_v120* ~/.isofit/srtmnet/
+COPY 6sv-2.1.tar ~/.isofit/sixs/
 
 # update base environment
 RUN mamba update -y -n base mamba conda && \
@@ -32,3 +34,22 @@ RUN source activate ci_env && \
 
 # copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
 COPY era5_20170218*.nc /root/${polymer_v_str}/ANCILLARY/ERA5/2017/02/18/
+
+# install isofit using the dev branch (uninstall conda-version without touching dependencies)
+RUN source activate ci_env && \
+    mamba remove isofit --force && \
+    pip install git+https://github.com/isofit/isofit.git@dev
+
+# download sRTMnet model and aux files (slow but NASA host server will soon be replaced with Zenodo)
+RUN wget -nc -P ~/.isofit/srtmnet https://avng.jpl.nasa.gov/pub/PBrodrick/isofit/sRTMnet_v120.h5
+RUN wget -nc -P ~/.isofit/srtmnet https://avng.jpl.nasa.gov/pub/PBrodrick/isofit/sRTMnet_v120_aux.npz
+ENV EMULATOR_PATH="~/.isofit/srtmnet/"
+
+# download and build 6S
+RUN wget -nc -P ~/.isofit/sixs https://github.com/ashiklom/isofit/releases/download/6sv-mirror/6sv-2.1.tar &&\
+    cd ~/.isofit/sixs &&\
+    tar -xf 6sv-2.1.tar &&\
+    rm 6sv-2.1.tar &&\
+    sed -i Makefile -e 's/FFLAGS.*/& -std=legacy/' &&\
+    make
+ENV SIXS_DIR="~/.isofit/sixs"
