@@ -10,6 +10,7 @@ SHELL ["/bin/bash", "-c"]
 # copy some needed stuff to /root
 # NOTE: This fails for non-existing files with docker versions released before 2021.
 COPY *.yml /root/
+COPY sicor/dist/* /root/
 COPY ${polymer_v_str}.tar.gz /root/
 COPY sRTMnet_v120* ~/.isofit/srtmnet/
 COPY 6sv-2.1.tar ~/.isofit/sixs/
@@ -25,7 +26,7 @@ RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
 # force to install latest sicor version which is currently not available from PyPI/conda-forge
 RUN source activate ci_env && \
     mamba remove sicor --force && \
-    pip install git+https://git.gfz-potsdam.de/EnMAP/sicor.git@main
+    pip install sicor*.whl
 
 # install Polymer into the ci_env environment
 RUN source activate ci_env && \
