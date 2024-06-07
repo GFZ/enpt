@@ -8,6 +8,7 @@ ENV polymer_v_str='polymer-v4.16.1'
 SHELL ["/bin/bash", "-c"]
 
 # copy some needed stuff to /root
+# NOTE: This fails for non-existing files with docker versions released before 2021.
 COPY *.yml /root/
 COPY ${polymer_v_str}.tar.gz /root/
 COPY sRTMnet_v120* ~/.isofit/srtmnet/
