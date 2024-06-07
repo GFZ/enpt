@@ -79,7 +79,7 @@ class IsofitEnMAP(object):
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
 
-        os.environ['SIXS_DIR'] = "/home/gfz-fe/scheffler/6sV2.1"  # FIXME hardcoded
+        os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100'  # duplicate of emulator_base
 
         # make sure ISOFIT's extra-files are downloaded
