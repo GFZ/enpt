@@ -37,8 +37,8 @@ from tempfile import TemporaryDirectory
 from typing import Tuple
 from fnmatch import fnmatch
 import os
-from os.path import join as pjoin
-import subprocess
+from os.path import join as pjoin, abspath as pabs
+from pathlib import Path
 from glob import glob
 import json
 from collections.abc import Mapping
@@ -350,7 +350,7 @@ class IsofitEnMAP(object):
                 wavelength_path=fp_wvl,
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 presolve=True,
-                emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+                emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
                 n_cores=30  # FIXME hardcoded
             )
 
@@ -414,10 +414,10 @@ class IsofitEnMAP(object):
                             aerosol_model_file=pjoin(path_data, 'aerosol_model.txt'),
                             aerosol_template_file=pjoin(path_data, 'aerosol_template.json'),
                             earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
-                            emulator_aux_file=pjoin(os.path.dirname(path_emulator_basedir), 'sRTMnet_v100_aux.npz'),
-                            emulator_file=path_emulator_basedir,
-                            engine_base_dir=os.environ['SIXS_DIR'],
-                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v100_vi'),
+                            emulator_aux_file=pjoin(path_emulator_basedir, 'sRTMnet_v120_aux.npz'),
+                            emulator_file=pjoin(path_emulator_basedir, 'sRTMnet_v120.h5'),
+                            engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs'),
+                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             lut_path=pjoin(path_workdir, 'lut_full', 'lut.nc'),
                             sim_path=pjoin(path_workdir, 'lut_full'),
@@ -597,7 +597,7 @@ class IsofitEnMAP(object):
                     path_outdir=pjoin(td, 'output'),
                     path_workdir=pjoin(td, 'workdir'),
                     path_enmap_wavelengths=fp_wvl,
-                    path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+                    path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                     path_surface_file=fp_surf,
                     aot=enmap_ImageL2.meta.aot,
                     cwv=enmap_ImageL2.meta.water_vapour,

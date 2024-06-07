@@ -37,6 +37,8 @@ Tests for `atmospheric_correction._isofit_enmap` module.
 
 import unittest
 import os
+from os.path import join as pjoin
+from pathlib import Path
 import tempfile
 import shutil
 from tempfile import TemporaryDirectory
@@ -105,7 +107,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
             log_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_out/isofit.log',
             presolve=True,
-            emulator_base='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',  # FIXME why not /home/gfz-fe/scheffler/sRTMnet_v100/
+            emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
             n_cores=30
         )
 
@@ -124,7 +126,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             path_outdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/output/',
             path_workdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/workdir/',
             path_enmap_wavelengths='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-            path_emulator_basedir='/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100',
+            path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
             path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
         )
 
