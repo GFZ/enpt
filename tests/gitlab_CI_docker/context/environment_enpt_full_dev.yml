@@ -8,7 +8,6 @@ dependencies:
   - pip  # avoids that conda uses the wrong pip
   - enpt>=0.19.5
   - enpt_enmapboxapp>=0.7.6
-  - isofit>3
 
   # EnMAP-Box
   - astropy
