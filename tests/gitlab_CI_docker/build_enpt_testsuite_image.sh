@@ -12,7 +12,7 @@ with open("../../'${pkgname}'/version.py") as version_file:
 print(version["__version__"])
 '
 version=`python -c "$python_script"`
-tag="${pkgname}_ci:$version"
+tag="ds__${pkgname}_ci:$version"
 gitlab_runner="${pkgname}_gitlab_CI_runner"
 runnername_remote="${pkgname}_ci_runner__v${version}__${HOSTNAME}"
 taglist="${pkgname}_ci_client"
