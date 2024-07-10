@@ -2,6 +2,12 @@
 History
 =======
 
+0.20.3 (coming soon)
+--------------------
+
+* Adapted CI runner build script to upstream changes in GitLab 17.0.
+
+
 0.20.2 (2024-05-30)
 -------------------
 
