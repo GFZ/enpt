@@ -83,11 +83,9 @@ test_enpt_install:
 
     # install enpt
     - pip install -e .
-    - cd ..
-    - pwd
-    - ls
 
     # test importability
+    - cd ../..
     - python -c "import enpt; print(enpt)"
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
 
@@ -96,6 +94,7 @@ test_enpt_install:
   only:
     - main
     - dev
+    - maintenance/modernize_setup
 
 
 pages:
