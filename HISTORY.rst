@@ -2,8 +2,8 @@
 History
 =======
 
-0.21.0 (coming soon)
---------------------
+0.21.0 (2024-08-28)
+-------------------
 
 * Adapted CI runner build script to upstream changes in GitLab 17.0.
 * !108: Migrated setup procedure from using setup.py + setup.cfg to using pyproject.toml only. Dropped requirements.txt.
