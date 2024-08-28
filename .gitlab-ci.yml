@@ -94,7 +94,6 @@ test_enpt_install:
   only:
     - main
     - dev
-    - maintenance/modernize_setup
 
 
 pages:
