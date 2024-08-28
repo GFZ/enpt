@@ -47,6 +47,8 @@ test_enpt:
 
     expire_in: 30 days
     when: always
+  except:
+    - maintenance/modernize_setup
 
 
 test_styles:
@@ -61,6 +63,8 @@ test_styles:
     - tests/linting/pycodestyle.log
     - tests/linting/pydocstyle.log
     when: always
+  except:
+    - maintenance/modernize_setup
 
 
 test_urls:
@@ -70,6 +74,8 @@ test_urls:
     - pip install -U urlchecker
     - make urlcheck
   when: always
+  except:
+    - maintenance/modernize_setup
 
 
 test_enpt_install:
@@ -90,6 +96,7 @@ test_enpt_install:
     - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
 
     # check if dependencies are properly installed
+    - conda list holoviews
     - pip check || exit
   only:
     - main

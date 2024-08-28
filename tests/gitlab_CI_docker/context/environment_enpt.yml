@@ -11,6 +11,7 @@ dependencies:
   - cerberus
   - gdal
   - geoarray>=0.15.8
+  - holoviews>1.12.7
   - jsmin
   - lxml
   - matplotlib
