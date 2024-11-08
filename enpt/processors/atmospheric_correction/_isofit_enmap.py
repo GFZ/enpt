@@ -80,7 +80,7 @@ class IsofitEnMAP(object):
         self.cfg = config
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
-        # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/sRTMnet_v100/sRTMnet_v100'  # duplicate of emulator_base
+        # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
 
         # make sure ISOFIT's extra-files are downloaded
         # FIXME: Somehow ISOFIT expects the data and examples dirs at .../site-packages/,
