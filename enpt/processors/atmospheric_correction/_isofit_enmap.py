@@ -52,7 +52,8 @@ from pandas import DataFrame
 import isofit
 from isofit.core.isofit import Isofit
 from isofit.utils import surface_model, analytical_line, empirical_line, extractions, segment
-from isofit.utils.downloads import download_data, download_examples
+from isofit.data.cli.data import download as download_data
+from isofit.data.cli.examples import download as download_examples
 from isofit.utils.apply_oe import apply_oe, CHUNKSIZE
 from isofit.utils.template_construction import (
     write_modtran_template,
@@ -83,14 +84,8 @@ class IsofitEnMAP(object):
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
 
         # make sure ISOFIT's extra-files are downloaded
-        # FIXME: Somehow ISOFIT expects the data and examples dirs at .../site-packages/,
-        #        not at ../site-packages/isofit, and also not at the default download directory at ~/.isofit/
-        #        -> https://github.com/isofit/isofit/issues/509
-        isofit_root = isofit.__path__[0]  # .../site-packages/isofit
-        if not glob(pjoin(isofit_root, '..', 'data', '*')):
-            download_data(output=pabs(pjoin(isofit_root, '..', 'data')), tag="latest")
-        if not glob(pjoin(isofit_root, '..', 'examples', '*')):
-            download_examples(output=pabs(pjoin(isofit_root, '..', 'examples')), tag="latest")
+        download_data(output=None, tag="latest")
+        download_examples(output=None, tag="latest")
 
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
@@ -384,9 +379,8 @@ class IsofitEnMAP(object):
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
-        path_isofit_root = isofit.__path__[0]
-        path_data = os.path.abspath(pjoin(path_isofit_root, '..', 'data'))
-        path_examples = os.path.abspath(pjoin(path_isofit_root, '..', 'examples'))
+        path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
+        path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
         if os.path.isdir(path_workdir):
