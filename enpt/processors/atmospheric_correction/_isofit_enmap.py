@@ -121,7 +121,7 @@ class IsofitEnMAP(object):
         write_modtran_template(
             atmosphere_type='ATM_MIDLAT_SUMMER',
             fid=enmap_timestamp,
-            altitude_km=mean_elevation_km + np.cos(np.deg2rad(180 - mean_to_sensor_zenith)) * mean_path_km,
+            altitude_km=mean_elevation_km + np.cos(np.deg2rad(mean_to_sensor_zenith)) * mean_path_km,
             dayofyear=datetime.strptime(enmap_timestamp[:15], "%Y%m%dt%H%M%S").timetuple().tm_yday,
             to_sun_zenith=mean_to_sun_zenith,
             to_sensor_azimuth=mean_to_sensor_azimuth,
