@@ -129,7 +129,7 @@ dev = [
 ]
 
 [project.scripts]
-arosics = "enpt.cli:main"
+enpt = "enpt.cli:main"
 
 [tool.setuptools]
 zip-safe = false
