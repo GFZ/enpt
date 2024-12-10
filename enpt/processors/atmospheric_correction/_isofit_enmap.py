@@ -260,7 +260,7 @@ class IsofitEnMAP(object):
         sy = np.sin(sza_r) * np.sin(saa_r)
         sz = np.cos(sza_r)
         phase_r = np.arccos(
-            (vx * sx + vy * sy + vz * sz) / np.sqrt((vx ** 2 + vy ** 2 + vz ** 2) * (sx **2 + sy ** 2 + sz ** 2)))
+            (vx * sx + vy * sy + vz * sz) / np.sqrt((vx ** 2 + vy ** 2 + vz ** 2) * (sx ** 2 + sy ** 2 + sz ** 2)))
         phase = np.rad2deg(phase_r)
 
         return phase

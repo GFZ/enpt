@@ -192,10 +192,8 @@ class EnPT_Controller(object):
                         (IsofitEnMAP(config=self.cfg)
                          .run_on_map_geometry(
                             self.L2_obj,
-                            segmentation=True,
-                            n_cores=self.cfg.CPUs - 2
-                        )
-                    )
+                            segmentation=False,
+                            n_cores=self.cfg.CPUs - 2))
                     boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
                     boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
                     self.L2_obj.data.arr = boa_ref
@@ -210,7 +208,8 @@ class EnPT_Controller(object):
                         if self.cfg.run_deadpix_P:
                             # re-apply dead pixel correction
                             self.L1_obj.logger.info(
-                                'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
+                                'Re-applying dead pixel correction to correct '
+                                'for spectral spikes due to fringe effect.')
                             self.L1_obj.correct_dead_pixels()
                     else:
                         self.L1_obj.logger.info('Skipping atmospheric correction as configured and '

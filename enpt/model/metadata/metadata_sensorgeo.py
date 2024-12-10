@@ -570,7 +570,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             # TODO: revise this later to get rid of the duplicates with self.geom_xxx
             self.geom_angles_all = dict(
                 view_zenith={e.tag: abs(float(e.text)) for e in xml.findall("specific/acrossOffNadirAngle/")},
-                view_azimuth={e.tag: float(e.text)  for e in xml.findall("specific/sceneAzimuthAngle/")},
+                view_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sceneAzimuthAngle/")},
                 sun_zenith={e.tag: 90 - float(e.text)for e in xml.findall("specific/sunElevationAngle/")},
                 sun_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sunAzimuthAngle/")}
             )

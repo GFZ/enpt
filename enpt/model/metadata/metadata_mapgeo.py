@@ -219,7 +219,6 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 # x_out, y_out = np.meshgrid(cols_full, rows_full)
                 # data_interpolated = griddata((cols_in, rows_in), data_in, (x_out, y_out), method='linear')
 
-
                 import numpy as np
                 from scipy.linalg import lstsq
 
@@ -246,7 +245,6 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 data_interpolated = a * x_out + b * y_out + c
 
                 return data_interpolated
-
 
                 # data_2d[badmask_full] = \
                 #     griddata(np.array([x[~badmask_full], y[~badmask_full]]).T,  # points we know
