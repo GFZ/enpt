@@ -423,10 +423,10 @@ class IsofitEnMAP(object):
                         )
                     ),
                     statevector=dict(
-                        AOT550=dict(
+                        AERFRAC_2=dict(
                             init=aot,
                             prior_mean=aot,
-                        ) if aot else isocfg_default['forward_model']['radiative_transfer']['statevector']['AOT550'],
+                        ) if aot else isocfg_default['forward_model']['radiative_transfer']['statevector']['AERFRAC_2'],
                         H2OSTR=dict(
                             init=cwv,
                             prior_mean=cwv

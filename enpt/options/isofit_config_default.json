@@ -11,7 +11,7 @@
         },
         "radiative_transfer": {
             "lut_grid": {
-                "AOT550": [
+                "AERFRAC_2": [
                     0.001,
                     0.1009,
                     0.2008,
@@ -46,14 +46,14 @@
                     "interpolator_base_path": "/path/to/data_out/lut_full/sRTMnet_v120_vi",
                     "irradiance_file": "/path/to/examples/20151026_SantaMonica/data/prism_optimized_irr.dat",
                     "lut_names": {
-                        "AOT550": null,
+                        "AERFRAC_2": null,
                         "H2OSTR": null
                     },
                     "lut_path": "/path/to/data_out/lut_full/lut.nc",
                     "sim_path": "/path/to/data_out/lut_full",
                     "statevector_names": [
-                        "H2OSTR",
-                        "AOT550"
+                        "AERFRAC_2",
+                        "H2OSTR"
                     ],
                     "template_file": "/path/to/data_out/config/20220712T000000Z_modtran_tpl.json"
                 }
