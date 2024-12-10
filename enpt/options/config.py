@@ -332,6 +332,14 @@ class EnPTConfig(object):
             Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline',
                                                       'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
 
+        :key vswir_overlap_algorithm:
+            Algorithm how to output the spectral bands in the VNIR/SWIR spectral overlap region (default: 'swir_only')
+
+                - 'order_by_wvl': keep spectral bands unchanged, order bands by wavelength
+                - 'average': average the spectral information within the overlap
+                - 'vnir_only': only use the VNIR bands (cut overlapping SWIR bands)
+                - 'swir_only': only use the SWIR bands (cut overlapping VNIR bands)
+
         :key target_projection_type:
             Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')
 
