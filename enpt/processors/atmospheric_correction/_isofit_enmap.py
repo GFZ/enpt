@@ -616,3 +616,95 @@ class IsofitEnMAP(object):
             boa_rfl.to_mem()
 
             return boa_rfl
+
+
+class LUT_Transformer(object):
+    def __init__(self, path_lut: str):
+        """
+
+        :param path_lut:    atmospheric look-up-table in binary format as created by Luis
+        """
+        self.p_lut_bin = path_lut
+        self._offset = 0
+
+    def modtran_lut_to_netcdf(self):
+        """
+        Read MODTRAN® LUT.
+
+        :param file_lut: path to LUT
+        :return:         LUT of atmospheric functions, x and y axes grid points, LUT wavelengths
+        """
+        def read_int16(data: np.ndarray, count: int):
+            val = np.array(data[self._offset:self._offset + count * 2].view('int16'))
+            self._offset += count * 2
+            return val
+
+        def read_float32(data: np.ndarray, count: int):
+            val = np.array(data[self._offset:self._offset + count * 4].view('f4'))
+            self._offset += count * 4
+            return val
+
+        with open(self.p_lut_bin, 'rb') as fd:
+            data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
+
+        wvl, vza, sza, hsf, aot, phi, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
+        npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
+
+        lut1 = read_float32(data, count=10584000).reshape(
+            (len(vza), len(sza), len(hsf), len(aot), len(phi), 1, len(wvl), npar1))
+        lut2 = read_float32(data, count=42336000).reshape(
+            (len(vza), len(sza), len(hsf), len(aot), 1, len(cwv), len(wvl), npar2))
+
+        # Build xnodes for LUT dimensions
+        ndim = 6
+
+        def create_xnodes(dim_arr, values, ndim):
+            xnodes = np.zeros((max(dim_arr), ndim))
+            for i, val in enumerate(values):
+                xnodes[:dim_arr[i], i] = val
+            return xnodes
+
+        dim_arr1 = [len(vza), len(sza), len(phi), len(hsf), len(aot), 1]
+        dim_arr2 = [len(vza), len(sza), 1, len(hsf), len(aot), len(cwv)]
+        xnodes1 = create_xnodes(dim_arr1, [vza, sza, phi, hsf, aot, [1]], ndim)
+        xnodes2 = create_xnodes(dim_arr2, [vza, sza, [1], hsf, aot, cwv], ndim)
+
+        # Combine xnodes
+        dim_arr = [len(vza), len(sza), len(hsf), len(aot), len(phi), len(cwv)]
+        xnodes = np.zeros((max(dim_arr), ndim))
+        xnodes[:, :4] = xnodes1[:, [0, 1, 3, 4]]
+        xnodes[:, 4] = xnodes1[:, 2]
+        xnodes[:, 5] = xnodes2[:, 5]
+
+        # Create cell coordinates
+        x_cell = np.array([[i, j, k, ii, jj, kk]
+                           for i in [0, 1] for j in [0, 1] for k in [0, 1]
+                           for ii in [0, 1] for jj in [0, 1] for kk in [0, 1]])
+
+        # Adjust boundaries
+        def adjust_boundaries(arr, dim):
+            arr[0] += 0.0001
+            arr[dim - 1] -= 0.0001
+
+        for arr, dim in zip([vza, sza, hsf, aot, phi, cwv], dim_arr):
+            adjust_boundaries(arr, dim)
+
+        # Extract LUTs
+        luts = l0_lut, edir_lut, edif_lut, sab_lut = [
+            np.squeeze(lut1[..., 0], axis=5),  # l0 LUT
+            np.squeeze(lut2[..., 0], axis=4),  # edir LUT
+            np.squeeze(lut2[..., 1], axis=4),  # edif LUT
+            np.squeeze(lut2[..., 2], axis=4)   # sab LUT
+        ]
+
+        # Define axes
+        axes_x = [
+            [vza, sza, hsf, aot, phi],  # axes x l0
+            [vza, sza, hsf, aot, cwv]   # axes x e s
+        ]
+        axes_y = [
+            [np.arange(i) for i in luts[0].shape[:-1]],  # axes y l0
+            [np.arange(i) for i in luts[0].shape[:-1]]   # axes y e s
+        ]
+
+        return luts, axes_x, axes_y, wvl, lut1, lut2, xnodes, 2 ** ndim, ndim, x_cell
