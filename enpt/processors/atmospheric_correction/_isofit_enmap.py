@@ -682,12 +682,9 @@ class LUT_Transformer(object):
                            for ii in [0, 1] for jj in [0, 1] for kk in [0, 1]])
 
         # Adjust boundaries
-        def adjust_boundaries(arr, dim):
+        for arr, dim in zip([vza, sza, hsf, aot, phi, cwv], dim_arr):
             arr[0] += 0.0001
             arr[dim - 1] -= 0.0001
-
-        for arr, dim in zip([vza, sza, hsf, aot, phi, cwv], dim_arr):
-            adjust_boundaries(arr, dim)
 
         # Extract LUTs
         luts = l0_lut, edir_lut, edif_lut, sab_lut = [
