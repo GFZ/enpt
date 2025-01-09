@@ -647,13 +647,13 @@ class LUT_Transformer(object):
         with open(self.p_lut_bin, 'rb') as fd:
             data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
 
-        wvl, vza, sza, hsf, aot, phi, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
+        wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
         npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
 
         lut1 = read_float32(data, count=10584000).reshape(
-            (len(vza), len(sza), len(hsf), len(aot), len(phi), 1, len(wvl), npar1))
+            (len(vza), len(sza), len(alt), len(aot), len(raa), 1, len(wvl), npar1))
         lut2 = read_float32(data, count=42336000).reshape(
-            (len(vza), len(sza), len(hsf), len(aot), 1, len(cwv), len(wvl), npar2))
+            (len(vza), len(sza), len(alt), len(aot), 1, len(cwv), len(wvl), npar2))
 
         # Build xnodes for LUT dimensions
         ndim = 6
@@ -664,13 +664,13 @@ class LUT_Transformer(object):
                 xnodes[:dim_arr[i], i] = val
             return xnodes
 
-        dim_arr1 = [len(vza), len(sza), len(phi), len(hsf), len(aot), 1]
-        dim_arr2 = [len(vza), len(sza), 1, len(hsf), len(aot), len(cwv)]
-        xnodes1 = create_xnodes(dim_arr1, [vza, sza, phi, hsf, aot, [1]], ndim)
-        xnodes2 = create_xnodes(dim_arr2, [vza, sza, [1], hsf, aot, cwv], ndim)
+        dim_arr1 = [len(vza), len(sza), len(raa), len(alt), len(aot), 1]
+        dim_arr2 = [len(vza), len(sza), 1, len(alt), len(aot), len(cwv)]
+        xnodes1 = create_xnodes(dim_arr1, [vza, sza, raa, alt, aot, [1]], ndim)
+        xnodes2 = create_xnodes(dim_arr2, [vza, sza, [1], alt, aot, cwv], ndim)
 
         # Combine xnodes
-        dim_arr = [len(vza), len(sza), len(hsf), len(aot), len(phi), len(cwv)]
+        dim_arr = [len(vza), len(sza), len(alt), len(aot), len(raa), len(cwv)]
         xnodes = np.zeros((max(dim_arr), ndim))
         xnodes[:, :4] = xnodes1[:, [0, 1, 3, 4]]
         xnodes[:, 4] = xnodes1[:, 2]
@@ -682,7 +682,7 @@ class LUT_Transformer(object):
                            for ii in [0, 1] for jj in [0, 1] for kk in [0, 1]])
 
         # Adjust boundaries
-        for arr, dim in zip([vza, sza, hsf, aot, phi, cwv], dim_arr):
+        for arr, dim in zip([vza, sza, alt, aot, raa, cwv], dim_arr):
             arr[0] += 0.0001
             arr[dim - 1] -= 0.0001
 
@@ -696,8 +696,8 @@ class LUT_Transformer(object):
 
         # Define axes
         axes_x = [
-            [vza, sza, hsf, aot, phi],  # axes x l0
-            [vza, sza, hsf, aot, cwv]   # axes x e s
+            [vza, sza, alt, aot, raa],  # axes x l0
+            [vza, sza, alt, aot, cwv]   # axes x e s
         ]
         axes_y = [
             [np.arange(i) for i in luts[0].shape[:-1]],  # axes y l0
