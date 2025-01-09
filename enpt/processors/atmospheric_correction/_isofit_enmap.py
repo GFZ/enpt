@@ -627,7 +627,7 @@ class LUT_Transformer(object):
         self.p_lut_bin = path_lut
         self._offset = 0
 
-    def modtran_lut_to_netcdf(self):
+    def read_binary_modtran_lut(self):
         """
         Read MODTRAN® LUT.
 

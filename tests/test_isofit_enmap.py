@@ -194,7 +194,7 @@ class Test_LUT_Transformer(unittest.TestCase):
         self.p_lut_bin = '/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/SCAPE_M/EnMAP_LUT_MOD5_formatted_1nm'
 
     def test_modtran_lut_to_netcdf(self):
-        LUT_Transformer(self.p_lut_bin).modtran_lut_to_netcdf()
+        LUT_Transformer(self.p_lut_bin).read_binary_modtran_lut()
 
 
 if __name__ == '__main__':
