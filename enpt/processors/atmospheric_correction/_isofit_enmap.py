@@ -258,7 +258,7 @@ class IsofitEnMAP(object):
     def _generate_lut_file(path_outdir: str):
         # TODO: By re-using either the unpacked lut.zip or the LUT_ISOFIT.nc,
         #       the processing time can be reduced by ~20-60 sec.
-        fp_out = pjoin(path_outdir, 'LUT_ISOFIT.nc')
+        fp_out = pjoin(path_outdir, 'EnMAP_LUT_MOD5_ISOFIT_formatted_1nm.nc')
 
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
               TemporaryDirectory() as td):
@@ -410,6 +410,9 @@ class IsofitEnMAP(object):
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
         if os.path.isdir(path_workdir):
+            if path_lut and path_lut.startswith(path_workdir):
+                raise ValueError(path_lut, "The given prebuilt LUT must not be within the given "
+                                           "working directory as it is deleted before running ISOFIT.")
             shutil.rmtree(path_workdir)
 
         for d in [
