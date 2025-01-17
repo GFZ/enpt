@@ -701,12 +701,6 @@ class LUT_Transformer(object):
         fwhm = np.zeros_like(wvl)
         fwhm[:len(wvl) - 1] = np.diff(wvl)
         fwhm[len(wvl) - 1] = fwhm[len(wvl) - 2]
-
-        # resample Fontenla irradiance to the wavelengths of the LUT (2100 CWLs)
-        # -> just uses center wavelengths and FWHMs + np.exp SRFs
-        # multiply with 0.1 to adapt unit to ISOFIT
-        sirr = np.zeros_like(wvl)  # not used by ISOFIT
-
         cos_sza = np.cos(np.deg2rad(sza))[None, :, None, None, None, None, None]
 
         # NOTE: ISOFIT expects a LUT with all parameters simulated for multiple CWV values.
@@ -771,7 +765,7 @@ class LUT_Transformer(object):
                 ('relative_azimuth', ('relative_azimuth',), raa),
                 ('wl', ('wl',), wvl),
                 ('fwhm', ('wl',), fwhm),
-                ('solar_irr', ('wl',), sirr),
+                ('solar_irr', ('wl',), np.zeros_like(wvl)),  # not used by ISOFIT)
                 # 7D data
                 ('rhoatm', dims, rhoatm),
                 ('sphalb', dims, sphalb),
