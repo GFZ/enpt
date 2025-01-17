@@ -443,7 +443,6 @@ class IsofitEnMAP(object):
                             engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs'),
                             interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
-                            lut_path=pjoin(path_workdir, 'lut_full', 'lut.nc'),
                             lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),  # if existing -> use this one, otherwise simulate to lut.nc
                             sim_path=pjoin(path_workdir, 'lut_full'),
                             template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
