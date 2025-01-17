@@ -63,6 +63,8 @@ from isofit.utils.template_construction import (
     Pathnames
 )
 import ray
+import netCDF4 as nc
+from scipy.interpolate import interp1d
 from py_tools_ds.geo.coord_grid import get_coord_grid
 from py_tools_ds.geo.coord_trafo import transform_coordArray
 from geoarray import GeoArray
@@ -627,19 +629,19 @@ class LUT_Transformer(object):
         self.p_lut_bin = path_lut
         self._offset = 0
 
-    def read_binary_modtran_lut(self):
+    def read_binary_modtran_lut(self, path_out_nc: str):
         """
         Read MODTRAN® LUT.
 
-        :param file_lut: path to LUT
+        :param path_out_nc: path to output LUT
         :return:         LUT of atmospheric functions, x and y axes grid points, LUT wavelengths
         """
-        def read_int16(data: np.ndarray, count: int):
+        def read_int16(data: np.ndarray, count):
             val = np.array(data[self._offset:self._offset + count * 2].view('int16'))
             self._offset += count * 2
             return val
 
-        def read_float32(data: np.ndarray, count: int):
+        def read_float32(data: np.ndarray, count):
             val = np.array(data[self._offset:self._offset + count * 4].view('f4'))
             self._offset += count * 4
             return val
@@ -650,36 +652,124 @@ class LUT_Transformer(object):
         wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
         npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
 
+        # LUT1 containing path radiance
+        # NOTE: The rhoatm values do not vary much with changing CVW contents,
+        #       therefore the LUT was created with a single CWV value.
+        # lut1_axnames = ['VZA', 'SZA', 'ALT', 'AOT', 'RAA', 'CWV', 'WVL', 'PAR1']
         lut1 = read_float32(data, count=10584000).reshape(
             (len(vza), len(sza), len(alt), len(aot), len(raa), 1, len(wvl), npar1))
+        # LUT2 containing downwelling direct and diffuse surface solar irradiance, spherical albedo and transmittance
+        # NOTE: The values in LUT2 do not vary much with changing RAAs,
+        #       therefore the LUT was created with a single RAA value.
+        # lut2_axnames = ['VZA', 'SZA', 'ALT', 'AOT', 'RAA', 'CWV', 'WVL', 'PAR2']
         lut2 = read_float32(data, count=42336000).reshape(
             (len(vza), len(sza), len(alt), len(aot), 1, len(cwv), len(wvl), npar2))
 
-        # Build xnodes for LUT dimensions
-        ndim = 6
+        ##############################
+        # TRANSFORM TO ISOFIT FORMAT #
+        ##############################
 
-        def create_xnodes(dim_arr, values, ndim):
-            xnodes = np.zeros((max(dim_arr), ndim))
-            for i, val in enumerate(values):
-                xnodes[:dim_arr[i], i] = val
-            return xnodes
+        # Get data from LUT1 and process it
+        fwhm = np.zeros_like(wvl)
+        fwhm[:len(wvl) - 1] = np.diff(wvl)
+        fwhm[len(wvl) - 1] = fwhm[len(wvl) - 2]
 
-        dim_arr1 = [len(vza), len(sza), len(raa), len(alt), len(aot), 1]
-        dim_arr2 = [len(vza), len(sza), 1, len(alt), len(aot), len(cwv)]
-        xnodes1 = create_xnodes(dim_arr1, [vza, sza, raa, alt, aot, [1]], ndim)
-        xnodes2 = create_xnodes(dim_arr2, [vza, sza, [1], alt, aot, cwv], ndim)
+        # resample Fontenla irradiance to the wavelengths of the LUT (2100 CWLs)
+        # -> just uses center wavelengths and FWHMs + np.exp SRFs
+        # multiply with 0.1 to adapt unit to ISOFIT
+        sirr = np.zeros_like(wvl)  # not used by ISOFIT
 
-        # Combine xnodes
-        dim_arr = [len(vza), len(sza), len(alt), len(aot), len(raa), len(cwv)]
-        xnodes = np.zeros((max(dim_arr), ndim))
-        xnodes[:, :4] = xnodes1[:, [0, 1, 3, 4]]
-        xnodes[:, 4] = xnodes1[:, 2]
-        xnodes[:, 5] = xnodes2[:, 5]
+        cos_sza = np.cos(np.deg2rad(sza))[None, :, None, None, None, None, None]
 
-        # Create cell coordinates
-        x_cell = np.array([[i, j, k, ii, jj, kk]
-                           for i in [0, 1] for j in [0, 1] for k in [0, 1]
-                           for ii in [0, 1] for jj in [0, 1] for kk in [0, 1]])
+        # NOTE: ISOFIT expects a LUT with all parameters simulated for multiple CWV values.
+        #       Since the binary MODTRAN LUT1 is created with a single CWV value (see above),
+        #       LUT1 has to be replicated 7 times for the CWV axis (axis=5). Same applies
+        #       to LUT2 and RAA (axis=4).
+        _lut1 = np.repeat(lut1, 7, axis=5)
+        _lut2 = np.repeat(lut2, 7, axis=4)
+
+        # extract all the parameters from the 2 LUTs
+        rhoatm = _lut1[..., 0]  # rhoatm
+        edir = _lut2[..., 0]  # transm_down_dir
+        edif = _lut2[..., 1]  # transm_down_dif
+        sab = _lut2[..., 2]  # spherical albedo
+        # The binary MODTRAN LUT has values in _lut2[..., 3], which should be transm_up_dir + transm_up_dif.
+        # However, this is already contained in the Edir/Edif variables, thus we need to set it to 1 here.
+        var5 = 1  # transm_up_dir + transm_up_dif
+        var6 = 0  # not needed ... already 0 and the transm_up_dir includes the transm_up_dif already
+
+        # convert parameters to what ISOFIT expects
+        _unit_scalefactor = 1000  # adapt MODTRAN LUT unit to ISOFIT
+        rhoatm *= _unit_scalefactor  # path radiance
+        sphalb = sab  # atmospheric spherical albedo
+        # tg = tdir + tdif
+        # transm_down_dir  = tg * cos(sza) * edir /  PI
+        # transm_down_dif  = tg * edif /  PI
+        _constant = (var5 + var6) / np.pi * _unit_scalefactor
+        transm_down_dir = edir * cos_sza * _constant  # direct downward transmittance
+        transm_down_dif = edif * _constant  # (diffuse downward transmittance)
+
+        del lut1, lut2, _lut1, _lut2, edir, edif, sab, data
+
+        # extrapolate data at 8 km elevation due to a bug in the MODTRAN-LUT (data at 8km = data at 0 km)
+        for arr in [rhoatm, sphalb, transm_down_dir, transm_down_dif]:
+            self.extrapolate_8km(arr, alt)
+
+        transm_up_dir = np.zeros_like(rhoatm)  # direct upward transmittance
+        transm_up_dif = np.zeros_like(rhoatm)  # diffuse upward transmittance
+        thermal_upwelling = np.zeros_like(rhoatm)  # thermal up-welling
+        thermal_downwelling = np.zeros_like(rhoatm)  # thermal down-welling
+
+        # write LUT to NetCDF file
+        with nc.Dataset(path_out_nc, 'w', format='NETCDF4') as nc_out:
+            nc_out.setncattr("RT_mode", "rdn")
+
+            # Add dimensions
+            for t, v in zip(('H2OSTR', 'AERFRAC_2', 'surface_elevation_km', 'solar_zenith',
+                             'observer_zenith', 'relative_azimuth', 'wl'),
+                            (cwv, aot, alt, sza, vza, raa, wvl)):
+                nc_out.createDimension(t, v.size)
+
+            # Add data
+            dims = ('observer_zenith', 'solar_zenith', 'surface_elevation_km',
+                    'AERFRAC_2', 'relative_azimuth', 'H2OSTR', 'wl')
+            for t, d, v in [
+                # 1D data
+                ('H2OSTR', ('H2OSTR',), cwv),
+                ('AERFRAC_2', ('AERFRAC_2',), aot),
+                ('surface_elevation_km', ('surface_elevation_km',), alt),
+                ('solar_zenith', ('solar_zenith',), sza),
+                ('observer_zenith', ('observer_zenith',), vza),
+                ('relative_azimuth', ('relative_azimuth',), raa),
+                ('wl', ('wl',), wvl),
+                ('fwhm', ('wl',), fwhm),
+                ('solar_irr', ('wl',), sirr),
+                # 7D data
+                ('rhoatm', dims, rhoatm),
+                ('sphalb', dims, sphalb),
+                ('transm_down_dir', dims, transm_down_dir),
+                ('transm_down_dif', dims, transm_down_dif),
+                ('transm_up_dir', dims, transm_up_dir),
+                ('transm_up_dif', dims, transm_up_dif),
+                ('thermal_upwelling', dims, thermal_upwelling),
+                ('thermal_downwelling', dims, thermal_downwelling),
+            ]:
+                var = nc_out.createVariable(t, "f4", d)
+                var[:] = v
+
+    @staticmethod
+    def extrapolate_8km(var: np.ndarray, alt_grid: np.ndarray):
+        """Replace data at 8km altitude by linearly extrapolating with 0.7km and 2.5km as grid points."""
+        var[:, :, 3, :, :, :, :] = \
+            interp1d(x=alt_grid[1:3],
+                     y=var[:, :, 1:3, :, :, :, :],
+                     axis=2,
+                     fill_value='extrapolate',
+                     bounds_error=False)(
+                np.array([8.])
+            )[:, :, 0, :, :, :, :]
+
+        return var
 
         # Adjust boundaries
         for arr, dim in zip([vza, sza, alt, aot, raa, cwv], dim_arr):
