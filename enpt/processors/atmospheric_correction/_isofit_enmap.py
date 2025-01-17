@@ -143,8 +143,9 @@ class IsofitEnMAP(object):
         fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
         fp_wvl = self._generate_wavelength_file(enmap_ImageL2, path_outdir)
         fp_surf = self._generate_surface_file(fp_wvl, path_outdir)
+        fp_lut = self._generate_lut_file(path_outdir)  # TODO: set to None in case of 6S
 
-        return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf
+        return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut
 
     @staticmethod
     def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
@@ -254,6 +255,26 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
+    def _generate_lut_file(path_outdir: str):
+        # TODO: By re-using either the unpacked lut.zip or the LUT_ISOFIT.nc,
+        #       the processing time can be reduced by ~20-60 sec.
+        fp_out = pjoin(path_outdir, 'LUT_ISOFIT.nc')
+
+        with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
+              TemporaryDirectory() as td):
+            zf.extractall(td)
+
+            LUT_Transformer(
+                path_lut=os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm')
+            ).read_binary_modtran_lut(
+                path_out_nc=fp_out
+            )
+
+            assert os.path.isfile(fp_out)
+
+        return fp_out
+
+    @staticmethod
     def _compute_solar_phase(vaa, vza, saa, sza):
         vaa_r, vza_r, saa_r, sza_r = (np.deg2rad(i) for i in (vaa, vza, saa, sza))
         vx = np.sin(vza_r) * np.cos(vaa_r)
@@ -337,7 +358,7 @@ class IsofitEnMAP(object):
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap_ImageL2, path_indir)
 
             os.makedirs(pjoin(td, 'workdir'), exist_ok=True)
             os.makedirs(pjoin(td, 'input'), exist_ok=True)
@@ -353,7 +374,8 @@ class IsofitEnMAP(object):
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 presolve=True,
                 emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
-                n_cores=30  # FIXME hardcoded
+                n_cores=30,  # FIXME hardcoded
+                prebuilt_lut=fp_lut
             )
 
             # read the AC results back into memory
@@ -373,6 +395,7 @@ class IsofitEnMAP(object):
              path_enmap_wavelengths: str,
              path_emulator_basedir: str,
              path_surface_file: str,
+             path_lut: str = None,
              aot: float = None,
              cwv: float = None,
              segmentation: bool = False,
@@ -421,6 +444,7 @@ class IsofitEnMAP(object):
                             interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             lut_path=pjoin(path_workdir, 'lut_full', 'lut.nc'),
+                            lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),  # if existing -> use this one, otherwise simulate to lut.nc
                             sim_path=pjoin(path_workdir, 'lut_full'),
                             template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
                         )
@@ -593,7 +617,7 @@ class IsofitEnMAP(object):
                             ) -> GeoArray:
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf = self.generate_input_files(enmap_ImageL2, path_indir)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap_ImageL2, path_indir)
 
             paths_output = \
                 self._run(
@@ -605,6 +629,7 @@ class IsofitEnMAP(object):
                     path_enmap_wavelengths=fp_wvl,
                     path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                     path_surface_file=fp_surf,
+                    path_lut=fp_lut,
                     aot=enmap_ImageL2.meta.aot,
                     cwv=enmap_ImageL2.meta.water_vapour,
                     segmentation=segmentation,
@@ -647,9 +672,8 @@ class LUT_Transformer(object):
             self._offset += count * 4
             return val
 
-        with ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf:
-            with zf.open('EnMAP_LUT_MOD5_formatted_1nm', 'r') as fd:
-                data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
+        with open(self.p_lut_bin, 'rb') as fd:
+            data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
 
         wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
         npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
