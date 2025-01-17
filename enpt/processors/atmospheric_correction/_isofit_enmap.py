@@ -647,8 +647,9 @@ class LUT_Transformer(object):
             self._offset += count * 4
             return val
 
-        with open(self.p_lut_bin, 'rb') as fd:
-            data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
+        with ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf:
+            with zf.open('EnMAP_LUT_MOD5_formatted_1nm', 'r') as fd:
+                data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
 
         wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
         npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
