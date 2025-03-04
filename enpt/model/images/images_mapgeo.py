@@ -196,33 +196,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
     @property
     def dem(self) -> GeoArray:
-        from ...processors.dem_preprocessing import DEM_Processor
-
-        if self.cfg.path_dem:
-            self.logger.info('Pre-processing DEM in map geometry...')
-            DP = DEM_Processor(
-                self.cfg.path_dem,
-                enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
-                                               self.meta.lat_UL_UR_LL_LR)),
-                CPUs=self.cfg.CPUs)
-            DP.fill_gaps()  # FIXME this will also be needed at other places
-            self._dem =\
-                DP.get_dem_in_map_geometry(
-                    mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
-                    mapBounds_prj=self.data.epsg,
-                    out_prj=self.data.epsg,
-                    out_gsd=(self.data.xgsd, self.data.ygsd)
-                )
-
-        else:
-            self.logger.info(f'No DEM provided. '
-                             f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
-            self._dem = DEM_Processor.get_flat_dem_from_average_elevation(
-                tuple(zip(self.meta.lon_UL_UR_LL_LR,
-                          self.meta.lat_UL_UR_LL_LR)),
-                self.cfg.average_elevation,
-                xres=30, yres=30
-            ).dem
+        if not self._dem:
+            self.get_preprocessed_dem()
 
         return self._dem
 
@@ -265,6 +240,35 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         paths.quicklook_swir = path.join(l2a_outdir, self.meta.filename_quicklook_swir)
 
         return paths
+
+    def get_preprocessed_dem(self):
+        from ...processors.dem_preprocessing import DEM_Processor
+
+        if self.cfg.path_dem:
+            self.logger.info('Pre-processing DEM in map geometry...')
+            DP = DEM_Processor(
+                self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
+                                               self.meta.lat_UL_UR_LL_LR)),
+                CPUs=self.cfg.CPUs)
+            DP.fill_gaps()  # FIXME this will also be needed at other places
+            self._dem =\
+                DP.get_dem_in_map_geometry(
+                    mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
+                    mapBounds_prj=self.data.epsg,
+                    out_prj=self.data.epsg,
+                    out_gsd=(self.data.xgsd, self.data.ygsd)
+                )
+
+        else:
+            self.logger.info(f'No DEM provided. '
+                             f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
+            self._dem = DEM_Processor.get_flat_dem_from_average_elevation(
+                tuple(zip(self.meta.lon_UL_UR_LL_LR,
+                          self.meta.lat_UL_UR_LL_LR)),
+                self.cfg.average_elevation,
+                xres=30, yres=30
+            ).dem
 
     def save(self, outdir: str, suffix="") -> str:
         """Save the product to disk using almost the same input format.
