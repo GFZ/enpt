@@ -36,6 +36,7 @@ from pyproj import CRS
 
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
+from py_tools_ds.geo.coord_grid import is_coord_grid_equal
 from py_tools_ds.geo.vector.topology import get_footprint_polygon, get_overlap_polygon
 from py_tools_ds.geo.projection import prj_equal
 
@@ -141,9 +142,13 @@ class DEM_Processor(object):
                                 ):
         # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
         xmin, ymin, xmax, ymax = mapBounds
-        dem = GeoArray(self.dem.filePath)  # do not overwrite self.dem due to in-place reprojection below
+        dem = GeoArray(self.dem.filePath)  # do not overwrite self.dem due to in-place re-projection below
 
-        if not prj_equal(self.dem.prj, out_prj):
+        if not prj_equal(self.dem.prj, out_prj) or \
+           not is_coord_grid_equal(dem.gt,
+                                   [xmin, xmin + out_gsd[0]],
+                                   [ymin, ymin + out_gsd[1]],
+                                   tolerance=0.):
             dem.reproject_to_new_grid(
                 tgt_prj=out_prj,
                 # FIXME tgt_xygrid asserts mapbounds to be in suitable projection  # noqa
