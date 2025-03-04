@@ -136,9 +136,6 @@ class EnPT_Controller(object):
         # run transformation to TOARef
         self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
-    def run_dem_processor(self):
-        self.L1_obj.get_preprocessed_dem()
-
     def run_spatial_optimization(self):
         # get a new instance of Spatial_Optimizer
         from ..processors.spatial_optimization import Spatial_Optimizer
@@ -179,11 +176,11 @@ class EnPT_Controller(object):
                 if self.cfg.enable_absolute_coreg:
                     # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
                     self.run_spatial_optimization()
-                self.run_dem_processor()
 
                 isofit = True  # FIXME hardcoded / revise implementation here
                 if isofit:
                     self.L2_obj = EnMAPL2Product_MapGeo.from_L1B_sensorgeo(config=self.cfg, enmap_ImageL1=self.L1_obj)
+                    self.L2_obj.get_preprocessed_dem()
 
                     from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
                     import numpy as np
@@ -202,6 +199,8 @@ class EnPT_Controller(object):
                     self.L2_obj.meta.unitcode = 'BOARef'
 
                 else:
+                    self.L1_obj.get_preprocessed_dem()
+
                     if self.cfg.enable_ac:
                         self.run_atmospheric_correction()
 
