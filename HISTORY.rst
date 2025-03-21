@@ -2,6 +2,13 @@
 History
 =======
 
+0.21.1 (coming soon)
+--------------------
+
+* Updated installation instructions.
+* Updated environment files due to upstream changes.
+
+
 0.21.0 (2024-08-28)
 -------------------
 

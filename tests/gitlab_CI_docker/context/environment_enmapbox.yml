@@ -4,7 +4,7 @@ channels: &id1
   - conda-forge
 
 dependencies:
-  - python>=3.8.*
+  - python>=3.8
   - pip  # avoids that conda uses the wrong pip
 
   - astropy
@@ -17,9 +17,8 @@ dependencies:
   - numba>=0.57
   - numpy
   - pyopengl
-  - qgis>=3.32
+  - qgis>=3.40.3
   - scikit-learn>=1
   - scipy>=1.1
   - sympy
-  - typeguard<3  # https://github.com/EnMAP-Box/enmap-box/issues/398
   - xgboost
