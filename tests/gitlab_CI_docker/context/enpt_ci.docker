@@ -1,4 +1,4 @@
-FROM ci_base_ubuntu:0.4
+FROM ci_base_ubuntu:0.5
 
 # set Polymer version string
 # NOTE: Polymer 4.16.1 compilation fails with Cython 3, https://github.com/conda-forge/acwater-feedstock/pull/4
