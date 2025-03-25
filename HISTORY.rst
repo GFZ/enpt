@@ -7,6 +7,7 @@ History
 
 * Updated installation instructions.
 * Updated environment files due to upstream changes.
+* !109: Replaced depreated calls of pkgutil.get_loader().
 
 
 0.21.0 (2024-08-28)
