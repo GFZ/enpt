@@ -2,12 +2,13 @@
 History
 =======
 
-0.21.1 (coming soon)
---------------------
+0.21.1 (2025-03-25)
+-------------------
 
 * Updated installation instructions.
 * Updated environment files due to upstream changes.
 * !109: Replaced depreated calls of pkgutil.get_loader().
+* Updated version of CI runner base image.
 
 
 0.21.0 (2024-08-28)
