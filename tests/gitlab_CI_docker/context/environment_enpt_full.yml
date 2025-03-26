@@ -6,7 +6,7 @@ channels: &id1
 dependencies:
   - python>=3.8
   - pip  # avoids that conda uses the wrong pip
-  - enpt>=0.19.5
+  - enpt>=0.21.0
   - enpt_enmapboxapp>=0.7.6
 
   # EnMAP-Box
@@ -19,9 +19,8 @@ dependencies:
   - numba>=0.57
   - numpy
   - pyopengl
-  - qgis>=3.32
+  - qgis>=3.40.3
   - scikit-learn>=1
   - scipy>=1.1
   - sympy
-  - typeguard<3  # https://github.com/EnMAP-Box/enmap-box/issues/398
   - xgboost

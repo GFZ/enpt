@@ -33,7 +33,7 @@ This tutorial requires some software to be installed on your machine:
     - `EnPT EnMAP-Box App (GUI)`_
 
 Please see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html#installing-enpt-along-with-qgis-and-the-enmap-box-backend-gui>`__
-for a description to install all together into a single MambaForge Conda environment.
+for a description to install all together into a single MiniForge Conda environment.
 
 .. _`EnPT EnMAP-Box App (GUI)`: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 

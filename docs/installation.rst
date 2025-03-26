@@ -13,14 +13,14 @@ Installing EnPT as a standalone package (backend code only)
 ***********************************************************
 
 
-Using Mambaforge (recommended)
-------------------------------
+Using Miniforge (recommended)
+-----------------------------
 
 This is the preferred way to install EnPT. It is the fastest one and it always installs the most
 recent stable release and automatically resolves all the dependencies.
 
-1. Install Mambaforge_.
-2. Open a Mambaforge command line prompt and proceed there (e.g., on Windows you can find it in the start menu).
+1. Install Miniforge_.
+2. Open a Miniforge command line prompt and proceed there (e.g., on Windows you can find it in the start menu).
 3. Install enpt into a separate environment and activate it:
 
    .. code-block:: bash
@@ -125,19 +125,19 @@ Installing EnPT along with QGIS and the EnMAP-Box (backend + GUI)
 
 If you want to use EnPT including the GUI_ in the EnMAP-Box_, it is highly recommended to install QGIS_,
 the EnMAP-Box_ requirements, the EnPT backend code and the EnPT GUI_ into a single conda_ environment
-within Mambaforge_.
+within Miniforge_.
 
-To do so, run the following command on a Mambaforge_ conda_ command line:
+To do so, run the following command on a Miniforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ conda env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
 
 Then activate the newly created conda_ environment and start QGIS_:
 
 .. code-block:: bash
 
-  $ mamba activate enpt_full
+  $ conda activate enpt_full
   $ qgis
 
 The EnMAP-Box_ QGIS_ plugin can then be installed via the QGIS_ Plugin manager and the EnPT GUI_ can be started
@@ -155,7 +155,7 @@ requirement polymer_ into the enpt_full environment as described above.
 
     .. code-block:: bash
 
-      $ mamba env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
+      $ conda env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::
@@ -163,18 +163,18 @@ requirement polymer_ into the enpt_full environment as described above.
     EnPT has been tested with Python 3.8+ on Linux, Windows and Mac OSX.
 
 
-.. _Mambaforge: https://github.com/conda-forge/miniforge#mambaforge
+.. _Miniforge: https://github.com/conda-forge/miniforge
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://docs.conda.io
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
 .. _HYGEOS support forum: https://forum.hygeos.com
-.. _polymer: https://forum.hygeos.com
+.. _polymer: https://github.com/hygeos/polymer
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _GUI: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
-.. _EnMAP-Box: https://bitbucket.org/hu-geomatics/enmap-box
+.. _EnMAP-Box: https://github.com/EnMAP-Box/enmap-box
 .. _QGIS: https://www.qgis.org
 .. _CDS registration page: https://cds.climate.copernicus.eu/
-.. _CDS API key: https://cds.climate.copernicus.eu/api-how-to
+.. _CDS API key: https://cds.climate.copernicus.eu/how-to-api
 .. _Microsoft build tools for visual studio: https://visualstudio.microsoft.com/de/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16

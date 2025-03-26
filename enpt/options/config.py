@@ -36,7 +36,7 @@ import os
 import json
 from json import JSONDecodeError
 import datetime
-import pkgutil
+from importlib.util import find_spec
 import warnings
 from pprint import pformat
 
@@ -59,12 +59,12 @@ from ..version import \
 __author__ = 'Daniel Scheffler'
 
 
-path_enptlib = os.path.dirname(pkgutil.get_loader("enpt").path)
+path_enptlib = os.path.dirname(find_spec("enpt").origin)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 
 try:
     # from acwater.acwater import polymer_ac_enmap
-    path_polymer = os.path.abspath(os.path.join(os.path.dirname(pkgutil.get_loader("polymer").path), os.pardir))
+    path_polymer = os.path.abspath(os.path.join(os.path.dirname(find_spec("polymer").origin), os.pardir))
 except AttributeError:
     path_polymer = ''
 
