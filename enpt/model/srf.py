@@ -152,23 +152,31 @@ class SRF(object):
         for band in self.bands:
             yield self[band]
 
-    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, List[str]] = None, normalize: bool = True):
+    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, List[str]] = None, normalize: bool = True,
+                  title: str = 'EnMAP spectral response functions', legend: bool = True):
         """Show a plot of all spectral response functions.
 
         :param figsize: figure size of the plot
         :param band:    band key to plot a single band instead of all bands
         :param normalize:    normalize SRFs to 0-1 (default: True)
+        :param title:   title to put above the plot
+        :param legend:  activate/deactivate the legend
         """
         if band and band not in self.bands:
             raise ValueError("Parameter 'band' must be a string out of those: %s."
                              % ', '.join(self.bands))
 
-        plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize)
         bands2plot = [band] if band else self.bands
         for band in bands2plot:
             srfs = list(self.srfs_norm01[band]) if normalize else list(self.srfs[band])
             plt.plot(self.srfs_wvl, srfs, '-', label='Band %s' % band)
-        plt.title('EnMAP spectral response functions')
+        plt.title(title)
         plt.xlabel('wavelength [%s]' % self.wvl_unit)
-        plt.ylabel('spectral response')
-        plt.legend(loc='upper right')
+        plt.ylabel(f'{'normalized ' if normalize else ''}spectral response [-]')
+        if legend:
+            plt.legend(loc='upper right')
+
+        plt.tight_layout()
+
+        return fig
