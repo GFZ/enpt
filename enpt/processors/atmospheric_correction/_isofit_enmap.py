@@ -145,7 +145,8 @@ class IsofitEnMAP(object):
         fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
         fp_wvl = self._generate_wavelength_file(enmap_ImageL2, path_outdir)
         fp_surf = self._generate_surface_file(fp_wvl, path_outdir)
-        fp_lut = self._generate_lut_file(path_outdir)  # TODO: set to None in case of 6S
+        fp_lut = self._generate_lut_file(path_outdir,
+                                         enmap_ImageL2.meta.geom_sun_zenith)  # TODO: set LUT to None in case of 6S
 
         return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut
 
@@ -257,7 +258,7 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
-    def _generate_lut_file(path_outdir: str):
+    def _generate_lut_file(path_outdir: str, sza_scene: float):
         # TODO: By re-using either the unpacked lut.zip or the LUT_ISOFIT.nc,
         #       the processing time can be reduced by ~20-60 sec.
         fp_out = pjoin(path_outdir, 'EnMAP_LUT_MOD5_ISOFIT_formatted_1nm.nc')
@@ -267,7 +268,8 @@ class IsofitEnMAP(object):
             zf.extractall(td)
 
             LUT_Transformer(
-                path_lut=os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm')
+                path_lut=os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm'),
+                sza_scene=sza_scene
             ).read_binary_modtran_lut(
                 path_out_nc=fp_out
             )
@@ -661,13 +663,14 @@ class IsofitEnMAP(object):
 
 
 class LUT_Transformer(object):
-    def __init__(self, path_lut: str):
+    def __init__(self, path_lut: str, sza_scene: float):
         """
 
         :param path_lut:    atmospheric look-up-table in binary format as created by Luis
         """
         self.p_lut_bin = path_lut
         self._offset = 0
+        self.sza_scene = sza_scene
 
     def read_binary_modtran_lut(self, path_out_nc: str):
         """
@@ -757,6 +760,9 @@ class LUT_Transformer(object):
         # write LUT to NetCDF file
         with nc.Dataset(path_out_nc, 'w', format='NETCDF4') as nc_out:
             nc_out.setncattr("RT_mode", "rdn")
+
+            var = nc_out.createVariable('coszen', 'f4', ())
+            var.assignValue(np.cos(np.deg2rad(self.sza_scene)))
 
             # Add dimensions
             for t, v in zip(('H2OSTR', 'AERFRAC_2', 'surface_elevation_km', 'solar_zenith',
