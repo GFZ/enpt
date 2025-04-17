@@ -534,24 +534,6 @@ class IsofitEnMAP(object):
                             logfile=path_logfile,
                         )
 
-                # Extract input data per segment
-                for inp, outp in [
-                    (paths.radiance_working_path, paths.rdn_subs_path),
-                    (paths.obs_working_path, paths.obs_subs_path),
-                    (paths.loc_working_path, paths.loc_subs_path),
-                ]:
-                    if not os.path.exists(outp):
-                        # logging.info("Extracting " + outp)
-                        extractions(
-                            inputfile=inp,
-                            labels=paths.lbl_working_path,
-                            output=outp,
-                            chunksize=CHUNKSIZE,
-                            flag=-9999,
-                            n_cores=n_cores,
-                            loglevel='INFO',  # FIXME hardcoded
-                            logfile=path_logfile,
-                        )
                     # Extract input data per segment
                     for inp, outp in [
                         (paths.radiance_working_path, paths.rdn_subs_path),
@@ -559,6 +541,9 @@ class IsofitEnMAP(object):
                         (paths.loc_working_path, paths.loc_subs_path),
                     ]:
                         if not os.path.exists(outp):
+                            if not os.path.exists(os.path.dirname(outp)):
+                                os.makedirs(os.path.dirname(outp))
+
                             # logging.info("Extracting " + outp)
                             extractions(
                                 inputfile=inp,
@@ -632,9 +617,6 @@ class IsofitEnMAP(object):
                 else:
                     return isocfg['output']
 
-        finally:
-            print('Stopping ray.')
-            ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
             finally:
                 # if os.environ.get('ISOFIT_DEBUG') != '1':
                 print('Stopping ray.')
