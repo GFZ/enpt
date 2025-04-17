@@ -494,23 +494,19 @@ class IsofitEnMAP(object):
 
         isocfg = update_nested_dict(isocfg_default, updatedict)
         paths = Pathnames(
-            SimpleNamespace(
-                **dict(
-                    input_radiance=path_toarad,
-                    input_loc=path_loc,
-                    input_obs=path_obs,
-                    working_directory=os.path.abspath(pjoin(path_workdir, '..')),
-                    surface_path=path_surface_file,
-                    aerosol_climatology_path=None,
-                    sensor='enmap',
-                    copy_input_files=False,
-                    channelized_uncertainty_path=None,
-                    model_discrepancy_path=None,
-                    modtran_path=None,
-                    rdn_factors_path=None,
-                    ray_temp_dir='/tmp/ray'
-                )
-            )
+            input_radiance=path_toarad,
+            input_loc=path_loc,
+            input_obs=path_obs,
+            working_directory=os.path.abspath(pjoin(path_workdir, '..')),
+            surface_path=path_surface_file,
+            aerosol_climatology_path=None,
+            sensor='enmap',
+            copy_input_files=False,
+            channelized_uncertainty_path=None,
+            model_discrepancy_path=None,
+            modtran_path=None,
+            rdn_factors_path=None,
+            ray_temp_dir='/tmp/ray'  # FIXME not Windows-compatible
         )
 
         try:
