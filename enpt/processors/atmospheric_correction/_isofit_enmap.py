@@ -351,6 +351,7 @@ class IsofitEnMAP(object):
 
         finally:
             print('Stopping ray.')
+            import ray
             ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
