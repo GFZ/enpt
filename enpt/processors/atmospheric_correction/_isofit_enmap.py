@@ -401,7 +401,7 @@ class IsofitEnMAP(object):
              segmentation: bool = False,
              segmentation_size: int = 40,
              n_cores: int = cpu_count()
-             ):
+             ) -> dict:
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
