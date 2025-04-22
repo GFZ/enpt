@@ -36,7 +36,7 @@ from tempfile import TemporaryDirectory
 from typing import Tuple
 from fnmatch import fnmatch
 import os
-from os.path import join as pjoin, abspath as pabs
+from os.path import join as pjoin
 from pathlib import Path
 from glob import glob
 import json
