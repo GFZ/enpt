@@ -32,7 +32,6 @@
 Performs the atmospheric correction of EnMAP L1B data.
 """
 import shutil
-from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from typing import Tuple
 from fnmatch import fnmatch
@@ -338,7 +337,7 @@ class IsofitEnMAP(object):
         params = {k: v for k, v in locals().items() if not k.startswith('__')}
 
         try:
-            apply_oe(SimpleNamespace(**params))
+            apply_oe(**params)
 
         except FileNotFoundError as e:
             print('Attempt to run apply_oe() failed due to FileNotFoundError.')
