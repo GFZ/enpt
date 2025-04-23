@@ -81,9 +81,13 @@ __author__ = 'Daniel Scheffler'
 class IsofitEnMAP(object):
     """"""
 
-    def __init__(self, config: EnPTConfig = None):
+    def __init__(self,
+                 config: EnPTConfig = None,
+                 log_level: str = None
+                 ) -> None:
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
+        self.log_level = log_level or config.log_level if config else 'INFO'
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
@@ -545,7 +549,7 @@ class IsofitEnMAP(object):
                             segsize=segmentation_size,
                             nchunk=CHUNKSIZE,
                             n_cores=n_cores,
-                            loglevel=self.cfg.log_level,
+                            loglevel=self.log_level,
                             logfile=path_logfile,
                         )
 
@@ -567,7 +571,7 @@ class IsofitEnMAP(object):
                                 chunksize=CHUNKSIZE,
                                 flag=-9999,
                                 n_cores=n_cores,
-                                loglevel=self.cfg.log_level,
+                                loglevel=self.log_level,
                                 logfile=path_logfile,
                             )
 
@@ -607,7 +611,7 @@ class IsofitEnMAP(object):
 
                 Isofit(
                     config_file=path_isocfg,
-                    level=self.cfg.log_level,
+                    level=self.log_level,
                     logfile=path_logfile
                 ).run(row_column=None)
 
@@ -626,7 +630,7 @@ class IsofitEnMAP(object):
                         output_rfl_file=paths.rfl_working_path,
                         output_unc_file=paths.uncert_working_path,
                         # atm_file=None,
-                        loglevel=self.cfg.log_level,
+                        loglevel=self.log_level,
                         logfile=path_logfile
                     )
 
