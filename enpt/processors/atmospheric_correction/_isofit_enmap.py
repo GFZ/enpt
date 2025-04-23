@@ -639,8 +639,8 @@ class IsofitEnMAP(object):
 
                     return dict(
                         estimated_reflectance_file=paths.rfl_working_path,
-                        estimated_state_file='NA',  # FIXME not sure why this is not created
-                        posterior_uncertainty_file=paths.uncert_working_path
+                        estimated_state_file=paths.state_working_path,
+                        posterior_uncertainty_file=paths.uncert_working_path,
                     )
                 else:
                     return isocfg['output']
