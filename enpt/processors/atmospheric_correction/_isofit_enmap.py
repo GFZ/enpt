@@ -311,8 +311,8 @@ class IsofitEnMAP(object):
 
         return cos_i
 
-    @staticmethod
-    def _apply_oe(input_radiance: str,
+    def _apply_oe(self,
+                  input_radiance: str,
                   input_loc: str,
                   input_obs: str,
                   working_directory: str,
@@ -329,7 +329,7 @@ class IsofitEnMAP(object):
                   model_discrepancy_path: str = None,
                   lut_config_file: str = None,
                   multiple_restarts: bool = False,
-                  logging_level: str = 'INFO',
+                  logging_level: str = None,
                   log_file: str = None,
                   n_cores: int = 1,
                   memory_gb: int = -1,
@@ -344,6 +344,7 @@ class IsofitEnMAP(object):
                   pressure_elevation: bool = False,
                   prebuilt_lut: str = None
                   ):
+        logging_level = logging_level or self.cfg.log_level
         params = {k: v for k, v in locals().items() if not k.startswith('__')}
 
         try:
@@ -542,7 +543,7 @@ class IsofitEnMAP(object):
                             segsize=segmentation_size,
                             nchunk=CHUNKSIZE,
                             n_cores=n_cores,
-                            loglevel='INFO',  # FIXME hardcoded
+                            loglevel=self.cfg.log_level,
                             logfile=path_logfile,
                         )
 
@@ -564,7 +565,7 @@ class IsofitEnMAP(object):
                                 chunksize=CHUNKSIZE,
                                 flag=-9999,
                                 n_cores=n_cores,
-                                loglevel='INFO',  # FIXME hardcoded
+                                loglevel=self.cfg.log_level,
                                 logfile=path_logfile,
                             )
 
@@ -604,7 +605,7 @@ class IsofitEnMAP(object):
 
                 Isofit(
                     config_file=path_isocfg,
-                    level='INFO',  # FIXME hardcoded
+                    level=self.cfg.log_level,
                     logfile=path_logfile
                 ).run(row_column=None)
 
@@ -623,7 +624,7 @@ class IsofitEnMAP(object):
                         output_rfl_file=paths.rfl_working_path,
                         output_unc_file=paths.uncert_working_path,
                         # atm_file=None,
-                        loglevel='INFO',  # FIXME hardcoded
+                        loglevel=self.cfg.log_level,
                         logfile=path_logfile
                     )
 
