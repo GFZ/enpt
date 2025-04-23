@@ -632,7 +632,7 @@ class IsofitEnMAP(object):
                         smoothing_sigma=[2],
                         output_rfl_file=paths.rfl_working_path,
                         output_unc_file=paths.uncert_working_path,
-                        # atm_file=None,
+                        atm_file=paths.state_working_path,
                         loglevel=self.log_level,
                         logfile=path_logfile
                     )
