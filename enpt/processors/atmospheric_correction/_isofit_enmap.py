@@ -210,7 +210,7 @@ class IsofitEnMAP(object):
         saa = enmap_ImageL2.meta.geom_sun_azimuth_array
         sza = enmap_ImageL2.meta.geom_sun_zenith_array
         phase = self._compute_solar_phase(vaa, vza, saa, sza)
-        slope = np.full(enmap_ImageL2.data.shape[:2], fill_value=90)
+        slope = np.full(enmap_ImageL2.data.shape[:2], fill_value=0)
         aspect = np.zeros(enmap_ImageL2.data.shape[:2])
         cos_i = self._compute_cos_i(saa, sza, slope=90, aspect=0)
         utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
