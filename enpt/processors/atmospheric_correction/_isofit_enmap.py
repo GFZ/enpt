@@ -180,6 +180,8 @@ class IsofitEnMAP(object):
             )
 
         elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
+        # FIXME: shape of elev does not match shape of lons/lats if no DEM is provided
+        # elev = np.zeros_like(lons)  # use mean elevation
 
         loc_data = np.dstack([lons, lats, elev])
         loc_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
@@ -190,8 +192,7 @@ class IsofitEnMAP(object):
                  bandnames=[
                      'Longitude (WGS-84)',
                      'Latitude (WGS-84)',
-                     'Elevation (m)'
-                 ]
+                     'Elevation (m)'  # used as first guess in case this is defined as state_vector component in the config
                  ],
                  nodata = -9999
                  ).save(fp_out)
@@ -593,7 +594,13 @@ class IsofitEnMAP(object):
                 with open(path_isocfg, 'w') as json_file:
                     json.dump(isocfg, json_file, skipkeys=False, indent=4)
 
-                self._build_modtran_template_file(path_emulator_basedir, path_obs, path_loc, path_workdir, enmap_timestamp)
+                self._build_modtran_template_file(
+                    path_emulator_basedir,
+                    path_obs,
+                    path_loc,
+                    path_workdir,
+                    enmap_timestamp
+                )
 
                 Isofit(
                     config_file=path_isocfg,
