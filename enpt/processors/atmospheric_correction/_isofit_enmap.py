@@ -249,7 +249,8 @@ class IsofitEnMAP(object):
     @staticmethod
     def _generate_surface_file(path_wavelength_file: str, path_outdir: str):
         fp_out = pjoin(path_outdir, 'surface_enmap.mat')
-        fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
+        # fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
+        fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_20240103_REE.json')
 
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip'), "r") as zf,
               TemporaryDirectory() as td):
