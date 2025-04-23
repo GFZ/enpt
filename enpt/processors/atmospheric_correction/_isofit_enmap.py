@@ -349,6 +349,8 @@ class IsofitEnMAP(object):
                   no_min_lut_spacing: bool = False,
                   inversion_windows: List[float] = None,
                   config_only: bool = False,
+                  interpolate_bad_rdn=False,
+                  interpolate_inplace=False,
                   ):
         logging_level = logging_level or self.log_level
         params = {k: v for k, v in locals().items() if not k.startswith('__')}
@@ -527,7 +529,8 @@ class IsofitEnMAP(object):
             model_discrepancy_path=None,
             modtran_path=None,
             rdn_factors_path=None,
-            ray_temp_dir='/tmp/ray'  # FIXME not Windows-compatible
+            ray_temp_dir='/tmp/ray',  # FIXME not Windows-compatible
+            interpolate_inplace=False
         )
 
         with EnvContextManager(
