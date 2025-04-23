@@ -33,7 +33,7 @@ Performs the atmospheric correction of EnMAP L1B data.
 """
 import shutil
 from tempfile import TemporaryDirectory
-from typing import Tuple
+from typing import Tuple, List
 from fnmatch import fnmatch
 import os
 from os.path import join as pjoin
@@ -342,7 +342,10 @@ class IsofitEnMAP(object):
                   num_neighbors: Tuple[int] = (),
                   atm_sigma: Tuple[float] = (2.0,),
                   pressure_elevation: bool = False,
-                  prebuilt_lut: str = None
+                  prebuilt_lut: str = None,
+                  no_min_lut_spacing: bool = False,
+                  inversion_windows: List[float] = None,
+                  config_only: bool = False,
                   ):
         logging_level = logging_level or self.cfg.log_level
         params = {k: v for k, v in locals().items() if not k.startswith('__')}
