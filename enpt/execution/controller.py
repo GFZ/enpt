@@ -185,7 +185,7 @@ class EnPT_Controller(object):
                     from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
                     import numpy as np
 
-                    boa_ref = \
+                    boa_ref, atm_state, uncertainty = \
                         (IsofitEnMAP(config=self.cfg)
                          .run_on_map_geometry(
                             self.L2_obj,

@@ -655,7 +655,7 @@ class IsofitEnMAP(object):
                             enmap_ImageL2: EnMAPL2Product_MapGeo,
                             segmentation: bool = False,
                             n_cores: int = cpu_count()
-                            ) -> GeoArray:
+                            ) -> (GeoArray, GeoArray, GeoArray):
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap_ImageL2, path_indir)
@@ -679,12 +679,17 @@ class IsofitEnMAP(object):
 
             # read the AC results back into memory
             boa_rfl = GeoArray(paths_output['estimated_reflectance_file'])
-            # state = GeoArray(paths_output['estimated_state_file'])
-            # uncert = GeoArray(paths_output['posterior_uncertainty_file'])
+            state = GeoArray(paths_output['estimated_state_file'])
+            uncert = GeoArray(paths_output['posterior_uncertainty_file'])
             # atm_coef = GeoArray(paths_output['atmospheric_coefficients_file'])  # not always present
             boa_rfl.to_mem()
+            state.to_mem()
+            uncert.to_mem()
 
-            return boa_rfl
+            # clip AOT/CWV to extent of EnMAP scene (ISOFIT output is larger)
+            state[~enmap_ImageL2.data.mask_nodata[:]] = np.nan
+
+            return boa_rfl, state, uncert
 
 
 class LUT_Transformer(object):
