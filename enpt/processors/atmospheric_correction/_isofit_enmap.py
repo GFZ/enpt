@@ -331,7 +331,6 @@ class IsofitEnMAP(object):
                   logging_level: str = 'INFO',
                   log_file: str = None,
                   n_cores: int = 1,
-                  num_cpus: int = 1,
                   memory_gb: int = -1,
                   presolve: bool = False,
                   empirical_line: bool = False,
