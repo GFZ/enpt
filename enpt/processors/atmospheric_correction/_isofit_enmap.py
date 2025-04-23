@@ -72,7 +72,7 @@ from py_tools_ds.geo.coord_grid import get_coord_grid
 from py_tools_ds.geo.coord_trafo import transform_coordArray
 from geoarray import GeoArray
 
-from ...model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo
+from ...model.images import EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig, path_enptlib
 
 __author__ = 'Daniel Scheffler'
@@ -196,7 +196,7 @@ class IsofitEnMAP(object):
                  bandnames=[
                      'Longitude (WGS-84)',
                      'Latitude (WGS-84)',
-                     'Elevation (m)'  # used as first guess in case this is defined as state_vector component in the config
+                     'Elevation (m)'  # used as first guess in case this is defined as state_vector component in config
                  ],
                  nodata = -9999
                  ).save(fp_out)
@@ -214,7 +214,8 @@ class IsofitEnMAP(object):
         aspect = np.zeros(enmap_ImageL2.data.shape[:2])
         cos_i = self._compute_cos_i(saa, sza, slope=90, aspect=0)
         utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
-        earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)  # TODO pixel-wise values
+        # TODO pixel-wise values
+        earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)
 
         obs_data = np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist])
         obs_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
@@ -374,9 +375,9 @@ class IsofitEnMAP(object):
             import ray
             ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
-    def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
-        with TemporaryDirectory() as td:
-            self._apply_oe()
+    # def apply_oe_on_sensor_geometry(self, enmap_ImageL1: EnMAPL1Product_SensorGeo):
+    #     with TemporaryDirectory() as td:
+    #         self._apply_oe()
 
     def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
@@ -470,6 +471,8 @@ class IsofitEnMAP(object):
                             interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),  # if existing -> use this one, otherwise simulate to lut.nc
+                            # use lut_path if existing, otherwise simulate to lut.nc
+                            lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),
                             sim_path=pjoin(path_workdir, 'lut_full'),
                             template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
                         )
@@ -542,8 +545,7 @@ class IsofitEnMAP(object):
                 # Superpixel segmentation
                 if segmentation:
                     if not os.path.exists(paths.lbl_working_path) or \
-                       not os.path.exists(paths.radiance_working_path
-                    ):
+                       not os.path.exists(paths.radiance_working_path):
                         # logging.info("Segmenting...")
                         segment(
                             spectra=(paths.radiance_working_path, paths.lbl_working_path),
@@ -649,7 +651,7 @@ class IsofitEnMAP(object):
                 # if os.environ.get('ISOFIT_DEBUG') != '1':
                 print('Stopping ray.')
                 import ray
-                ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
+                ray.shutdown()  # FIXME: Should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def run_on_map_geometry(self,
                             enmap_ImageL2: EnMAPL2Product_MapGeo,
@@ -722,7 +724,7 @@ class LUT_Transformer(object):
         with open(self.p_lut_bin, 'rb') as fd:
             data = np.frombuffer(fd.read(), dtype=np.uint8)  # Read all data as bytes
 
-        wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count = read_int16(data, count=1)[0]) for _ in range(7)]
+        wvl, vza, sza, alt, aot, raa, cwv = [read_float32(data, count=read_int16(data, count=1)[0]) for _ in range(7)]
         npar1, npar2 = [read_int16(data, count=1)[0] for _ in range(2)]
 
         # LUT1 containing path radiance

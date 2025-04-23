@@ -42,9 +42,12 @@ from pathlib import Path
 import tempfile
 import shutil
 from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 import numpy as np
 
+from enpt.io.reader import L1B_Reader
+from enpt.processors.orthorectification import Orthorectifier
 from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
 from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP, LUT_Transformer
 
@@ -67,10 +70,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
     @staticmethod
     def _get_enmap_l2a_obj():
-        from zipfile import ZipFile
-        from enpt.io.reader import L1B_Reader
-        from enpt.processors.orthorectification import Orthorectifier
-        from enpt.options.config import config_for_testing_dlr
         cfg_dict = dict(config_for_testing_dlr, **dict(target_projection_type='UTM'))
         cfg = EnPTConfig(**cfg_dict)
 
