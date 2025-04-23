@@ -350,7 +350,7 @@ class IsofitEnMAP(object):
                   inversion_windows: List[float] = None,
                   config_only: bool = False,
                   ):
-        logging_level = logging_level or self.cfg.log_level
+        logging_level = logging_level or self.log_level
         params = {k: v for k, v in locals().items() if not k.startswith('__')}
 
         try:
