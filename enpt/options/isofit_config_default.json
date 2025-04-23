@@ -59,7 +59,7 @@
                 }
             },
             "statevector": {
-                "AOT550": {
+                "AERFRAC_2": {
                     "bounds": [
                         0.001,
                         1.0
