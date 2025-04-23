@@ -181,14 +181,19 @@ class IsofitEnMAP(object):
 
         elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
 
+        loc_data = np.dstack([lons, lats, elev])
+        loc_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
+
         fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_loc")  # no file extension supported
-        GeoArray(np.dstack([lons, lats, elev]),
+        GeoArray(loc_data,
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
                      'Longitude (WGS-84)',
                      'Latitude (WGS-84)',
                      'Elevation (m)'
                  ]
+                 ],
+                 nodata = -9999
                  ).save(fp_out)
 
         return fp_out
@@ -206,8 +211,11 @@ class IsofitEnMAP(object):
         utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
         earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)  # TODO pixel-wise values
 
+        obs_data = np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist])
+        obs_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
+
         fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_obs")  # no file extension supported
-        GeoArray(np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist]),
+        GeoArray(obs_data,
                  enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
                  bandnames=[
                      'Path length (m)',
@@ -221,7 +229,8 @@ class IsofitEnMAP(object):
                      'Cosine(i)',
                      'UTC Time',
                      'Earth-sun distance (AU)'
-                 ]
+                 ],
+                 nodata=-9999
                  ).save(fp_out)
 
         return fp_out
