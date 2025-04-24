@@ -29,7 +29,8 @@ test_enpt:
     # - cd ../../
 
     # switch from the isofit conda-package to the current dev branch (most dependencies already resolved)
-    - pip install -U git+https://github.com/isofit/isofit.git@dev
+    # - pip install -U git+https://github.com/isofit/isofit.git@dev
+    - pip install -U git+https://github.com/isofit/isofit.git@main  # use the main branch for now
 
     # run tests
     - make pytest  # test are called here
