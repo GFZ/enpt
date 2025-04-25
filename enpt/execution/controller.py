@@ -41,10 +41,12 @@ from typing import Optional
 from time import time
 from datetime import timedelta
 from glob import glob
+import numpy as np
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
 from ..model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo  # noqa: F401
+from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
 
 __author__ = 'Daniel Scheffler'
 
@@ -175,33 +177,18 @@ class EnPT_Controller(object):
                     self.L1_obj.correct_dead_pixels()
                 if self.cfg.enable_absolute_coreg:
                     # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
-                    self.run_spatial_optimization()
+                    self.run_spatial_optimization()  # expects sensor geometry
 
-                isofit = True  # FIXME hardcoded / revise implementation here
-                if isofit:
-                    self.L2_obj = EnMAPL2Product_MapGeo.from_L1B_sensorgeo(config=self.cfg, enmap_ImageL1=self.L1_obj)
-                    self.L2_obj.get_preprocessed_dem()
+                if self.cfg.enable_ac:
+                    if self.cfg.land_ac_alg == 'SICOR':
+                        ################################
+                        # run SICOR on sensor geometry #
+                        ################################
 
-                    from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
-                    import numpy as np
+                        # get DEM in sensor geometry
+                        self.L1_obj.get_preprocessed_dem()
 
-                    boa_ref, atm_state, uncertainty = \
-                        (IsofitEnMAP(config=self.cfg)
-                         .run_on_map_geometry(
-                            self.L2_obj,
-                            segmentation=False,
-                            n_cores=self.cfg.CPUs - 2))
-                    boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
-                    boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
-                    self.L2_obj.data.arr = boa_ref
-                    self.L2_obj.data.nodata = self.cfg.output_nodata_value
-                    self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
-                    self.L2_obj.meta.unitcode = 'BOARef'
-
-                else:
-                    self.L1_obj.get_preprocessed_dem()
-
-                    if self.cfg.enable_ac:
+                        # run SICOR
                         self.run_atmospheric_correction()
 
                         if self.cfg.run_deadpix_P:
@@ -210,11 +197,43 @@ class EnPT_Controller(object):
                                 'Re-applying dead pixel correction to correct '
                                 'for spectral spikes due to fringe effect.')
                             self.L1_obj.correct_dead_pixels()
+
+                        self.run_orthorectification()
+
                     else:
-                        self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                                'computing top-of-atmosphere reflectance instead.')
-                        self.run_toaRad2toaRef()
-                    # self.run_spatial_optimization()
+                        ##############################
+                        # run ISOFIT on map geometry #
+                        ##############################
+
+                        # get EnMAP image in map geometry
+                        self.L2_obj = (
+                            EnMAPL2Product_MapGeo
+                            .from_L1B_sensorgeo(
+                                config=self.cfg,
+                                enmap_ImageL1=self.L1_obj
+                            )
+                        )
+                        # get DEM in map geometry
+                        self.L2_obj.get_preprocessed_dem()
+
+                        # run ISOFIT
+                        boa_ref, atm_state, uncertainty = \
+                            (IsofitEnMAP(config=self.cfg)
+                             .run_on_map_geometry(
+                                self.L2_obj,
+                                segmentation=False,
+                                n_cores=self.cfg.CPUs - 2))
+                        boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                        boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
+                        self.L2_obj.data.arr = boa_ref
+                        self.L2_obj.data.nodata = self.cfg.output_nodata_value
+                        self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                        self.L2_obj.meta.unitcode = 'BOARef'
+
+                else:
+                    self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                            'computing top-of-atmosphere reflectance instead.')
+                    self.run_toaRad2toaRef()
                     self.run_orthorectification()
 
                 self.write_output()
