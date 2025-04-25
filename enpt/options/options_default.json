@@ -66,6 +66,9 @@
             "land_ac_alg": "SICOR",  /*Algorithm to use for atmospheric correction over land (default: SICOR):
                                        'SICOR': developed at GFZ; fast but misses image-based AOT/water vapour retrieval
                                        'ISOFIT': developed at NASA/JPL; accurate but computationally expensive*/
+            "enable_segmentation": true,  /*Enable SLIC segmentation during atmospheric correction (supported by SICOR
+                                            and ISOFIT) (default: True). With segmentation disabled, the AC runs on a
+                                            pixel-level, which is slightly more accurate but takes much longer.*/
             "polymer_additional_results": true,  /*enable the generation of additional results when running ACwater/POLYMER (default: True)*/
             "auto_download_ecmwf": true,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/

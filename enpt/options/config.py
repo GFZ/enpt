@@ -300,6 +300,11 @@ class EnPTConfig(object):
                 - 'SICOR': developed at GFZ; fast but misses image-based AOT/water vapour retrieval
                 - 'ISOFIT': developed at NASA/JPL; accurate but computationally expensive
 
+        :key enable_segmentation:
+            Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).
+            With segmentation disabled, the AC runs on a pixel-level, which is slightly more accurate
+            but takes much longer.
+
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
 
@@ -426,6 +431,7 @@ class EnPTConfig(object):
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
         self.land_ac_alg = gp('land_ac_alg')
+        self.enable_segmentation = gp('enable_segmentation')
         self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')

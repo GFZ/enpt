@@ -119,6 +119,8 @@ def get_enpt_argparser():
     add('--land_ac_alg', type=str, default='SICOR', nargs='?',
         help="Algorithm to use for atmospheric correction over land (default: 'SICOR'):"
              "('SICOR', 'ISOFIT')")
+    add('--enable_segmentation', type=_str2bool, default=True, nargs='?', const=True,
+        help='Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).')
     add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
