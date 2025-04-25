@@ -162,100 +162,105 @@ class EnPT_Controller(object):
             else:
                 self.L1_obj.save(self.cfg.output_dir)
 
+    def _run_frontend_test(self):
+        self._print_received_configuration()
+
+        if not os.path.isdir(self.cfg.output_dir):
+            raise NotADirectoryError(self.cfg.output_dir)
+
+        with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl'), 'wb') as outF:
+            pickle.dump(
+                dict(
+                    json_config=self.cfg.json_config,
+                    kwargs=self.cfg.kwargs
+                ),
+                outF)
+
     def run_all_processors(self):
         """Run all processors at once."""
-        if os.getenv('IS_ENPT_GUI_TEST') != "1":
-            try:
-                if os.getenv('IS_ENPT_GUI_CALL') == "1":
-                    self._write_to_stdout_stderr()
 
-                if self.cfg.log_level == 'DEBUG':
-                    self._print_received_configuration()
+        if os.getenv('IS_ENPT_GUI_TEST') == "1":
+            self._run_frontend_test()
+            return None
 
-                self.read_L1B_data()
-                if self.cfg.run_deadpix_P:
-                    self.L1_obj.correct_dead_pixels()
-                if self.cfg.enable_absolute_coreg:
-                    # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
-                    self.run_spatial_optimization()  # expects sensor geometry
+        try:
+            if os.getenv('IS_ENPT_GUI_CALL') == "1":
+                self._write_to_stdout_stderr()
 
-                if self.cfg.enable_ac:
-                    if self.cfg.land_ac_alg == 'SICOR':
-                        ################################
-                        # run SICOR on sensor geometry #
-                        ################################
+            if self.cfg.log_level == 'DEBUG':
+                self._print_received_configuration()
 
-                        # get DEM in sensor geometry
-                        self.L1_obj.get_preprocessed_dem()
+            self.read_L1B_data()
+            if self.cfg.run_deadpix_P:
+                self.L1_obj.correct_dead_pixels()
+            if self.cfg.enable_absolute_coreg:
+                # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                self.run_spatial_optimization()  # expects sensor geometry
 
-                        # run SICOR
-                        self.run_atmospheric_correction()
+            if self.cfg.enable_ac:
+                if self.cfg.land_ac_alg == 'SICOR':
+                    ################################
+                    # run SICOR on sensor geometry #
+                    ################################
 
-                        if self.cfg.run_deadpix_P:
-                            # re-apply dead pixel correction
-                            self.L1_obj.logger.info(
-                                'Re-applying dead pixel correction to correct '
-                                'for spectral spikes due to fringe effect.')
-                            self.L1_obj.correct_dead_pixels()
+                    # get DEM in sensor geometry
+                    self.L1_obj.get_preprocessed_dem()
 
-                        self.run_orthorectification()
+                    # run SICOR
+                    self.run_atmospheric_correction()
 
-                    else:
-                        ##############################
-                        # run ISOFIT on map geometry #
-                        ##############################
+                    if self.cfg.run_deadpix_P:
+                        # re-apply dead pixel correction
+                        self.L1_obj.logger.info(
+                            'Re-applying dead pixel correction to correct '
+                            'for spectral spikes due to fringe effect.')
+                        self.L1_obj.correct_dead_pixels()
 
-                        # get EnMAP image in map geometry
-                        self.L2_obj = (
-                            EnMAPL2Product_MapGeo
-                            .from_L1B_sensorgeo(
-                                config=self.cfg,
-                                enmap_ImageL1=self.L1_obj
-                            )
-                        )
-                        # get DEM in map geometry
-                        self.L2_obj.get_preprocessed_dem()
-
-                        # run ISOFIT
-                        boa_ref, atm_state, uncertainty = \
-                            (IsofitEnMAP(config=self.cfg)
-                             .run_on_map_geometry(
-                                self.L2_obj,
-                                segmentation=False,
-                                n_cores=self.cfg.CPUs - 2))
-                        boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
-                        boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
-                        self.L2_obj.data.arr = boa_ref
-                        self.L2_obj.data.nodata = self.cfg.output_nodata_value
-                        self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
-                        self.L2_obj.meta.unitcode = 'BOARef'
-
-                else:
-                    self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                            'computing top-of-atmosphere reflectance instead.')
-                    self.run_toaRad2toaRef()
                     self.run_orthorectification()
 
-                self.write_output()
+                else:
+                    ##############################
+                    # run ISOFIT on map geometry #
+                    ##############################
 
-                self.L1_obj.logger.info('Total runtime of the processing chain: %s'
-                                        % timedelta(seconds=time() - self._time_startup))
-            finally:
-                self.cleanup()
+                    # get EnMAP image in map geometry
+                    self.L2_obj = (
+                        EnMAPL2Product_MapGeo
+                        .from_L1B_sensorgeo(
+                            config=self.cfg,
+                            enmap_ImageL1=self.L1_obj
+                        )
+                    )
+                    # get DEM in map geometry
+                    self.L2_obj.get_preprocessed_dem()
 
-        else:
-            self._print_received_configuration()
+                    # run ISOFIT
+                    boa_ref, atm_state, uncertainty = \
+                        (IsofitEnMAP(config=self.cfg)
+                         .run_on_map_geometry(
+                            self.L2_obj,
+                            segmentation=False,
+                            n_cores=self.cfg.CPUs - 2))
+                    boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                    boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
+                    self.L2_obj.data.arr = boa_ref
+                    self.L2_obj.data.nodata = self.cfg.output_nodata_value
+                    self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                    self.L2_obj.meta.unitcode = 'BOARef'
 
-            if not os.path.isdir(self.cfg.output_dir):
-                raise NotADirectoryError(self.cfg.output_dir)
+            else:
+                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                        'computing top-of-atmosphere reflectance instead.')
+                self.run_toaRad2toaRef()
+                self.run_orthorectification()
 
-            with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl'), 'wb') as outF:
-                pickle.dump(
-                    dict(
-                        json_config=self.cfg.json_config,
-                        kwargs=self.cfg.kwargs
-                    ),
-                    outF)
+            self.write_output()
+
+            self.L1_obj.logger.info('Total runtime of the processing chain: %s'
+                                    % timedelta(seconds=time() - self._time_startup))
+        finally:
+            self.cleanup()
+            return None
 
     @staticmethod
     def _write_to_stdout_stderr():
