@@ -63,6 +63,9 @@
                                            (land surfaces are not included in the L2A product)
                                   'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                                               NOTE that this may result in edge effects, e.g., at coastlines*/
+            "land_ac_alg": "SICOR",  /*Algorithm to use for atmospheric correction over land (default: SICOR):
+                                       'SICOR': developed at GFZ; fast but misses image-based AOT/water vapour retrieval
+                                       'ISOFIT': developed at NASA/JPL; accurate but computationally expensive*/
             "polymer_additional_results": true,  /*enable the generation of additional results when running ACwater/POLYMER (default: True)*/
             "auto_download_ecmwf": true,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/

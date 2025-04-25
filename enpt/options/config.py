@@ -280,17 +280,23 @@ class EnPTConfig(object):
             Polymer root directory (that contains the subdirectory for ancillary data).
 
         :key enable_ac:
-            Enable atmospheric correction using SICOR algorithm (default: True).
+            Enable atmospheric correction (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
 
         :key mode_ac:
             3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
 
-                - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
+                - 'land': SICOR/ISOFIT (developed for land surfaces is applied to land AND water surfaces
                 - 'water': POLYMER (developed for water surfaces) is applied to water only
                            (land surfaces are no included in the L2A product)
                 - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                               NOTE that this may result in edge effects, e.g., at coastlines
+
+        :key land_ac_alg:
+            Algorithm to use for atmospheric correction over land (default: SICOR):
+
+                - 'SICOR': developed at GFZ; fast but misses image-based AOT/water vapour retrieval
+                - 'ISOFIT': developed at NASA/JPL; accurate but computationally expensive
 
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
@@ -302,7 +308,7 @@ class EnPTConfig(object):
             Scale factor to be applied to BOA reflectance result
 
         :key threads:
-            number of threads for multiprocessing of blocks (see bellow):
+            number of threads for multiprocessing of blocks (see below):
 
                 - 'threads = 0': for single thread
                 - 'threads < 0': for as many threads as there are CPUs
@@ -417,6 +423,7 @@ class EnPTConfig(object):
         self.polymer_root = gp('polymer_root')
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
+        self.land_ac_alg = gp('land_ac_alg')
         self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
