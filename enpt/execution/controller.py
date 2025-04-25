@@ -239,7 +239,7 @@ class EnPT_Controller(object):
                         (IsofitEnMAP(config=self.cfg)
                          .run_on_map_geometry(
                             self.L2_obj,
-                            segmentation=False,
+                            segmentation=self.cfg.enable_segmentation,
                             n_cores=self.cfg.CPUs - 2))
                     boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
                     boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
