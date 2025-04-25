@@ -48,7 +48,7 @@ from multiprocessing import cpu_count
 import numpy as np
 from pyproj.crs import CRS
 from pandas import DataFrame
-import netCDF4 as nc
+import netCDF4 as nc  # noqa
 from scipy.interpolate import interp1d
 
 from ...utils import EnvContextManager
@@ -57,7 +57,7 @@ with EnvContextManager(ISOFIT_DEBUG='0',
                        OMP_NUM_THREADS='1'):
     import isofit
     from isofit.core.isofit import Isofit
-    from isofit.utils import surface_model, analytical_line, extractions, segment
+    from isofit.utils import surface_model, analytical_line as run_analytical_line, extractions, segment
     from isofit.data.cli.data import download as download_data
     from isofit.data.cli.examples import download as download_examples
     from isofit.utils.apply_oe import apply_oe, CHUNKSIZE
@@ -161,9 +161,9 @@ class IsofitEnMAP(object):
         radiance[mask_nodata] = -9999
 
         fp_out = pjoin(path_outdir, f"{enmap.meta.scene_basename}_rdn")
-        gA = GeoArray(radiance, enmap.data.gt, enmap.data.prj, nodata=-9999)
-        gA.meta.band_meta = enmap.data.meta.band_meta
-        gA.save(fp_out)
+        rad = GeoArray(radiance, enmap.data.gt, enmap.data.prj, nodata=-9999)
+        rad.meta.band_meta = enmap.data.meta.band_meta
+        rad.save(fp_out)
 
         return fp_out
 
@@ -281,7 +281,7 @@ class IsofitEnMAP(object):
               TemporaryDirectory() as td):
             zf.extractall(td)
 
-            LUT_Transformer(
+            LUTTransformer(
                 path_lut=os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm'),
                 sza_scene=sza_scene
             ).read_binary_modtran_lut(
@@ -424,7 +424,7 @@ class IsofitEnMAP(object):
              segmentation: bool = False,
              segmentation_size: int = 40,
              n_cores: int = cpu_count()
-             ) -> dict:
+             ) -> dict:  # noqa
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default_MOD5.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
@@ -508,13 +508,13 @@ class IsofitEnMAP(object):
             )
         )
 
-        def update_nested_dict(d, u):
+        def update_nested_dict(dic, u):
             for k, v in u.items():
                 if isinstance(v, Mapping):
-                    d[k] = update_nested_dict(d.get(k, {}), v)
+                    dic[k] = update_nested_dict(dic.get(k, {}), v)
                 else:
-                    d[k] = v
-            return d
+                    dic[k] = v
+            return dic
 
         isocfg = update_nested_dict(isocfg_default, updatedict)
         paths = Pathnames(
@@ -620,7 +620,7 @@ class IsofitEnMAP(object):
 
                 if segmentation:
                     # logging.info("Analytical line inference")
-                    analytical_line(
+                    run_analytical_line(
                         rdn_file=paths.radiance_working_path,
                         loc_file=paths.loc_working_path,
                         obs_file=paths.obs_working_path,
@@ -692,7 +692,7 @@ class IsofitEnMAP(object):
             return boa_rfl, state, uncert
 
 
-class LUT_Transformer(object):
+class LUTTransformer(object):
     def __init__(self, path_lut: str, sza_scene: float):
         """
 
@@ -709,13 +709,13 @@ class LUT_Transformer(object):
         :param path_out_nc: path to output LUT
         :return:         LUT of atmospheric functions, x and y axes grid points, LUT wavelengths
         """
-        def read_int16(data: np.ndarray, count):
-            val = np.array(data[self._offset:self._offset + count * 2].view('int16'))
+        def read_int16(array: np.ndarray, count):
+            val = np.array(array[self._offset:self._offset + count * 2].view('int16'))
             self._offset += count * 2
             return val
 
-        def read_float32(data: np.ndarray, count):
-            val = np.array(data[self._offset:self._offset + count * 4].view('f4'))
+        def read_float32(array: np.ndarray, count):
+            val = np.array(array[self._offset:self._offset + count * 4].view('f4'))
             self._offset += count * 4
             return val
 
