@@ -12,26 +12,51 @@
         "radiative_transfer": {
             "lut_grid": {
                 "AERFRAC_2": [
-                    0.001,
-                    0.1009,
-                    0.2008,
-                    0.3007,
-                    0.4006,
-                    0.5005,
-                    0.6004,
-                    0.7003,
-                    0.8002,
-                    0.9001,
-                    1.0
+                    0.05,
+                    0.12,
+                    0.20,
+                    0.30,
+                    0.40,
+                    0.80
                 ],
                 "H2OSTR": [
-                    1e-10,
+                    0.0,
                     1.0,
                     1.5,
                     2.0,
                     2.7,
                     3.5,
                     5.0
+                ],
+                "observer_zenith": [
+                    0,
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0
+                ],
+                "solar_zenith": [
+                    0,
+                    10.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    70.0
+                ],
+                "relative_azimuth": [
+                    0,
+                    25.0,
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    180.0
+                ],
+                "surface_elevation_km": [
+                    0,
+                    0.7,
+                    2.5,
+                    8.0
                 ]
             },
             "radiative_transfer_engines": {
@@ -47,7 +72,11 @@
                     "irradiance_file": "/path/to/examples/20151026_SantaMonica/data/prism_optimized_irr.dat",
                     "lut_names": {
                         "AERFRAC_2": null,
-                        "H2OSTR": null
+                        "H2OSTR": null,
+                        "observer_zenith": null,
+                        "solar_zenith": null,
+                        "relative_azimuth": null,
+                        "surface_elevation_km": null
                     },
                     "lut_path": "/path/to/data_out/lut_full/lut.nc",
                     "sim_path": "/path/to/data_out/lut_full",
@@ -61,8 +90,8 @@
             "statevector": {
                 "AERFRAC_2": {
                     "bounds": [
-                        0.001,
-                        1.0
+                        0.05,
+                        0.8
                     ],
                     "init": 0.1009,
                     "prior_mean": 0.1009,
@@ -71,7 +100,7 @@
                 },
                 "H2OSTR": {
                     "bounds": [
-                        1e-10,
+                        0,
                         5.0
                     ],
                     "init": 2.5,
