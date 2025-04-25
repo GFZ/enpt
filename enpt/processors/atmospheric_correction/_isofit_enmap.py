@@ -142,57 +142,56 @@ class IsofitEnMAP(object):
             ihaze_type="AER_NONE",
         )
 
-    def generate_input_files(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
-        fp_rad = self._generate_radiance_file(enmap_ImageL2, path_outdir)
-        fp_loc = self._generate_loc_file(enmap_ImageL2, path_outdir)
-        fp_obs = self._generate_obs_file(enmap_ImageL2, path_outdir)
-        fp_wvl = self._generate_wavelength_file(enmap_ImageL2, path_outdir)
+    def generate_input_files(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        fp_rad = self._generate_radiance_file(enmap, path_outdir)
+        fp_loc = self._generate_loc_file(enmap, path_outdir)
+        fp_obs = self._generate_obs_file(enmap, path_outdir)
+        fp_wvl = self._generate_wavelength_file(enmap, path_outdir)
         fp_surf = self._generate_surface_file(fp_wvl, path_outdir)
-        fp_lut = self._generate_lut_file(path_outdir,
-                                         enmap_ImageL2.meta.geom_sun_zenith)  # TODO: set LUT to None in case of 6S
+        fp_lut = self._generate_lut_file(path_outdir, enmap.meta.geom_sun_zenith)  # TODO: set LUT to None in case of 6S
 
         return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut
 
     @staticmethod
-    def _generate_radiance_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+    def _generate_radiance_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
         # ISOFIT expects radiance in uW/cm²/sr/nm, EnPT provides mW/m²/sr/nm
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
-        mask_nodata = ~enmap_ImageL2.data.mask_nodata[:]
-        radiance = enmap_ImageL2.data[:] / 10.0
+        mask_nodata = ~enmap.data.mask_nodata[:]
+        radiance = enmap.data[:] / 10.0
         radiance[mask_nodata] = -9999
 
-        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_rdn")
-        gA = GeoArray(radiance, enmap_ImageL2.data.gt, enmap_ImageL2.data.prj, nodata=-9999)
-        gA.meta.band_meta = enmap_ImageL2.data.meta.band_meta
+        fp_out = pjoin(path_outdir, f"{enmap.meta.scene_basename}_rdn")
+        gA = GeoArray(radiance, enmap.data.gt, enmap.data.prj, nodata=-9999)
+        gA.meta.band_meta = enmap.data.meta.band_meta
         gA.save(fp_out)
 
         return fp_out
 
     @staticmethod
-    def _generate_loc_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
-        xmin, xmax, ymin, ymax = enmap_ImageL2.data.box.boundsMap
-        xgsd, ygsd = (enmap_ImageL2.data.xgsd, enmap_ImageL2.data.ygsd)
+    def _generate_loc_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        xmin, xmax, ymin, ymax = enmap.data.box.boundsMap
+        xgsd, ygsd = (enmap.data.xgsd, enmap.data.ygsd)
         x_grid, ygrid = get_coord_grid((xmin, ymax), (xmax, ymin), (xgsd, -ygsd))
-        if enmap_ImageL2.data.epsg == 4326:
+        if enmap.data.epsg == 4326:
             lons = x_grid
             lats = ygrid
         else:
             lons, lats = transform_coordArray(
-                CRS(enmap_ImageL2.data.epsg).to_wkt(),
+                CRS(enmap.data.epsg).to_wkt(),
                 CRS(4326).to_wkt(),
                 x_grid, ygrid
             )
 
-        elev = enmap_ImageL2.dem[:]  # FIXME nodata value 0
+        elev = enmap.dem[:]  # FIXME nodata value 0
         # FIXME: shape of elev does not match shape of lons/lats if no DEM is provided
         # elev = np.zeros_like(lons)  # use mean elevation
 
         loc_data = np.dstack([lons, lats, elev])
-        loc_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
+        loc_data[~enmap.data.mask_nodata[:]] = -9999
 
-        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_loc")  # no file extension supported
+        fp_out = pjoin(path_outdir, f"{enmap.meta.scene_basename}_loc")  # no file extension supported
         GeoArray(loc_data,
-                 enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
+                 enmap.data.gt, enmap.data.prj,
                  bandnames=[
                      'Longitude (WGS-84)',
                      'Latitude (WGS-84)',
@@ -203,26 +202,26 @@ class IsofitEnMAP(object):
 
         return fp_out
 
-    def _generate_obs_file(self, enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
-        path_length = np.full(enmap_ImageL2.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
-        vaa = enmap_ImageL2.meta.geom_view_azimuth_array
-        vza = enmap_ImageL2.meta.geom_view_zenith_array
-        saa = enmap_ImageL2.meta.geom_sun_azimuth_array
-        sza = enmap_ImageL2.meta.geom_sun_zenith_array
+    def _generate_obs_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        path_length = np.full(enmap.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
+        vaa = enmap.meta.geom_view_azimuth_array
+        vza = enmap.meta.geom_view_zenith_array
+        saa = enmap.meta.geom_sun_azimuth_array
+        sza = enmap.meta.geom_sun_zenith_array
         phase = self._compute_solar_phase(vaa, vza, saa, sza)
-        slope = np.full(enmap_ImageL2.data.shape[:2], fill_value=0)
-        aspect = np.zeros(enmap_ImageL2.data.shape[:2])
+        slope = np.full(enmap.data.shape[:2], fill_value=0)
+        aspect = np.zeros(enmap.data.shape[:2])
         cos_i = self._compute_cos_i(saa, sza, slope=90, aspect=0)
-        utc = enmap_ImageL2.meta.aqtime_utc_array  # TODO pixel-wise values
+        utc = enmap.meta.aqtime_utc_array  # TODO pixel-wise values
         # TODO pixel-wise values
-        earth_sun_dist = np.full(enmap_ImageL2.data.shape[:2], fill_value=enmap_ImageL2.meta.earthSunDist)
+        earth_sun_dist = np.full(enmap.data.shape[:2], fill_value=enmap.meta.earthSunDist)
 
         obs_data = np.dstack([path_length, vaa, vza, saa, sza, phase, slope, aspect, cos_i, utc, earth_sun_dist])
-        obs_data[~enmap_ImageL2.data.mask_nodata[:]] = -9999
+        obs_data[~enmap.data.mask_nodata[:]] = -9999
 
-        fp_out = pjoin(path_outdir, f"{enmap_ImageL2.meta.scene_basename}_obs")  # no file extension supported
+        fp_out = pjoin(path_outdir, f"{enmap.meta.scene_basename}_obs")  # no file extension supported
         GeoArray(obs_data,
-                 enmap_ImageL2.data.gt, enmap_ImageL2.data.prj,
+                 enmap.data.gt, enmap.data.prj,
                  bandnames=[
                      'Path length (m)',
                      'To-sensor azimuth (0 to 360 degrees cw from N)',
@@ -242,10 +241,10 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
-    def _generate_wavelength_file(enmap_ImageL2: EnMAPL2Product_MapGeo, path_outdir: str):
+    def _generate_wavelength_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
         fp_out = pjoin(path_outdir, 'enmap_wavelength_fwhm.txt')
-        wvl = enmap_ImageL2.meta.wvl_center
-        fwhm = enmap_ImageL2.meta.fwhm
+        wvl = enmap.meta.wvl_center
+        fwhm = enmap.meta.fwhm
         df = DataFrame(np.hstack([wvl.reshape(-1, 1), fwhm.reshape(-1, 1)]))
         df.to_csv(fp_out, header=False, sep='\t')
 
@@ -379,10 +378,10 @@ class IsofitEnMAP(object):
     #     with TemporaryDirectory() as td:
     #         self._apply_oe()
 
-    def apply_oe_on_map_geometry(self, enmap_ImageL2: EnMAPL2Product_MapGeo):
+    def apply_oe_on_map_geometry(self, enmap: EnMAPL2Product_MapGeo):
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap_ImageL2, path_indir)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
             os.makedirs(pjoin(td, 'workdir'), exist_ok=True)
             os.makedirs(pjoin(td, 'input'), exist_ok=True)
@@ -653,13 +652,13 @@ class IsofitEnMAP(object):
                 ray.shutdown()  # FIXME: Should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
     def run_on_map_geometry(self,
-                            enmap_ImageL2: EnMAPL2Product_MapGeo,
+                            enmap: EnMAPL2Product_MapGeo,
                             segmentation: bool = False,
                             n_cores: int = cpu_count()
                             ) -> (GeoArray, GeoArray, GeoArray):
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap_ImageL2, path_indir)
+            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
             paths_output = \
                 self._run(
@@ -672,8 +671,8 @@ class IsofitEnMAP(object):
                     path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                     path_surface_file=fp_surf,
                     path_lut=fp_lut,
-                    aot=enmap_ImageL2.meta.aot,
-                    cwv=enmap_ImageL2.meta.water_vapour,
+                    aot=enmap.meta.aot,
+                    cwv=enmap.meta.water_vapour,
                     segmentation=segmentation,
                     n_cores=n_cores
                 )
@@ -688,7 +687,7 @@ class IsofitEnMAP(object):
             uncert.to_mem()
 
             # clip AOT/CWV to extent of EnMAP scene (ISOFIT output is larger)
-            state[~enmap_ImageL2.data.mask_nodata[:]] = np.nan
+            state[~enmap.data.mask_nodata[:]] = np.nan
 
             return boa_rfl, state, uncert
 
