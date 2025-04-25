@@ -427,7 +427,6 @@ class IsofitEnMAP(object):
              n_cores: int = cpu_count()
              ) -> dict:
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
-        path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default.json')
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default_MOD5.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
         path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
