@@ -113,7 +113,7 @@ def get_enpt_argparser():
     add('--enable_ac', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")
-    add('--mode_ac', type=str, default=None, nargs='?',
+    add('--mode_ac', type=str, default='land', nargs='?',
         help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
              "('land', water', 'combined')")
     add('--land_ac_alg', type=str, default='SICOR', nargs='?',
