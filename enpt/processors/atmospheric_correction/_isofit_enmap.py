@@ -417,6 +417,7 @@ class IsofitEnMAP(object):
              path_workdir: str,
              path_enmap_wavelengths: str,
              path_surface_file: str,
+             use_6s: bool = False,
              path_emulator_basedir: str = None,
              path_lut: str = None,
              aot: float = None,
@@ -432,7 +433,10 @@ class IsofitEnMAP(object):
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
-        # TODO: verify that path_emulator_basedir is not empty in case of 6S
+        if use_6s:
+            if not path_emulator_basedir or not isdir(path_emulator_basedir):
+                raise ValueError(path_emulator_basedir,
+                                 "'path_emulator_basedir' does not point to an existing directory.")
 
         if os.path.isdir(path_workdir):
             if path_lut and path_lut.startswith(path_workdir):
@@ -458,23 +462,23 @@ class IsofitEnMAP(object):
                 instrument=dict(
                     # SNR=500,  # use noise file instead of static SNR
                     parametric_noise_file=pjoin(path_enptlib, 'resources', 'EnMAP_Sensor', 'parametric_noise.txt'),
-                    wavelength_file=path_enmap_wavelengths,
+                    wavelength_file=pabs(path_enmap_wavelengths),
                 ),
                 radiative_transfer=dict(
                     radiative_transfer_engines=dict(
                         vswir=dict(
-                            aerosol_model_file=pjoin(path_data, 'aerosol_model.txt'),
-                            aerosol_template_file=pjoin(path_data, 'aerosol_template.json'),
+                            aerosol_model_file=pjoin(path_data, 'aerosol_model.txt') if use_6s else None,
+                            aerosol_template_file=pjoin(path_data, 'aerosol_template.json') if use_6s else None,
                             earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
-                            emulator_aux_file=pjoin(path_emulator_basedir, 'sRTMnet_v120_aux.npz'),
-                            emulator_file=pjoin(path_emulator_basedir, 'sRTMnet_v120.h5'),
-                            engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs'),
-                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
+                            emulator_aux_file=pjoin(path_emulator_basedir, 'sRTMnet_v120_aux.npz') if use_6s else None,
+                            emulator_file=pjoin(path_emulator_basedir, 'sRTMnet_v120.h5') if use_6s else None,
+                            engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs') if use_6s else None,
+                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi') if use_6s else None,
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             # use lut_path if existing, otherwise simulate to lut.nc
                             lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),
-                            sim_path=pjoin(path_workdir, 'lut_full'),
-                            template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
+                            sim_path=pjoin(path_workdir, 'lut_full') if use_6s else None,
+                            template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')  if use_6s else None
                         )
                     ),
                     statevector=dict(
@@ -606,13 +610,14 @@ class IsofitEnMAP(object):
                 with open(path_isocfg, 'w') as json_file:
                     json.dump(isocfg, json_file, skipkeys=False, indent=4)
 
-                self._build_modtran_template_file(
-                    path_emulator_basedir,
-                    path_obs,
-                    path_loc,
-                    path_workdir,
-                    enmap_timestamp
-                )
+                if use_6s:
+                    self._build_modtran_template_file(
+                        path_emulator_basedir,
+                        path_obs,
+                        path_loc,
+                        path_workdir,
+                        enmap_timestamp
+                    )
 
                 Isofit(
                     config_file=path_isocfg,
