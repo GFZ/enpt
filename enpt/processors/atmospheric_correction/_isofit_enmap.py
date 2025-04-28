@@ -36,7 +36,7 @@ from tempfile import TemporaryDirectory
 from typing import Tuple, List
 from fnmatch import fnmatch
 import os
-from os.path import join as pjoin
+from os.path import join as pjoin, abspath as pabs
 from pathlib import Path
 from glob import glob
 import json
@@ -416,8 +416,8 @@ class IsofitEnMAP(object):
              path_outdir: str,
              path_workdir: str,
              path_enmap_wavelengths: str,
-             path_emulator_basedir: str,
              path_surface_file: str,
+             path_emulator_basedir: str = None,
              path_lut: str = None,
              aot: float = None,
              cwv: float = None,
@@ -431,6 +431,8 @@ class IsofitEnMAP(object):
         path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
+
+        # TODO: verify that path_emulator_basedir is not empty in case of 6S
 
         if os.path.isdir(path_workdir):
             if path_lut and path_lut.startswith(path_workdir):
@@ -487,7 +489,7 @@ class IsofitEnMAP(object):
                     ),
                 ),
                 surface=dict(
-                    surface_file=path_surface_file
+                    surface_file=pabs(path_surface_file)
                 ),
             ),
             implementation=dict(
@@ -497,14 +499,14 @@ class IsofitEnMAP(object):
                 ray_temp_dir='/tmp/ray',  # TODO not Windows-compatible
             ),
             input=dict(
-                measured_radiance_file=path_toarad,
-                loc_file=path_loc,
-                obs_file=path_obs
+                measured_radiance_file=pabs(path_toarad),
+                loc_file=pabs(path_loc),
+                obs_file=pabs(path_obs)
             ),
             output=dict(
-                estimated_reflectance_file=pjoin(path_outdir, f'{enmap_timestamp}_estimated_reflectance.bsq'),
-                estimated_state_file=pjoin(path_outdir, f'{enmap_timestamp}_estimated_state.bsq'),
-                posterior_uncertainty_file=pjoin(path_outdir, f'{enmap_timestamp}_posterior_uncertainty.bsq'),
+                estimated_reflectance_file=pjoin(pabs(path_outdir), f'{enmap_timestamp}_estimated_reflectance.bsq'),
+                estimated_state_file=pjoin(pabs(path_outdir), f'{enmap_timestamp}_estimated_state.bsq'),
+                posterior_uncertainty_file=pjoin(pabs(path_outdir), f'{enmap_timestamp}_posterior_uncertainty.bsq'),
             )
         )
 
