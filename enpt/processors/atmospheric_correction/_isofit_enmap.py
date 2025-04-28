@@ -36,7 +36,7 @@ from tempfile import TemporaryDirectory
 from typing import Tuple, List
 from fnmatch import fnmatch
 import os
-from os.path import join as pjoin, abspath as pabs
+from os.path import isdir, join as pjoin, abspath as pabs
 from pathlib import Path
 from glob import glob
 import json
@@ -477,6 +477,17 @@ class IsofitEnMAP(object):
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             # use lut_path if existing, otherwise simulate to lut.nc
                             lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_transm1.nc',  # Valencia LUT transm mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_rdn1.nc',  # Valencia LUT rdn mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_rdn2.nc',  # Valencia LUT rdn mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_transm1.nc',  # Luis-LUT transm mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_transm2.nc',  # Luis-LUT transm mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/__OLD/LUT_ISO_MOD5_formatted_1nm_rdn.nc',  # Luis-LUT rdn mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_rdn.nc',  # Luis-LUT rdn mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_rdn1.nc',  # Luis-LUT rdn mode
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISOFIT.nc',  # Luis-LUT transm mode Stephane
+                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/6S-EnMAP_MLS_RUR_ISO_rdn.nc',  # Valencia-LUT im 6S-Format
+                            # lut_path='/misc/se4/segl/EnMAP_ISO_LUT/LUT_ISO_MOD5_formatted_1nm.nc',
                             sim_path=pjoin(path_workdir, 'lut_full') if use_6s else None,
                             template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')  if use_6s else None
                         )
