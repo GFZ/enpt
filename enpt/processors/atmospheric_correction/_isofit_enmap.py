@@ -36,7 +36,7 @@ from tempfile import TemporaryDirectory
 from typing import Tuple, List
 from fnmatch import fnmatch
 import os
-from os.path import isdir, join as pjoin, abspath as pabs
+from os.path import isdir, isfile, join as pjoin, abspath as pabs
 from pathlib import Path
 from glob import glob
 import json
@@ -417,7 +417,6 @@ class IsofitEnMAP(object):
              path_workdir: str,
              path_enmap_wavelengths: str,
              path_surface_file: str,
-             use_6s: bool = False,
              path_emulator_basedir: str = None,
              path_lut: str = None,
              aot: float = None,
@@ -433,6 +432,7 @@ class IsofitEnMAP(object):
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
+        use_6s = not isfile(path_lut)
         if use_6s:
             if not path_emulator_basedir or not isdir(path_emulator_basedir):
                 raise ValueError(path_emulator_basedir,
@@ -467,29 +467,23 @@ class IsofitEnMAP(object):
                 radiative_transfer=dict(
                     radiative_transfer_engines=dict(
                         vswir=dict(
-                            aerosol_model_file=pjoin(path_data, 'aerosol_model.txt') if use_6s else None,
-                            aerosol_template_file=pjoin(path_data, 'aerosol_template.json') if use_6s else None,
+                            aerosol_model_file=pjoin(path_data, 'aerosol_model.txt'),
+                            aerosol_template_file=pjoin(path_data, 'aerosol_template.json'),
                             earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
-                            emulator_aux_file=pjoin(path_emulator_basedir, 'sRTMnet_v120_aux.npz') if use_6s else None,
-                            emulator_file=pjoin(path_emulator_basedir, 'sRTMnet_v120.h5') if use_6s else None,
-                            engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs') if use_6s else None,
-                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi') if use_6s else None,
+                            emulator_aux_file=pjoin(path_emulator_basedir, 'sRTMnet_v120_aux.npz'),
+                            emulator_file=pjoin(path_emulator_basedir, 'sRTMnet_v120.h5'),
+                            engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs'),
+                            interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
                             # use lut_path if existing, otherwise simulate to lut.nc
                             lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_transm1.nc',  # Valencia LUT transm mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_rdn1.nc',  # Valencia LUT rdn mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/EnMAP_MLS_RUR_ISO_rdn2.nc',  # Valencia LUT rdn mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_transm1.nc',  # Luis-LUT transm mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_transm2.nc',  # Luis-LUT transm mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/__OLD/LUT_ISO_MOD5_formatted_1nm_rdn.nc',  # Luis-LUT rdn mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_rdn.nc',  # Luis-LUT rdn mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISO_MOD5_formatted_1nm_rdn1.nc',  # Luis-LUT rdn mode
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/LUT_ISOFIT.nc',  # Luis-LUT transm mode Stephane
-                            # lut_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/6S-EnMAP_MLS_RUR_ISO_rdn.nc',  # Valencia-LUT im 6S-Format
-                            # lut_path='/misc/se4/segl/EnMAP_ISO_LUT/LUT_ISO_MOD5_formatted_1nm.nc',
-                            sim_path=pjoin(path_workdir, 'lut_full') if use_6s else None,
-                            template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')  if use_6s else None
+                            sim_path=pjoin(path_workdir, 'lut_full'),
+                            template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
+                        ) if use_6s else dict(
+                            earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
+                            irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
+                            # use lut_path if existing, otherwise simulate to lut.nc
+                            lut_path=path_lut
                         )
                     ),
                     statevector=dict(
