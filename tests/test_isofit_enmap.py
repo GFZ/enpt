@@ -152,18 +152,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
         )
 
-    def test__run__backtransformed_l2_spectra(self):
-        IsofitEnMAP()._run(
-            path_toarad='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/backtransformed_l2_spectra/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z__backtransformed_l2_spectra',
-            path_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/backtransformed_l2_spectra/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z__backtransformed_l2_spectra_loc',
-            path_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/backtransformed_l2_spectra/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z__backtransformed_l2_spectra_obs',
-            path_outdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/output/',
-            path_workdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/workdir/',
-            path_enmap_wavelengths='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-            path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-            path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
-        )
-
     def test__run__backtransformed_l2_spectra_lut_mod5(self):
         """4x3 spectra within 10x10 image. Lines: different forward sim.: #1: UVEG LUT; #2: Luis LUT, #3: MODTRAN."""
         with (TemporaryDirectory() as td,
