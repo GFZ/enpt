@@ -93,7 +93,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
         return L2_obj
 
-    @pytest.mark.skip(reason="too slow for running in CI")
+    # @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe__direct_call(self):
         with (TemporaryDirectory() as td,
               ZipFile(pjoin(dir_isofit_data, 'isofit_testdata.zip'), "r") as zf):
