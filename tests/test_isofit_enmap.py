@@ -227,10 +227,17 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 class Test_LUT_Transformer(unittest.TestCase):
     """Tests for L1B_Reader class."""
 
-    def setUp(self):
-        self.p_lut_bin = '/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/SCAPE_M/EnMAP_LUT_MOD5_formatted_1nm'
 
     def test_modtran_lut_to_netcdf(self):
+        with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
+              TemporaryDirectory() as td):
+            zf.extractall(td)
+
+            lut_mod = os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm')
+            lut_iso = os.path.join(td, 'LUT_ISOFIT_EnPT.nc')
+
+            LUTTransformer(lut_mod, sza_scene=40).read_binary_modtran_lut(lut_iso)
+
         LUTTransformer(self.p_lut_bin, sza_scene=40).read_binary_modtran_lut(self.p_nc_enpt)
 
 
