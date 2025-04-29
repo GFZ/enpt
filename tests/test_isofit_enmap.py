@@ -219,8 +219,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             assert np.allclose(cos_i_karl, cos_i_py)
 
 
-class Test_LUT_Transformer(unittest.TestCase):
-    """Tests for L1B_Reader class."""
+class Test_LUTTransformer(unittest.TestCase):
+    """Tests for LUTTransformer class."""
 
     def test_modtran_lut_to_netcdf(self):
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
