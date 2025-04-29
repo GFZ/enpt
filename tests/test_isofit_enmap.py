@@ -49,6 +49,7 @@ from glob import glob
 
 import numpy as np
 import pytest
+from geoarray import GeoArray
 
 from enpt.io.reader import L1B_Reader
 from enpt.processors.orthorectification import Orthorectifier
@@ -133,7 +134,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
             p_extr = pjoin(td, 'extracted')
             zf.extractall(p_extr)
-            files = glob(pjoin(p_extr, '*'))
+            files = glob(pjoin(p_extr, 'backtransformed_l2_spectra_v9', '*'))
 
             IR = IsofitEnMAP()
             IR._run(
@@ -148,6 +149,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_lut=IR._generate_lut_file(td, 45),
                 segmentation=False,
             )
+            a = 1
+
     @pytest.mark.skip(reason="too slow for running in CI")
     def test__run__backtransformed_l2_spectra_6s(self):
         """4x3 spectra within 10x10 image. Lines: different forward sim.: #1: UVEG LUT; #2: Luis LUT, #3: MODTRAN."""
@@ -156,7 +159,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
             p_extr = pjoin(td, 'extracted')
             zf.extractall(p_extr)
-            files = glob(pjoin(p_extr, '*'))
+            files = glob(pjoin(p_extr, 'backtransformed_l2_spectra_v9', '*'))
 
             IR = IsofitEnMAP()
             IR._run(
@@ -185,23 +188,35 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             IsofitEnMAP().generate_input_files(self._get_enmap_l2a_obj(), td)
 
     def test__compute_solar_phase(self):
-        from geoarray import GeoArray
-        gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq')
-        vaa = gA[:, :, 1]
-        vza = gA[:, :, 2]
-        saa = gA[:, :, 3]
-        sza = gA[:, :, 4]
-        phase_karl = gA[:, :, 5]
+        with (TemporaryDirectory() as td,
+              ZipFile(pjoin(dir_isofit_data, 'isofit_testdata.zip'), "r") as zf):
+
+            p_extr = pjoin(td, 'extracted')
+            zf.extractall(p_extr)
+            files = glob(pjoin(p_extr, 'c_translation_test', '*'))
+            gA = GeoArray(fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0])
+
+            vaa = gA[:, :, 1]
+            vza = gA[:, :, 2]
+            saa = gA[:, :, 3]
+            sza = gA[:, :, 4]
+            phase_karl = gA[:, :, 5]
 
         phase_py = IsofitEnMAP()._compute_solar_phase(vaa, vza, saa, sza)
         assert np.allclose(phase_karl, phase_py)
 
     def test__compute_cos_i(self):
-        from geoarray import GeoArray
-        gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq')
-        saa = gA[:, :, 3]
-        sza = gA[:, :, 4]
-        cos_i_karl = gA[:, :, 8]
+        with (TemporaryDirectory() as td,
+              ZipFile(pjoin(dir_isofit_data, 'isofit_testdata.zip'), "r") as zf):
+
+            p_extr = pjoin(td, 'extracted')
+            zf.extractall(p_extr)
+            files = glob(pjoin(p_extr, 'c_translation_test', '*'))
+            gA = GeoArray(fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0])
+
+            saa = gA[:, :, 3]
+            sza = gA[:, :, 4]
+            cos_i_karl = gA[:, :, 8]
 
         cos_i_py = IsofitEnMAP()._compute_cos_i(saa, sza, slope=90, aspect=0)
         assert np.allclose(cos_i_karl, cos_i_py)
@@ -218,5 +233,4 @@ class Test_LUT_Transformer(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import pytest
     pytest.main()
