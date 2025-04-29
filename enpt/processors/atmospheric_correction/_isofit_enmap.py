@@ -197,7 +197,7 @@ class IsofitEnMAP(object):
                      'Latitude (WGS-84)',
                      'Elevation (m)'  # used as first guess in case this is defined as state_vector component in config
                  ],
-                 nodata = -9999
+                 nodata=-9999
                  ).save(fp_out)
 
         return fp_out
@@ -349,8 +349,8 @@ class IsofitEnMAP(object):
                   no_min_lut_spacing: bool = False,
                   inversion_windows: List[float] = None,
                   config_only: bool = False,
-                  # interpolate_bad_rdn=False,
-                  # interpolate_inplace=False,
+                  interpolate_bad_rdn=False,
+                  interpolate_inplace=False,
                   ):
         logging_level = logging_level or self.log_level
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
@@ -542,7 +542,7 @@ class IsofitEnMAP(object):
             modtran_path=None,
             rdn_factors_path=None,
             ray_temp_dir='/tmp/ray',  # FIXME not Windows-compatible
-            # interpolate_inplace=False
+            interpolate_inplace=False
         )
 
         with EnvContextManager(
