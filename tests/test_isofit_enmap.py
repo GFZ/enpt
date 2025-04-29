@@ -46,6 +46,7 @@ from zipfile import ZipFile
 from importlib.util import find_spec
 from fnmatch import filter as fnfilter
 from glob import glob
+from multiprocessing import cpu_count
 
 import numpy as np
 import pytest
@@ -94,34 +95,29 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe__direct_call(self):
-        # from geoarray import GeoArray
-        # gA = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil')
-        # gA.show()
+        with (TemporaryDirectory() as td,
+              ZipFile(pjoin(dir_isofit_data, 'isofit_testdata.zip'), "r") as zf):
 
-        from time import time
-        t0 = time()
+            p_extr = pjoin(td, 'extracted')
+            zf.extractall(p_extr)
+            p_root = pjoin(p_extr, 'backtransformed_l2_spectra_v9')
+            files = glob(pjoin(p_root, '*'))
+            os.makedirs(pjoin(td, 'output'))
 
-        IsofitEnMAP()._apply_oe(
-            # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_rdn_sub.bil',
-            # input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ.bil',
-            # input_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub.bil',
-            # input_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub.bil',
-
-            input_radiance='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ__subX0-10Y0-10.bsq',
-            input_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub__subX0-10Y0-10.bsq',
-            input_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq',
-            working_directory='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_out__subX0-10Y0-10/',
-            surface_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat',
-            wavelength_path='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-            log_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_out/isofit.log',
-            presolve=True,
-            emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
-            n_cores=30
-        )
-
-        t = time() - t0
-        print(t / 60)
-        a = 1
+            IR = IsofitEnMAP()
+            IR._apply_oe(
+                input_radiance=fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0],
+                input_loc=fnfilter(files, '*ENMAP*loc')[0],
+                input_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
+                working_directory=pjoin(td, 'output'),
+                log_file=pjoin(td, 'output', 'isofit.log'),
+                wavelength_path=None,  # read from radiance header
+                # emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
+                surface_path=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
+                prebuilt_lut=IR._generate_lut_file(td, 45),
+                empirical_line=True,  # enables segmentation
+                n_cores=cpu_count() - 2,
+            )
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe_on_map_geometry(self):
