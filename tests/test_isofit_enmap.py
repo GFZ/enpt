@@ -126,32 +126,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
     def test_apply_oe_on_map_geometry(self):
         IsofitEnMAP().apply_oe_on_map_geometry(self._get_enmap_l2a_obj())
 
-    @pytest.mark.skip(reason="too slow for running in CI")
-    def test__run(self):
-        IsofitEnMAP()._run(
-            path_toarad='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/ENMAP01-____L1X-DT000000XXXX_20220712T000000Z_00x_VXXXXXX_XXXXXXTXXXXXXZ__subX0-10Y0-10.bsq',
-            path_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_loc_sub__subX0-10Y0-10.bsq',
-            path_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/emp20220712t184754_obs_sub__subX0-10Y0-10.bsq',
-            path_outdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/output/',
-            path_workdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/workdir/',
-            path_enmap_wavelengths='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-            path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-            path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
-        )
-
-    @pytest.mark.skip(reason="too slow for running in CI")
-    def test__run__la_crau(self):
-        IsofitEnMAP()._run(
-            path_toarad='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/LaCrau/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z__subX800-810Y370-380',
-            path_loc='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/LaCrau/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z_loc__subX800-810Y370-380',
-            path_obs='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/data_in/LaCrau/ENMAP01-____L1X-DT0000001702_20220717T110603Z_033_V010400_20231017T193615Z_obs__subX800-810Y370-380',
-            path_outdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/output/',
-            path_workdir='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/core_run/workdir/',
-            path_enmap_wavelengths='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/sensor_new/enmap_wavelengths.txt',
-            path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-            path_surface_file='/home/gfz-fe/scheffler/temp/EnPT/isofit_implementation/surface/surface_20221020_EnMAP.mat'
-        )
-
     def test__run__backtransformed_l2_spectra_lut_mod5(self):
         """4x3 spectra within 10x10 image. Lines: different forward sim.: #1: UVEG LUT; #2: Luis LUT, #3: MODTRAN."""
         with (TemporaryDirectory() as td,
@@ -172,6 +146,29 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 # path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                 path_surface_file=pjoin(p_extr, 'surface_20221020_EnMAP.mat'),
                 path_lut=IR._generate_lut_file(td, 45),
+                segmentation=False,
+            )
+    @pytest.mark.skip(reason="too slow for running in CI")
+    def test__run__backtransformed_l2_spectra_6s(self):
+        """4x3 spectra within 10x10 image. Lines: different forward sim.: #1: UVEG LUT; #2: Luis LUT, #3: MODTRAN."""
+        with (TemporaryDirectory() as td,
+              ZipFile(pjoin(dir_isofit_data, 'isofit_testdata.zip'), "r") as zf):
+
+            p_extr = pjoin(td, 'extracted')
+            zf.extractall(p_extr)
+            files = glob(pjoin(p_extr, '*'))
+
+            IR = IsofitEnMAP()
+            IR._run(
+                path_toarad=fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0],
+                path_loc=fnfilter(files, '*ENMAP*loc')[0],
+                path_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
+                path_outdir=pjoin(td, 'output/'),
+                path_workdir=pjoin(td, 'workdir/'),
+                path_enmap_wavelengths=pjoin(p_extr, 'enmap_wavelengths.txt'),
+                path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
+                path_surface_file=pjoin(p_extr, 'surface_20221020_EnMAP.mat'),
+                path_lut=None,
                 segmentation=False,
             )
 
