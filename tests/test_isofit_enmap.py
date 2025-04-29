@@ -115,7 +115,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 # emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
                 surface_path=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
                 prebuilt_lut=IR._generate_lut_file(td, 45),
-                empirical_line=True,  # enables segmentation
+                empirical_line=False,  # disables segmentation
+                analytical_line=False,  # disables segmentation
                 n_cores=cpu_count() - 2,
             )
 
