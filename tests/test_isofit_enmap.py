@@ -134,7 +134,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
             p_extr = pjoin(td, 'extracted')
             zf.extractall(p_extr)
-            files = glob(pjoin(p_extr, 'backtransformed_l2_spectra_v9', '*'))
+            p_root = pjoin(p_extr, 'backtransformed_l2_spectra_v9')
+            files = glob(pjoin(p_root, '*'))
 
             IR = IsofitEnMAP()
             IR._run(
@@ -143,9 +144,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
                 path_outdir=pjoin(td, 'output/'),
                 path_workdir=pjoin(td, 'workdir/'),
-                path_enmap_wavelengths=pjoin(p_extr, 'enmap_wavelengths.txt'),
+                path_enmap_wavelengths=pjoin(p_root, 'enmap_wavelengths.txt'),
                 # path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-                path_surface_file=pjoin(p_extr, 'surface_20221020_EnMAP.mat'),
+                path_surface_file=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
                 path_lut=IR._generate_lut_file(td, 45),
                 segmentation=False,
             )
@@ -159,7 +160,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
             p_extr = pjoin(td, 'extracted')
             zf.extractall(p_extr)
-            files = glob(pjoin(p_extr, 'backtransformed_l2_spectra_v9', '*'))
+            p_root = pjoin(p_extr, 'backtransformed_l2_spectra_v9')
+            files = glob(pjoin(p_root, '*'))
 
             IR = IsofitEnMAP()
             IR._run(
@@ -168,9 +170,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
                 path_outdir=pjoin(td, 'output/'),
                 path_workdir=pjoin(td, 'workdir/'),
-                path_enmap_wavelengths=pjoin(p_extr, 'enmap_wavelengths.txt'),
+                path_enmap_wavelengths=pjoin(p_root, 'enmap_wavelengths.txt'),
                 path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-                path_surface_file=pjoin(p_extr, 'surface_20221020_EnMAP.mat'),
+                path_surface_file=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
                 path_lut=None,
                 segmentation=False,
             )
