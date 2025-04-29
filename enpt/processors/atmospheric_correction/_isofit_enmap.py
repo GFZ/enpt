@@ -432,7 +432,7 @@ class IsofitEnMAP(object):
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
 
-        use_6s = not isfile(path_lut)
+        use_6s = not path_lut or not isfile(path_lut)
         if use_6s:
             if not path_emulator_basedir or not isdir(path_emulator_basedir):
                 raise ValueError(path_emulator_basedir,
