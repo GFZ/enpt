@@ -150,7 +150,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_lut=IR._generate_lut_file(td, 45),
                 segmentation=False,
             )
-            a = 1
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test__run__backtransformed_l2_spectra_6s(self):
@@ -226,7 +225,6 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
 class Test_LUT_Transformer(unittest.TestCase):
     """Tests for L1B_Reader class."""
-
 
     def test_modtran_lut_to_netcdf(self):
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
