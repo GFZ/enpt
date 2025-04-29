@@ -218,8 +218,8 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             sza = gA[:, :, 4]
             cos_i_karl = gA[:, :, 8]
 
-        cos_i_py = IsofitEnMAP()._compute_cos_i(saa, sza, slope=90, aspect=0)
-        assert np.allclose(cos_i_karl, cos_i_py)
+            cos_i_py = IsofitEnMAP()._compute_cos_i(saa, sza, slope=90, aspect=0)
+            assert np.allclose(cos_i_karl, cos_i_py)
 
 
 class Test_LUT_Transformer(unittest.TestCase):
