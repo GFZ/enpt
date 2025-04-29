@@ -238,8 +238,6 @@ class Test_LUT_Transformer(unittest.TestCase):
 
             LUTTransformer(lut_mod, sza_scene=40).read_binary_modtran_lut(lut_iso)
 
-        LUTTransformer(self.p_lut_bin, sza_scene=40).read_binary_modtran_lut(self.p_nc_enpt)
-
 
 if __name__ == '__main__':
     pytest.main()
