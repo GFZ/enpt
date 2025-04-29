@@ -64,7 +64,7 @@ dir_isofit_data = os.path.join(path_enptlib, '..', 'tests', 'data', 'isofit')
 
 
 class Test_ISOFIT_EnMAP(unittest.TestCase):
-    """Tests for L1B_Reader class."""
+    """Tests for ISOFIT_EnMAP class."""
 
     def setUp(self):
         self.config = EnPTConfig(**config_for_testing)
