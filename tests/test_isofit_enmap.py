@@ -130,9 +130,11 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 analytical_line=False,  # disables segmentation
                 n_cores=cpu_count() - 2,
             )
-
-            self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
-                                           path_reference=pjoin(p_root, 'reference_spectra.bsq'))
+            try:
+                self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*rfl'))[0],
+                                               path_reference=pjoin(p_root, 'reference_spectra.bsq'))
+            except IndexError:
+                raise Exception(f"{os.listdir(pjoin(td, 'output'))}")
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe_on_map_geometry(self):
