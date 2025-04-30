@@ -93,6 +93,17 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
         return L2_obj
 
+    def _validate_BOA_reflectance(self, path_boaref: str, path_reference: str):
+        """Validate that the output BOA reflectance matches the expected reference."""
+        boaref_isofit = GeoArray(path_boaref)
+        boaref_reference = GeoArray(path_reference)
+        residuals = boaref_isofit[:] - boaref_reference[:]
+        bbl = np.ones(boaref_isofit.bands, bool)
+        bbl[120:135] = False
+        bbl[161:178] = False
+        bbl[219:] = False
+        assert np.max(np.abs(residuals[1, :4, bbl])) < 0.03, 'Residuals exceed 3% BOA reflectance.'
+
     # @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe__direct_call(self):
         with (TemporaryDirectory() as td,
@@ -119,6 +130,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 analytical_line=False,  # disables segmentation
                 n_cores=cpu_count() - 2,
             )
+
+            self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
+                                           path_reference=pjoin(p_root, 'reference_spectra.bsq'))
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe_on_map_geometry(self):
@@ -148,6 +162,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 segmentation=False,
             )
 
+            self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
+                                           path_reference=pjoin(p_root, 'reference_spectra.bsq'))
+
     @pytest.mark.skip(reason="too slow for running in CI")
     def test__run__backtransformed_l2_spectra_6s(self):
         """4x3 spectra within 10x10 image. Lines: different forward sim.: #1: UVEG LUT; #2: Luis LUT, #3: MODTRAN."""
@@ -172,6 +189,9 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_lut=None,
                 segmentation=False,
             )
+
+            self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
+                                           path_reference=pjoin(p_root, 'reference_spectra.bsq'))
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_run_on_map_geometry(self):
