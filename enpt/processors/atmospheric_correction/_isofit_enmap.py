@@ -852,28 +852,3 @@ class LUTTransformer(object):
             )[:, :, 0, :, :, :, :]
 
         return var
-
-        # Adjust boundaries
-        for arr, dim in zip([vza, sza, alt, aot, raa, cwv], dim_arr):
-            arr[0] += 0.0001
-            arr[dim - 1] -= 0.0001
-
-        # Extract LUTs
-        luts = l0_lut, edir_lut, edif_lut, sab_lut = [
-            np.squeeze(lut1[..., 0], axis=5),  # l0 LUT
-            np.squeeze(lut2[..., 0], axis=4),  # edir LUT
-            np.squeeze(lut2[..., 1], axis=4),  # edif LUT
-            np.squeeze(lut2[..., 2], axis=4)   # sab LUT
-        ]
-
-        # Define axes
-        axes_x = [
-            [vza, sza, alt, aot, raa],  # axes x l0
-            [vza, sza, alt, aot, cwv]   # axes x e s
-        ]
-        axes_y = [
-            [np.arange(i) for i in luts[0].shape[:-1]],  # axes y l0
-            [np.arange(i) for i in luts[0].shape[:-1]]   # axes y e s
-        ]
-
-        return luts, axes_x, axes_y, wvl, lut1, lut2, xnodes, 2 ** ndim, ndim, x_cell
