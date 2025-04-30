@@ -120,7 +120,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 input_radiance=fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0],
                 input_loc=fnfilter(files, '*ENMAP*loc')[0],
                 input_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
-                working_directory=pjoin(td, 'output'),
+                working_directory=pjoin(td),
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 wavelength_path=None,  # read from radiance header
                 # emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
