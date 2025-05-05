@@ -90,7 +90,7 @@ class IsofitEnMAP(object):
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
         self.log_level = log_level or (config.log_level if config else 'INFO')
-        self.logger = self._get_default_logger()
+        self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler
         self.cpus = config.CPUs if config else cpu_count() - 2
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
@@ -100,32 +100,15 @@ class IsofitEnMAP(object):
         download_data(path=None, tag="latest")
         download_examples(path=None, tag="latest")
 
-    def _get_default_logger(self):
-        logger = logging.getLogger()  # get the root logger (used by ISOFIT)
-
-        # Remove all StreamHandlers
-        for handler in logger.handlers[:]:
-            if isinstance(handler, logging.StreamHandler):
-                logger.removeHandler(handler)
-
-        # Add a single StreamHandler to stdout
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setFormatter(logging.Formatter(
-            fmt="%(levelname)s:%(asctime)s ||| %(message)s",
-            datefmt="%Y-%m-%d,%H:%M:%S"
-        ))
-        logger.addHandler(stdout_handler)
-        logger.setLevel(self.log_level)
-
-        return logger
-
-    def activate_logging_though_EnPT_Logger(self, logger: EnPT_Logger):
-        # get root logger and remove all StreamHandlers to avoid duplicated log lines
+    def _initialize_logging(self, logger: EnPT_Logger = None):
+        # get root logger (used by ISOFIT) and remove all StreamHandlers to avoid duplicated log lines
         root_logger = logging.getLogger()
         root_logger.setLevel(self.log_level)
         for h in root_logger.handlers[:]:
             if isinstance(h, logging.StreamHandler):
                 root_logger.removeHandler(h)
+
+        logger = logger or EnPT_Logger('log__EnPT_ISOFIT', fmt_suffix=None, log_level=self.log_level)
 
         # attach EnPT handlers to the root logger so that Isofit logs go through the EnPT logger
         for handler in logger.handlers:
@@ -133,17 +116,7 @@ class IsofitEnMAP(object):
 
         self.logger = logger
 
-    # @classmethod
-    # def _cleanup(cls, tempDir, warn_message):
-    #     """Clean up implicitly (not to be called directly)."""
-    #     logger.close()
-    #     # Also remove handlers from root logger if necessary
-    #     for handler in logger.handlers:
-    #         root_logger.removeHandler(handler)
-    #
-    #     # for handler in logger.handlers[:]:
-    #     #     if isinstance(handler, logging.StreamHandler):
-    #     #         logger.removeHandler(handler)
+        return logger
 
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
@@ -432,6 +405,8 @@ class IsofitEnMAP(object):
     #         self._apply_oe()
 
     def apply_oe_on_map_geometry(self, enmap: EnMAPL2Product_MapGeo):
+        self._initialize_logging(enmap.logger)
+
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
@@ -726,7 +701,7 @@ class IsofitEnMAP(object):
                             segmentation: bool = False,
                             n_cores: int = None
                             ) -> (GeoArray, GeoArray, GeoArray):
-        self.activate_logging_though_EnPT_Logger(enmap.logger)
+        self._initialize_logging(enmap.logger)
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
         with TemporaryDirectory() as td:
