@@ -91,6 +91,7 @@ class IsofitEnMAP(object):
         self.cfg = config
         self.log_level = log_level or config.log_level if config else 'INFO'
         self.logger = self._get_default_logger()
+        self.cpus = config.CPUs if config else cpu_count() - 2
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
@@ -384,7 +385,7 @@ class IsofitEnMAP(object):
                   multiple_restarts: bool = False,
                   logging_level: str = None,
                   log_file: str = None,
-                  n_cores: int = 1,
+                  n_cores: int = None,
                   presolve: bool = False,
                   empirical_line: bool = False,
                   analytical_line: bool = False,
@@ -402,6 +403,7 @@ class IsofitEnMAP(object):
                   interpolate_inplace=False,
                   ):
         logging_level = logging_level or self.log_level
+        n_cores = n_cores if n_cores is not None else self.cpus
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
 
         try:
@@ -472,7 +474,7 @@ class IsofitEnMAP(object):
              cwv: float = None,
              segmentation: bool = False,
              segmentation_size: int = 40,
-             n_cores: int = cpu_count()
+             n_cores: int = None
              ) -> dict:  # noqa
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default_MOD5.json')
@@ -480,6 +482,7 @@ class IsofitEnMAP(object):
         path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
+        n_cores = n_cores if n_cores is not None else self.cpus
 
         use_6s = not path_lut or not isfile(path_lut)
         if use_6s:
@@ -717,7 +720,7 @@ class IsofitEnMAP(object):
     def run_on_map_geometry(self,
                             enmap: EnMAPL2Product_MapGeo,
                             segmentation: bool = False,
-                            n_cores: int = cpu_count()
+                            n_cores: int = None
                             ) -> (GeoArray, GeoArray, GeoArray):
         self.activate_logging_though_EnPT_Logger(enmap.logger)
         self.logger.info("Initializing ISOFIT run on map geometry...")
@@ -740,7 +743,7 @@ class IsofitEnMAP(object):
                     aot=enmap.meta.aot,
                     cwv=enmap.meta.water_vapour,
                     segmentation=segmentation,
-                    n_cores=n_cores
+                    n_cores=n_cores if n_cores is not None else self.cpus
                 )
 
             # read the AC results back into memory
