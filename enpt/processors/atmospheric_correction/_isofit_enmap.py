@@ -48,8 +48,6 @@ from multiprocessing import cpu_count
 import numpy as np
 from pyproj.crs import CRS
 from pandas import DataFrame
-import netCDF4 as nc  # noqa
-from scipy.interpolate import interp1d
 
 from ...utils import EnvContextManager
 with EnvContextManager(ISOFIT_DEBUG='0',
@@ -72,6 +70,7 @@ from py_tools_ds.geo.coord_grid import get_coord_grid
 from py_tools_ds.geo.coord_trafo import transform_coordArray
 from geoarray import GeoArray
 
+from ._isofit_lut_preparation import LUTTransformer
 from ...model.images import EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig, path_enptlib
 
