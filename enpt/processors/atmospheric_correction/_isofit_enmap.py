@@ -607,7 +607,7 @@ class IsofitEnMAP(object):
                 if segmentation:
                     if not os.path.exists(paths.lbl_working_path) or \
                        not os.path.exists(paths.radiance_working_path):
-                        self.logger.info("Segmenting...")
+                        self.logger.info("Running forward segmentation...")
                         segment(
                             spectra=(paths.radiance_working_path, paths.lbl_working_path),
                             nodata_value=-9999,  # as set in self._generate_radiance_file()
@@ -685,7 +685,7 @@ class IsofitEnMAP(object):
                 ).run(row_column=None)
 
                 if segmentation:
-                    self.logger.info("Analytical line inference")
+                    self.logger.info("Running inverse-segmentation through analytical line inference")
                     run_analytical_line(
                         rdn_file=paths.radiance_working_path,
                         loc_file=paths.loc_working_path,
