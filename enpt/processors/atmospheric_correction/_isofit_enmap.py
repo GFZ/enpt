@@ -89,7 +89,7 @@ class IsofitEnMAP(object):
                  ) -> None:
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
-        self.log_level = log_level or config.log_level if config else 'INFO'
+        self.log_level = log_level or (config.log_level if config else 'INFO')
         self.logger = self._get_default_logger()
         self.cpus = config.CPUs if config else cpu_count() - 2
 
