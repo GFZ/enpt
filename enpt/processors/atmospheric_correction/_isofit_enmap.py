@@ -103,6 +103,7 @@ class IsofitEnMAP(object):
 
     def _initialize_logging(self, logger: EnPT_Logger = None):
         # get root logger (used by ISOFIT) and remove all StreamHandlers to avoid duplicated log lines
+        # NOTE: ray workers have their own root logger which is NOT captured here (logs are missing)
         root_logger = logging.getLogger()
         root_logger.setLevel(self.log_level)
         for h in root_logger.handlers[:]:
