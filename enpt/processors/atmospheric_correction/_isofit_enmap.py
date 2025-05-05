@@ -44,6 +44,8 @@ from collections.abc import Mapping
 from datetime import datetime
 from zipfile import ZipFile
 from multiprocessing import cpu_count
+import logging
+import sys
 
 import numpy as np
 from pyproj.crs import CRS
@@ -73,6 +75,7 @@ from geoarray import GeoArray
 from ._isofit_lut_preparation import LUTTransformer
 from ...model.images import EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig, path_enptlib
+from ...utils.logging import EnPT_Logger
 
 __author__ = 'Daniel Scheffler'
 
@@ -151,8 +154,8 @@ class IsofitEnMAP(object):
 
         return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut
 
-    @staticmethod
-    def _generate_radiance_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+    def _generate_radiance_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        self.logger.info("Generating radiance file...")
         # ISOFIT expects radiance in uW/cm²/sr/nm, EnPT provides mW/m²/sr/nm
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
         mask_nodata = ~enmap.data.mask_nodata[:]
@@ -166,8 +169,8 @@ class IsofitEnMAP(object):
 
         return fp_out
 
-    @staticmethod
-    def _generate_loc_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+    def _generate_loc_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        self.logger.info("Generating location file...")
         xmin, xmax, ymin, ymax = enmap.data.box.boundsMap
         xgsd, ygsd = (enmap.data.xgsd, enmap.data.ygsd)
         x_grid, ygrid = get_coord_grid((xmin, ymax), (xmax, ymin), (xgsd, -ygsd))
@@ -202,6 +205,7 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_obs_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        self.logger.info("Generating observation file...")
         path_length = np.full(enmap.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
         vaa = enmap.meta.geom_view_azimuth_array
         vza = enmap.meta.geom_view_zenith_array
@@ -239,8 +243,8 @@ class IsofitEnMAP(object):
 
         return fp_out
 
-    @staticmethod
-    def _generate_wavelength_file(enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+    def _generate_wavelength_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        self.logger.info("Generating wavelength file...")
         fp_out = pjoin(path_outdir, 'enmap_wavelength_fwhm.txt')
         wvl = enmap.meta.wvl_center
         fwhm = enmap.meta.fwhm
@@ -249,8 +253,8 @@ class IsofitEnMAP(object):
 
         return fp_out
 
-    @staticmethod
-    def _generate_surface_file(path_wavelength_file: str, path_outdir: str):
+    def _generate_surface_file(self, path_wavelength_file: str, path_outdir: str):
+        self.logger.info("Generating surface file...")
         fp_out = pjoin(path_outdir, 'surface_enmap.mat')
         # fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
         fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_20240103_REE.json')
@@ -270,8 +274,8 @@ class IsofitEnMAP(object):
 
         return fp_out
 
-    @staticmethod
-    def _generate_lut_file(path_outdir: str, sza_scene: float):
+    def _generate_lut_file(self, path_outdir: str, sza_scene: float):
+        self.logger.info("Generating LUT file...")
         # TODO: By re-using either the unpacked lut.zip or the LUT_ISOFIT.nc,
         #       the processing time can be reduced by ~20-60 sec.
         fp_out = pjoin(path_outdir, 'EnMAP_LUT_MOD5_ISOFIT_formatted_1nm.nc')
@@ -554,7 +558,7 @@ class IsofitEnMAP(object):
                 if segmentation:
                     if not os.path.exists(paths.lbl_working_path) or \
                        not os.path.exists(paths.radiance_working_path):
-                        # logging.info("Segmenting...")
+                        self.logger.info("Segmenting...")
                         segment(
                             spectra=(paths.radiance_working_path, paths.lbl_working_path),
                             nodata_value=-9999,  # as set in self._generate_radiance_file()
@@ -576,7 +580,7 @@ class IsofitEnMAP(object):
                             if not os.path.exists(os.path.dirname(outp)):
                                 os.makedirs(os.path.dirname(outp))
 
-                            # logging.info("Extracting " + outp)
+                            self.logger.info("Extracting " + outp)
                             extractions(
                                 inputfile=inp,
                                 labels=paths.lbl_working_path,
@@ -615,6 +619,7 @@ class IsofitEnMAP(object):
                     json.dump(isocfg, json_file, skipkeys=False, indent=4)
 
                 if use_6s:
+                    self.logger.info("Building template file for 6S...")
                     self._build_modtran_template_file(
                         path_emulator_basedir,
                         path_obs,
@@ -623,6 +628,7 @@ class IsofitEnMAP(object):
                         enmap_timestamp
                     )
 
+                self.logger.info("Running ISOFIT...")
                 Isofit(
                     config_file=path_isocfg,
                     level=self.log_level,
@@ -630,7 +636,7 @@ class IsofitEnMAP(object):
                 ).run(row_column=None)
 
                 if segmentation:
-                    # logging.info("Analytical line inference")
+                    self.logger.info("Analytical line inference")
                     run_analytical_line(
                         rdn_file=paths.radiance_working_path,
                         loc_file=paths.loc_working_path,
@@ -658,7 +664,7 @@ class IsofitEnMAP(object):
 
             finally:
                 # if os.environ.get('ISOFIT_DEBUG') != '1':
-                print('Stopping ray.')
+                self.logger.info('Stopping ray.')
                 import ray
                 ray.shutdown()  # FIXME: Should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
@@ -667,6 +673,9 @@ class IsofitEnMAP(object):
                             segmentation: bool = False,
                             n_cores: int = cpu_count()
                             ) -> (GeoArray, GeoArray, GeoArray):
+        self.activate_logging_though_EnPT_Logger(enmap.logger)
+        self.logger.info("Initializing ISOFIT run on map geometry...")
+
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
