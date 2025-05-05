@@ -97,6 +97,7 @@ class IsofitEnMAP(object):
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
 
         # make sure ISOFIT's extra-files are downloaded
+        self.logger.info('Downloading ISOFIT extra-files...')
         download_data(path=None, tag="latest")
         download_examples(path=None, tag="latest")
 
