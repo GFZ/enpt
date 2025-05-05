@@ -407,7 +407,9 @@ class IsofitEnMAP(object):
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
 
         try:
+            self.logger.info("Running Isofit.apply_oe().")
             apply_oe(**params)
+            self.logger.info("Finished running Isofit.apply_oe().")
 
         except FileNotFoundError as e:
             print('Attempt to run apply_oe() failed due to FileNotFoundError.')
@@ -421,7 +423,7 @@ class IsofitEnMAP(object):
                 raise
 
         finally:
-            print('Stopping ray.')
+            self.logger.info('Stopping ray.')
             import ray
             ray.shutdown()  # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
 
@@ -703,12 +705,14 @@ class IsofitEnMAP(object):
                         logfile=path_logfile
                     )
 
+                    self.logger.info("ISOFIT finished.")
                     return dict(
                         estimated_reflectance_file=paths.rfl_working_path,
                         estimated_state_file=paths.state_working_path,
                         posterior_uncertainty_file=paths.uncert_working_path
                     )
                 else:
+                    self.logger.info("ISOFIT finished.")
                     return isocfg['output']
 
             finally:
