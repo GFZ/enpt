@@ -90,6 +90,7 @@ class IsofitEnMAP(object):
         """Create an instance of IsofitEnMAP."""
         self.cfg = config
         self.log_level = log_level or config.log_level if config else 'INFO'
+        self.logger = self._get_default_logger()
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
@@ -97,6 +98,39 @@ class IsofitEnMAP(object):
         # make sure ISOFIT's extra-files are downloaded
         download_data(path=None, tag="latest")
         download_examples(path=None, tag="latest")
+
+    def _get_default_logger(self):
+        logger = logging.getLogger()  # get the root logger (used by ISOFIT)
+
+        # Remove all StreamHandlers
+        for handler in logger.handlers[:]:
+            if isinstance(handler, logging.StreamHandler):
+                logger.removeHandler(handler)
+
+        # Add a single StreamHandler to stdout
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setFormatter(logging.Formatter(
+            fmt="%(levelname)s:%(asctime)s ||| %(message)s",
+            datefmt="%Y-%m-%d,%H:%M:%S"
+        ))
+        logger.addHandler(stdout_handler)
+        logger.setLevel(self.log_level)
+
+        return logger
+
+    def activate_logging_though_EnPT_Logger(self, logger: EnPT_Logger):
+        # get root logger and remove all StreamHandlers to avoid duplicated log lines
+        root_logger = logging.getLogger()
+        root_logger.setLevel(self.log_level)
+        for h in root_logger.handlers[:]:
+            if isinstance(h, logging.StreamHandler):
+                root_logger.removeHandler(h)
+
+        # attach EnPT handlers to the root logger so that Isofit logs go through the EnPT logger
+        for handler in logger.handlers:
+            root_logger.addHandler(handler)
+
+        self.logger = logger
 
     @staticmethod
     def _build_modtran_template_file(path_emulator_basedir: str,
