@@ -45,7 +45,6 @@ from datetime import datetime
 from zipfile import ZipFile
 from multiprocessing import cpu_count
 import logging
-import sys
 
 import numpy as np
 from pyproj.crs import CRS
