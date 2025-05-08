@@ -55,7 +55,8 @@ from geoarray import GeoArray
 from enpt.io.reader import L1B_Reader
 from enpt.processors.orthorectification import Orthorectifier
 from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
-from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP, LUTTransformer
+from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
+from enpt.processors.atmospheric_correction._isofit_lut_preparation import LUTTransformer
 
 __author__ = 'Daniel Scheffler'
 
