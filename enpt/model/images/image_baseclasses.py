@@ -79,6 +79,8 @@ class _EnMAP_Image(object):
         self._mask_cirrus = None
         self._dem = None
         self._deadpixelmap = None
+        self._isofit_atm_state = None
+        self._isofit_uncertainty = None
         self._polymer_logchl = None
         self._polymer_logfb = None
         self._polymer_rgli = None
@@ -310,6 +312,49 @@ class _EnMAP_Image(object):
     @deadpixelmap.deleter
     def deadpixelmap(self):
         self._deadpixelmap = None
+
+    @property
+    def isofit_atm_state(self) -> GeoArray:
+        """Return ISOFIT's atmospheric state output which contains the estimated aerosol optical depth and water vapour.
+
+        :return: geoarray.GeoArray
+        """
+        return self._isofit_atm_state
+
+    @isofit_atm_state.setter
+    def isofit_atm_state(self, *geoArr_initArgs):
+        self._isofit_atm_state = (
+            self._get_geoarray_with_datalike_geometry(
+                geoArr_initArgs,
+                'isofit_atm_state',
+                nodataVal=-9999)
+        )
+        self._isofit_atm_state.bandnames = ['aerosol optical thickness (AOT)', 'water vapour']
+
+    @isofit_atm_state.deleter
+    def isofit_atm_state(self):
+        self._isofit_atm_state = None
+
+    @property
+    def isofit_uncertainty(self) -> GeoArray:
+        """Return ISOFIT's uncertainty layer.
+
+        :return: geoarray.GeoArray
+        """
+        return self._isofit_uncertainty
+
+    @isofit_uncertainty.setter
+    def isofit_uncertainty(self, *geoArr_initArgs):
+        self._isofit_uncertainty = (
+            self._get_geoarray_with_datalike_geometry(
+                geoArr_initArgs,
+                'isofit_uncertainty',
+                nodataVal=-9999)
+        )
+
+    @isofit_uncertainty.deleter
+    def isofit_uncertainty(self):
+        self._isofit_uncertainty = None
 
     @property
     def polymer_logchl(self) -> GeoArray:

@@ -248,6 +248,16 @@ class EnPT_Controller(object):
                     self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
                     self.L2_obj.meta.unitcode = 'BOARef'
 
+                    # clip AOT/CWV to extent of EnMAP scene (ISOFIT output is larger)
+                    atm_state[~self.L2_obj.data.mask_nodata[:]] = -9999
+                    atm_state[np.isnan(atm_state)] = -9999
+
+                    uncertainty[~self.L2_obj.data.mask_nodata[:]] = -9999
+                    uncertainty[np.isnan(uncertainty)] = -9999
+
+                    self.L2_obj.isofit_atm_state = atm_state
+                    self.L2_obj.isofit_uncertainty = uncertainty
+
             else:
                 self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
                                         'computing top-of-atmosphere reflectance instead.')

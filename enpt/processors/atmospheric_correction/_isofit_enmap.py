@@ -736,7 +736,4 @@ class IsofitEnMAP(object):
             state.to_mem()
             uncert.to_mem()
 
-            # clip AOT/CWV to extent of EnMAP scene (ISOFIT output is larger)
-            state[~enmap.data.mask_nodata[:]] = np.nan
-
             return boa_rfl, state, uncert
