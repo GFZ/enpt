@@ -284,8 +284,8 @@ class IsofitEnMAP(object):
             fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_20240103_REE.json')
         else:
             self.logger.info(f"Generating surface file based on user provided input "
-                             f"({self.cfg.path_isofit_surface_json})...")
-            fp_surfjson = self.cfg.path_isofit_surface_json
+                             f"({self.cfg.path_isofit_surface_config})...")
+            fp_surfjson = self.cfg.path_isofit_surface_config
 
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip'), "r") as zf,
               TemporaryDirectory() as td):

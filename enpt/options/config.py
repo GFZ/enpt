@@ -312,7 +312,7 @@ class EnPTConfig(object):
             - 'minerals': preset optimized to mineral mapping and rare earth elements (REE)
             - 'custom': user-defined surface optimization file (to be passed to isofit_surface_json)
 
-        :key path_isofit_surface_json:
+        :key path_isofit_surface_config:
             Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')
 
         :key polymer_additional_results:

@@ -124,7 +124,7 @@ def get_enpt_argparser():
     add('-isp', '--isofit_surface_optimization', type=str, default='default', nargs='?',
         help="Select surface optimization preset for ISOFIT."
              "('default', minerals', 'custom')")
-    add('-pisp', '--path_isofit_surface_json', type=str, default=None,
+    add('-pisc', '--path_isofit_surface_config', type=str, default=None,
         help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')")
     add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
