@@ -92,7 +92,7 @@ class DEM_Processor(object):
     def get_flat_dem_from_average_elevation(cls, corner_coords_lonlat, average_elevation, xres=30, yres=30):
         """Return a 'flat DEM' instance of DEM_Processor.
 
-        (a GeoArray fully covering the given coorner coordinates with the average elevation as pixel values)
+        (a GeoArray fully covering the given corner coordinates with the average elevation as pixel values)
 
         :param corner_coords_lonlat:    corner coordinates to be covered by the output DEM
         :param average_elevation:       average elevation in meters

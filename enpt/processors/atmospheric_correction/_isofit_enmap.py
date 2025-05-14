@@ -206,8 +206,7 @@ class IsofitEnMAP(object):
             )
 
         elev = enmap.dem[:]  # FIXME nodata value 0
-        # FIXME: shape of elev does not match shape of lons/lats if no DEM is provided
-        # elev = np.zeros_like(lons)  # use mean elevation
+        assert elev.shape == lons.shape == lats.shape
 
         loc_data = np.dstack([lons, lats, elev])
         loc_data[~enmap.data.mask_nodata[:]] = -9999

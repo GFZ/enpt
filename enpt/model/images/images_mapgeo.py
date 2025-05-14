@@ -263,12 +263,12 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         else:
             self.logger.info(f'No DEM provided. '
                              f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
-            self._dem = DEM_Processor.get_flat_dem_from_average_elevation(
-                tuple(zip(self.meta.lon_UL_UR_LL_LR,
-                          self.meta.lat_UL_UR_LL_LR)),
-                self.cfg.average_elevation,
-                xres=30, yres=30
-            ).dem
+            self._dem = GeoArray(
+                np.full(self.data.shape[:2], self.cfg.average_elevation),
+                geotransform=self.data.gt,
+                projection=self.data.prj,
+                nodata=-9999
+            )
 
     def save(self, outdir: str, suffix="") -> str:
         """Save the product to disk using almost the same input format.
