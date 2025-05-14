@@ -479,6 +479,12 @@ class EnPTConfig(object):
                           UserWarning)
             self.output_interleave = 'pixel'
 
+        # check ISOFIT + land mode
+        if self.land_ac_alg == 'ISOFIT' and self.mode_ac != 'land':
+            raise NotImplementedError(f"The ISOFIT atmospheric correction is currently only supported together with "
+                                      f"the 'land' AC mode. Support for the '{self.mode_ac}' mode will be added soon."
+                                      f"Please adapt your configuration accordingly.")
+
         # override target_projection_type if target_epsg is given
         if self.target_epsg:
             self.target_projection_type = \
