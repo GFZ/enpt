@@ -56,7 +56,7 @@ def get_enpt_argparser():
     add('--version', action='version', version=__version__)
 
     # NOTE: don't define any defaults here for parameters that are passed to EnPTConfig!
-    #       -> otherwise, we cannot distinguish between explicity given parameters and default values
+    #       -> otherwise, we cannot distinguish between explicitly given parameters and default values
     #       => see docs in parsedArgs_to_user_opts() for explanation
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
@@ -174,7 +174,7 @@ def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
     """Convert argparse Namespace object to dictionary of explicitly given parameters.
 
     NOTE:   All options that have not been given explicitly (None values) are removed. Reason: EnPTConfig prefers
-            directly passed arguments against those that are passed withi a JSON config file.
+            directly passed arguments against those that are passed within a JSON config file.
             So, e.g., if CPUs=None (default), the 'CPUs' parameter given within a JSON config file would be overridden.
 
             => only override JSON configuration if parameters are explicitly given (e.g., CPUs is set to 10)
