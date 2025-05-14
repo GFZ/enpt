@@ -315,6 +315,9 @@ class EnPTConfig(object):
         :key path_isofit_surface_config:
             Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')
 
+        :key path_isofit_surface_priors:
+            Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)
+
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
 
@@ -443,7 +446,8 @@ class EnPTConfig(object):
         self.land_ac_alg = gp('land_ac_alg')
         self.enable_segmentation = gp('enable_segmentation')
         self.isofit_surface_optimization = gp('isofit_surface_optimization')
-        self.path_isofit_surface_json = gp('path_isofit_surface_json')
+        self.path_isofit_surface_config = gp('path_isofit_surface_config')
+        self.path_isofit_surface_priors = gp('path_isofit_surface_priors')
         self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')

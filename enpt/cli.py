@@ -126,6 +126,8 @@ def get_enpt_argparser():
              "('default', minerals', 'custom')")
     add('-pisc', '--path_isofit_surface_config', type=str, default=None,
         help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')")
+    add('-pisp', '--path_isofit_surface_priors', type=str, default=None,
+        help="Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)")
     add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,

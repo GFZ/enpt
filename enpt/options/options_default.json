@@ -74,6 +74,7 @@
                                                         'minerals': preset optimized to mineral mapping and rare earth elements (REE)
                                                         'custom': user-defined surface optimization file (to be passed to isofit_surface_json)*/
             "path_isofit_surface_config": "",  /*path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')*/
+            "path_isofit_surface_priors": "",  /*path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)*/
             "polymer_additional_results": true,  /*enable the generation of additional results when running ACwater/POLYMER (default: True)*/
             "auto_download_ecmwf": true,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
