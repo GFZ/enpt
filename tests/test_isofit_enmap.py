@@ -94,11 +94,11 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
         return L2_obj
 
-    def _validate_BOA_reflectance(self, path_boaref: str, path_reference: str):
+    def _validate_BOA_reflectance(self, path_boaref: str, path_reference: str, ref_scale: float = 1.0):
         """Validate that the output BOA reflectance matches the expected reference."""
         boaref_isofit = GeoArray(path_boaref)
         boaref_reference = GeoArray(path_reference)
-        residuals = boaref_isofit[:] - boaref_reference[:]
+        residuals = boaref_isofit[:] - (boaref_reference[:] * ref_scale)
         bbl = np.ones(boaref_isofit.bands, bool)
         bbl[120:135] = False
         bbl[161:178] = False
