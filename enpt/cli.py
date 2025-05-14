@@ -123,7 +123,7 @@ def get_enpt_argparser():
         help='Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).')
     add('-isp', '--isofit_surface_optimization', type=str, default='default', nargs='?',
         help="Select surface optimization preset for ISOFIT."
-             "('default', minerals', 'custom')")
+             "('default', ree', 'custom')")
     add('-pisc', '--path_isofit_surface_config', type=str, default=None,
         help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')")
     add('-pisp', '--path_isofit_surface_priors', type=str, default=None,

@@ -278,8 +278,8 @@ class IsofitEnMAP(object):
         if self.cfg.isofit_surface_optimization == 'default':
             self.logger.info("Generating surface file for default set of surface coverage types...")
             fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
-        elif self.cfg.isofit_surface_optimization == 'minerals':
-            self.logger.info("Generating surface file with specific optimization for minerals...")
+        elif self.cfg.isofit_surface_optimization == 'ree':
+            self.logger.info("Generating surface file with specific optimization for rare earth elements (REE)...")
             fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_20240103_REE.json')
         else:
             self.logger.info(f"Generating surface file based on user provided input "

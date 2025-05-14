@@ -71,7 +71,7 @@
                                             pixel-level, which is slightly more accurate but takes much longer.*/
             "isofit_surface_optimization": "default",  /*Select surface optimization preset for ISOFIT.
                                                         'default': default set of surface coverage optimations
-                                                        'minerals': preset optimized to mineral mapping and rare earth elements (REE)
+                                                        'ree': preset optimized to rare earth elements (REE)
                                                         'custom': user-defined surface optimization file (to be passed to isofit_surface_json)*/
             "path_isofit_surface_config": "",  /*path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')*/
             "path_isofit_surface_priors": "",  /*path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)*/
