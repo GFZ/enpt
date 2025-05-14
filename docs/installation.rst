@@ -85,7 +85,7 @@ you through the process.
 Optional: Install Polymer for advanced atmospheric correction over water surfaces
 ---------------------------------------------------------------------------------
 
-For atmospheric correction of water surfaces using the Polymer algorithm instead of SICOR_ or ISOFIT_ (which are mainly
+For atmospheric correction of water surfaces using the Polymer algorithm instead of `SICOR`_/`ISOFIT`_ (which are mainly
 designed for land surfaces), the additional package polymer_ is required. The Polymer atmospheric correction is made
 available in EnPT by the ACwater_ package, a wrapper developed by AWI Bremerhaven, which is already contained in the
 default EnPT installation.
