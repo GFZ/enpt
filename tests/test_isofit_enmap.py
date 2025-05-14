@@ -153,7 +153,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             p_root = pjoin(p_extr, 'backtransformed_l2_spectra_v9')
             files = glob(pjoin(p_root, '*'))
 
-            IR = IsofitEnMAP()
+            IR = IsofitEnMAP(log_level='INFO')
             IR._run(
                 path_toarad=fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0],
                 path_loc=fnfilter(files, '*ENMAP*loc')[0],
@@ -164,7 +164,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 # path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                 path_surface_file=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
                 path_lut=IR._generate_lut_file(td, 45),
-                segmentation=False,
+                segmentation=False
             )
 
             self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
@@ -192,7 +192,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
                 path_surface_file=pjoin(p_root, 'surface_20221020_EnMAP.mat'),
                 path_lut=None,
-                segmentation=False,
+                segmentation=False
             )
 
             self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
