@@ -287,7 +287,11 @@ class IsofitEnMAP(object):
                              f"({self.cfg.path_isofit_surface_config})...")
             fp_surfjson = self.cfg.path_isofit_surface_config
 
-        with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip'), "r") as zf,
+        path_surf_spec = (
+                self.cfg.path_isofit_surface_priors or
+                pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
+        )
+        with (ZipFile(path_surf_spec, "r") as zf,
               TemporaryDirectory() as td):
             zf.extractall(td)
             fp_surfjson_tmp = pjoin(td, os.path.basename(fp_surfjson))
