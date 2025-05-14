@@ -30,7 +30,7 @@ Feature overview
 * read EnMAP Level-1B input data
 * radiometric conversion to top-of-atmosphere radiance
 * dead pixel correction
-* atmospheric correction (based on SICOR_ for land and `ACwater Polymer`_ via Polymer_ for water surfaces)
+* atmospheric correction (based on SICOR_ or ISOFIT_ for land and `ACwater Polymer`_ via Polymer_ for water surfaces)
 * optional export of additional results from atmospheric parameter retrieval
 * detection and correction of geometric misregistrations compared to user provided spatial reference (based on AROSICS_)
 * orthorectification
@@ -93,6 +93,7 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _coverage: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
 .. _pytest: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/test_reports/report.html
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _ISOFIT: https://github.com/isofit/isofit
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
 .. _Polymer: https://forum.hygeos.com
