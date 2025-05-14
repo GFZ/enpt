@@ -209,6 +209,10 @@ produces a slightly different Level-2A data format. The current differences are 
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-SPECTRAL_IMAGE.TIF                  |         yes         | yes      | EnMAP L2A bottom-of-atmosphere reflectance (land) or normalized water leaving reflectance (water) |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_ISOFIT_ATM_STATE.TIF          |         no          | optional | ISOFIT's atmospheric state output (estimated aerosol optical depth and water vapour)              |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_ISOFIT_UNCERTAINTY.TIF        |         no          | optional | ISOFIT's uncertainty layer providing an estimate of the BOA reflectance uncertainty               |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*RNIR.TIF             |         no          | optional | TOA reflectance at 863 nm corrected for Rayleigh scattering                                       |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*RGLI.TIF             |         no          | optional | Reflectance of the sun glint predicted from ECMWF wind speed                                      |
