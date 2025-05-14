@@ -305,6 +305,16 @@ class EnPTConfig(object):
             With segmentation disabled, the AC runs on a pixel-level, which is slightly more accurate
             but takes much longer.
 
+        :key isofit_surface_optimization:
+            Select surface optimization preset for ISOFIT.
+
+            - 'default': default set of surface coverage optimations
+            - 'minerals': preset optimized to mineral mapping and rare earth elements (REE)
+            - 'custom': user-defined surface optimization file (to be passed to isofit_surface_json)
+
+        :key path_isofit_surface_json:
+            Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')
+
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
 
@@ -432,6 +442,8 @@ class EnPTConfig(object):
         self.mode_ac = gp('mode_ac')
         self.land_ac_alg = gp('land_ac_alg')
         self.enable_segmentation = gp('enable_segmentation')
+        self.isofit_surface_optimization = gp('isofit_surface_optimization')
+        self.path_isofit_surface_json = gp('path_isofit_surface_json')
         self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
