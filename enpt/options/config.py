@@ -308,7 +308,7 @@ class EnPTConfig(object):
         :key isofit_surface_optimization:
             Select surface optimization preset for ISOFIT.
 
-            - 'default': default set of surface coverage optimations
+            - 'multicomponent_surface': default set of surface coverage optimations
             - 'ree': preset optimized to rare earth elements (REE)
             - 'custom': user-defined surface optimization file (to be passed to isofit_surface_json)
 

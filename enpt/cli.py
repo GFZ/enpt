@@ -121,9 +121,9 @@ def get_enpt_argparser():
              "('SICOR', 'ISOFIT')")
     add('--enable_segmentation', type=_str2bool, default=True, nargs='?', const=True,
         help='Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).')
-    add('-isp', '--isofit_surface_optimization', type=str, default='default', nargs='?',
+    add('-isp', '--isofit_surface_optimization', type=str, default='multicomponent_surface', nargs='?',
         help="Select surface optimization preset for ISOFIT."
-             "('default', ree', 'custom')")
+             "('multicomponent_surface', ree', 'custom')")
     add('-pisc', '--path_isofit_surface_config', type=str, default=None,
         help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')")
     add('-pisp', '--path_isofit_surface_priors', type=str, default=None,
