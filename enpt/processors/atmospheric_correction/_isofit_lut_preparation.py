@@ -36,7 +36,7 @@ from scipy.interpolate import interp1d
 
 class LUTTransformer(object):
     def __init__(self, path_lut: str, sza_scene: float):
-        """
+        """Get an instance of LUTTransformer.
 
         :param path_lut:    atmospheric look-up-table in binary format as created by Luis
         """
@@ -173,7 +173,12 @@ class LUTTransformer(object):
 
     @staticmethod
     def extrapolate_8km(var: np.ndarray, alt_grid: np.ndarray):
-        """Replace data at 8km altitude by linearly extrapolating with 0.7km and 2.5km as grid points."""
+        """Replace data at 8km altitude by linearly extrapolating with 0.7km and 2.5km as grid points.
+
+        :param var:         variable to extrapolate
+        :param alt_grid:    altitude grid points where to extrapolate
+        :return:
+        """
         var[:, :, 3, :, :, :, :] = \
             interp1d(x=alt_grid[1:3],
                      y=var[:, :, 1:3, :, :, :, :],

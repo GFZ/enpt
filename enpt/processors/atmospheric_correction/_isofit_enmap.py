@@ -80,13 +80,17 @@ __author__ = 'Daniel Scheffler'
 
 
 class IsofitEnMAP(object):
-    """"""
+    """Class to perform atmospheric correction of EnMAP data using ISOFIT."""
 
     def __init__(self,
                  config: EnPTConfig = None,
                  log_level: str = None
                  ) -> None:
-        """Create an instance of IsofitEnMAP."""
+        """Create an instance of IsofitEnMAP.
+
+        :param config:      instance of EnPTConfig
+        :param log_level:   logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        """
         self.cfg = config
         self.log_level = log_level or (config.log_level if config else 'INFO')
         self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler
@@ -101,6 +105,11 @@ class IsofitEnMAP(object):
         download_examples(path=None, tag="latest")
 
     def _initialize_logging(self, logger: EnPT_Logger = None):
+        """
+        Initialize logging and forward the ISOFIT logs to EnPT.
+
+        :param logger: EnPT_Logger instance to be used or None (default) to create a new one.
+        """
         # get root logger (used by ISOFIT) and remove all StreamHandlers to avoid duplicated log lines
         # NOTE: ray workers have their own root logger which is NOT captured here (logs are missing)  # FIXME
         root_logger = logging.getLogger()
@@ -125,6 +134,16 @@ class IsofitEnMAP(object):
                                      path_loc: str,
                                      path_workdir: str,
                                      enmap_timestamp: str):
+        """
+        Build a MODTRAN template file based on the given input files and parameters.
+
+        :param path_emulator_basedir:   Path to the ISOFIT emulator base directory.
+        :param path_obs:                Path to the observation file.
+        :param path_loc:                Path to the location file.
+        :param path_workdir:            Path to the working directory.
+        :param enmap_timestamp:         Timestamp of the EnMAP data.
+        :return: None
+        """
         lut_params = LUTConfig(lut_config_file=None, emulator=path_emulator_basedir)
         (
             h_m_s,
@@ -166,6 +185,14 @@ class IsofitEnMAP(object):
         )
 
     def generate_input_files(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        """
+        Generate the necessary input files for ISOFIT.
+
+        :param enmap:           EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :param path_outdir:     Output directory path.
+        :return: A tuple containing file paths to the generated radiance, location,
+                 observation, wavelength, surface, and LUT files.
+        """
         fp_rad = self._generate_radiance_file(enmap, path_outdir)
         fp_loc = self._generate_loc_file(enmap, path_outdir)
         fp_obs = self._generate_obs_file(enmap, path_outdir)
@@ -176,6 +203,13 @@ class IsofitEnMAP(object):
         return fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut
 
     def _generate_radiance_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        """
+        Generate the radiance file for ISOFIT.
+
+        :param enmap:   EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :param path_outdir: Output directory path.
+        :return: A file path to the generated radiance file.
+        """
         self.logger.info("Generating radiance file...")
         # ISOFIT expects radiance in uW/cm²/sr/nm, EnPT provides mW/m²/sr/nm
         # 1000 uW/10000 cm²/sr/nm corresponds to mW/m²/sr/nm
@@ -191,6 +225,18 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_loc_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        """
+        Generate the location file for ISOFIT containing longitude, latitude, and elevation data.
+
+        This function computes a grid of coordinates based on the bounding box and grid size of the
+        input EnMAP data. It transforms the coordinates to WGS-84 if necessary and combines them with
+        elevation data extracted from the DEM. The resulting 3D data array is saved as a location file
+        with specified metadata and nodata values.
+
+        :param enmap: EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :param path_outdir: Output directory path where the location file will be saved.
+        :return: A file path to the generated location file.
+        """
         self.logger.info("Generating location file...")
         xmin, xmax, ymin, ymax = enmap.data.box.boundsMap
         xgsd, ygsd = (enmap.data.xgsd, enmap.data.ygsd)
@@ -225,6 +271,13 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_obs_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        """
+        Generate observation file for ISOFIT containing angular, slope, aspect, time, and ESD information.
+
+        :param enmap: EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :param path_outdir: Output directory path where the observation file will be saved.
+        :return: A file path to the generated observation file.
+        """
         self.logger.info("Generating observation file...")
         path_length = np.full(enmap.data.shape[:2], fill_value=650000)  # from ~650km EnMAP flight height
         vaa = enmap.meta.geom_view_azimuth_array
@@ -264,6 +317,13 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_wavelength_file(self, enmap: EnMAPL2Product_MapGeo, path_outdir: str):
+        """
+        Generates a file containing central wavelength and full width at half maximum (FWHM) information for ISOFIT.
+
+        :param enmap: EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :param path_outdir: Output directory path where the wavelength file will be saved.
+        :return: A file path to the generated wavelength file.
+        """
         self.logger.info("Generating wavelength file...")
         fp_out = pjoin(path_outdir, 'enmap_wavelength_fwhm.txt')
         wvl = enmap.meta.wvl_center
@@ -274,6 +334,13 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_surface_file(self, path_wavelength_file: str, path_outdir: str):
+        """
+        Generate a file containing surface coverage type information for ISOFIT.
+
+        :param path_wavelength_file: Path to the file containing central wavelength and full width at half maximum (FWHM) information.
+        :param path_outdir: Output directory path where the surface file will be saved.
+        :return: A file path to the generated surface file.
+        """
         surf_preset = self.cfg.isofit_surface_optimization if self.cfg else 'default'
         fp_out = pjoin(path_outdir, 'surface_enmap.mat')
 
@@ -308,6 +375,13 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_lut_file(self, path_outdir: str, sza_scene: float):
+        """
+        Generate the LUT file for ISOFIT.
+
+        :param path_outdir: Output directory path where the LUT file will be saved.
+        :param sza_scene: Solar zenith angle of the scene in degrees.
+        :return: A file path to the generated LUT file.
+        """
         self.logger.info("Generating LUT file...")
         # TODO: By re-using either the unpacked lut.zip or the LUT_ISOFIT.nc,
         #       the processing time can be reduced by ~20-60 sec.
@@ -329,7 +403,16 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
-    def _compute_solar_phase(vaa, vza, saa, sza):
+    def _compute_solar_phase(vaa: float, vza: float, saa: float, sza: float):
+        """
+        Compute the solar phase angle given the following angles in degrees:
+
+        :param vaa: View azimuth angle in degrees.
+        :param vza: View zenith angle in degrees.
+        :param saa: Solar azimuth angle in degrees.
+        :param sza: Solar zenith angle in degrees.
+        :return: The solar phase angle in degrees.
+        """
         vaa_r, vza_r, saa_r, sza_r = (np.deg2rad(i) for i in (vaa, vza, saa, sza))
         vx = np.sin(vza_r) * np.cos(vaa_r)
         vy = np.sin(vza_r) * np.sin(vaa_r)
@@ -344,7 +427,16 @@ class IsofitEnMAP(object):
         return phase
 
     @staticmethod
-    def _compute_cos_i(saa, sza, slope: float, aspect: float):
+    def _compute_cos_i(saa: float, sza: float, slope: float, aspect: float):
+        """
+        Compute the cosine of the illumination angle (i) given the following angles in degrees:
+
+        :param saa: Solar azimuth angle in degrees.
+        :param sza: Solar zenith angle in degrees.
+        :param slope: Slope of the terrain in degrees.
+        :param aspect: Aspect of the terrain in degrees.
+        :return: The cosine of the illumination angle (i).
+        """
         saa_r, sza_r, slope_r = (np.deg2rad(i) for i in (saa, sza, slope))
         saa_asp_r = saa_r if aspect == 0 else np.deg2rad(saa - aspect)
         cos_i = np.cos(sza_r) * np.cos(slope_r) + np.sin(sza_r) * np.sin(slope_r) * np.cos(saa_asp_r)
@@ -418,6 +510,15 @@ class IsofitEnMAP(object):
     #         self._apply_oe()
 
     def apply_oe_on_map_geometry(self, enmap: EnMAPL2Product_MapGeo):
+        """
+        Apply the ISOFIT atmospheric correction on EnMAP L2 data in map geometry using Isofit.apply_oe().
+
+        This method prepares necessary input files and executes the atmospheric correction
+        using ISOFIT on the given EnMAP Level 2 product with map geometry.
+
+        :param enmap: EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
+        :return: A GeoArray object containing the bottom-of-atmosphere (BOA) reflectance.
+        """
         self._initialize_logging(enmap.logger)
 
         with TemporaryDirectory() as td:
@@ -466,6 +567,29 @@ class IsofitEnMAP(object):
              segmentation_size: int = 40,
              n_cores: int = None
              ) -> dict:  # noqa
+        """
+        Run the atmospheric correction process using Isofit.run().
+
+        This executes the atmospheric correction process using the provided
+        paths and parameters. It reads input data, applies the correction, and returns
+        the results as a dictionary.
+
+        :param path_toarad:             Path to the TOA radiance file.
+        :param path_loc:                Path to the location file.
+        :param path_obs:                Path to the observation file.
+        :param path_outdir:             Path to the output directory.
+        :param path_workdir:            Path to the working directory.
+        :param path_enmap_wavelengths:  Path to the EnMAP wavelengths file.
+        :param path_surface_file:       Path to the surface file.
+        :param path_emulator_basedir:   Path to the emulator base directory.
+        :param path_lut:                Path to the lookup table.
+        :param aot:                     Aerosol optical thickness value.
+        :param cwv:                     Columnar water vapor value.
+        :param segmentation:            Flag to enable segmentation.
+        :param segmentation_size:       Size of the segmentation.
+        :param n_cores:                 Number of cores to use.
+        :return: Dictionary containing the results of the atmospheric correction.
+        """
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default_MOD5.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
@@ -714,6 +838,17 @@ class IsofitEnMAP(object):
                             segmentation: bool = False,
                             n_cores: int = None
                             ) -> (GeoArray, GeoArray, GeoArray):
+        """
+        Run ISOFIT atmospheric correction on map geometry.
+
+        This function initializes logging, sets up input files, and runs the ISOFIT
+        atmospheric correction process on the provided EnMAP L2 product in map geometry.
+
+        :param enmap:           The EnMAP L2 product in map geometry to process.
+        :param segmentation:    Flag to determine if segmentation should be applied.
+        :param n_cores:         Number of cores to use during processing.
+        :return: A tuple containing the estimated reflectance, atmospheric state, and uncertainty GeoArrays.
+        """
         self._initialize_logging(enmap.logger)
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
