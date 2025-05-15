@@ -305,15 +305,15 @@ class EnPTConfig(object):
             With segmentation disabled, the AC runs on a pixel-level, which is slightly more accurate
             but takes much longer.
 
-        :key isofit_surface_optimization:
-            Select surface optimization preset for ISOFIT.
+        :key isofit_surface_category:
+            Select surface category preset for which ISOFIT should optimize.
 
             - 'multicomponent_surface': default set of surface coverage optimations
             - 'ree': preset optimized to rare earth elements (REE)
             - 'custom': user-defined surface optimization file (to be passed to isofit_surface_json)
 
         :key path_isofit_surface_config:
-            Path to custom surface optimization file for ISOFIT (only used if isofit_surface_optimization=='custom')
+            Path to custom surface optimization file for ISOFIT (only used if isofit_surface_category=='custom')
 
         :key path_isofit_surface_priors:
             Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)
@@ -445,7 +445,7 @@ class EnPTConfig(object):
         self.mode_ac = gp('mode_ac')
         self.land_ac_alg = gp('land_ac_alg')
         self.enable_segmentation = gp('enable_segmentation')
-        self.isofit_surface_optimization = gp('isofit_surface_optimization')
+        self.isofit_surface_category = gp('isofit_surface_category')
         self.path_isofit_surface_config = gp('path_isofit_surface_config')
         self.path_isofit_surface_priors = gp('path_isofit_surface_priors')
         self.polymer_additional_results = gp('polymer_additional_results')

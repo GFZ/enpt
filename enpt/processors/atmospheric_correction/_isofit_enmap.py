@@ -341,7 +341,7 @@ class IsofitEnMAP(object):
         :param path_outdir: Output directory path where the surface file will be saved.
         :return: A file path to the generated surface file.
         """
-        surf_preset = self.cfg.isofit_surface_optimization if self.cfg else 'multicomponent_surface'
+        surf_preset = self.cfg.isofit_surface_category if self.cfg else 'multicomponent_surface'
         fp_out = pjoin(path_outdir, 'surface_enmap.mat')
 
         if surf_preset == 'multicomponent_surface':
