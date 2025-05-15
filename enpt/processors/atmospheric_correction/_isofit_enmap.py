@@ -337,7 +337,7 @@ class IsofitEnMAP(object):
         """
         Generate a file containing surface coverage type information for ISOFIT.
 
-        :param path_wavelength_file: Path to the file containing central wavelength and full width at half maximum (FWHM) information.
+        :param path_wavelength_file: Path to the file containing central wavelength and bandwidths (FWHM) information.
         :param path_outdir: Output directory path where the surface file will be saved.
         :return: A file path to the generated surface file.
         """

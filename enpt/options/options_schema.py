@@ -89,7 +89,7 @@ enpt_schema_input = dict(
                     land_ac_alg=dict(type='string', required=False, allowed=['SICOR', 'ISOFIT']),
                     enable_segmentation=dict(type='boolean', required=False),
                     isofit_surface_category=dict(type='string', required=False,
-                                                     allowed=['multicomponent_surface', 'ree', 'custom']),
+                                                 allowed=['multicomponent_surface', 'ree', 'custom']),
                     path_isofit_surface_config=dict(type='string', required=False),
                     path_isofit_surface_priors=dict(type='string', required=False),
                     polymer_additional_results=dict(type='boolean', required=False),
