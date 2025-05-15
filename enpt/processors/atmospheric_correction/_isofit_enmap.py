@@ -274,20 +274,22 @@ class IsofitEnMAP(object):
         return fp_out
 
     def _generate_surface_file(self, path_wavelength_file: str, path_outdir: str):
+        surf_preset = self.cfg.isofit_surface_optimization if self.cfg else 'default'
         fp_out = pjoin(path_outdir, 'surface_enmap.mat')
-        if self.cfg.isofit_surface_optimization == 'default':
+
+        if surf_preset == 'default':
             self.logger.info("Generating surface file for default set of surface coverage types...")
             fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_default.json')
-        elif self.cfg.isofit_surface_optimization == 'ree':
+        elif surf_preset == 'ree':
             self.logger.info("Generating surface file with specific optimization for rare earth elements (REE)...")
             fp_surfjson = pjoin(path_enptlib, 'options', 'isofit_surface_20240103_REE.json')
-        else:
+        else:  # 'custom'
             self.logger.info(f"Generating surface file based on user provided input "
                              f"({self.cfg.path_isofit_surface_config})...")
             fp_surfjson = self.cfg.path_isofit_surface_config
 
         path_surf_spec = (
-                self.cfg.path_isofit_surface_priors or
+                self.cfg.path_isofit_surface_priors if self.cfg and self.cfg.path_isofit_surface_priors else
                 pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
         )
         with (ZipFile(path_surf_spec, "r") as zf,
