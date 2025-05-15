@@ -403,14 +403,14 @@ class IsofitEnMAP(object):
         return fp_out
 
     @staticmethod
-    def _compute_solar_phase(vaa: float, vza: float, saa: float, sza: float):
+    def _compute_solar_phase(vaa: np.ndarray, vza: np.ndarray, saa: np.ndarray, sza: np.ndarray):
         """
         Compute the solar phase angle given the following angles in degrees:
 
-        :param vaa: View azimuth angle in degrees.
-        :param vza: View zenith angle in degrees.
-        :param saa: Solar azimuth angle in degrees.
-        :param sza: Solar zenith angle in degrees.
+        :param vaa: View azimuth angle array in degrees.
+        :param vza: View zenith angle array in degrees.
+        :param saa: Solar azimuth angle array in degrees.
+        :param sza: Solar zenith angle array in degrees.
         :return: The solar phase angle in degrees.
         """
         vaa_r, vza_r, saa_r, sza_r = (np.deg2rad(i) for i in (vaa, vza, saa, sza))
@@ -427,12 +427,12 @@ class IsofitEnMAP(object):
         return phase
 
     @staticmethod
-    def _compute_cos_i(saa: float, sza: float, slope: float, aspect: float):
+    def _compute_cos_i(saa: np.ndarray, sza: np.ndarray, slope: float, aspect: float):
         """
         Compute the cosine of the illumination angle (i) given the following angles in degrees:
 
-        :param saa: Solar azimuth angle in degrees.
-        :param sza: Solar zenith angle in degrees.
+        :param saa: Solar azimuth angle array in degrees.
+        :param sza: Solar zenith angle array in degrees.
         :param slope: Slope of the terrain in degrees.
         :param aspect: Aspect of the terrain in degrees.
         :return: The cosine of the illumination angle (i).
