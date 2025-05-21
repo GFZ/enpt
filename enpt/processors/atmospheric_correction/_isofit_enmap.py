@@ -96,6 +96,10 @@ class IsofitEnMAP(object):
         self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler
         self.cpus = config.CPUs if config else cpu_count() - 2
 
+        # always leave at least 2 cores free to ensure optimal performance
+        if cpu_count() > 6 and self.cpus > (cpu_count() - 2):
+            self.cpus = cpu_count() - 2
+
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
 
