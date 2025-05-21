@@ -393,7 +393,8 @@ class IsofitEnMAP(object):
 
             LUTTransformer(
                 path_lut=os.path.join(td, 'EnMAP_LUT_MOD5_formatted_1nm'),
-                sza_scene=sza_scene
+                sza_scene=sza_scene,
+                logger=self.logger
             ).read_binary_modtran_lut(
                 path_out_nc=fp_out
             )

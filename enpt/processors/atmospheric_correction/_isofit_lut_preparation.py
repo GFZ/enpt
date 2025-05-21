@@ -29,13 +29,17 @@
 
 """Module to prepare the pre-built LUT passed to ISOFIT."""
 
+import logging
+
 import netCDF4 as nc
 import numpy as np
 from scipy.interpolate import interp1d
 
+from ...utils.logging import EnPT_Logger
+
 
 class LUTTransformer(object):
-    def __init__(self, path_lut: str, sza_scene: float):
+    def __init__(self, path_lut: str, sza_scene: float, logger: EnPT_Logger | logging.Logger = None):
         """Get an instance of LUTTransformer.
 
         :param path_lut:    atmospheric look-up-table in binary format as created by Luis
@@ -43,6 +47,11 @@ class LUTTransformer(object):
         self.p_lut_bin = path_lut
         self._offset = 0
         self.sza_scene = sza_scene
+        if logger:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger()
+            self.logger.setLevel(logging.INFO)
 
     def read_binary_modtran_lut(self, path_out_nc: str):
         """
@@ -51,6 +60,9 @@ class LUTTransformer(object):
         :param path_out_nc: path to output LUT
         :return:         LUT of atmospheric functions, x and y axes grid points, LUT wavelengths
         """
+        if self.logger:
+            self.logger.debug("Reading binary LUT")
+
         def read_int16(array: np.ndarray, count):
             val = np.array(array[self._offset:self._offset + count * 2].view('int16'))
             self._offset += count * 2
@@ -83,6 +95,9 @@ class LUTTransformer(object):
         ##############################
         # TRANSFORM TO ISOFIT FORMAT #
         ##############################
+
+        if self.logger:
+            self.logger.debug("Transforming LUT to ISOFIT format")
 
         # Get data from LUT1 and process it
         fwhm = np.zeros_like(wvl)
@@ -131,6 +146,9 @@ class LUTTransformer(object):
         thermal_upwelling = np.zeros_like(rhoatm)  # thermal up-welling
         thermal_downwelling = np.zeros_like(rhoatm)  # thermal down-welling
 
+        if self.logger:
+            self.logger.debug(f"Writing LUT to {path_out_nc}")
+
         # write LUT to NetCDF file
         with nc.Dataset(path_out_nc, 'w', format='NETCDF4') as nc_out:
             nc_out.setncattr("RT_mode", "rdn")
@@ -170,6 +188,9 @@ class LUTTransformer(object):
             ]:
                 var = nc_out.createVariable(t, "f4", d)
                 var[:] = v
+
+        if self.logger:
+            self.logger.debug(f"LUT successfully saved")
 
     @staticmethod
     def extrapolate_8km(var: np.ndarray, alt_grid: np.ndarray):
