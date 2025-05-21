@@ -42,6 +42,7 @@ from time import time
 from datetime import timedelta
 from glob import glob
 import numpy as np
+from natsort import natsort
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
@@ -296,3 +297,10 @@ class EnPT_Controller(object):
         if self._finalizer.detach():
             if self.tempDir:
                 shutil.rmtree(self.tempDir)
+
+            remaining_files = glob(os.path.join(self.tempDir, '**', '*'))
+            if remaining_files:
+                self.L1_obj.logger.warning(
+                    f"Failed to completely delete EnPT´s temporary files at {self.tempDir}. \n"
+                    f"Remaining files: \n"
+                    f"{'\n'.join(natsort(remaining_files))}")
