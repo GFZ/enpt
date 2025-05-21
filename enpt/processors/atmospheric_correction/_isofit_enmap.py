@@ -864,6 +864,7 @@ class IsofitEnMAP(object):
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
         with TemporaryDirectory() as td:
+        with TemporaryDirectory(ignore_cleanup_errors=True) as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
