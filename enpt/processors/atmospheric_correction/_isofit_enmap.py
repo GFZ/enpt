@@ -95,6 +95,7 @@ class IsofitEnMAP(object):
         self.log_level = log_level or (config.log_level if config else 'INFO')
         self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler
         self.cpus = config.CPUs if config else cpu_count() - 2
+        self._tmpdir = pjoin(self.cfg.working_dir, 'isofit') if config else None
 
         # always leave at least 2 cores free to ensure optimal performance
         if cpu_count() > 6 and self.cpus > (cpu_count() - 2):
@@ -834,9 +835,14 @@ class IsofitEnMAP(object):
 
             finally:
                 # if os.environ.get('ISOFIT_DEBUG') != '1':
-                self.logger.info('Stopping ray.')
-                import ray
-                ray.shutdown()  # FIXME: Should be done by ISOFIT itself (calling ray stop --force is not sufficient)
+                # FIXME: This should be done by ISOFIT itself (calling ray stop --force is not sufficient)
+                try:
+                    import ray
+                    if ray.is_initialized():
+                        self.logger.info('Stopping ray.')
+                        ray.shutdown()
+                except Exception as e:
+                    self.logger.info(f"Ray shutdown failed: {e}")
 
     def run_on_map_geometry(self,
                             enmap: EnMAPL2Product_MapGeo,
