@@ -297,6 +297,7 @@ class EnPT_Controller(object):
         if self._finalizer.detach():
             if self.tempDir:
                 shutil.rmtree(self.tempDir)
+                shutil.rmtree(self.tempDir, ignore_errors=True)
 
             remaining_files = glob(os.path.join(self.tempDir, '**', '*'))
             if remaining_files:
