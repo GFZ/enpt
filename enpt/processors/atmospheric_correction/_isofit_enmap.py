@@ -699,8 +699,8 @@ class IsofitEnMAP(object):
                 ),
             ),
             implementation=dict(
-                # debug_mode=False,
-                debug_mode=True,  # TODO deactivate if done
+                debug_mode=False,
+                # debug_mode=True,  # TODO deactivate if done
                 n_cores=n_cores,
                 ray_temp_dir=pjoin(pabs(path_workdir), 'ray'),
             ),
