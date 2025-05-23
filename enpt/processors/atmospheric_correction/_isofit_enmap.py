@@ -53,7 +53,9 @@ from pandas import DataFrame
 from ...utils import EnvContextManager
 with EnvContextManager(ISOFIT_DEBUG='0',
                        MKL_NUM_THREADS='1',
-                       OMP_NUM_THREADS='1'):
+                       OMP_NUM_THREADS='1'
+                       # ISOFIT_NO_SET_THREADS='1'
+                       ):
     import isofit
     from isofit.core.isofit import Isofit
     from isofit.utils import surface_model, analytical_line as run_analytical_line, extractions, segment
