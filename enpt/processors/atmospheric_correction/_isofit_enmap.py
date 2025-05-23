@@ -628,7 +628,7 @@ class IsofitEnMAP(object):
         path_outdir = path_outdir or pjoin(self._tmpdir, 'output')
         path_workdir = path_workdir or pjoin(self._tmpdir, 'workdir')
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
-        n_cores = n_cores if n_cores is not None and n_cores < (cpu_count() -4) else self.cpus
+        n_cores = n_cores if n_cores is not None and n_cores < (cpu_count() - 4) else self.cpus
 
         use_6s = not path_lut or not isfile(path_lut)
         if use_6s:
