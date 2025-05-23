@@ -370,11 +370,14 @@ class IsofitEnMAP(object):
             fp_surfjson_tmp = pjoin(td, os.path.basename(fp_surfjson))
             shutil.copyfile(fp_surfjson, fp_surfjson_tmp)
 
-            surface_model(
-                config_path=fp_surfjson_tmp,
-                wavelength_path=path_wavelength_file,
-                output_path=fp_out
-            )
+            # generate surface_enmap.mat
+            # with multiprocessing in KMeans disabled (avoids a UnicodeDecodeError on Windows and is even faster)
+            with EnvContextManager(OMP_NUM_THREADS='1'):
+                surface_model(
+                    config_path=fp_surfjson_tmp,
+                    wavelength_path=path_wavelength_file,
+                    output_path=fp_out
+                )
             assert os.path.isfile(fp_out)
 
         return fp_out
