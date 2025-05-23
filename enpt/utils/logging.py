@@ -226,7 +226,7 @@ class LessThanFilter(logging.Filter):
         self.max_level = exclusive_maximum
 
     def filter(self, record):
-        """Filter funtion.
+        """Filter function.
 
         NOTE: Returns True if logging level of the given record is below the maximum log level.
 
