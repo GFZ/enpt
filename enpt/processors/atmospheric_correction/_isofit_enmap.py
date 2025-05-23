@@ -702,7 +702,7 @@ class IsofitEnMAP(object):
                 debug_mode=False,
                 # debug_mode=True,  # TODO deactivate if done
                 n_cores=n_cores,
-                ray_temp_dir=pjoin(pabs(path_workdir), 'ray'),
+                ray_temp_dir=pjoin(gettempdir(), "ray"),
             ),
             input=dict(
                 measured_radiance_file=pabs(path_toarad),
