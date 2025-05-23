@@ -93,7 +93,7 @@ class IsofitEnMAP(object):
         """
         self.cfg = config
         self.log_level = log_level or (config.log_level if config else 'INFO')
-        self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler
+        self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler (overridden later)
         self.cpus = config.CPUs if config else cpu_count() - 2
         self._tmpdir = pjoin(self.cfg.working_dir, 'isofit') if config else None
 
@@ -525,7 +525,7 @@ class IsofitEnMAP(object):
         :param enmap: EnMAPL2Product_MapGeo instance containing the EnMAP Level 2 data.
         :return: A GeoArray object containing the bottom-of-atmosphere (BOA) reflectance.
         """
-        self._initialize_logging(enmap.logger)
+        self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
 
         with TemporaryDirectory() as td:
             path_indir = pjoin(td, 'input')
@@ -860,7 +860,7 @@ class IsofitEnMAP(object):
         :param n_cores:         Number of cores to use during processing.
         :return: A tuple containing the estimated reflectance, atmospheric state, and uncertainty GeoArrays.
         """
-        self._initialize_logging(enmap.logger)
+        # self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
         with TemporaryDirectory() as td:
