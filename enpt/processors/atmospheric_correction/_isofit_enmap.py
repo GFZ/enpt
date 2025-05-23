@@ -94,12 +94,12 @@ class IsofitEnMAP(object):
         self.cfg = config
         self.log_level = log_level or (config.log_level if config else 'INFO')
         self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler (overridden later)
-        self.cpus = config.CPUs if config else cpu_count() - 2
+        self.cpus = config.CPUs if config else cpu_count()
         self._tmpdir = pjoin(self.cfg.working_dir, 'isofit') if config else None
 
-        # always leave at least 2 cores free to ensure optimal performance
-        if cpu_count() > 6 and self.cpus > (cpu_count() - 2):
-            self.cpus = cpu_count() - 2
+        # leave at least 4 cores free to ensure optimal performance (in case there are more than 6 cores available)
+        if cpu_count() > 6 and self.cpus > (cpu_count() - 4):
+            self.cpus = cpu_count() - 4
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
@@ -605,7 +605,7 @@ class IsofitEnMAP(object):
         path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
         path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
-        n_cores = n_cores if n_cores is not None else self.cpus
+        n_cores = n_cores if n_cores is not None and n_cores < (cpu_count() -4) else self.cpus
 
         use_6s = not path_lut or not isfile(path_lut)
         if use_6s:
