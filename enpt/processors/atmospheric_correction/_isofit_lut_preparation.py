@@ -190,7 +190,7 @@ class LUTTransformer(object):
                 var[:] = v
 
         if self.logger:
-            self.logger.debug(f"LUT successfully saved")
+            self.logger.debug("LUT successfully saved")
 
     @staticmethod
     def extrapolate_8km(var: np.ndarray, alt_grid: np.ndarray):
