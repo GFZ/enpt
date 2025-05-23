@@ -64,10 +64,10 @@ class EnPT_Controller(object):
         self.cfg: EnPTConfig = config or EnPTConfig(**config_kwargs)
 
         # generate temporary directory (must be deleted at the end of the pipeline)
-        self.tempDir = tempfile.mkdtemp()
+        self.cfg.working_dir = self.cfg.working_dir or tempfile.mkdtemp()
 
         # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
-        self._finalizer = weakref.finalize(self, self._cleanup, self.tempDir,
+        self._finalizer = weakref.finalize(self, self._cleanup, self.cfg.working_dir,
                                            warn_message="Implicitly cleaning up {!r}".format(self))
 
         # record startup time
@@ -84,7 +84,10 @@ class EnPT_Controller(object):
         :param subdir:          subdirectory name to be created within temporary directory
         :return:                /tmp/tmpk2qp0yri/rootdir/
         """
-        outdir = os.path.join(self.tempDir, subdir) if not self.cfg.is_dummy_dataformat else self.tempDir
+        outdir = (
+            os.path.join(self.cfg.working_dir, subdir)) if not self.cfg.is_dummy_dataformat else (
+            self.cfg.working_dir
+        )
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(outdir)
@@ -104,7 +107,7 @@ class EnPT_Controller(object):
         if not self.cfg.is_dummy_dataformat:
             return outdir
         else:
-            return os.path.join(self.tempDir, os.path.splitext(os.path.basename(path_zipfile))[0])
+            return os.path.join(self.cfg.working_dir, os.path.splitext(os.path.basename(path_zipfile))[0])
 
     def read_L1B_data(self) -> None:
         """Read the provider L1B data given in config and return an EnMAP image object."""
@@ -295,13 +298,12 @@ class EnPT_Controller(object):
     def cleanup(self):
         """Clean up (to be called directly)."""
         if self._finalizer.detach():
-            if self.tempDir:
-                shutil.rmtree(self.tempDir)
-                shutil.rmtree(self.tempDir, ignore_errors=True)
+            if self.cfg.working_dir:
+                shutil.rmtree(self.cfg.working_dir, ignore_errors=True)
 
-            remaining_files = glob(os.path.join(self.tempDir, '**', '*'))
+            remaining_files = glob(os.path.join(self.cfg.working_dir, '**', '*'))
             if remaining_files:
                 self.L1_obj.logger.warning(
-                    f"Failed to completely delete EnPT´s temporary files at {self.tempDir}. \n"
+                    f"Failed to completely delete EnPT´s temporary files at {self.cfg.working_dir}. \n"
                     f"Remaining files: \n"
                     f"{'\n'.join(natsorted(remaining_files))}")

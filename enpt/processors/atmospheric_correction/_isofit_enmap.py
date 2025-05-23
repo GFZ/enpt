@@ -32,7 +32,7 @@
 Performs the atmospheric correction of EnMAP L1B data.
 """
 import shutil
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, mkdtemp, gettempdir
 from typing import Tuple, List
 from fnmatch import fnmatch
 import os
@@ -45,6 +45,8 @@ from datetime import datetime
 from zipfile import ZipFile
 from multiprocessing import cpu_count
 import logging
+import weakref
+from warnings import warn
 
 import numpy as np
 from pyproj.crs import CRS
@@ -86,7 +88,8 @@ class IsofitEnMAP(object):
 
     def __init__(self,
                  config: EnPTConfig = None,
-                 log_level: str = None
+                 log_level: str = None,
+                 tempdir: str = None,
                  ) -> None:
         """Create an instance of IsofitEnMAP.
 
@@ -97,7 +100,15 @@ class IsofitEnMAP(object):
         self.log_level = log_level or (config.log_level if config else 'INFO')
         self.logger = self._initialize_logging(logger=None)  # default logger without FileHandler (overridden later)
         self.cpus = config.CPUs if config else cpu_count()
-        self._tmpdir = pjoin(self.cfg.working_dir, 'isofit') if config else None
+        self._tmpdir = (
+            tempdir if tempdir and os.path.exists(tempdir) else
+            pjoin(self.cfg.working_dir, 'isofit') if config else
+            mkdtemp(dir=tempdir)
+        )
+
+        # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
+        self._finalizer = weakref.finalize(self, self._cleanup, self._tmpdir,
+                                           warn_message="Implicitly cleaning up {!r}".format(self))
 
         # leave at least 4 cores free to ensure optimal performance (in case there are more than 6 cores available)
         if cpu_count() > 6 and self.cpus > (cpu_count() - 4):
@@ -112,6 +123,13 @@ class IsofitEnMAP(object):
         self.logger.info('Downloading ISOFIT extra-files...')
         download_data(path=None, tag="latest")
         download_examples(path=None, tag="latest")
+
+    @classmethod
+    def _cleanup(cls, tempDir, warn_message):
+        """Clean up implicitly (not to be called directly)."""
+        if tempDir and os.path.exists(tempDir):
+            shutil.rmtree(tempDir)
+            warn(warn_message, ResourceWarning)
 
     def _initialize_logging(self, logger: EnPT_Logger = None):
         """
@@ -369,12 +387,12 @@ class IsofitEnMAP(object):
                 pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
         )
         with (ZipFile(path_surf_spec, "r") as zf,
-              TemporaryDirectory() as td):
+              TemporaryDirectory(dir=self._tmpdir, prefix='surface__') as td):
             zf.extractall(td)
             fp_surfjson_tmp = pjoin(td, os.path.basename(fp_surfjson))
             shutil.copyfile(fp_surfjson, fp_surfjson_tmp)
 
-            # generate surface_enmap.mat
+            # generate surface_enmap.mat within /<self._tmpdir>/surface__tmp*/
             # with multiprocessing in KMeans disabled (avoids a UnicodeDecodeError on Windows and is even faster)
             with EnvContextManager(OMP_NUM_THREADS='1'):
                 surface_model(
@@ -400,7 +418,7 @@ class IsofitEnMAP(object):
         fp_out = pjoin(path_outdir, 'EnMAP_LUT_MOD5_ISOFIT_formatted_1nm.nc')
 
         with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
-              TemporaryDirectory() as td):
+              TemporaryDirectory(dir=self._tmpdir, prefix='lut__') as td):
             zf.extractall(td)
 
             LUTTransformer(
@@ -494,7 +512,7 @@ class IsofitEnMAP(object):
                   ):
         logging_level = logging_level or self.log_level
         n_cores = n_cores if n_cores is not None else self.cpus
-        ray_temp_dir = pjoin(pabs(working_directory), 'ray')
+        ray_temp_dir = pjoin(gettempdir(), "ray")
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
 
         try:
@@ -534,35 +552,34 @@ class IsofitEnMAP(object):
         """
         self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
 
-        with TemporaryDirectory() as td:
-            path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
+        path_indir = pjoin(self._tmpdir, 'input')
+        fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
-            os.makedirs(pjoin(td, 'workdir'), exist_ok=True)
-            os.makedirs(pjoin(td, 'input'), exist_ok=True)
-            os.makedirs(pjoin(td, 'output'), exist_ok=True)
+        os.makedirs(pjoin(self._tmpdir, 'workdir'), exist_ok=True)
+        os.makedirs(pjoin(self._tmpdir, 'input'), exist_ok=True)
+        os.makedirs(pjoin(self._tmpdir, 'output'), exist_ok=True)
 
-            self._apply_oe(
-                input_radiance=fp_rad,
-                input_loc=fp_loc,
-                input_obs=fp_obs,
-                working_directory=pjoin(td, 'workdir'),
-                surface_path=fp_surf,
-                wavelength_path=fp_wvl,
-                log_file=pjoin(td, 'output', 'isofit.log'),
-                presolve=True,
-                emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
-                n_cores=self.cpus,
-                prebuilt_lut=fp_lut
-            )
+        self._apply_oe(
+            input_radiance=fp_rad,
+            input_loc=fp_loc,
+            input_obs=fp_obs,
+            working_directory=pjoin(self._tmpdir, 'workdir'),
+            surface_path=fp_surf,
+            wavelength_path=fp_wvl,
+            log_file=pjoin(self._tmpdir, 'output', 'isofit.log'),
+            presolve=True,
+            emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
+            n_cores=self.cpus,
+            prebuilt_lut=fp_lut
+        )
 
-            # read the AC results back into memory
-            boa_rfl = GeoArray(glob(pjoin(td, 'output', 'estimated_reflectance.bsq'))[0])
-            # state = GeoArray(glob(pjoin(td, 'output', 'estimated_state.bsq'))[0])
-            # uncert = GeoArray(glob(pjoin(td, 'output', 'posterior_uncertainty.bsq'))[0])
-            boa_rfl.to_mem()
+        # read the AC results back into memory
+        boa_rfl = GeoArray(glob(pjoin(self._tmpdir, 'output', 'estimated_reflectance.bsq'))[0])
+        # state = GeoArray(glob(pjoin(self._tmpdir, 'output', 'estimated_state.bsq'))[0])
+        # uncert = GeoArray(glob(pjoin(self._tmpdir, 'output', 'posterior_uncertainty.bsq'))[0])
+        boa_rfl.to_mem()
 
-            return boa_rfl
+        return boa_rfl
 
     def _run(self,
              path_toarad: str,
@@ -606,8 +623,10 @@ class IsofitEnMAP(object):
         enmap_timestamp = os.path.basename(path_toarad).split('____')[1].split('_')[1]
         path_isocfg_default = pjoin(path_enptlib, 'options', 'isofit_config_default_MOD5.json')
         path_isocfg = pjoin(path_workdir, 'config', 'isofit_config.json')
-        path_data = os.path.abspath(pjoin(Path.home(), '.isofit', 'data'))
-        path_examples = os.path.abspath(pjoin(Path.home(), '.isofit', 'examples'))
+        path_data = pabs(pjoin(Path.home(), '.isofit', 'data'))
+        path_examples = pabs(pjoin(Path.home(), '.isofit', 'examples'))
+        path_outdir = path_outdir or pjoin(self._tmpdir, 'output')
+        path_workdir = path_workdir or pjoin(self._tmpdir, 'workdir')
         path_logfile = pjoin(path_outdir, f'{enmap_timestamp}_isofit.log')
         n_cores = n_cores if n_cores is not None and n_cores < (cpu_count() -4) else self.cpus
 
@@ -626,10 +645,8 @@ class IsofitEnMAP(object):
         for d in [
             path_workdir,
             pjoin(path_workdir, 'config'),
-            pjoin(path_workdir, 'lut_full'),
-            pjoin(path_workdir, 'ray'),
-            path_outdir,
-            os.path.dirname(path_toarad)  # input directory
+            pjoin(path_workdir, 'lut_full'),  # needed for 6S simulations
+            path_outdir
         ]:
             os.makedirs(d, exist_ok=True)
 
@@ -721,7 +738,7 @@ class IsofitEnMAP(object):
             model_discrepancy_path=None,
             modtran_path=None,
             rdn_factors_path=None,
-            ray_temp_dir=pjoin(pabs(path_workdir), 'ray'),
+            ray_temp_dir=pjoin(gettempdir(), "ray"),
             interpolate_inplace=False
         )
 
@@ -868,37 +885,36 @@ class IsofitEnMAP(object):
         :param n_cores:         Number of cores to use during processing.
         :return: A tuple containing the estimated reflectance, atmospheric state, and uncertainty GeoArrays.
         """
-        # self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
+        self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
-        with TemporaryDirectory(dir=self._get_tmpdir('run'), ignore_cleanup_errors=True) as td:
-            path_indir = pjoin(td, 'input')
-            fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
+        path_indir = pjoin(self._tmpdir, 'input')
+        fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
-            paths_output = \
-                self._run(
-                    path_toarad=fp_rad,
-                    path_loc=fp_loc,
-                    path_obs=fp_obs,
-                    path_outdir=pjoin(td, 'output'),
-                    path_workdir=pjoin(td, 'workdir'),
-                    path_enmap_wavelengths=fp_wvl,
-                    path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
-                    path_surface_file=fp_surf,
-                    path_lut=fp_lut,
-                    aot=enmap.meta.aot,
-                    cwv=enmap.meta.water_vapour,
-                    segmentation=segmentation,
-                    n_cores=n_cores if n_cores is not None else self.cpus
-                )
+        paths_output = \
+            self._run(
+                path_toarad=fp_rad,
+                path_loc=fp_loc,
+                path_obs=fp_obs,
+                path_outdir=pjoin(self._tmpdir, 'output'),
+                path_workdir=pjoin(self._tmpdir, 'workdir'),
+                path_enmap_wavelengths=fp_wvl,
+                path_emulator_basedir=pjoin(Path.home(), '.isofit', 'srtmnet'),
+                path_surface_file=fp_surf,
+                path_lut=fp_lut,
+                aot=enmap.meta.aot,
+                cwv=enmap.meta.water_vapour,
+                segmentation=segmentation,
+                n_cores=n_cores if n_cores is not None else self.cpus
+            )
 
-            # read the AC results back into memory
-            boa_rfl = GeoArray(paths_output['estimated_reflectance_file'])
-            state = GeoArray(paths_output['estimated_state_file'])
-            uncert = GeoArray(paths_output['posterior_uncertainty_file'])
-            # atm_coef = GeoArray(paths_output['atmospheric_coefficients_file'])  # not always present
-            boa_rfl.to_mem()
-            state.to_mem()
-            uncert.to_mem()
+        # read the AC results back into memory
+        boa_rfl = GeoArray(paths_output['estimated_reflectance_file'])
+        state = GeoArray(paths_output['estimated_state_file'])
+        uncert = GeoArray(paths_output['posterior_uncertainty_file'])
+        # atm_coef = GeoArray(paths_output['atmospheric_coefficients_file'])  # not always present
+        boa_rfl.to_mem()
+        state.to_mem()
+        uncert.to_mem()
 
-            return boa_rfl, state, uncert
+        return boa_rfl, state, uncert
