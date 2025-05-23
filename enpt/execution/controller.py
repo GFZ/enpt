@@ -269,9 +269,9 @@ class EnPT_Controller(object):
 
             self.L1_obj.logger.info('Total runtime of the processing chain: %s'
                                     % timedelta(seconds=time() - self._time_startup))
+
         finally:
             self.cleanup()
-            return None
 
     @staticmethod
     def _write_to_stdout_stderr():
