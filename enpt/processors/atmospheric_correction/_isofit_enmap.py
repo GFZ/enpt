@@ -480,7 +480,6 @@ class IsofitEnMAP(object):
                   presolve: bool = False,
                   empirical_line: bool = False,
                   analytical_line: bool = False,
-                  ray_temp_dir: str = "/tmp/ray",
                   emulator_base: str = None,
                   segmentation_size: int = 40,
                   num_neighbors: Tuple[int] = (),
@@ -495,6 +494,7 @@ class IsofitEnMAP(object):
                   ):
         logging_level = logging_level or self.log_level
         n_cores = n_cores if n_cores is not None else self.cpus
+        ray_temp_dir = pjoin(pabs(working_directory), 'ray')
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
 
         try:
@@ -627,6 +627,7 @@ class IsofitEnMAP(object):
             path_workdir,
             pjoin(path_workdir, 'config'),
             pjoin(path_workdir, 'lut_full'),
+            pjoin(path_workdir, 'ray'),
             path_outdir,
             os.path.dirname(path_toarad)  # input directory
         ]:
@@ -684,7 +685,7 @@ class IsofitEnMAP(object):
                 # debug_mode=False,
                 debug_mode=True,  # TODO deactivate if done
                 n_cores=n_cores,
-                ray_temp_dir='/tmp/ray',  # TODO not Windows-compatible
+                ray_temp_dir=pjoin(pabs(path_workdir), 'ray'),
             ),
             input=dict(
                 measured_radiance_file=pabs(path_toarad),
@@ -720,7 +721,7 @@ class IsofitEnMAP(object):
             model_discrepancy_path=None,
             modtran_path=None,
             rdn_factors_path=None,
-            ray_temp_dir='/tmp/ray',  # FIXME not Windows-compatible
+            ray_temp_dir=pjoin(pabs(path_workdir), 'ray'),
             interpolate_inplace=False
         )
 
@@ -870,7 +871,7 @@ class IsofitEnMAP(object):
         # self._initialize_logging(enmap.logger)  # use enmap.logger instead if self.logger which has no FileHandler
         self.logger.info("Initializing ISOFIT run on map geometry...")
 
-        with TemporaryDirectory(ignore_cleanup_errors=True) as td:
+        with TemporaryDirectory(dir=self._get_tmpdir('run'), ignore_cleanup_errors=True) as td:
             path_indir = pjoin(td, 'input')
             fp_rad, fp_loc, fp_obs, fp_wvl, fp_surf, fp_lut = self.generate_input_files(enmap, path_indir)
 
