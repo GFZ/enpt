@@ -548,7 +548,7 @@ class IsofitEnMAP(object):
                 log_file=pjoin(td, 'output', 'isofit.log'),
                 presolve=True,
                 emulator_base=pjoin(Path.home(), '.isofit', 'srtmnet', 'sRTMnet_v120.h5'),
-                n_cores=30,  # FIXME hardcoded
+                n_cores=self.cpus,
                 prebuilt_lut=fp_lut
             )
 
