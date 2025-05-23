@@ -99,6 +99,8 @@ class IsofitEnMAP(object):
 
         # leave at least 4 cores free to ensure optimal performance (in case there are more than 6 cores available)
         if cpu_count() > 6 and self.cpus > (cpu_count() - 4):
+            self.logger.debug(f"Reduced number of CPU cores to be used for ISOFIT from {self.cpus} to "
+                              f"{cpu_count() - 4} to achieve optimal performance without breaking execution.")
             self.cpus = cpu_count() - 4
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
