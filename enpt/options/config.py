@@ -403,6 +403,11 @@ class EnPTConfig(object):
             self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
+        if self.CPUs > cpu_count():
+            warnings.warn(f"Unable to run EnPT on {self.CPUs} CPU cores "
+                          f"as there are only {cpu_count()} available. Falling back to {cpu_count()} cores.")
+            self.CPUs = cpu_count()
+
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
