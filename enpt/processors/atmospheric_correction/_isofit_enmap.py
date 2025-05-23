@@ -498,6 +498,7 @@ class IsofitEnMAP(object):
                   presolve: bool = False,
                   empirical_line: bool = False,
                   analytical_line: bool = False,
+                  ray_temp_dir=pjoin(gettempdir(), "ray"),
                   emulator_base: str = None,
                   segmentation_size: int = 40,
                   num_neighbors: Tuple[int] = (),
@@ -512,7 +513,6 @@ class IsofitEnMAP(object):
                   ):
         logging_level = logging_level or self.log_level
         n_cores = n_cores if n_cores is not None else self.cpus
-        ray_temp_dir = pjoin(gettempdir(), "ray")
         params = {k: v for k, v in locals().items() if not k.startswith('__') and k != 'self'}
 
         try:
