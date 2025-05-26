@@ -288,7 +288,7 @@ class EnPTConfig(object):
         :key mode_ac:
             3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
 
-                - 'land': SICOR/ISOFIT (developed for land surfaces is applied to land AND water surfaces
+                - 'land': SICOR/ISOFIT (developed for land surfaces is applied to land AND water surfaces)
                 - 'water': POLYMER (developed for water surfaces) is applied to water only
                            (land surfaces are no included in the L2A product)
                 - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
