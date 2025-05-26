@@ -496,6 +496,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
         self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
         self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
+        self.geom_angles_all: Optional[dict] = None  # all view and sun angles available
         self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: Optional[float] = None  # earth-sun distance
         self.aot: Optional[float] = None  # scene aerosol optical thickness
@@ -565,6 +566,15 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
             self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
             self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
             self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
+
+            # TODO: revise this later to get rid of the duplicates with self.geom_xxx
+            self.geom_angles_all = dict(
+                view_zenith={e.tag: abs(float(e.text)) for e in xml.findall("specific/acrossOffNadirAngle/")},
+                view_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sceneAzimuthAngle/")},
+                sun_zenith={e.tag: 90 - float(e.text)for e in xml.findall("specific/sunElevationAngle/")},
+                sun_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sunAzimuthAngle/")}
+            )
+
         else:
             # read the acquisition time
             self.observation_datetime = \

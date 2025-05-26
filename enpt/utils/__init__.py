@@ -30,3 +30,20 @@
 """EnPT 'utils' module containing utilities that are used in the whole EnPT package."""
 
 __author__ = 'Daniel Scheffler'
+
+
+import os
+
+
+class EnvContextManager(object):
+    """Context manager class allowing to intermediately set environment variables."""
+
+    def __init__(self, **kwargs):
+        self.env_vars = kwargs
+
+    def __enter__(self):
+        self.old_env = os.environ.copy()
+        os.environ.update(self.env_vars)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        os.environ = self.old_env

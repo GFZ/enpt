@@ -2,6 +2,14 @@
 History
 =======
 
+1.0.0 (coming soon)
+-------------------
+
+* !106: Implemented ISOFIT as another atmospheric correction approach for land surfaces providing enhanced BOA
+  reflectance quality, water vapor and aerosol optical depth retrievals, and estimation of BOA reflectance uncertainty.
+  Besides the implementation of an ISOFIT wrapper, multiple frontend parameters are added to EnPT, the documentation,
+  is extended for ISOFIT and isofit is added as a new package requirement.
+
 0.21.1 (2025-03-25)
 -------------------
 

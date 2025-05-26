@@ -104,6 +104,7 @@ config_for_testing_water = dict(
     scale_factor_toa_ref=10000,
     enable_ac=True,
     mode_ac='combined',
+    land_ac_alg='SICOR',
     polymer_additional_results=True,
     polymer_root=path_polymer,
     threads=-1,
@@ -189,6 +190,7 @@ config_for_testing_dlr = dict(
     path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
     mode_ac='land',
+    land_ac_alg='SICOR',
     CPUs=32,
     ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
@@ -280,17 +282,41 @@ class EnPTConfig(object):
             Polymer root directory (that contains the subdirectory for ancillary data).
 
         :key enable_ac:
-            Enable atmospheric correction using SICOR algorithm (default: True).
+            Enable atmospheric correction (default: True).
             If False, the L2A output contains top-of-atmosphere reflectance.
 
         :key mode_ac:
             3 modes to determine which atmospheric correction is applied at which surfaces (default: land):
 
-                - 'land': SICOR (developed for land surfaces is applied to land AND water surfaces
+                - 'land': SICOR/ISOFIT (developed for land surfaces is applied to land AND water surfaces)
                 - 'water': POLYMER (developed for water surfaces) is applied to water only
                            (land surfaces are no included in the L2A product)
                 - 'combined': SICOR is applied to land and POLYMER is applied to water surfaces;
                               NOTE that this may result in edge effects, e.g., at coastlines
+
+        :key land_ac_alg:
+            Algorithm to use for atmospheric correction over land (default: SICOR):
+
+                - 'SICOR': developed at GFZ; fast but misses image-based AOT/water vapour retrieval
+                - 'ISOFIT': developed at NASA/JPL; accurate but computationally expensive
+
+        :key enable_segmentation:
+            Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).
+            With segmentation disabled, the AC runs on a pixel-level, which is slightly more accurate
+            but takes much longer.
+
+        :key isofit_surface_category:
+            Select surface category preset for which ISOFIT should optimize.
+
+            - 'multicomponent_surface': default set of surface coverage optimations
+            - 'ree': preset optimized to rare earth elements (REE)
+            - 'custom': user-defined surface optimization file (to be passed to isofit_surface_json)
+
+        :key path_isofit_surface_config:
+            Path to custom surface optimization file for ISOFIT (only used if isofit_surface_category=='custom')
+
+        :key path_isofit_surface_priors:
+            Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)
 
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
@@ -302,7 +328,7 @@ class EnPTConfig(object):
             Scale factor to be applied to BOA reflectance result
 
         :key threads:
-            number of threads for multiprocessing of blocks (see bellow):
+            number of threads for multiprocessing of blocks (see below):
 
                 - 'threads = 0': for single thread
                 - 'threads < 0': for as many threads as there are CPUs
@@ -331,6 +357,14 @@ class EnPTConfig(object):
         :key ortho_resampAlg:
             Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline',
                                                       'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
+
+        :key vswir_overlap_algorithm:
+            Algorithm how to output the spectral bands in the VNIR/SWIR spectral overlap region (default: 'swir_only')
+
+                - 'order_by_wvl': keep spectral bands unchanged, order bands by wavelength
+                - 'average': average the spectral information within the overlap
+                - 'vnir_only': only use the VNIR bands (cut overlapping SWIR bands)
+                - 'swir_only': only use the SWIR bands (cut overlapping VNIR bands)
 
         :key target_projection_type:
             Projection type of the raster output files ('UTM', 'Geographic') (default: 'UTM')
@@ -369,6 +403,11 @@ class EnPTConfig(object):
             self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
+        if self.CPUs > cpu_count():
+            warnings.warn(f"Unable to run EnPT on {self.CPUs} CPU cores "
+                          f"as there are only {cpu_count()} available. Falling back to {cpu_count()} cores.")
+            self.CPUs = cpu_count()
+
         self.log_level = gp('log_level')
         self.create_logfile = gp('create_logfile')
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
@@ -409,6 +448,11 @@ class EnPTConfig(object):
         self.polymer_root = gp('polymer_root')
         self.enable_ac = gp('enable_ac')
         self.mode_ac = gp('mode_ac')
+        self.land_ac_alg = gp('land_ac_alg')
+        self.enable_segmentation = gp('enable_segmentation')
+        self.isofit_surface_category = gp('isofit_surface_category')
+        self.path_isofit_surface_config = gp('path_isofit_surface_config')
+        self.path_isofit_surface_priors = gp('path_isofit_surface_priors')
         self.polymer_additional_results = gp('polymer_additional_results')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
@@ -455,6 +499,12 @@ class EnPTConfig(object):
             warnings.warn("The interleaving type 'line' is not supported by the GTiff output format. Using 'pixel'.",
                           UserWarning)
             self.output_interleave = 'pixel'
+
+        # check ISOFIT + land mode
+        if self.land_ac_alg == 'ISOFIT' and self.mode_ac != 'land':
+            raise NotImplementedError(f"The ISOFIT atmospheric correction is currently only supported together with "
+                                      f"the 'land' AC mode. Support for the '{self.mode_ac}' mode will be added soon."
+                                      f"Please adapt your configuration accordingly.")
 
         # override target_projection_type if target_epsg is given
         if self.target_epsg:

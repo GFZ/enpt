@@ -1,0 +1,153 @@
+{
+    "ISOFIT_base": "/path/to/lib/python3.11/site-packages",
+    "forward_model": {
+        "instrument": {
+            "parametric_noise_file": "/path/to/parametric_noise.txt",
+            "integrations": 1,
+            "unknowns": {
+                "uncorrelated_radiometric_uncertainty": 0.01
+            },
+            "wavelength_file": "/path/to/wavelengths.txt"
+        },
+        "radiative_transfer": {
+            "lut_grid": {
+                "AERFRAC_2": [
+                    0.05,
+                    0.12,
+                    0.20,
+                    0.30,
+                    0.40,
+                    0.80
+                ],
+                "H2OSTR": [
+                    0.0,
+                    1.0,
+                    1.5,
+                    2.0,
+                    2.7,
+                    3.5,
+                    5.0
+                ],
+                "observer_zenith": [
+                    0,
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0
+                ],
+                "solar_zenith": [
+                    0,
+                    10.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    70.0
+                ],
+                "relative_azimuth": [
+                    0,
+                    25.0,
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    180.0
+                ],
+                "surface_elevation_km": [
+                    0,
+                    0.7,
+                    2.5,
+                    8.0
+                ]
+            },
+            "radiative_transfer_engines": {
+                "vswir": {
+                    "aerosol_model_file": "/path/to/data/aerosol_model.txt",
+                    "aerosol_template_file": "/path/to/data/aerosol_template.json",
+                    "earth_sun_distance_file": "/path/to/data/earth_sun_distance.txt",
+                    "emulator_aux_file": "/path/to/srtmnet/sRTMnet_v120_aux.npz",
+                    "emulator_file": "/path/to/srtmnet/sRTMnet_v120.h5",
+                    "engine_base_dir": "/path/to/6sV2.1",
+                    "engine_name": "sRTMnet",
+                    "interpolator_base_path": "/path/to/data_out/lut_full/sRTMnet_v120_vi",
+                    "irradiance_file": "/path/to/examples/20151026_SantaMonica/data/prism_optimized_irr.dat",
+                    "lut_names": {
+                        "AERFRAC_2": null,
+                        "H2OSTR": null,
+                        "observer_zenith": null,
+                        "solar_zenith": null,
+                        "relative_azimuth": null,
+                        "surface_elevation_km": null
+                    },
+                    "lut_path": "/path/to/data_out/lut_full/lut.nc",
+                    "sim_path": "/path/to/data_out/lut_full",
+                    "statevector_names": [
+                        "AERFRAC_2",
+                        "H2OSTR"
+                    ],
+                    "template_file": "/path/to/data_out/config/20220712T000000Z_modtran_tpl.json"
+                }
+            },
+            "statevector": {
+                "AERFRAC_2": {
+                    "bounds": [
+                        0.05,
+                        0.8
+                    ],
+                    "init": 0.1009,
+                    "prior_mean": 0.1009,
+                    "prior_sigma": 10.0,
+                    "scale": 1
+                },
+                "H2OSTR": {
+                    "bounds": [
+                        0,
+                        5.0
+                    ],
+                    "init": 2.5,
+                    "prior_mean": 2.5,
+                    "prior_sigma": 100.0,
+                    "scale": 1
+                }
+            },
+            "unknowns": {
+                "H2O_ABSCO": 0.0
+            }
+        },
+        "surface": {
+            "select_on_init": true,
+            "surface_category": "multicomponent_surface",
+            "surface_file": "/path/to/data_out/data/surface.mat"
+        }
+    },
+    "implementation": {
+        "debug_mode": false,
+        "inversion": {
+            "windows": [
+                [
+                    350.0,
+                    1360.0
+                ],
+                [
+                    1410,
+                    1800.0
+                ],
+                [
+                    1970.0,
+                    2500.0
+                ]
+            ]
+        },
+        "n_cores": 30,
+        "ray_temp_dir": "/tmp/ray"
+    },
+    "input": {
+        "loc_file": "/path/to/loc_file.bsq",
+        "measured_radiance_file": "/path/to/enmap_spectral_image.bsq",
+        "obs_file": "/path/to/obs_file.bsq"
+    },
+    "output": {
+        "estimated_reflectance_file": "/path/to/output/timestamp_rfl",
+        "estimated_state_file": "/path/to/output/timestamp_state",
+        "posterior_uncertainty_file": "/path/to/output/timestamp_uncert"
+    }
+}

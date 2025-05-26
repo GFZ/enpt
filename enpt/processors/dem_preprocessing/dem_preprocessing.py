@@ -36,7 +36,9 @@ from pyproj import CRS
 
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
+from py_tools_ds.geo.coord_grid import is_coord_grid_equal
 from py_tools_ds.geo.vector.topology import get_footprint_polygon, get_overlap_polygon
+from py_tools_ds.geo.projection import prj_equal
 
 from ..spatial_transform import Geometry_Transformer, get_UTMEPSG_from_LonLat, get_center_coord
 
@@ -90,7 +92,7 @@ class DEM_Processor(object):
     def get_flat_dem_from_average_elevation(cls, corner_coords_lonlat, average_elevation, xres=30, yres=30):
         """Return a 'flat DEM' instance of DEM_Processor.
 
-        (a GeoArray fully covering the given coorner coordinates with the average elevation as pixel values)
+        (a GeoArray fully covering the given corner coordinates with the average elevation as pixel values)
 
         :param corner_coords_lonlat:    corner coordinates to be covered by the output DEM
         :param average_elevation:       average elevation in meters
@@ -107,7 +109,7 @@ class DEM_Processor(object):
         rows = int(np.ceil((max(y_all) - min(y_all)) / yres)) + 2
 
         # get a GeoArray instance
-        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation),
+        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation).astype(np.int16),
                           geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
                           projection=CRS(tgt_utm_epsg).to_wkt())
 
@@ -124,10 +126,47 @@ class DEM_Processor(object):
         # compute on map geometry (as provided)
         pass
 
-    def to_sensor_geometry(self,
-                           lons: np.ndarray,
-                           lats: np.ndarray):
+    def get_dem_in_sensor_geometry(self,
+                                   lons: np.ndarray,
+                                   lats: np.ndarray):
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
         data_sensorgeo = GT.to_sensor_geometry(self.dem)
 
         return GeoArray(data_sensorgeo)
+
+    def get_dem_in_map_geometry(self,
+                                mapBounds: tuple,
+                                mapBounds_prj: Union[str, int],
+                                out_prj: Union[str, int],
+                                out_gsd: tuple
+                                ):
+        # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
+        xmin, ymin, xmax, ymax = mapBounds
+        dem = GeoArray(self.dem.filePath)  # do not overwrite self.dem due to in-place re-projection below
+
+        if not prj_equal(self.dem.prj, out_prj) or \
+           not is_coord_grid_equal(dem.gt,
+                                   [xmin, xmin + out_gsd[0]],
+                                   [ymin, ymin + out_gsd[1]],
+                                   tolerance=0.):
+            dem.reproject_to_new_grid(
+                tgt_prj=out_prj,
+                # FIXME tgt_xygrid asserts mapbounds to be in suitable projection  # noqa
+                tgt_xygrid=[[xmin, xmin + out_gsd[0]], [ymax, ymax - out_gsd[1]]],
+                rspAlg='bilinear',
+                CPUs=self.CPUs
+            )
+
+        dem_mapgeo = (
+            GeoArray(
+                *dem.get_mapPos(
+                    mapBounds=mapBounds,
+                    mapBounds_prj=mapBounds_prj,
+                    out_prj=out_prj,
+                    out_gsd=out_gsd,
+                    rspAlg='bilinear'
+                ),
+                nodata=dem.nodata
+            )
+        )
+        return dem_mapgeo

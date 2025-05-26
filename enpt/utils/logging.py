@@ -99,7 +99,7 @@ class EnPT_Logger(logging.Logger):
         streamHandler.set_name('StringIO handler')
 
         # create ConsoleHandler for logging levels DEGUG and INFO -> logging to sys.stdout
-        consoleHandler_out = logging.StreamHandler(stream=sys.stdout)  # by default it would go to sys.stderr
+        consoleHandler_out = logging.StreamHandler(stream=sys.stdout)  # by default, it would go to sys.stderr
         consoleHandler_out.setFormatter(self.formatter_ConsoleH)
         consoleHandler_out.set_name('console handler stdout')
         consoleHandler_out.setLevel(log_level)
@@ -226,7 +226,7 @@ class LessThanFilter(logging.Filter):
         self.max_level = exclusive_maximum
 
     def filter(self, record):
-        """Filter funtion.
+        """Filter function.
 
         NOTE: Returns True if logging level of the given record is below the maximum log level.
 

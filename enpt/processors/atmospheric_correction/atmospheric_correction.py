@@ -73,7 +73,7 @@ class AtmosphericCorrector(object):
 
             options["retrieval"]["cpu"] = self.cfg.CPUs or cpu_count()
             options["retrieval"]["disable_progressbars"] = self.cfg.disable_progress_bars
-            options["retrieval"]["segmentation"] = True
+            options["retrieval"]["segmentation"] = self.cfg.enable_segmentation
 
             # TODO: issue is closed -> revise
             # temporarily disable uncertainty measures to avoid https://git.gfz-potsdam.de/EnMAP/sicor/-/issues/86
@@ -139,9 +139,9 @@ class AtmosphericCorrector(object):
 
         return True
 
-    def _run_ac__land_mode(self,
-                           enmap_ImageL1: EnMAPL1Product_SensorGeo
-                           ) -> (np.ndarray, np.ndarray, dict):
+    def run_sicor(self,
+                  enmap_ImageL1: EnMAPL1Product_SensorGeo
+                  ) -> (np.ndarray, np.ndarray, dict):
         """Run atmospheric correction in 'land' mode, i.e., use SICOR for all surfaces."""
         if 2 in enmap_ImageL1.vnir.mask_landwater[:]:
             enmap_ImageL1.logger.info(
@@ -164,6 +164,32 @@ class AtmosphericCorrector(object):
                            options=self._get_sicor_options(enmap_ImageL1, land_only=False),
                            unknowns=True,
                            logger=enmap_ImageL1.logger)
+
+        return boa_ref_vnir, boa_ref_swir, land_additional_results
+
+    def run_isofit(self,
+                   enmap_ImageL1: EnMAPL1Product_SensorGeo
+                   ) -> (np.ndarray, np.ndarray, dict):
+        """Run atmospheric correction in 'land' mode and use ISOFIT for all surfaces."""
+        if 2 in enmap_ImageL1.vnir.mask_landwater[:]:
+            enmap_ImageL1.logger.info(
+                "Running atmospheric correction in 'land' mode. ISOFIT is applied to ALL surfaces. "
+                "Uncertainty is expected for water surfaces because ISOFIT is designed for land only.")
+
+        from ._isofit_enmap import IsofitEnMAP
+        boa_ref_vnir, boa_ref_swir, land_additional_results = (
+            IsofitEnMAP(self.cfg).apply_oe_on_sensor_geometry(enmap_ImageL1))
+
+        return boa_ref_vnir, boa_ref_swir, land_additional_results
+
+    def _run_ac__land_mode(self,
+                           enmap_ImageL1: EnMAPL1Product_SensorGeo
+                           ) -> (np.ndarray, np.ndarray, dict):
+        boa_ref_vnir, boa_ref_swir, land_additional_results = \
+            self.run_sicor(enmap_ImageL1)
+
+        # boa_ref_vnir, boa_ref_swir, land_additional_results = \
+        #     self.run_isofit(enmap_ImageL1)
 
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 

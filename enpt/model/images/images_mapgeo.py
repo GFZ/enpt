@@ -34,6 +34,7 @@ from types import SimpleNamespace
 from typing import Tuple, Optional  # noqa: F401
 from os import path, makedirs
 
+import numpy as np
 from geoarray import GeoArray, NoDataMask
 
 from .image_baseclasses import _EnMAP_Image
@@ -193,6 +194,21 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         assert isinstance(string, str), "'log' can only be set to a string. Got %s." % type(string)
         self.logger.captured_stream = string
 
+    @property
+    def dem(self) -> GeoArray:
+        if not self._dem:
+            self.get_preprocessed_dem()
+
+        return self._dem
+
+    @dem.setter
+    def dem(self, *geoArr_initArgs):
+        self._dem = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'dem', nodataVal=0)  # FIXME 0?
+
+    @dem.deleter
+    def dem(self):
+        self._dem = None
+
     @classmethod
     def from_L1B_sensorgeo(cls, config: EnPTConfig, enmap_ImageL1: EnMAPL1Product_SensorGeo):
         from ...processors.orthorectification import Orthorectifier
@@ -225,6 +241,35 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         return paths
 
+    def get_preprocessed_dem(self):
+        from ...processors.dem_preprocessing import DEM_Processor
+
+        if self.cfg.path_dem:
+            self.logger.info('Pre-processing DEM in map geometry...')
+            DP = DEM_Processor(
+                self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
+                                               self.meta.lat_UL_UR_LL_LR)),
+                CPUs=self.cfg.CPUs)
+            DP.fill_gaps()  # FIXME this will also be needed at other places
+            self._dem =\
+                DP.get_dem_in_map_geometry(
+                    mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
+                    mapBounds_prj=self.data.epsg,
+                    out_prj=self.data.epsg,
+                    out_gsd=(self.data.xgsd, self.data.ygsd)
+                )
+
+        else:
+            self.logger.info(f'No DEM provided. '
+                             f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
+            self._dem = GeoArray(
+                np.full(self.data.shape[:2], self.cfg.average_elevation),
+                geotransform=self.data.gt,
+                projection=self.data.prj,
+                nodata=-9999
+            )
+
     def save(self, outdir: str, suffix="") -> str:
         """Save the product to disk using almost the same input format.
 
@@ -254,6 +299,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                          'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
+                         'isofit_atm_state', 'isofit_uncertainty',
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
 
             if attrName == 'deadpixelmap':
@@ -261,7 +307,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
                 continue
 
-            if attrName.startswith('polymer_'):
+            if attrName.startswith('polymer_') or attrName.startswith('isofit_'):
                 ext = \
                     'TIF' if self.cfg.output_format == 'GTiff' else \
                     'BSQ' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
@@ -274,6 +320,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                     polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
                     polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
                     polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',
+                    isofit_atm_state=f'{self.meta.scene_basename}-ACOUT_ISOFIT_ATM_STATE.{ext}',
+                    isofit_uncertainty=f'{self.meta.scene_basename}-ACOUT_ISOFIT_UNCERTAINTY.{ext}'
                 )
                 outpath = path.join(product_dir, dict_attr_fn[attrName])
             else:

@@ -201,7 +201,7 @@ class Orthorectifier(object):
                                                 meta_l1b=enmap_ImageL1.meta,
                                                 wvls_l2a=L2_obj.data.meta.band_meta['wavelength'],
                                                 dims_mapgeo=L2_obj.data.shape,
-                                                grid_res_l2a=(L2_obj.data.gt[1], abs(L2_obj.data.gt[5])),
+                                                geotransform_l2a=L2_obj.data.gt,
                                                 logger=L2_obj.logger)
         L2_obj.meta.add_band_statistics(L2_obj.data)
 

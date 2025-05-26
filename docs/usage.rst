@@ -52,7 +52,7 @@ Note, that the processors are built on each other, so the order must be unchange
 
       CTR = EnPT_Controller(**your_config_parameters)  # config parameters are described above
 
-2. *Read the EnMAP Level-1B data* into memory, convert DNs to radiance and compute coordiante layers:
+2. *Read the EnMAP Level-1B data* into memory, convert DNs to radiance and compute coordinate layers:
 
    .. code-block:: python
 

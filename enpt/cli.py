@@ -56,7 +56,7 @@ def get_enpt_argparser():
     add('--version', action='version', version=__version__)
 
     # NOTE: don't define any defaults here for parameters that are passed to EnPTConfig!
-    #       -> otherwise, we cannot distinguish between explicity given parameters and default values
+    #       -> otherwise, we cannot distinguish between explicitly given parameters and default values
     #       => see docs in parsedArgs_to_user_opts() for explanation
     add('-jc', '--json_config', nargs='?', type=str,
         help='file path of a JSON file containing options. See here for an example: '
@@ -113,9 +113,21 @@ def get_enpt_argparser():
     add('--enable_ac', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable atmospheric correction using SICOR algorithm (default: True). If False, the L2A output contains "
              "top-of-atmosphere reflectance")
-    add('--mode_ac', type=str, default=None, nargs='?',
+    add('--mode_ac', type=str, default='land', nargs='?',
         help="3 modes to determine which atmospheric correction is applied at which surfaces (default: land): "
              "('land', water', 'combined')")
+    add('--land_ac_alg', type=str, default='SICOR', nargs='?',
+        help="Algorithm to use for atmospheric correction over land (default: 'SICOR'):"
+             "('SICOR', 'ISOFIT')")
+    add('--enable_segmentation', type=_str2bool, default=True, nargs='?', const=True,
+        help='Enable SLIC segmentation during atmospheric correction (supported by SICOR and ISOFIT) (default: True).')
+    add('-isp', '--isofit_surface_category', type=str, default='multicomponent_surface', nargs='?',
+        help="Select surface category preset for which ISOFIT should optimize."
+             "('multicomponent_surface', ree', 'custom')")
+    add('-pisc', '--path_isofit_surface_config', type=str, default=None,
+        help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_category=='custom')")
+    add('-pisp', '--path_isofit_surface_priors', type=str, default=None,
+        help="Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)")
     add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
         help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
@@ -162,7 +174,7 @@ def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
     """Convert argparse Namespace object to dictionary of explicitly given parameters.
 
     NOTE:   All options that have not been given explicitly (None values) are removed. Reason: EnPTConfig prefers
-            directly passed arguments against those that are passed withi a JSON config file.
+            directly passed arguments against those that are passed within a JSON config file.
             So, e.g., if CPUs=None (default), the 'CPUs' parameter given within a JSON config file would be overridden.
 
             => only override JSON configuration if parameters are explicitly given (e.g., CPUs is set to 10)

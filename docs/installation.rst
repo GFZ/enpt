@@ -53,6 +53,7 @@ to resolve the following dependencies before the pip installer is run:
 * geopandas
 * glymur
 * h5py
+* isofit >=3.4.2
 * numba
 * numpy
 * llvmlite
@@ -84,7 +85,7 @@ you through the process.
 Optional: Install Polymer for advanced atmospheric correction over water surfaces
 ---------------------------------------------------------------------------------
 
-For atmospheric correction of water surfaces using the Polymer algorithm instead of SICOR_ (which is mainly
+For atmospheric correction of water surfaces using the Polymer algorithm instead of `SICOR`_/`ISOFIT`_ (which are mainly
 designed for land surfaces), the additional package polymer_ is required. The Polymer atmospheric correction is made
 available in EnPT by the ACwater_ package, a wrapper developed by AWI Bremerhaven, which is already contained in the
 default EnPT installation.
@@ -172,6 +173,7 @@ requirement polymer_ into the enpt_full environment as described above.
 .. _HYGEOS support forum: https://forum.hygeos.com
 .. _polymer: https://github.com/hygeos/polymer
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _ISOFIT: https://github.com/isofit/isofit
 .. _GUI: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _EnMAP-Box: https://github.com/EnMAP-Box/enmap-box
 .. _QGIS: https://www.qgis.org

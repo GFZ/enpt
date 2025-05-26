@@ -74,6 +74,7 @@ dependencies = [
     "cerberus",
     "gdal",
     "geoarray>=0.15.8",
+    "isofit",
     "jsmin",
     "lxml",
     "matplotlib",

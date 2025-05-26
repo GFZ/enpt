@@ -38,6 +38,8 @@ from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
+from py_tools_ds.geo.coord_trafo import mapXY2imXY
+from py_tools_ds.geo.coord_trafo import transform_any_prj
 from geoarray import GeoArray
 
 from .metadata_sensorgeo import EnMAP_Metadata_L1B_SensorGeo
@@ -54,7 +56,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
                  wvls_l2a: Union[List, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
-                 grid_res_l2a: Tuple[float, float],
+                 geotransform_l2a: Tuple[float, float, float, float, float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
@@ -62,13 +64,21 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         :param meta_l1b:            metadata object of the L1B dataset in sensor geometry
         :param wvls_l2a:            list of center wavelengths included in the L2A product
         :param dims_mapgeo:         dimensions of the EnMAP raster data in map geometry, e.g., (1024, 1000, 218)
-        :param grid_res_l2a:        Coordinate grid resolution of the L2A product (x, y)
+        :param geotransform_l2a:    GDAL GeoTransform tuple of EnMAP raster data in map geometry
         :param logger:              instance of logging.logger or subclassed
         """
         self.cfg = config
-        self._meta_l1b = meta_l1b
-        self.grid_res = grid_res_l2a
+        self.geotransform = geotransform_l2a
+        self.grid_res = geotransform_l2a[1], abs(geotransform_l2a[5])
         self.logger = logger or logging.getLogger()
+
+        # privates
+        self._meta_l1b = meta_l1b
+        self._geom_view_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing zenith angles
+        self._geom_view_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing azimuth angles
+        self._geom_sun_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar zenith angles
+        self._geom_sun_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar azimuth angles
+        self._aqtime_utc_array: Optional[np.ndarray] = None  # 2D array of pixel-wise UTC times (decimal hours)
 
         # defaults
         self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
@@ -89,6 +99,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.geom_sun_azimuth: float = meta_l1b.geom_sun_azimuth  # sun azimuth angle
         self.mu_sun: float = meta_l1b.mu_sun  # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: float = meta_l1b.earthSunDist  # earth-sun distance
+        self.aot: float = meta_l1b.aot
+        self.water_vapour: float = meta_l1b.water_vapour
 
         # generate file names for L2A output
         file_ext_l1b = os.path.splitext(meta_l1b.vnir.filename_data)[1]
@@ -189,6 +201,134 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 (max([vnir_urx, swir_urx]), max([vnir_ury, swir_ury])),
                 (min([vnir_llx, swir_llx]), min([vnir_lly, swir_lly])),
                 (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
+
+    def _get_view_acq_geometry_arrays(self):
+        if not self.cfg.is_dummy_dataformat:
+            ll_cornerCoords = tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR))
+            if self.epsg == 4326:
+                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in ll_cornerCoords]
+            else:
+                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in
+                                   [transform_any_prj(4326, self.epsg, x, y) for x, y in ll_cornerCoords]]
+
+            def _interpolate(cols_in, rows_in, data_in, outshape):
+                # from scipy.interpolate import griddata, interp2d, bi
+                #
+                # rows_full = np.arange(outshape[0])
+                # cols_full = np.arange(outshape[1])
+                # x_out, y_out = np.meshgrid(cols_full, rows_full)
+                # data_interpolated = griddata((cols_in, rows_in), data_in, (x_out, y_out), method='linear')
+
+                import numpy as np
+                from scipy.linalg import lstsq
+
+                # Given data
+                x = np.array(cols_in)
+                y = np.array(rows_in)
+                data = np.array(data_in)
+
+                # Create matrix A for the plane equation coefficients
+                A = np.column_stack((x, y, np.ones_like(x)))
+
+                # Solve Ax = b, where x contains coefficients of the plane equation
+                coefficients, _, _, _ = lstsq(A, data)
+
+                # Extract coefficients
+                a, b, c = coefficients
+
+                # Define output grid
+                rows_full = np.arange(outshape[0])
+                cols_full = np.arange(outshape[1])
+                x_out, y_out = np.meshgrid(cols_full, rows_full)
+
+                # Evaluate plane equation to get interpolated values
+                data_interpolated = a * x_out + b * y_out + c
+
+                return data_interpolated
+
+                # data_2d[badmask_full] = \
+                #     griddata(np.array([x[~badmask_full], y[~badmask_full]]).T,  # points we know
+                #              data_2d[~badmask_full],  # values we know
+                #              np.array([x[badmask_full], y[badmask_full]]).T,  # points to interpolate
+                #              method=method, fill_value=fill_value)
+                #
+                # RGI = RegularGridInterpolator(points=[cols_in, rows_in],
+                #                               values=np.array(data_in).T,  # must be in shape [x, y]
+                #                               method='linear',
+                #                               bounds_error=False)
+                # rows_full = np.arange(outshape[0])
+                # cols_full = np.arange(outshape[1])
+                # data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full)))
+                # return data_full
+
+            def interpolate_between_corners(corners_xy, data):
+                cols_in, rows_in = zip(*corners_xy)  # UL, UR, LL, LR
+                data_in = data['upper_left'], data['upper_right'], data['lower_left'], data['lower_right']
+                return _interpolate(cols_in, rows_in, data_in, (self.nrows, self.ncols))
+
+            # read Geometry (observation/illumination) angle
+            # NOTE: EnMAP metadata provide also the angles for the image corners
+            #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
+            # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
+            # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
+            vza_all = self._meta_l1b.geom_angles_all['view_zenith']
+            vaa_all = self._meta_l1b.geom_angles_all['view_azimuth']
+            sza_all = self._meta_l1b.geom_angles_all['sun_zenith']
+            saa_all = self._meta_l1b.geom_angles_all['sun_azimuth']
+            self._geom_view_zenith_array = interpolate_between_corners(im_cornerCoords, vza_all)
+            self._geom_view_azimuth_array = interpolate_between_corners(im_cornerCoords, vaa_all)
+            self._geom_sun_zenith_array = interpolate_between_corners(im_cornerCoords, sza_all)
+            self._geom_sun_azimuth_array = interpolate_between_corners(im_cornerCoords, saa_all)
+
+        else:
+            # static values for  dummy EnMAP data format
+            rows, cols = self.nrows, self.ncols
+
+            self._geom_view_zenith_array = np.full((rows, cols), fill_value=self.geom_view_zenith)
+            self._geom_view_azimuth_array = np.full((rows, cols), fill_value=self.geom_view_azimuth)
+            self._geom_sun_zenith_array = np.full((rows, cols), fill_value=self.geom_sun_zenith)
+            self._geom_sun_azimuth_array = np.full((rows, cols), fill_value=self.geom_sun_azimuth)
+
+    def _get_aqtime_utc_array(self):
+        if not self.cfg.is_dummy_dataformat:
+            rows, cols = self.nrows, self.ncols
+
+            # TODO replace this by interpolating all angles
+            dt = self._meta_l1b.observation_datetime
+            decimal_hours = dt.hour + dt.minute / 60. * dt.second / 3600
+            self._aqtime_utc_array = np.full((rows, cols), fill_value=decimal_hours)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def geom_view_zenith_array(self) -> np.ndarray:
+        if self._geom_view_zenith_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_view_zenith_array
+
+    @property
+    def geom_view_azimuth_array(self) -> np.ndarray:
+        if self._geom_view_azimuth_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_view_azimuth_array
+
+    @property
+    def geom_sun_zenith_array(self) -> np.ndarray:
+        if self._geom_sun_zenith_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_sun_zenith_array
+
+    @property
+    def geom_sun_azimuth_array(self) -> np.ndarray:
+        if self._geom_sun_azimuth_array is None:
+            self._get_view_acq_geometry_arrays()
+        return self._geom_sun_azimuth_array
+
+    @property
+    def aqtime_utc_array(self) -> np.ndarray:
+        if self._aqtime_utc_array is None:
+            self._get_aqtime_utc_array()
+        return self._aqtime_utc_array
 
     def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
         R, C, B = datastack_vnir_swir.shape

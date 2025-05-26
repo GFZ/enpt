@@ -41,10 +41,13 @@ from typing import Optional
 from time import time
 from datetime import timedelta
 from glob import glob
+import numpy as np
+from natsort import natsorted
 
 from ..options.config import EnPTConfig
 from ..io.reader import L1B_Reader
 from ..model.images import EnMAPL1Product_SensorGeo, EnMAPL2Product_MapGeo  # noqa: F401
+from ..processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
 
 __author__ = 'Daniel Scheffler'
 
@@ -61,10 +64,10 @@ class EnPT_Controller(object):
         self.cfg: EnPTConfig = config or EnPTConfig(**config_kwargs)
 
         # generate temporary directory (must be deleted at the end of the pipeline)
-        self.tempDir = tempfile.mkdtemp()
+        self.cfg.working_dir = self.cfg.working_dir or tempfile.mkdtemp()
 
         # setup a finalizer that destroys remaining data (directories, etc.) in case of unexpected exit
-        self._finalizer = weakref.finalize(self, self._cleanup, self.tempDir,
+        self._finalizer = weakref.finalize(self, self._cleanup, self.cfg.working_dir,
                                            warn_message="Implicitly cleaning up {!r}".format(self))
 
         # record startup time
@@ -81,7 +84,10 @@ class EnPT_Controller(object):
         :param subdir:          subdirectory name to be created within temporary directory
         :return:                /tmp/tmpk2qp0yri/rootdir/
         """
-        outdir = os.path.join(self.tempDir, subdir) if not self.cfg.is_dummy_dataformat else self.tempDir
+        outdir = (
+            os.path.join(self.cfg.working_dir, subdir)) if not self.cfg.is_dummy_dataformat else (
+            self.cfg.working_dir
+        )
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(outdir)
@@ -101,7 +107,7 @@ class EnPT_Controller(object):
         if not self.cfg.is_dummy_dataformat:
             return outdir
         else:
-            return os.path.join(self.tempDir, os.path.splitext(os.path.basename(path_zipfile))[0])
+            return os.path.join(self.cfg.working_dir, os.path.splitext(os.path.basename(path_zipfile))[0])
 
     def read_L1B_data(self) -> None:
         """Read the provider L1B data given in config and return an EnMAP image object."""
@@ -136,9 +142,6 @@ class EnPT_Controller(object):
         # run transformation to TOARef
         self.L1_obj = RT.transform_TOARad2TOARef(self.L1_obj)
 
-    def run_dem_processor(self):
-        self.L1_obj.get_preprocessed_dem()
-
     def run_spatial_optimization(self):
         # get a new instance of Spatial_Optimizer
         from ..processors.spatial_optimization import Spatial_Optimizer
@@ -163,57 +166,115 @@ class EnPT_Controller(object):
             else:
                 self.L1_obj.save(self.cfg.output_dir)
 
+    def _run_frontend_test(self):
+        self._print_received_configuration()
+
+        if not os.path.isdir(self.cfg.output_dir):
+            raise NotADirectoryError(self.cfg.output_dir)
+
+        with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl'), 'wb') as outF:
+            pickle.dump(
+                dict(
+                    json_config=self.cfg.json_config,
+                    kwargs=self.cfg.kwargs
+                ),
+                outF)
+
     def run_all_processors(self):
         """Run all processors at once."""
-        if os.getenv('IS_ENPT_GUI_TEST') != "1":
-            try:
-                if os.getenv('IS_ENPT_GUI_CALL') == "1":
-                    self._write_to_stdout_stderr()
 
-                if self.cfg.log_level == 'DEBUG':
-                    self._print_received_configuration()
+        if os.getenv('IS_ENPT_GUI_TEST') == "1":
+            self._run_frontend_test()
+            return None
 
-                self.read_L1B_data()
-                if self.cfg.run_deadpix_P:
-                    self.L1_obj.correct_dead_pixels()
-                if self.cfg.enable_absolute_coreg:
-                    # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
-                    self.run_spatial_optimization()
-                self.run_dem_processor()
-                if self.cfg.enable_ac:
+        try:
+            if os.getenv('IS_ENPT_GUI_CALL') == "1":
+                self._write_to_stdout_stderr()
+
+            if self.cfg.log_level == 'DEBUG':
+                self._print_received_configuration()
+
+            self.read_L1B_data()
+            if self.cfg.run_deadpix_P:
+                self.L1_obj.correct_dead_pixels()
+            if self.cfg.enable_absolute_coreg:
+                # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
+                self.run_spatial_optimization()  # expects sensor geometry
+
+            if self.cfg.enable_ac:
+                if self.cfg.land_ac_alg == 'SICOR':
+                    ################################
+                    # run SICOR on sensor geometry #
+                    ################################
+
+                    # get DEM in sensor geometry
+                    self.L1_obj.get_preprocessed_dem()
+
+                    # run SICOR
                     self.run_atmospheric_correction()
 
                     if self.cfg.run_deadpix_P:
                         # re-apply dead pixel correction
                         self.L1_obj.logger.info(
-                            'Re-applying dead pixel correction to correct for spectral spikes due to fringe effect.')
+                            'Re-applying dead pixel correction to correct '
+                            'for spectral spikes due to fringe effect.')
                         self.L1_obj.correct_dead_pixels()
+
+                    self.run_orthorectification()
+
                 else:
-                    self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
-                                            'computing top-of-atmosphere reflectance instead.')
-                    self.run_toaRad2toaRef()
-                # self.run_spatial_optimization()
+                    ##############################
+                    # run ISOFIT on map geometry #
+                    ##############################
+
+                    # get EnMAP image in map geometry
+                    self.L2_obj = (
+                        EnMAPL2Product_MapGeo
+                        .from_L1B_sensorgeo(
+                            config=self.cfg,
+                            enmap_ImageL1=self.L1_obj
+                        )
+                    )
+                    # get DEM in map geometry
+                    self.L2_obj.get_preprocessed_dem()
+
+                    # run ISOFIT
+                    boa_ref, atm_state, uncertainty = \
+                        (IsofitEnMAP(config=self.cfg)
+                         .run_on_map_geometry(
+                            self.L2_obj,
+                            segmentation=self.cfg.enable_segmentation,
+                            n_cores=self.cfg.CPUs))
+                    boa_ref = (boa_ref[:] * self.cfg.scale_factor_boa_ref).astype(np.int16)
+                    boa_ref[~self.L2_obj.data.mask_nodata[:]] = self.cfg.output_nodata_value
+                    self.L2_obj.data.arr = boa_ref
+                    self.L2_obj.data.nodata = self.cfg.output_nodata_value
+                    self.L2_obj.meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
+                    self.L2_obj.meta.unitcode = 'BOARef'
+
+                    # clip AOT/CWV to extent of EnMAP scene (ISOFIT output is larger)
+                    atm_state[~self.L2_obj.data.mask_nodata[:]] = -9999
+                    atm_state[np.isnan(atm_state)] = -9999
+
+                    uncertainty[~self.L2_obj.data.mask_nodata[:]] = -9999
+                    uncertainty[np.isnan(uncertainty)] = -9999
+
+                    self.L2_obj.isofit_atm_state = atm_state
+                    self.L2_obj.isofit_uncertainty = uncertainty
+
+            else:
+                self.L1_obj.logger.info('Skipping atmospheric correction as configured and '
+                                        'computing top-of-atmosphere reflectance instead.')
+                self.run_toaRad2toaRef()
                 self.run_orthorectification()
-                self.write_output()
 
-                self.L1_obj.logger.info('Total runtime of the processing chain: %s'
-                                        % timedelta(seconds=time() - self._time_startup))
-            finally:
-                self.cleanup()
+            self.write_output()
 
-        else:
-            self._print_received_configuration()
+            self.L1_obj.logger.info('Total runtime of the processing chain: %s'
+                                    % timedelta(seconds=time() - self._time_startup))
 
-            if not os.path.isdir(self.cfg.output_dir):
-                raise NotADirectoryError(self.cfg.output_dir)
-
-            with open(os.path.join(self.cfg.output_dir, 'received_args_kwargs.pkl'), 'wb') as outF:
-                pickle.dump(
-                    dict(
-                        json_config=self.cfg.json_config,
-                        kwargs=self.cfg.kwargs
-                    ),
-                    outF)
+        finally:
+            self.cleanup()
 
     @staticmethod
     def _write_to_stdout_stderr():
@@ -237,5 +298,12 @@ class EnPT_Controller(object):
     def cleanup(self):
         """Clean up (to be called directly)."""
         if self._finalizer.detach():
-            if self.tempDir:
-                shutil.rmtree(self.tempDir)
+            if self.cfg.working_dir:
+                shutil.rmtree(self.cfg.working_dir, ignore_errors=True)
+
+            remaining_files = glob(os.path.join(self.cfg.working_dir, '**', '*'))
+            if remaining_files:
+                self.L1_obj.logger.warning(
+                    f"Failed to completely delete EnPT´s temporary files at {self.cfg.working_dir}. \n"
+                    f"Remaining files: \n"
+                    f"{'\n'.join(natsorted(remaining_files))}")
