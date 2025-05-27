@@ -157,8 +157,8 @@ over water surfaces
 ACwater/Polymer
 ~~~~~~~~~~~~~~~
 
-  For atmospheric correction over water, EnPT can optionally use the **`ACwater`_** algorithm, which is a wrapper module
-  around **`Polymer`_** (`Steinmetz et al. (2011)`_) to generate normalized water leaving reflectance from TOA radiance.
+  For atmospheric correction over water, EnPT can optionally use the `ACwater`_ algorithm, which is a wrapper module
+  around `Polymer`_ (`Steinmetz et al. (2011)`_) to generate normalized water leaving reflectance from TOA radiance.
   ACwater_ was developed at AWI Bremerhaven in cooperation with GFZ and makes the `Polymer`_ algorithm applicable to
   EnMAP Level 1B data in EnPT.
 
