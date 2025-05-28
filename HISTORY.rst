@@ -9,6 +9,8 @@ History
   reflectance quality, water vapor and aerosol optical depth retrievals, and estimation of BOA reflectance uncertainty.
   Besides the implementation of an ISOFIT wrapper, multiple frontend parameters are added to EnPT, the documentation,
   is extended for ISOFIT and isofit is added as a new package requirement.
+* !110/!111:Replaced old GFZ emails and institute name.
+* !112: Dropped Python 3.8 support due to end-of-life status and add official support for 3.12.
 
 0.21.1 (2025-03-25)
 -------------------
