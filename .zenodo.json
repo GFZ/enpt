@@ -15,46 +15,46 @@
     "creators": [
         {
             "name": "Scheffler, Daniel",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4106-8928"
         },
         {
             "name": "Bohn, Niklas",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4078-886X"
         },
         {
             "name": "Guillaso, Stéphane",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0001-9805-9390"
         },
         {
             "name": "Segl, Karl",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics"
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics"
         }
     ],
     "contributors": [
         {
             "name": "Scheffler, Daniel",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4106-8928",
             "type": "Researcher"
         },
         {
             "name": "Bohn, Niklas",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4078-886X",
             "type": "Researcher"
         },
         {
             "name": "Guillaso, Stéphane",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0001-9805-9390",
             "type": "Researcher"
         },
         {
             "name": "Segl, Karl",
-            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
             "type": "WorkPackageLeader"
         },
         {
