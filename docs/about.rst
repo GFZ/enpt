@@ -8,7 +8,7 @@ About
 
 The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data.
 It provides free and open-source features for users to transform EnMAP Level-1B data themselves to Level-2A products.
-The package has been developed at the German Research Centre for Geosciences Potsdam (GFZ).
+The package has been developed at the GFZ Helmholtz Centre for Geosciences, Germany.
 
 Feature overview
 ----------------

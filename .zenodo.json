@@ -1,6 +1,6 @@
 {
     "title": "EnPT - EnMAP Processing Tool",
-    "description": "The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data. It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed at the German Research Centre for Geosciences Potsdam (GFZ) as an alternative to the processing chain of the EnMAP Ground Segment.",
+    "description": "The EnPT Python package is an automated pre-processing pipeline for the new EnMAP hyperspectral satellite data. It provides free and open-source features to transform EnMAP Level-1B data to Level-2A. The package has been developed at the GFZ Helmholtz Centre for Geosciences, Germany, as an alternative to the processing chain of the EnMAP Ground Segment.",
     "license": "GPL-3.0+",
     "upload_type": "software",
     "keywords": [
@@ -15,46 +15,46 @@
     "creators": [
         {
             "name": "Scheffler, Daniel",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4106-8928"
         },
         {
             "name": "Bohn, Niklas",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4078-886X"
         },
         {
             "name": "Guillaso, Stéphane",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0001-9805-9390"
         },
         {
             "name": "Segl, Karl",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics"
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics"
         }
     ],
     "contributors": [
         {
             "name": "Scheffler, Daniel",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4106-8928",
             "type": "Researcher"
         },
         {
             "name": "Bohn, Niklas",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0003-4078-886X",
             "type": "Researcher"
         },
         {
             "name": "Guillaso, Stéphane",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "orcid": "0000-0001-9805-9390",
             "type": "Researcher"
         },
         {
             "name": "Segl, Karl",
-            "affiliation": "GFZ Helmholtz Centre for Geosciences GFZ, Section 1.4 - Remote Sensing and Geoinformatics",
+            "affiliation": "GFZ Helmholtz Centre for Geosciences, Section 1.4 - Remote Sensing and Geoinformatics",
             "type": "WorkPackageLeader"
         },
         {

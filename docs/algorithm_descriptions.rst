@@ -192,8 +192,8 @@ Spatial Co-Registration
 
 EnPT enables the geometric adaptation of EnMAP data to a user-provided image scene (e.g. Sentinel-2). Spatial
 misregistrations are detected using the open-source Python package `AROSICS`_ (An Automated and Robust Open-Source
-Image Co-Registration Software for Multi-Sensor Satellite Data). It has been developed at the German Research Centre
-for Geosciences (GFZ) Potsdam. For detailed algorithm description and use cases refer to the corresponding
+Image Co-Registration Software for Multi-Sensor Satellite Data). It has been developed at the GFZ Helmholtz Centre
+for Geosciences, Germany. For detailed algorithm description and use cases refer to the corresponding
 (open-access) paper that can be found here:
 `Scheffler D, Hollstein A, Diedrich H, Segl K, Hostert P. AROSICS: An Automated and Robust Open-Source Image
 Co-Registration Software for Multi-Sensor Satellite Data. Remote Sensing. 2017; 9(7):676`__.
