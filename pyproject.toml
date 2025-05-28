@@ -48,10 +48,10 @@ authors = [
 maintainers = [
     {name = "Daniel Scheffler", email = "daniel.scheffler@gfz.de"},
 ]
-license = {text = "GPL-3.0-or-later"}
+license = "GPL-3.0-or-later"
+license-files = ["LICEN[CS]E*", "AUTHORS.rst"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -134,7 +134,6 @@ enpt = "enpt.cli:main"
 [tool.setuptools]
 zip-safe = false
 include-package-data = true
-license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 namespaces = false
