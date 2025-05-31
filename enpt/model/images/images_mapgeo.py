@@ -36,6 +36,7 @@ from os import path, makedirs
 
 import numpy as np
 from geoarray import GeoArray, NoDataMask
+from osgeo import gdal
 
 from .image_baseclasses import _EnMAP_Image
 from .images_sensorgeo import EnMAPL1Product_SensorGeo
@@ -343,6 +344,15 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 else:
                     self.logger.warning(f"The '{attrName}' attribute cannot be saved because it does not exist in the "
                                         f"current EnMAP image.")
+
+            if attrName == 'data' and self.cfg.output_format != 'ENVI':
+                ds: gdal.Dataset
+                with gdal.Open(outpath, gdal.GA_Update) as ds:
+                    for i in range(ds.RasterCount):
+                        band: gdal.Band = ds.GetRasterBand(i + 1)
+                        wvl, fwhm = self.meta.wvl_center[i] / 1000., self.meta.fwhm[i] / 1000.
+                        band.SetMetadataItem('CENTRAL_WAVELENGTH_UM', str(wvl), 'IMAGERY')
+                        band.SetMetadataItem('FWHM_UM', str(fwhm), 'IMAGERY')
 
         # TODO remove GDAL's *.aux.xml files?
 
