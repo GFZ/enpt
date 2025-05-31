@@ -11,6 +11,7 @@ History
   is extended for ISOFIT and isofit is added as a new package requirement.
 * !110/!111:Replaced old GFZ emails and institute name.
 * !112: Dropped Python 3.8 support due to end-of-life status and add official support for 3.12.
+* !113: Adapted license declaration in pyproject.toml to new PEP 639.
 
 0.21.1 (2025-03-25)
 -------------------
