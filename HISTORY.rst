@@ -2,8 +2,8 @@
 History
 =======
 
-1.0.0 (coming soon)
--------------------
+1.0.0 (2025-06-02)
+------------------
 
 * !106: Implemented ISOFIT as another atmospheric correction approach for land surfaces providing enhanced BOA
   reflectance quality, water vapor and aerosol optical depth retrievals, and estimation of BOA reflectance uncertainty.
