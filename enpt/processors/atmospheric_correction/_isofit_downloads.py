@@ -71,8 +71,8 @@ def download_isofit_resources(dir_output: str, logger: Logger = None):
                         break
 
             if not os.path.isfile(p_out):
-                raise FileNotFoundError(f"Download of {desc} zipfile failed after 3 attempts. "
-                                        f"Please download it manually from {url} and store it at {dir_output} directory. "
+                raise FileNotFoundError(f"Download of {desc} zipfile failed after 3 attempts. Please download it "
+                                        f"manually from {url} and store it at {dir_output} directory. "
                                         "Otherwise, the ISOFIT AC will not work.")
             elif md5sum != checksums[fn]:
                 raise ValueError(f"Downloaded {desc} zipfile is corrupted. "
