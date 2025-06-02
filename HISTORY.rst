@@ -5,7 +5,7 @@ History
 1.0.0 (2025-06-02)
 ------------------
 
-* !106: Implemented ISOFIT as another atmospheric correction approach for land surfaces providing enhanced BOA
+* !106/!116: Implemented ISOFIT as another atmospheric correction approach for land surfaces providing enhanced BOA
   reflectance quality, water vapor and aerosol optical depth retrievals, and estimation of BOA reflectance uncertainty.
   Besides the implementation of an ISOFIT wrapper, multiple frontend parameters are added to EnPT, the documentation,
   is extended for ISOFIT and isofit is added as a new package requirement.
@@ -15,6 +15,7 @@ History
 * !114: Added wavelength and FWHM information to L2A output (allows true-color visualizatioin the ENMAP-Box.
 * !115: Migrated to hatchling build backend to have PEP 639 support and support for specifying build exlusions.
   Removed MANIFEST.in. Removed setuptools-git from requirements.
+
 
 0.21.1 (2025-03-25)
 -------------------
