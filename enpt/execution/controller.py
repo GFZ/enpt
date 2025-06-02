@@ -306,4 +306,4 @@ class EnPT_Controller(object):
                 self.L1_obj.logger.warning(
                     f"Failed to completely delete EnPT´s temporary files at {self.cfg.working_dir}. \n"
                     f"Remaining files: \n"
-                    f"{'\n'.join(natsorted(remaining_files))}")
+                    f"{f'{chr(10)}'.join(natsorted(remaining_files))}")
