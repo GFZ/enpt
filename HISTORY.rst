@@ -16,6 +16,7 @@ History
 * !115: Migrated to hatchling build backend to have PEP 639 support and support for specifying build exlusions.
   Removed MANIFEST.in. Removed setuptools-git from requirements.
 
+
 0.21.1 (2025-03-25)
 -------------------
 
