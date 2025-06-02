@@ -57,6 +57,8 @@ def download_isofit_resources(dir_output: str, logger: Logger = None):
         download = not os.path.isfile(p_out) or md5(p_out) != checksums[fn]
 
         if download:
+            os.makedirs(dir_output, exist_ok=True)
+
             md5sum = ''
             for i in range(3):
                 urllib.request.urlretrieve(url, p_out)
