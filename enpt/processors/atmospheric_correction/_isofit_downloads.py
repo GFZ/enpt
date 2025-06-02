@@ -77,6 +77,10 @@ def download_isofit_resources(dir_output: str, logger: Logger = None):
                 raise ValueError(f"Downloaded {desc} zipfile is corrupted. "
                                  f"Please download it manually from {url} and store it at {dir_output} directory. "
                                  "Otherwise, the ISOFIT AC will not work.")
+
+            if logger is not None:
+                logger.info(f"{desc} zipfile successfully downloaded.")
+
         else:
             if logger is not None:
                 logger.info(f"{desc} zipfile already downloaded. Proceeding.")
