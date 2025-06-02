@@ -47,6 +47,7 @@ from importlib.util import find_spec
 from fnmatch import filter as fnfilter
 from glob import glob
 from multiprocessing import cpu_count
+from logging import getLogger
 
 import numpy as np
 import pytest
@@ -55,6 +56,7 @@ from geoarray import GeoArray
 from enpt.io.reader import L1B_Reader
 from enpt.processors.orthorectification import Orthorectifier
 from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
+from enpt.processors.atmospheric_correction._isofit_downloads import download_isofit_resources
 from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
 from enpt.processors.atmospheric_correction._isofit_lut_preparation import LUTTransformer
 
@@ -104,6 +106,16 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
         bbl[161:178] = False
         bbl[219:] = False
         assert np.max(np.abs(residuals[1, :4, bbl])) < 0.03, 'Residuals exceed 3% BOA reflectance.'
+
+    def test_download_isofit_resources(self):
+        with TemporaryDirectory() as td:
+            # download files
+            download_isofit_resources(td, getLogger('test_downloads'))
+            assert os.path.isfile(pjoin(td, 'lut.zip'))
+            assert os.path.isfile(pjoin(td, 'isofit_surface_spectra.zip'))
+
+            # cover the case of already downloaded files
+            download_isofit_resources(td, getLogger('test_downloads'))
 
     @pytest.mark.skip(reason="too slow for running in CI")
     def test_apply_oe__direct_call(self):
