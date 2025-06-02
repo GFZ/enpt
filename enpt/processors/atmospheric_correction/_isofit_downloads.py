@@ -32,9 +32,10 @@
 import urllib.request
 import os
 import hashlib
+from logging import Logger
 
 
-def download_isofit_resources(dir_output: str):
+def download_isofit_resources(dir_output: str, logger: Logger = None):
     """
     Download surface spectra and LUT file from remote EnPT repository for running ISOFIT.
 
@@ -53,18 +54,30 @@ def download_isofit_resources(dir_output: str):
         fn = os.path.basename(url)
         p_out = os.path.join(dir_output, fn)
 
-        for i in range(3):
-            urllib.request.urlretrieve(url, dir_output)
+        download = not os.path.isfile(p_out) or md5(p_out) != checksums[fn]
 
-            if os.path.isfile(p_out):
-                # verify checksum
-                if md5(p_out) == checksums[fn]:
-                    break
+        if download:
+            md5sum = ''
+            for i in range(3):
+                urllib.request.urlretrieve(url, p_out)
 
-        if not os.path.isfile(p_out):
-            raise FileNotFoundError(f"Download of {desc} zipfile failed after 3 attempts. "
-                                    f"Please download it manually from {url} and store it at {dir_output} directory. "
-                                    "Otherwise, the ISOFIT AC will not work.")
+                if os.path.isfile(p_out):
+                    # verify checksum
+                    md5sum = md5(p_out)
+                    if md5sum == checksums[fn]:
+                        break
+
+            if not os.path.isfile(p_out):
+                raise FileNotFoundError(f"Download of {desc} zipfile failed after 3 attempts. "
+                                        f"Please download it manually from {url} and store it at {dir_output} directory. "
+                                        "Otherwise, the ISOFIT AC will not work.")
+            elif md5sum != checksums[fn]:
+                raise ValueError(f"Downloaded {desc} zipfile is corrupted. "
+                                 f"Please download it manually from {url} and store it at {dir_output} directory. "
+                                 "Otherwise, the ISOFIT AC will not work.")
+        else:
+            if logger is not None:
+                logger.info(f"{desc} zipfile already downloaded. Proceeding.")
 
 
 def md5(file_path):

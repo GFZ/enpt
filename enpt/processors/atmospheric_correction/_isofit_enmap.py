@@ -123,9 +123,8 @@ class IsofitEnMAP(object):
         # make sure EnPT data for ISOFIT are downloaded (not contained in EnPT package distribution)
         self.path_surf_spec_zip = pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
         self.path_lut_zip = pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip')
-        if not isfile(self.path_surf_spec_zip) or not isfile(self.path_lut_zip):
-            self.logger.info("Downloading EnPT-internal resources for ISOFIT...")
-            download_isofit_resources(pjoin(path_enptlib, 'resources', 'isofit'))
+        self.logger.info("Downloading EnPT-internal resources for ISOFIT...")
+        download_isofit_resources(pjoin(path_enptlib, 'resources', 'isofit'), self.logger)
 
         # make sure ISOFIT's extra-files are downloaded
         self.logger.info('Downloading ISOFIT extra-files...')
