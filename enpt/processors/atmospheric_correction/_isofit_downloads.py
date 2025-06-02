@@ -39,7 +39,8 @@ def download_isofit_resources(dir_output: str, logger: Logger = None):
     """
     Download surface spectra and LUT file from remote EnPT repository for running ISOFIT.
 
-    :param dir_output: directory where to store the downloaded files
+    :param dir_output:  directory where to store the downloaded files
+    :param logger:      logger to use
     """
     url_enpt = "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/"
     url_spec = url_enpt + "-/raw/main/enpt/resources/isofit/isofit_surface_spectra.zip"
