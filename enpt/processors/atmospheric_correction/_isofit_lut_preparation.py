@@ -30,6 +30,7 @@
 """Module to prepare the pre-built LUT passed to ISOFIT."""
 
 import logging
+from typing import Union
 
 import netCDF4 as nc
 import numpy as np
@@ -39,7 +40,7 @@ from ...utils.logging import EnPT_Logger
 
 
 class LUTTransformer(object):
-    def __init__(self, path_lut: str, sza_scene: float, logger: EnPT_Logger | logging.Logger = None):
+    def __init__(self, path_lut: str, sza_scene: float, logger: Union[EnPT_Logger, logging.Logger] = None):
         """Get an instance of LUTTransformer.
 
         :param path_lut:    atmospheric look-up-table in binary format as created by Luis
