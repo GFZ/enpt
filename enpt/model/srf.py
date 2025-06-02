@@ -173,7 +173,7 @@ class SRF(object):
             plt.plot(self.srfs_wvl, srfs, '-', label='Band %s' % band)
         plt.title(title)
         plt.xlabel('wavelength [%s]' % self.wvl_unit)
-        plt.ylabel(f'{'normalized ' if normalize else ''}spectral response [-]')
+        plt.ylabel(f"{'normalized ' if normalize else ''}spectral response [-]")
         if legend:
             plt.legend(loc='upper right')
 
