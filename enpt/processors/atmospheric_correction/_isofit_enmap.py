@@ -75,6 +75,7 @@ from py_tools_ds.geo.coord_grid import get_coord_grid
 from py_tools_ds.geo.coord_trafo import transform_coordArray
 from geoarray import GeoArray
 
+from ._isofit_downloads import download_isofit_resources
 from ._isofit_lut_preparation import LUTTransformer
 from ...model.images import EnMAPL2Product_MapGeo
 from ...options.config import EnPTConfig, path_enptlib
@@ -118,6 +119,13 @@ class IsofitEnMAP(object):
 
         os.environ['SIXS_DIR'] = pjoin(Path.home(), '.isofit', 'sixs')
         # os.environ['EMULATOR_PATH'] = '/home/gfz-fe/scheffler/srtmnet/sRTMnet_v120.h5'  # duplicate of emulator_base
+
+        # make sure EnPT data for ISOFIT are downloaded (not contained in EnPT package distribution)
+        self.path_surf_spec_zip = pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
+        self.path_lut_zip = pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip')
+        if not isfile(self.path_surf_spec_zip) or not isfile(self.path_lut_zip):
+            self.logger.info("Downloading EnPT-internal resources for ISOFIT...")
+            download_isofit_resources(pjoin(path_enptlib, 'resources', 'isofit'))
 
         # make sure ISOFIT's extra-files are downloaded
         self.logger.info('Downloading ISOFIT extra-files...')
@@ -384,7 +392,7 @@ class IsofitEnMAP(object):
 
         path_surf_spec = (
                 self.cfg.path_isofit_surface_priors if self.cfg and self.cfg.path_isofit_surface_priors else
-                pjoin(path_enptlib, 'resources', 'isofit', 'isofit_surface_spectra.zip')
+                self.path_surf_spec_zip
         )
         with (ZipFile(path_surf_spec, "r") as zf,
               TemporaryDirectory(dir=self._tmpdir, prefix='surface__') as td):
@@ -417,7 +425,7 @@ class IsofitEnMAP(object):
         #       the processing time can be reduced by ~20-60 sec.
         fp_out = pjoin(path_outdir, 'EnMAP_LUT_MOD5_ISOFIT_formatted_1nm.nc')
 
-        with (ZipFile(pjoin(path_enptlib, 'resources', 'isofit', 'lut.zip'), 'r') as zf,
+        with (ZipFile(self.path_lut_zip, 'r') as zf,
               TemporaryDirectory(dir=self._tmpdir, prefix='lut__') as td):
             zf.extractall(td)
 
