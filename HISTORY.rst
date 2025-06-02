@@ -2,6 +2,12 @@
 History
 =======
 
+1.0.1 (2025-06-02)
+------------------
+
+* Fixed SyntaxError "f-string expression part cannot include a backslash".
+
+
 1.0.0 (2025-06-02)
 ------------------
 
