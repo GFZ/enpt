@@ -127,9 +127,12 @@ SICOR   |SICOR_Logo|
 
   advantages:
     * fast processing, low memory usage
+    * three-phases-of-water retrieval (water vapor, liquid water, ice)
     * BOA reflectance quality meets EnMAP mission requirements
+
   drawbacks:
-    * no water vapor and aerosol optical depth retrieval implemented
+    * no aerosol optical depth retrieval implemented
+    * no consideration of surface priors and consequently more noise in the output spectra
 
 ISOFIT
 ~~~~~~
@@ -148,6 +151,7 @@ ISOFIT
     * high BOA reflectance quality (well within the EnMAP mission requirements)
     * water vapor and aerosol optical depth retrieval (retrieval maps may be added to L2A output)
     * estimation of BOA reflectance uncertainty (optional output)
+    * consideration of surface prior spectra which helps to reduce noise in the output spectra
   drawbacks:
     * computationally expensive (optimized for server execution and workstations)
 
