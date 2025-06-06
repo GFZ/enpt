@@ -53,7 +53,7 @@ to resolve the following dependencies before the pip installer is run:
 * geopandas
 * glymur
 * h5py
-* isofit >=3.4.2
+* isofit >=3.4.3
 * numba
 * numpy
 * llvmlite
