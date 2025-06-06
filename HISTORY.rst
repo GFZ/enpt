@@ -2,6 +2,14 @@
 History
 =======
 
+1.0.4 (2025-06-06)
+------------------
+
+* Revised algorithm descriptions of SICOR and ISOFIT.
+* Bumped minimal version of enpt to be used for enpt_full_dev environment.
+* Bumped minimal version of isofit to fix Windows-related issues.
+
+
 1.0.3 (2025-06-02)
 ------------------
 
