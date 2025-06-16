@@ -5,7 +5,7 @@ History
 1.0.5 (2025-06-16)
 ------------------
 
-!116: Fixed OverflowError when transforming LUT into ISOFIT format.
+!117: Fixed OverflowError when transforming LUT into ISOFIT format.
 
 
 1.0.4 (2025-06-06)
