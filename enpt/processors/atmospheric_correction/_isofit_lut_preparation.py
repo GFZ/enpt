@@ -46,7 +46,7 @@ class LUTTransformer(object):
         :param path_lut:    atmospheric look-up-table in binary format as created by Luis
         """
         self.p_lut_bin = path_lut
-        self._offset = 0
+        self._offset = np.int32(0)
         self.sza_scene = sza_scene
         if logger:
             self.logger = logger
