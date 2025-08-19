@@ -116,7 +116,7 @@ If you commit new Python files, please note that they have to contain the follow
 
     # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
     #
-    # Copyright (C) 2018-2024 Karl Segl (GFZ Potsdam, segl@gfz.de), Daniel Scheffler
+    # Copyright (C) 2018–2025 Karl Segl (GFZ Potsdam, segl@gfz.de), Daniel Scheffler
     # (GFZ Potsdam, danschef@gfz.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz.de),
     # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz.de)
     #
