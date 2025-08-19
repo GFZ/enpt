@@ -164,3 +164,13 @@ create_github_release:
         - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
     except:
         - dev
+
+
+gitleaks: # Gitleaks security scanner
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  stage: test
+  before_script: []  # prevents git lfs pull
+  script:
+    - gitleaks git --platform gitlab --max-decode-depth 5 --verbose --redact $CI_PROJECT_DIR
