@@ -325,7 +325,8 @@ class AtmosphericCorrector(object):
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
-        # set initial value water_additional_results
+        # set initial values
+        land_additional_results = None
         water_additional_results = None
 
         # run the AC
@@ -378,6 +379,11 @@ class AtmosphericCorrector(object):
 
         # FIXME: Consider to also join SICOR's land_additional_results
         #  (contains three phases of water maps and several retrieval uncertainty measures)
+
+        if land_additional_results:
+            enmap_ImageL1.vnir.sicor_cwv = land_additional_results['cwv_model']
+            enmap_ImageL1.vnir.sicor_liq = land_additional_results['liq_model']
+            enmap_ImageL1.vnir.sicor_ice = land_additional_results['ice_model']
 
         # join additional results from ACwater/Polymer
         if water_additional_results and self.cfg.polymer_additional_results:
