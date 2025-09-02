@@ -281,7 +281,7 @@ produces a slightly different Level-2A data format. The current differences are 
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_SICOR_CWV.TIF                 |         no          | optional | SICOR's column water vapor output (estimated through three-phases-of-water-retrieval)             |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_SICOR_LIQ.TIF                 |         no          | optional | SICOR's liquid water content output (estimated through three-phases-of-water-retrieval)           |
+    |ENMAP*L2A*-ACOUT_SICOR_LIQ.TIF                 |         no          | optional | SICOR's liquid/canopy water content output (estimated through three-phases-of-water-retrieval)    |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_SICOR_ICE.TIF                 |         no          | optional | SICOR's ice content output (estimated through three-phases-of-water-retrieval)                    |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
