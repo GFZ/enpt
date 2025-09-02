@@ -2,6 +2,12 @@
 History
 =======
 
+1.1.0 (coming soon)
+-------------------
+
+* !121: Added SICOR's three phases of water retrieval maps (water vapor, liquid water, ice) to EnPT's L2A output.
+
+
 1.0.5 (2025-06-16)
 ------------------
 
