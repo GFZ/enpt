@@ -279,15 +279,15 @@ produces a slightly different Level-2A data format. The current differences are 
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-SPECTRAL_IMAGE.TIF                  |         yes         | yes      | EnMAP L2A bottom-of-atmosphere reflectance (land) or normalized water leaving reflectance (water) |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_SICOR_CWV.TIF                 |         no          | optional | SICOR's column water vapor output (estimated through three-phases-of-water-retrieval)             |
+    |ENMAP*L2A*-ACOUT_SICOR_CWV.TIF                 |         no          | yes      | SICOR's column water vapor output (estimated through three-phases-of-water-retrieval)             |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_SICOR_LIQ.TIF                 |         no          | optional | SICOR's liquid/canopy water content output (estimated through three-phases-of-water-retrieval)    |
+    |ENMAP*L2A*-ACOUT_SICOR_LIQ.TIF                 |         no          | yes      | SICOR's liquid/canopy water content output (estimated through three-phases-of-water-retrieval)    |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_SICOR_ICE.TIF                 |         no          | optional | SICOR's ice content output (estimated through three-phases-of-water-retrieval)                    |
+    |ENMAP*L2A*-ACOUT_SICOR_ICE.TIF                 |         no          | yes      | SICOR's ice content output (estimated through three-phases-of-water-retrieval)                    |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_ISOFIT_ATM_STATE.TIF          |         no          | optional | ISOFIT's atmospheric state output (estimated aerosol optical depth and water vapour)              |
+    |ENMAP*L2A*-ACOUT_ISOFIT_ATM_STATE.TIF          |         no          | yes      | ISOFIT's atmospheric state output (estimated aerosol optical depth and water vapour)              |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_ISOFIT_UNCERTAINTY.TIF        |         no          | optional | ISOFIT's uncertainty layer providing an estimate of the BOA reflectance uncertainty               |
+    |ENMAP*L2A*-ACOUT_ISOFIT_UNCERTAINTY.TIF        |         no          | yes      | ISOFIT's uncertainty layer providing an estimate of the BOA reflectance uncertainty               |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*RNIR.TIF             |         no          | optional | TOA reflectance at 863 nm corrected for Rayleigh scattering                                       |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
