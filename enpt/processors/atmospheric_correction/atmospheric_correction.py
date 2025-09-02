@@ -194,7 +194,7 @@ class AtmosphericCorrector(object):
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
     def _run_ac__water_mode(self, enmap_ImageL1: EnMAPL1Product_SensorGeo
-                            ) -> (np.ndarray, np.ndarray):
+                            ) -> (np.ndarray, np.ndarray, dict):
         """Run atmospheric correction in 'water' mode, i.e., use ACWater/Polymer for water surfaces only.
 
         NOTE:
