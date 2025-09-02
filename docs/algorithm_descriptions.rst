@@ -134,6 +134,12 @@ SICOR   |SICOR_Logo|
     * no aerosol optical depth retrieval implemented
     * no consideration of surface priors and consequently more noise in the output spectra
 
+  .. note::
+
+    With segmentation enabled (default), the three-phases-of-water retrieval maps are computed using gaussian
+    interpolation of the segment-wise retrieval results. To obtain per-pixel retrieval maps, segmentation must
+    be disabled.
+
 ISOFIT
 ~~~~~~
 
