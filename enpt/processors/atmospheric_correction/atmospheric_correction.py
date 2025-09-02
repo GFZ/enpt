@@ -237,7 +237,7 @@ class AtmosphericCorrector(object):
 
     def _run_ac__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
-                               ) -> (np.ndarray, np.ndarray, dict):
+                               ) -> (np.ndarray, np.ndarray, dict, dict):
         """Run atmospheric corr. in 'combined' mode, i.e., use SICOR for land and ACWater/Polymer for water surfaces.
 
         NOTE:
