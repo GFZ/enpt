@@ -160,6 +160,7 @@ class Orthorectifier(object):
 
         # run the orthorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
+                         'sicor_cwv', 'sicor_liq', 'sicor_ice',
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             attr = getattr(enmap_ImageL1.vnir, attrName)
 
