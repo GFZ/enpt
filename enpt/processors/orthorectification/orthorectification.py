@@ -162,7 +162,10 @@ class Orthorectifier(object):
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
                          'sicor_cwv', 'sicor_liq', 'sicor_ice',
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
-            attr = getattr(enmap_ImageL1.vnir, attrName)
+            if attrName.startswith('sicor_'):
+                attr = getattr(enmap_ImageL1.swir, attrName)  # SICOR attributes are stored in SWIR geometry
+            else:
+                attr = getattr(enmap_ImageL1.vnir, attrName)
 
             if attr is not None:
                 kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest

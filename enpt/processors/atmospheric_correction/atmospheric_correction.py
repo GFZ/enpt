@@ -377,12 +377,12 @@ class AtmosphericCorrector(object):
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
 
-        # join three phases of water maps from SICOR
+        # join three phases of water maps from SICOR (output is in SWIR geometry)
         if land_additional_results:
             # TODO: Consider to also join SICOR's retrieval uncertainty measures
-            enmap_ImageL1.vnir.sicor_cwv = land_additional_results['cwv_model']
-            enmap_ImageL1.vnir.sicor_liq = land_additional_results['liq_model']
-            enmap_ImageL1.vnir.sicor_ice = land_additional_results['ice_model']
+            enmap_ImageL1.swir.sicor_cwv = land_additional_results['cwv_model']
+            enmap_ImageL1.swir.sicor_liq = land_additional_results['liq_model']
+            enmap_ImageL1.swir.sicor_ice = land_additional_results['ice_model']
 
         # join additional results from ACwater/Polymer
         if water_additional_results and self.cfg.polymer_additional_results:
