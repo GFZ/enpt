@@ -190,7 +190,10 @@ class Orthorectifier(object):
         L2_obj.data[~mask_nodata_common] = L2_obj.data.nodata
 
         for attr_gA in [L2_obj.mask_landwater, L2_obj.mask_clouds, L2_obj.mask_cloudshadow, L2_obj.mask_haze,
-                        L2_obj.mask_snow, L2_obj.mask_cirrus]:
+                        L2_obj.mask_snow, L2_obj.mask_cirrus,
+                        L2_obj.sicor_cwv, L2_obj.sicor_liq, L2_obj.sicor_ice,
+                        L2_obj.polymer_logchl, L2_obj.polymer_logfb, L2_obj.polymer_rgli,
+                        L2_obj.polymer_rnir, L2_obj.polymer_bitmask]:
             if attr_gA is not None:
                 attr_gA[~mask_nodata_common] = attr_gA.nodata
 
