@@ -158,7 +158,7 @@ class AtmosphericCorrector(object):
         #                 optional (if options["retrieval"]["inversion"]["full"] = True):
         #                 jacobian, convergence, iterations, gain, averaging_kernel, cost_function,
         #                 dof (degrees of freedom), information_content, retrieval_noise, smoothing_error
-        #              -> SWIR geometry (?)  # FIXME
+        #              -> SWIR geometry  # FIXME
         boa_ref_vnir, boa_ref_swir, land_additional_results = \
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1,
                            options=self._get_sicor_options(enmap_ImageL1, land_only=False),
