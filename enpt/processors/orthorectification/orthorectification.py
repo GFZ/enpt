@@ -164,8 +164,10 @@ class Orthorectifier(object):
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
             if attrName.startswith('sicor_'):
                 attr = getattr(enmap_ImageL1.swir, attrName)  # SICOR attributes are stored in SWIR geometry
+                _lons, _lats = lons_swir, lats_swir
             else:
                 attr = getattr(enmap_ImageL1.vnir, attrName)
+                _lons, _lats = lons_vnir, lats_vnir
 
             if attr is not None:
                 kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest
@@ -174,8 +176,8 @@ class Orthorectifier(object):
                 kw_trafo_attr['tgt_nodata'] = attr.nodata
 
                 GT = Geometry_Transformer(
-                    lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
-                    lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
+                    lons=_lons if _lons.ndim == 2 else _lons[:, :, 0],
+                    lats=_lats if _lats.ndim == 2 else _lats[:, :, 0],
                     **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
