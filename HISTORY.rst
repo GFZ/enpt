@@ -2,8 +2,8 @@
 History
 =======
 
-1.1.0 (coming soon)
--------------------
+1.1.0 (2025-09-04)
+------------------
 
 * !119: Added GitLeaks CI job.
 * !120: Updated copyright.
