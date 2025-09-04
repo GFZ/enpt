@@ -9,6 +9,7 @@ History
 * !120: Updated copyright.
 * Updated Zenodo metadata due to upstream changes in the Zenodo API.
 * !121: Added SICOR's three phases of water retrieval maps (water vapor, liquid water, ice) to EnPT's L2A output.
+* !122: Fixed issue of EnPT log file not being moved to output folder.
 
 
 1.0.5 (2025-06-16)
