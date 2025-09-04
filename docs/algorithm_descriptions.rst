@@ -115,10 +115,12 @@ SICOR   |SICOR_Logo|
 ~~~~~
 
   `SICOR`_ (Sensor Independent Atmospheric Correction of optical Earth observation data from multi- and
-  hyperspectral instruments) is a Python-based open-source package developed at the GFZ Helmholtz Centre for
-  Geosciences, Germany. The algorithm uses an Optimal Estimation based inversion scheme that relies on
-  simulations obtained from the MODTRAN radiative transfer code. For details, please refer to the
-  `documentation pages of SICOR`_.
+  hyperspectral instruments) is a Python-based open-source package for atmospheric correction developed
+  at the GFZ Helmholtz Centre for Geosciences, Germany. The algorithm uses an Optimal Estimation based
+  inversion scheme that relies on simulations obtained from the MODTRAN radiative transfer code. Besides
+  the computation of surface reflectance, SICOR also estimates the three phases of water (water vapor,
+  liquid water, ice) which are included in the EnPT L2A product. For details about the SICOR algorithm
+  and the generated products, please refer to the `documentation pages of SICOR`_.
 
   .. |SICOR_Logo| image:: https://git.gfz-potsdam.de/EnMAP/sicor/raw/main/docs/images/sicor_logo_lr.png
            :target: https://git.gfz-potsdam.de/EnMAP/sicor
@@ -127,7 +129,7 @@ SICOR   |SICOR_Logo|
 
   advantages:
     * fast processing, low memory usage
-    * three-phases-of-water retrieval (water vapor, liquid water, ice)
+    * `three-phases-of-water retrieval`_ (water vapor, liquid water, ice)
     * BOA reflectance quality meets EnMAP mission requirements
 
   drawbacks:
@@ -339,6 +341,7 @@ Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/
+.. _`three-phases-of-water retrieval`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/algorithm_descriptions.html#three-phases-of-water-retrieval
 .. _`documentation pages of ISOFIT`: https://isofit.readthedocs.io/en/latest/index.html
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample
