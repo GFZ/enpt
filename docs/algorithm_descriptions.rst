@@ -115,10 +115,12 @@ SICOR   |SICOR_Logo|
 ~~~~~
 
   `SICOR`_ (Sensor Independent Atmospheric Correction of optical Earth observation data from multi- and
-  hyperspectral instruments) is a Python-based open-source package developed at the GFZ Helmholtz Centre for
-  Geosciences, Germany. The algorithm uses an Optimal Estimation based inversion scheme that relies on
-  simulations obtained from the MODTRAN radiative transfer code. For details, please refer to the
-  `documentation pages of SICOR`_.
+  hyperspectral instruments) is a Python-based open-source package for atmospheric correction developed
+  at the GFZ Helmholtz Centre for Geosciences, Germany. The algorithm uses an Optimal Estimation based
+  inversion scheme that relies on simulations obtained from the MODTRAN radiative transfer code. Besides
+  the computation of surface reflectance, SICOR also estimates the three phases of water (water vapor,
+  liquid water, ice) which are included in the EnPT L2A product. For details about the SICOR algorithm
+  and the generated products, please refer to the `documentation pages of SICOR`_.
 
   .. |SICOR_Logo| image:: https://git.gfz-potsdam.de/EnMAP/sicor/raw/main/docs/images/sicor_logo_lr.png
            :target: https://git.gfz-potsdam.de/EnMAP/sicor
@@ -127,12 +129,18 @@ SICOR   |SICOR_Logo|
 
   advantages:
     * fast processing, low memory usage
-    * three-phases-of-water retrieval (water vapor, liquid water, ice)
+    * `three-phases-of-water retrieval`_ (water vapor, liquid water, ice)
     * BOA reflectance quality meets EnMAP mission requirements
 
   drawbacks:
     * no aerosol optical depth retrieval implemented
     * no consideration of surface priors and consequently more noise in the output spectra
+
+  .. note::
+
+    With segmentation enabled (default), the three-phases-of-water retrieval maps are computed using gaussian
+    interpolation of the segment-wise retrieval results. To obtain per-pixel retrieval maps, segmentation must
+    be disabled.
 
 ISOFIT
 ~~~~~~
@@ -273,9 +281,15 @@ produces a slightly different Level-2A data format. The current differences are 
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-SPECTRAL_IMAGE.TIF                  |         yes         | yes      | EnMAP L2A bottom-of-atmosphere reflectance (land) or normalized water leaving reflectance (water) |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_ISOFIT_ATM_STATE.TIF          |         no          | optional | ISOFIT's atmospheric state output (estimated aerosol optical depth and water vapour)              |
+    |ENMAP*L2A*-ACOUT_SICOR_CWV.TIF                 |         no          | yes      | SICOR's column water vapor output (estimated through three-phases-of-water-retrieval)             |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
-    |ENMAP*L2A*-ACOUT_ISOFIT_UNCERTAINTY.TIF        |         no          | optional | ISOFIT's uncertainty layer providing an estimate of the BOA reflectance uncertainty               |
+    |ENMAP*L2A*-ACOUT_SICOR_LIQ.TIF                 |         no          | yes      | SICOR's liquid/canopy water content output (estimated through three-phases-of-water-retrieval)    |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_SICOR_ICE.TIF                 |         no          | yes      | SICOR's ice content output (estimated through three-phases-of-water-retrieval)                    |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_ISOFIT_ATM_STATE.TIF          |         no          | yes      | ISOFIT's atmospheric state output (estimated aerosol optical depth and water vapour)              |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_ISOFIT_UNCERTAINTY.TIF        |         no          | yes      | ISOFIT's uncertainty layer providing an estimate of the BOA reflectance uncertainty               |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*RNIR.TIF             |         no          | optional | TOA reflectance at 863 nm corrected for Rayleigh scattering                                       |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
@@ -327,6 +341,7 @@ Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 .. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/
+.. _`three-phases-of-water retrieval`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/algorithm_descriptions.html#three-phases-of-water-retrieval
 .. _`documentation pages of ISOFIT`: https://isofit.readthedocs.io/en/latest/index.html
 .. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample

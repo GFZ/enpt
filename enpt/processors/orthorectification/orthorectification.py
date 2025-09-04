@@ -160,8 +160,14 @@ class Orthorectifier(object):
 
         # run the orthorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
+                         'sicor_cwv', 'sicor_liq', 'sicor_ice',
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
-            attr = getattr(enmap_ImageL1.vnir, attrName)
+            if attrName.startswith('sicor_'):
+                attr = getattr(enmap_ImageL1.swir, attrName)  # SICOR attributes are stored in SWIR geometry
+                _lons, _lats = lons_swir, lats_swir
+            else:
+                attr = getattr(enmap_ImageL1.vnir, attrName)
+                _lons, _lats = lons_vnir, lats_vnir
 
             if attr is not None:
                 kw_init_attr = kw_init.copy() if attrName not in rsp_nearest_list else kw_init_nearest
@@ -170,8 +176,8 @@ class Orthorectifier(object):
                 kw_trafo_attr['tgt_nodata'] = attr.nodata
 
                 GT = Geometry_Transformer(
-                    lons=lons_vnir if lons_vnir.ndim == 2 else lons_vnir[:, :, 0],
-                    lats=lats_vnir if lats_vnir.ndim == 2 else lats_vnir[:, :, 0],
+                    lons=_lons if _lons.ndim == 2 else _lons[:, :, 0],
+                    lats=_lats if _lats.ndim == 2 else _lats[:, :, 0],
                     **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
@@ -189,7 +195,10 @@ class Orthorectifier(object):
         L2_obj.data[~mask_nodata_common] = L2_obj.data.nodata
 
         for attr_gA in [L2_obj.mask_landwater, L2_obj.mask_clouds, L2_obj.mask_cloudshadow, L2_obj.mask_haze,
-                        L2_obj.mask_snow, L2_obj.mask_cirrus]:
+                        L2_obj.mask_snow, L2_obj.mask_cirrus,
+                        L2_obj.sicor_cwv, L2_obj.sicor_liq, L2_obj.sicor_ice,
+                        L2_obj.polymer_logchl, L2_obj.polymer_logfb, L2_obj.polymer_rgli,
+                        L2_obj.polymer_rnir, L2_obj.polymer_bitmask]:
             if attr_gA is not None:
                 attr_gA[~mask_nodata_common] = attr_gA.nodata
 

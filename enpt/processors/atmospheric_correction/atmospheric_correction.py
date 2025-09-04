@@ -158,7 +158,7 @@ class AtmosphericCorrector(object):
         #                 optional (if options["retrieval"]["inversion"]["full"] = True):
         #                 jacobian, convergence, iterations, gain, averaging_kernel, cost_function,
         #                 dof (degrees of freedom), information_content, retrieval_noise, smoothing_error
-        #              -> SWIR geometry (?)  # FIXME
+        #              -> SWIR geometry  # FIXME
         boa_ref_vnir, boa_ref_swir, land_additional_results = \
             sicor_ac_enmap(enmap_l1b=enmap_ImageL1,
                            options=self._get_sicor_options(enmap_ImageL1, land_only=False),
@@ -194,7 +194,7 @@ class AtmosphericCorrector(object):
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
     def _run_ac__water_mode(self, enmap_ImageL1: EnMAPL1Product_SensorGeo
-                            ) -> (np.ndarray, np.ndarray):
+                            ) -> (np.ndarray, np.ndarray, dict):
         """Run atmospheric correction in 'water' mode, i.e., use ACWater/Polymer for water surfaces only.
 
         NOTE:
@@ -237,7 +237,7 @@ class AtmosphericCorrector(object):
 
     def _run_ac__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
-                               ) -> (np.ndarray, np.ndarray, dict):
+                               ) -> (np.ndarray, np.ndarray, dict, dict):
         """Run atmospheric corr. in 'combined' mode, i.e., use SICOR for land and ACWater/Polymer for water surfaces.
 
         NOTE:
@@ -325,7 +325,8 @@ class AtmosphericCorrector(object):
             f"Starting atmospheric correction for VNIR and SWIR detector in '{self.cfg.mode_ac}' mode. "
             f"Source radiometric unit code is '{enmap_ImageL1.meta.vnir.unitcode}'.")
 
-        # set initial value water_additional_results
+        # set initial values
+        land_additional_results = None
         water_additional_results = None
 
         # run the AC
@@ -376,8 +377,12 @@ class AtmosphericCorrector(object):
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
 
-        # FIXME: Consider to also join SICOR's land_additional_results
-        #  (contains three phases of water maps and several retrieval uncertainty measures)
+        # join three phases of water maps from SICOR (output is in SWIR geometry)
+        if land_additional_results:
+            # TODO: Consider to also join SICOR's retrieval uncertainty measures
+            enmap_ImageL1.swir.sicor_cwv = np.nan_to_num(land_additional_results['cwv_model'], nan=-9999)
+            enmap_ImageL1.swir.sicor_liq = np.nan_to_num(land_additional_results['liq_model'], nan=-9999)
+            enmap_ImageL1.swir.sicor_ice = np.nan_to_num(land_additional_results['ice_model'], nan=-9999)
 
         # join additional results from ACwater/Polymer
         if water_additional_results and self.cfg.polymer_additional_results:

@@ -79,6 +79,9 @@ class _EnMAP_Image(object):
         self._mask_cirrus = None
         self._dem = None
         self._deadpixelmap = None
+        self._sicor_cwv = None
+        self._sicor_liq = None
+        self._sicor_ice = None
         self._isofit_atm_state = None
         self._isofit_uncertainty = None
         self._polymer_logchl = None
@@ -312,6 +315,60 @@ class _EnMAP_Image(object):
     @deadpixelmap.deleter
     def deadpixelmap(self):
         self._deadpixelmap = None
+
+    @property
+    def sicor_cwv(self) -> GeoArray:
+        """Return SICOR's column water vapor output.
+
+        :return: geoarray.GeoArray
+        """
+        return self._sicor_cwv
+
+    @sicor_cwv.setter
+    def sicor_cwv(self, *geoArr_initArgs):
+        self._sicor_cwv = (
+            self._get_geoarray_with_datalike_geometry(
+                geoArr_initArgs,
+                'sicor_cwv',
+                nodataVal=-9999)
+        )
+        self._sicor_cwv.bandnames = ['column water vapor']
+
+    @property
+    def sicor_liq(self) -> GeoArray:
+        """Return SICOR's liquid water content output.
+
+        :return: geoarray.GeoArray
+        """
+        return self._sicor_liq
+
+    @sicor_liq.setter
+    def sicor_liq(self, *geoArr_initArgs):
+        self._sicor_liq = (
+            self._get_geoarray_with_datalike_geometry(
+                geoArr_initArgs,
+                'sicor_liq',
+                nodataVal=-9999)
+        )
+        self._sicor_liq.bandnames = ['path length of liquid water / canopy water content']
+
+    @property
+    def sicor_ice(self) -> GeoArray:
+        """Return SICOR's ice content output.
+
+        :return: geoarray.GeoArray
+        """
+        return self._sicor_ice
+
+    @sicor_ice.setter
+    def sicor_ice(self, *geoArr_initArgs):
+        self._sicor_ice = (
+            self._get_geoarray_with_datalike_geometry(
+                geoArr_initArgs,
+                'sicor_ice',
+                nodataVal=-9999)
+        )
+        self._sicor_ice.bandnames = ['path length of ice']
 
     @property
     def isofit_atm_state(self) -> GeoArray:

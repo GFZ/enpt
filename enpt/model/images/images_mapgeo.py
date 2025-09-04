@@ -300,6 +300,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         for attrName in ['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow',
                          'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
+                         'sicor_cwv', 'sicor_liq', 'sicor_ice',
                          'isofit_atm_state', 'isofit_uncertainty',
                          'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
 
@@ -308,7 +309,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 self.logger.warning('Currently, L2A dead pixel masks cannot be saved yet.')
                 continue
 
-            if attrName.startswith('polymer_') or attrName.startswith('isofit_'):
+            if attrName.startswith('sicor_') or attrName.startswith('isofit_') or attrName.startswith('polymer_'):
                 ext = \
                     'TIF' if self.cfg.output_format == 'GTiff' else \
                     'BSQ' if self.cfg.output_format == 'ENVI' and self.cfg.output_interleave == 'band' else \
@@ -321,6 +322,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                     polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
                     polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
                     polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',
+                    sicor_cwv=f'{self.meta.scene_basename}-ACOUT_SICOR_CWV.{ext}',
+                    sicor_liq=f'{self.meta.scene_basename}-ACOUT_SICOR_LIQ.{ext}',
+                    sicor_ice=f'{self.meta.scene_basename}-ACOUT_SICOR_ICE.{ext}',
                     isofit_atm_state=f'{self.meta.scene_basename}-ACOUT_ISOFIT_ATM_STATE.{ext}',
                     isofit_uncertainty=f'{self.meta.scene_basename}-ACOUT_ISOFIT_UNCERTAINTY.{ext}'
                 )
