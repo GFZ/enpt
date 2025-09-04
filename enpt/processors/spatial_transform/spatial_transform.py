@@ -301,12 +301,12 @@ class RPC_Geolayer_Generator(object):
         lat_norm = (lat - self.lat_off) / self.lat_scale  # latitude
         height_norm = (height - self.height_off) / self.height_scale  # elevation
 
-        msg = 'Coordinate normalization yields significantly out-of-range values for %s. ' \
-              'Check the coordinates and RPC coefficients.'
         # for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes', 'heights']):
         for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes']):
             if llh.min() < -1.1 or llh.max() > 1.1:
-                raise RuntimeError((llh.min(), llh.max()), msg % name)
+                raise RuntimeError((llh.min(), llh.max()),
+                                    f'Coordinate normalization yields significantly out-of-range values for {name}. '
+                                    f'Check the coordinates and RPC coefficients.')
 
         return lon_norm, lat_norm, height_norm
 

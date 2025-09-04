@@ -117,8 +117,8 @@ class EnPT_Controller(object):
         # input validation
         if not os.path.isdir(path_enmap_image) and \
            not (os.path.exists(path_enmap_image) and zipfile.is_zipfile(path_enmap_image)):
-            raise ValueError("The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
-                             "archive. Received %s." % path_enmap_image)
+            raise ValueError(f"The parameter 'path_enmap_image' must be a directory or the path to an existing zip "
+                             f"archive. Received {path_enmap_image}")
 
         # extract L1B image archive if needed
         if zipfile.is_zipfile(path_enmap_image):
