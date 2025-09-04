@@ -33,6 +33,7 @@ import logging
 from types import SimpleNamespace
 from typing import Tuple, Optional  # noqa: F401
 from os import path, makedirs
+import shutil
 
 import numpy as np
 from geoarray import GeoArray, NoDataMask
@@ -369,5 +370,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
             metaF.write(metadata_string)
 
         self.logger.info("L2A product successfully written!")
+
+        # move logfile to output folder and rename to L2A format
+        shutil.move(self.logger.path_logfile, path.join(product_dir, f'{self.meta.scene_basename}__EnPT.log'))
 
         return product_dir
