@@ -63,7 +63,7 @@ class EnPT_Logger(logging.Logger):
         # attributes that need to be present in order to unpickle the logger via __setstate_
         self.name_logfile = name_logfile
         self.fmt_suffix = fmt_suffix
-        self.path_logfile = path_logfile
+        self.path_logfile = os.path.abspath(path_logfile)
         self.log_level = log_level
 
         super(EnPT_Logger, self).__init__(name_logfile)
