@@ -380,9 +380,9 @@ class AtmosphericCorrector(object):
         # join three phases of water maps from SICOR (output is in SWIR geometry)
         if land_additional_results:
             # TODO: Consider to also join SICOR's retrieval uncertainty measures
-            enmap_ImageL1.swir.sicor_cwv = land_additional_results['cwv_model']
-            enmap_ImageL1.swir.sicor_liq = land_additional_results['liq_model']
-            enmap_ImageL1.swir.sicor_ice = land_additional_results['ice_model']
+            enmap_ImageL1.swir.sicor_cwv = np.nan_to_num(land_additional_results['cwv_model'], nan=-9999)
+            enmap_ImageL1.swir.sicor_liq = np.nan_to_num(land_additional_results['liq_model'], nan=-9999)
+            enmap_ImageL1.swir.sicor_ice = np.nan_to_num(land_additional_results['ice_model'], nan=-9999)
 
         # join additional results from ACwater/Polymer
         if water_additional_results and self.cfg.polymer_additional_results:
