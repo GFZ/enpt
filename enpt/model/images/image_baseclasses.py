@@ -350,7 +350,7 @@ class _EnMAP_Image(object):
                 'sicor_liq',
                 nodataVal=-9999)
         )
-        self._sicor_liq.bandnames = ['liquid water content']
+        self._sicor_liq.bandnames = ['path length of liquid water / canopy water content']
 
     @property
     def sicor_ice(self) -> GeoArray:
@@ -368,7 +368,7 @@ class _EnMAP_Image(object):
                 'sicor_ice',
                 nodataVal=-9999)
         )
-        self._sicor_ice.bandnames = ['ice content']
+        self._sicor_ice.bandnames = ['path length of ice']
 
     @property
     def isofit_atm_state(self) -> GeoArray:
