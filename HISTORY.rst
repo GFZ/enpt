@@ -2,6 +2,12 @@
 History
 =======
 
+1.1.1 (2025-09-10)
+------------------
+
+* Pinned ISOFIT to 3.4.3 due to current incompatibilities with isofit>=3.5.
+
+
 1.1.0 (2025-09-04)
 ------------------
 

@@ -11,7 +11,7 @@ dependencies:
   - cerberus
   - gdal
   - geoarray>=0.15.8
-  - isofit>=3.4.3
+  - isofit=3.4.3  # compatibility for >=3.5 not yet implemented
   - jsmin
   - lxml
   - matplotlib
