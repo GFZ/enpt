@@ -71,7 +71,7 @@ dependencies = [
     "cerberus",
     "gdal",
     "geoarray>=0.15.8",
-    "isofit>=3.4.3",
+    "isofit==3.4.3",  # compatiblity for >=3.5 is not yet implemented
     "jsmin",
     "lxml",
     "matplotlib",
