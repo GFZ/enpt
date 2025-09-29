@@ -46,7 +46,7 @@ from zipfile import ZipFile
 from multiprocessing import cpu_count
 import logging
 import weakref
-from warnings import warn
+from warnings import warn, filterwarnings, catch_warnings
 
 import numpy as np
 from pyproj.crs import CRS
@@ -862,6 +862,29 @@ class IsofitEnMAP(object):
                         posterior_uncertainty_file=paths.uncert_working_path
                     )
                 else:
+                    # revise atmospheric state and uncertainty files
+                    # (contain more bands as if segmentation is enabled with ISOFIT 3.4.3)
+                    # TODO: remove this as soon as the issue is fixed in ISOFIT
+                    p_state = isocfg['output']['estimated_state_file']
+                    p_uncert = isocfg['output']['posterior_uncertainty_file']
+                    p_state_rev = p_state.replace('.bsq', '_rev.bsq')
+                    p_uncert_rev = p_uncert.replace('.bsq', '_rev.bsq')
+
+                    with catch_warnings():
+                        filterwarnings('ignore', category=RuntimeWarning, message='Band names could not be set')
+
+                        state = GeoArray(p_state)
+                        GeoArray(state[:, :, np.arange(state.bands)[-2]:],
+                                 state.gt, state.prj, bandnames=['AERFRAC_2', 'H2OSTR'], q=True) \
+                            .save(p_state_rev)
+
+                        uncert = GeoArray(p_uncert)
+                        GeoArray(uncert[:, :, :np.arange(uncert.bands)[-2]], uncert.gt, uncert.prj, q=True) \
+                            .save(p_uncert_rev)
+
+                    isocfg['output']['estimated_state_file'] = p_state_rev
+                    isocfg['output']['posterior_uncertainty_file'] = p_uncert_rev
+
                     self.logger.info("ISOFIT finished.")
                     return isocfg['output']
 
