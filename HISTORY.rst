@@ -2,10 +2,17 @@
 History
 =======
 
+1.1.2 (2025-09-29)
+------------------
+
+* !124: Implemented workaround for unexpected number of bands in the state and uncertainty files produced by
+  ISOFIT with segmentation disabled (fixes #144).
+
+
 1.1.1 (2025-09-10)
 ------------------
 
-* Pinned ISOFIT to 3.4.3 due to current incompatibilities with isofit>=3.5.
+* !123: Pinned ISOFIT to 3.4.3 due to current incompatibilities with isofit>=3.5.
 
 
 1.1.0 (2025-09-04)
