@@ -139,7 +139,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
                                                               self.detector_meta.lat_UL_UR_LL_LR)),
                                CPUs=self.cfg.CPUs,
-                               progress=~self.cfg.disable_progress_bars)
+                               progress=not self.cfg.disable_progress_bars)
             DP.fill_gaps()  # FIXME this will also be needed at other places
 
             R, C = self.data.shape[:2]
@@ -236,7 +236,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                           img2.detector_meta.lat_UL_UR_LL_LR))
             elevation = DEM_Processor(img2.cfg.path_dem,
                                       enmapIm_cornerCoords=img2_cornerCoords,
-                                      progress=~self.cfg.disable_progress_bars).dem \
+                                      progress=not self.cfg.disable_progress_bars).dem \
                 if img2.cfg.path_dem else self.cfg.average_elevation
 
             LL, LR = compute_mapCoords_within_sensorGeoDims(

@@ -253,7 +253,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
                                                self.meta.lat_UL_UR_LL_LR)),
                 CPUs=self.cfg.CPUs,
-                progress=~self.cfg.disable_progress_bars,
+                progress=not self.cfg.disable_progress_bars,
             )
             DP.fill_gaps()  # FIXME this will also be needed at other places
             self._dem =\
