@@ -48,10 +48,12 @@ __author__ = 'Daniel Scheffler'
 class DEM_Processor(object):
     def __init__(self, dem_path_geoarray: Union[str, GeoArray],
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
-                 CPUs: int = None):
-        self.dem = GeoArray(dem_path_geoarray)
+                 CPUs: int = None,
+                 progress: bool = False):
+        self.dem = GeoArray(dem_path_geoarray, progress=progress)
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.CPUs = CPUs or cpu_count()
+        self.progress = progress
 
         self._set_nodata_if_not_provided()
         self._validate_input()
@@ -111,7 +113,8 @@ class DEM_Processor(object):
         # get a GeoArray instance
         dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation).astype(np.int16),
                           geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
-                          projection=CRS(tgt_utm_epsg).to_wkt())
+                          projection=CRS(tgt_utm_epsg).to_wkt(),
+                          progress=False)
 
         return cls(dem_gA, corner_coords_lonlat)
 
@@ -132,7 +135,7 @@ class DEM_Processor(object):
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
         data_sensorgeo = GT.to_sensor_geometry(self.dem)
 
-        return GeoArray(data_sensorgeo)
+        return GeoArray(data_sensorgeo, progress=self.progress)
 
     def get_dem_in_map_geometry(self,
                                 mapBounds: tuple,
@@ -142,7 +145,8 @@ class DEM_Processor(object):
                                 ):
         # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
         xmin, ymin, xmax, ymax = mapBounds
-        dem = GeoArray(self.dem.filePath)  # do not overwrite self.dem due to in-place re-projection below
+        dem = GeoArray(self.dem.filePath,
+                       progress=self.progress)  # do not overwrite self.dem due to in-place re-projection below
 
         if not prj_equal(self.dem.prj, out_prj) or \
            not is_coord_grid_equal(dem.gt,
@@ -166,7 +170,8 @@ class DEM_Processor(object):
                     out_gsd=out_gsd,
                     rspAlg='bilinear'
                 ),
-                nodata=dem.nodata
+                nodata=dem.nodata,
+                progress=self.progress
             )
         )
         return dem_mapgeo
