@@ -2,6 +2,12 @@
 History
 =======
 
+1.1.3 (coming soon)
+-------------------
+
+* !125: Fixed #143 (DEM preprocessing progress not muted if land_ac_alg='ISOFIT' and progress=False).
+
+
 1.1.2 (2025-09-29)
 ------------------
 
