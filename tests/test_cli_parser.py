@@ -58,6 +58,7 @@ class Test_CLIParser(TestCase):
         self.parser_run = run_path(path_run_enpt)['get_enpt_argparser']()
         self.get_config = run_path(path_run_enpt)['get_config']
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_param_acceptance(self):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--CPUs', '10'])
@@ -72,6 +73,7 @@ class Test_CLIParser(TestCase):
         assert config.CPUs == cpu_count()
 
     @patch('sys.stderr', new_callable=StringIO)  # catch STDERR so it does not pollute the test output
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_param_list(self, mock_stderr):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--target_coord_grid', '0', '30', '0', '30'])
@@ -83,6 +85,7 @@ class Test_CLIParser(TestCase):
         assert '-tgtgrid/--target_coord_grid: expected 4 arguments' in mock_stderr.getvalue()
 
     @patch('sys.stderr', new_callable=StringIO)  # catch STDERR so it does not pollute the test output
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_param_boolean(self, mock_stderr):
         parsed_args = self.parser_run.parse_args(self.baseargs +
                                                  ['--enable_ac', 'True'])
@@ -107,6 +110,7 @@ class Test_CLIParser(TestCase):
 
         assert '--enable_ac: Boolean value expected.' in mock_stderr.getvalue()
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_json_opts(self):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['--json_config', '{"general_opts": {"CPUs": 10}}'])
@@ -118,6 +122,7 @@ class Test_CLIParser(TestCase):
         config = self.get_config(parsed_args)
         assert config.CPUs == cpu_count()
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_tgtprj(self):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['-tgtprj', 'Geographic'])
@@ -132,6 +137,7 @@ class Test_CLIParser(TestCase):
         CTR = enpt.EnPT_Controller(config)
         assert CTR.cfg.target_projection_type == 'UTM'
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_tgtepsg(self):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['-tgtepsg', '32617'])
@@ -147,6 +153,7 @@ class Test_CLIParser(TestCase):
         assert CTR.cfg.target_projection_type == 'Geographic'
         assert CTR.cfg.target_epsg == 4326
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_output_nodata_value(self):
         parsed_args = self.parser_run.parse_args(
             self.baseargs + ['-ond', '-32768'])
