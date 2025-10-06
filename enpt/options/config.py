@@ -109,8 +109,7 @@ config_for_testing_water = dict(
     polymer_root=path_polymer,
     threads=-1,
     blocksize=100,
-    vswir_overlap_algorithm='swir_only',
-    CPUs=16
+    vswir_overlap_algorithm='swir_only'
 )
 
 
@@ -127,8 +126,6 @@ config_for_testing = dict(
     disable_progress_bars=True,
     is_dummy_dataformat=True,
     enable_ac=False,
-    ortho_resampAlg='bilinear',
-    CPUs=16
 )
 
 
@@ -191,7 +188,6 @@ config_for_testing_dlr = dict(
     enable_ac=True,
     mode_ac='land',
     land_ac_alg='SICOR',
-    CPUs=32,
     ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
 )
