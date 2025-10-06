@@ -63,11 +63,13 @@ class Test_get_options(TestCase):
 
 
 class Test_EnPTConfig(TestCase):
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_plain_args(self):
         cfg = EnPTConfig(CPUs=10)
         assert isinstance(cfg, EnPTConfig)
         assert cfg.CPUs == 10
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_jsonconfig_str_allfine(self):
         cfg = '{"a": 1 /*comment*/, "b":2}'
         cfg = EnPTConfig(json_config=cfg)
@@ -93,16 +95,19 @@ class Test_EnPTConfig(TestCase):
         with pytest.raises(ValueError):
             EnPTConfig(json_config=cfg)
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_jsonconfig_file(self):
         cfg = os.path.join(path_options_default)
         cfg = EnPTConfig(json_config=cfg)
         assert isinstance(cfg, EnPTConfig)
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_jsonconfig_param_acceptance(self):
         cfg = EnPTConfig(json_config='{"general_opts": {"CPUs": 10}}')
         assert isinstance(cfg, EnPTConfig)
         assert cfg.CPUs == 10
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_to_jsonable_dict(self):
         cfg = EnPTConfig()
         jsonable_dict = cfg.to_jsonable_dict()
@@ -111,6 +116,7 @@ class Test_EnPTConfig(TestCase):
         # test if dict is jsonable
         dumps(jsonable_dict)
 
+    @pytest.mark.filterwarnings("ignore:No digital elevation model provided:RuntimeWarning")
     def test_to_dict_validity(self):
         cfg = EnPTConfig()
         params = cfg.to_dict()
