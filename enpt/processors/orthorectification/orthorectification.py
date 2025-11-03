@@ -276,7 +276,7 @@ class Orthorectifier(object):
                                                           self.cfg.target_coord_grid['y'],)
 
         enmap_ImageL1.logger.info('Computed common target extent of orthorectified image (xmin, ymin, xmax, ymax in '
-                                  'EPSG %s): %s' % (tgt_epsg, str(common_extent_prj)))
+                                  'EPSG %s): %s' % (tgt_epsg, tuple(float(x) for x in common_extent_prj)))
 
         return common_extent_prj
 
