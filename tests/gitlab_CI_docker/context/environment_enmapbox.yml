@@ -14,7 +14,7 @@ dependencies:
   - lightgbm
   - matplotlib
   - netcdf4
-  - numba>=0.57
+  - numba>=0.63
   - numpy
   - pyopengl
   - qgis>=3.40.3
