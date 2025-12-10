@@ -29,3 +29,17 @@ dependencies:
   - sicor>=0.19.1
   - tqdm
   - utm
+
+  # test/doc/lint requirements
+  - flake8
+  - pycodestyle
+  - pydocstyle
+  - pylint
+  - pytest
+  - pytest-cov
+  - sphinx-argparse
+  - sphinx_rtd_theme
+  - urlchecker
+
+  - pip:
+    - pytest-reporter-html1
