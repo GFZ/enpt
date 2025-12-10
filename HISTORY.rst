@@ -6,6 +6,7 @@ History
 -------------------
 
 * !125: Fixed #143 (DEM preprocessing progress not muted if land_ac_alg='ISOFIT' and progress=False).
+* !126: Updated numba pinning to >=0.63 to fix SegmentationFaults that showed up on Linux in the context of EnSoMAP.
 
 
 1.1.2 (2025-09-29)
