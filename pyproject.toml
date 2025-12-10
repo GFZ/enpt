@@ -110,7 +110,7 @@ doc = [
 test = [
     "pytest",
     "pytest-cov",
-    "pytest-reporter-html1",
+    "pytest-reporter-html1<0.9.5",  # 0.9.5 requires docutils>=0.22 -> not yet supported by sphinx/sphinx_rtd_theme
     "urlchecker",
 ]
 lint = [
