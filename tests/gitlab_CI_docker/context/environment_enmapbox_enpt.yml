@@ -4,7 +4,7 @@ channels: &id1
   - conda-forge
 
 dependencies:
-  - python>=3.9.*
+  - python>=3.10
   - pip  # avoids that conda uses the wrong pip
   - astropy
   - catboost
