@@ -50,7 +50,6 @@ license-files = ["LICEN[CS]E*", "AUTHORS.rst"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -64,7 +63,7 @@ keywords = [
     "satellite",
     "processing chain"
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "acwater>=0.3.0",
     "arosics>=1.0.0",
