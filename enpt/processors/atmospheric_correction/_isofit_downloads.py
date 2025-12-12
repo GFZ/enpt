@@ -42,7 +42,7 @@ def download_isofit_resources(dir_output: str, logger: Logger = None):
     :param dir_output:  directory where to store the downloaded files
     :param logger:      logger to use
     """
-    url_enpt = "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/"
+    url_enpt = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/"
     url_spec = url_enpt + "-/raw/main/enpt/resources/isofit/isofit_surface_spectra.zip"
     url_lut = url_enpt + "-/raw/main/enpt/resources/isofit/lut.zip"
 

@@ -122,8 +122,8 @@ SICOR   |SICOR_Logo|
   liquid water, ice) which are included in the EnPT L2A product. For details about the SICOR algorithm
   and the generated products, please refer to the `documentation pages of SICOR`_.
 
-  .. |SICOR_Logo| image:: https://git.gfz-potsdam.de/EnMAP/sicor/raw/main/docs/images/sicor_logo_lr.png
-           :target: https://git.gfz-potsdam.de/EnMAP/sicor
+  .. |SICOR_Logo| image:: https://git.gfz.de/EnMAP/sicor/raw/main/docs/images/sicor_logo_lr.png
+           :target: https://git.gfz.de/EnMAP/sicor
            :width: 80px
            :alt: SICOR Logo
 
@@ -197,8 +197,8 @@ ACwater/Polymer
 Spatial Co-Registration
 ***********************
 
-.. image:: https://git.gfz-potsdam.de/danschef/arosics/raw/main/docs/images/arosics_logo.png
-   :target: https://git.gfz-potsdam.de/danschef/arosics
+.. image:: https://git.gfz.de/danschef/arosics/raw/main/docs/images/arosics_logo.png
+   :target: https://git.gfz.de/danschef/arosics
    :width: 80px
    :alt: AROSICS Logo
 
@@ -338,11 +338,11 @@ The **Polymer quality flags bitmask** represents a bit-encoded product with the 
 Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 
 
-.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/
 .. _`three-phases-of-water retrieval`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/algorithm_descriptions.html#three-phases-of-water-retrieval
 .. _`documentation pages of ISOFIT`: https://isofit.readthedocs.io/en/latest/index.html
-.. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
+.. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample
 .. _`Park & Ruddick (2005)`: https://opg.optica.org/ao/abstract.cfm?uri=ao-44-7-1236

@@ -20,8 +20,8 @@ test_enpt:
 
     # install sicor and perhaps switch sicor branch
     # - rm -rf context/sicor
-    # - git clone https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
-    # # - git clone -b dev https://git.gfz-potsdam.de/EnMAP/sicor.git ./context/sicor
+    # - git clone https://git.gfz.de/EnMAP/sicor.git ./context/sicor
+    # # - git clone -b dev https://git.gfz.de/EnMAP/sicor.git ./context/sicor
     # - cd ./context/sicor
     # - git lfs install
     # - git lfs pull
