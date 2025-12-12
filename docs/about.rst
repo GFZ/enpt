@@ -22,7 +22,7 @@ Feature overview
 * orthorectification
 * write EnMAP Level-2A output data
 
-.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
-.. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
+.. _SICOR: https://git.gfz.de/EnMAP/sicor
+.. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
 .. _Polymer: https://forum.hygeos.com

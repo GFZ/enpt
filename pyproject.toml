@@ -96,10 +96,10 @@ file = "README.rst"
 content-type = "text/x-rst"
 
 [project.urls]
-"Source code" = "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT"
-"Issue Tracker" = "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/issues"
+"Source code" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT"
+"Issue Tracker" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/issues"
 "Documentation" = "https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc"
-"Change log" = "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst"
+"Change log" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst"
 "Zenodo" = "https://zenodo.org/records/8229436"
 
 [project.optional-dependencies]

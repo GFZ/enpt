@@ -11,10 +11,10 @@ more about the differences between EnMAP processing levels.
 As described in the :ref:`usage` section of this documentation, the input parameters of EnPT_ can be set using the
 Python application programming interface (API), the command line interface (CLI) or the graphical userface (GUI) within
 the EnMAP-Box_ in QGIS_. In this tutorial, we will use the GUI for simplicity. More information about the GUI can be
-found `here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp>`__.
+found `here <https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp>`__.
 
 
-.. _EnPT: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT
+.. _EnPT: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT
 .. _EnMAP: https://www.enmap.org/
 .. _EnMAP-Box: https://www.enmap.org/data_tools/enmapbox/
 .. _QGIS: https://www.qgis.org
@@ -35,14 +35,14 @@ This tutorial requires some software to be installed on your machine:
 Please see `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc/installation.html#installing-enpt-along-with-qgis-and-the-enmap-box-backend-gui>`__
 for a description to install all together into a single MiniForge Conda environment.
 
-.. _`EnPT EnMAP-Box App (GUI)`: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
+.. _`EnPT EnMAP-Box App (GUI)`: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 
 
 Data
 """"
 
 You can download a subset of an EnMAP Level-1B dataset from
-`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
+`here <https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/tree/master/tests/data/
 EnMAP_Level_1B/ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows0-99.zip>`__,
 which can be used to reproduce this tutorial. However, the actual EnMAP dataset that was used for this tutorial is
 not contained in the EnPT repository due to its file size.

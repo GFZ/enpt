@@ -14,7 +14,7 @@ Ground Segment.
 
 * Please check the documentation_ for installation and usage instructions and in depth information.
 * Information on how to **cite the EnPT Python package** can be found in the
-  `CITATION <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/CITATION>`__ file.
+  `CITATION <https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/CITATION>`__ file.
 
 
 License
@@ -41,10 +41,10 @@ Status
 
 |badge1| |badge2| |badge3| |badge4| |badge5| |badge6| |badge7| |badge8| |badge9|
 
-.. |badge1| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/pipeline.svg
-    :target: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
+.. |badge1| image:: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/pipeline.svg
+    :target: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/pipelines
 
-.. |badge2| image:: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/coverage.svg
+.. |badge2| image:: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/badges/main/coverage.svg
     :target: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
 
 .. |badge3| image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
@@ -57,7 +57,7 @@ Status
         :target: https://anaconda.org/conda-forge/enpt
 
 .. |badge6| image:: https://img.shields.io/pypi/l/enpt.svg
-    :target: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/LICENSE
+    :target: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/LICENSE
 
 .. |badge7| image:: https://img.shields.io/pypi/pyversions/enpt.svg
     :target: https://img.shields.io/pypi/pyversions/enpt.svg
@@ -74,7 +74,7 @@ History / Changelog
 -------------------
 
 You can find the protocol of recent changes in the EnPT package
-`here <https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst>`__.
+`here <https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst>`__.
 
 Credits
 -------
@@ -92,8 +92,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _documentation: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc
 .. _coverage: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/coverage/
 .. _pytest: https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/test_reports/report.html
-.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
-.. _AROSICS: https://git.gfz-potsdam.de/danschef/arosics
+.. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
 .. _Polymer: https://forum.hygeos.com

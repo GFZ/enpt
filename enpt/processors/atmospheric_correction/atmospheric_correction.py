@@ -76,7 +76,7 @@ class AtmosphericCorrector(object):
             options["retrieval"]["segmentation"] = self.cfg.enable_segmentation
 
             # TODO: issue is closed -> revise
-            # temporarily disable uncertainty measures to avoid https://git.gfz-potsdam.de/EnMAP/sicor/-/issues/86
+            # temporarily disable uncertainty measures to avoid https://git.gfz.de/EnMAP/sicor/-/issues/86
             # if set to False, uncertainty values are not contained in the additional output of SICOR
             options["retrieval"]["inversion"]["full"] = False
 

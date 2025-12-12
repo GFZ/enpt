@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 pkgname="enpt"
-repourl="https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT"
+repourl="https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT"
 
 context_dir="./context"
 dockerfile="${pkgname}_ci.docker"
@@ -63,7 +63,7 @@ gitlab-ci-multi-runner register \
   --non-interactive \
   --executor 'docker' \
   --docker-image '${tag}' \
-  --url 'https://git.gfz-potsdam.de' \
+  --url 'https://git.gfz.de' \
   --token '${token}' \
   --description '${runnername_remote}' \
   --docker-pull-policy='never'

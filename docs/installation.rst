@@ -132,7 +132,7 @@ To do so, run the following command on a Miniforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ conda env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ conda env create -n enpt_full -f https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
 
 Then activate the newly created conda_ environment and start QGIS_:
 
@@ -156,7 +156,7 @@ requirement polymer_ into the enpt_full environment as described above.
 
     .. code-block:: bash
 
-      $ conda env create -n enpt_full -f https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
+      $ conda env create -n enpt_full -f https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::
@@ -172,9 +172,9 @@ requirement polymer_ into the enpt_full environment as described above.
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
 .. _HYGEOS support forum: https://forum.hygeos.com
 .. _polymer: https://github.com/hygeos/polymer
-.. _SICOR: https://git.gfz-potsdam.de/EnMAP/sicor
+.. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
-.. _GUI: https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
+.. _GUI: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _EnMAP-Box: https://github.com/EnMAP-Box/enmap-box
 .. _QGIS: https://www.qgis.org
 .. _CDS registration page: https://cds.climate.copernicus.eu/

@@ -77,7 +77,7 @@
     ],
     "related_identifiers": [
         {
-            "identifier": "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
+            "identifier": "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
             "relation": "isSupplementTo",
             "resource_type": "software"
         },
@@ -96,7 +96,7 @@
         "code:programmingLanguage": [
             {"id": "python"}
         ],
-        "code:codeRepository": "https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
+        "code:codeRepository": "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT",
         "code:developmentStatus":  {"id": "active"}
     }
 }
