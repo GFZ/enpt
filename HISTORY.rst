@@ -7,6 +7,7 @@ History
 
 * !130: Replaced git.gfz-potsdam.de with git.gfz.de.
 * !131: Replaced deprecated call of np.trapz.
+* Pinned numpy to >=2.
 
 
 1.1.3 (2025-12-10)
