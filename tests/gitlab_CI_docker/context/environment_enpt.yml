@@ -17,7 +17,7 @@ dependencies:
   - matplotlib
   - mvgavg
   - natsort
-  - numpy
+  - numpy>=2
   - numpy-indexed
   - packaging
   - pandas
