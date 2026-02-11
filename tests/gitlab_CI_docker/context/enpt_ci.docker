@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 # copy some needed stuff to /root
 # NOTE: This fails for non-existing files with docker versions released before 2021.
 COPY *.yml /root/
-COPY sicor/dist/* /root/
+# COPY sicor/dist/* /root/
 COPY sRTMnet_v120* /root/.isofit/srtmnet/
 COPY 6sv-2.1.tar /root/.isofit/sixs/
 
@@ -19,9 +19,9 @@ RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
     conda clean -afy
 
 # force to install latest sicor version which is currently not available from PyPI/conda-forge
-RUN source activate ci_env && \
-    mamba remove sicor --force && \
-    pip install /root/sicor*.whl
+# RUN source activate ci_env && \
+#     mamba remove sicor --force && \
+#     pip install /root/sicor*.whl
 
 # install isofit using the dev branch (uninstall conda-version without touching dependencies)
 RUN source activate ci_env && \
