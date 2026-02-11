@@ -107,10 +107,10 @@ class AtmosphericCorrector(object):
         try:
             import acwater as _acwater  # noqa: F401
 
-            if parse_version(_acwater.__version__) < parse_version('0.3.0'):
+            if parse_version(_acwater.__version__) < parse_version('0.4.0'):
                 if self.cfg.mode_ac in ['water', 'combined']:
                     logger.warning(f"The installed version of ACwater (v{_acwater.__version__}) is too old. "
-                                   f"At least version 0.3.0 is required. Instead of ACwater, SICOR is applied to water "
+                                   f"At least version 0.4.0 is required. Instead of ACwater, SICOR is applied to water "
                                    f"surfaces as a workaround.")
 
                 return False
