@@ -86,7 +86,7 @@ Optional: Get an API key to download Polymer auxiliary data
 -----------------------------------------------------------
 
 If you intend to use `ACwater`_/`Polymer`_ for atmospheric correction over water surfaces,
-you need to get CDS API key to download auxiliary data at runtime.
+you need to get a CDS API key to download auxiliary data at runtime.
 For this, please register at the `CDS registration page`_ and store your `CDS API key`_
 in your home directory. Further details are given in the `ACwater Polymer installation instructions`_.
 
