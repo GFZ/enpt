@@ -24,9 +24,9 @@ RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
 #     pip install /root/sicor*.whl
 
 # install isofit using the dev branch (uninstall conda-version without touching dependencies)
-RUN source activate ci_env && \
-    mamba remove isofit --force && \
-    pip install git+https://github.com/isofit/isofit.git@dev
+# RUN source activate ci_env && \
+#     mamba remove isofit --force && \
+#     pip install git+https://github.com/isofit/isofit.git@dev
 
 # download sRTMnet model and aux files (slow but NASA host server will soon be replaced with Zenodo)
 RUN wget -nc -P /root/.isofit/srtmnet https://avng.jpl.nasa.gov/pub/PBrodrick/isofit/sRTMnet_v120.h5
