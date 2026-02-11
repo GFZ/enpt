@@ -88,7 +88,6 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         except ModuleNotFoundError as e:
             pytest.fail(f'POLYMER is not importable. Error was: {str(e)}.')
 
-    @pytest.mark.skipif(not find_spec('polymer'), reason='POLYMER is not installed.')
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
@@ -97,7 +96,6 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
                 pytest.fail(f"Polymer output 'ENMAP01*-ACOUT_POLYMER_{bn}.TIF' is missing.")
         # TODO: validate pixel values
 
-    @pytest.mark.skipif(not find_spec('polymer'), reason='POLYMER is not installed.')
     @patch('acwater.acwater.polymer_ac_enmap', None)
     def test_run_all_processors_without_acwater_installed(self):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
