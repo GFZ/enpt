@@ -15,7 +15,7 @@ test_enpt:
     - source activate ci_env
 
     # update some dependencies
-    - mamba install -y 'geoarray>=0.19.2'
+    # - mamba install -y 'geoarray>=0.19.2'
     # - pip install 'py_tools_ds>=0.14.23'
 
     # install sicor and perhaps switch sicor branch
@@ -31,7 +31,7 @@ test_enpt:
     # switch from the isofit conda-package to the current dev branch (most dependencies already resolved)
     # - pip install -U git+https://github.com/isofit/isofit.git@dev
     # - pip uninstall -y isofit  # use the main branch for now
-    - mamba install -y "isofit=3.4.3"  # compatibility for >=3.5 not yet implemented
+    # - mamba install -y "isofit=3.4.3"  # compatibility for >=3.5 not yet implemented
 
     # run tests
     - make pytest  # test are called here
