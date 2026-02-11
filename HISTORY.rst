@@ -8,6 +8,7 @@ History
 * !130: Replaced git.gfz-potsdam.de with git.gfz.de.
 * !131: Replaced deprecated call of np.trapz.
 * Pinned numpy to >=2.
+* !132: Adapted to ACWater 0.4.0 which now ships Polymer (also updated the installation instructions accordingly).
 
 
 1.1.3 (2025-12-10)
