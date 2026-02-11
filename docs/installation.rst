@@ -82,43 +82,18 @@ you through the process.
 
 
 
-Optional: Install Polymer for advanced atmospheric correction over water surfaces
----------------------------------------------------------------------------------
+Optional: Get an API key to download Polymer auxiliary data
+-----------------------------------------------------------
 
-For atmospheric correction of water surfaces using the Polymer algorithm instead of `SICOR`_/`ISOFIT`_ (which are mainly
-designed for land surfaces), the additional package polymer_ is required. The Polymer atmospheric correction is made
-available in EnPT by the ACwater_ package, a wrapper developed by AWI Bremerhaven, which is already contained in the
-default EnPT installation.
-
-1. To install the optional package polymer_, first activate the previously created enpt conda_ environment:
-
-   .. code-block:: bash
-
-    $ mamba activate enpt
-
-2. Then register at the `HYGEOS support forum`_, download polymer_ from there (EnPT was tested with polymer v4.16.1,
-   later versions may fail), unpack it and run the following commands from the unpacked root directory of polymer_:
-
-   .. code-block:: bash
-
-    $ make
-    $ make auxdata_common
-    $ make ancillary
-    $ mkdir -p ANCILLARY/ERA5
-    $ pip install -e .
+If you intend to use `ACwater`_/`Polymer`_ for atmospheric correction over water surfaces,
+you need to get CDS API key to download auxiliary data at runtime.
+For this, please register at the `CDS registration page`_ and store your `CDS API key`_
+in your home directory. Further details are given in the `ACwater Polymer installation instructions`_.
 
   .. note::
 
-    When using a conda_ environment on Linux or Mac OSX, the needed compilers to build polymer_
-    should be already installed. On Windows, you need to install the `Microsoft build tools for visual studio`_
-    including the C++ build tools, the latest versions of MSVCv142 - VS 2019 C++ x64/x86 build tools and Windows 10 SDK
-    (see `here <https://wiki.python.org/moin/WindowsCompilers>`__ for details).
-    However, polymer_ is currently *not Windows compatible* and will likely not run as expected.
-
-
-Apart from that, you need to register at the `CDS registration page`_ and install a `CDS API key`_. This is required
-to automatically download atmospheric AUX data at runtime, which are needed to run Polymer. Further details are
-given in the `ACwater Polymer installation instructions`_.
+    As of EnPT v1.1.4 and `ACwater`_ v0.4.0, the installation of the latest version of `Polymer`_ is
+    fully integrated into the installation of EnPT. A separate installation of Polymer is no longer required.
 
 
 Installing EnPT along with QGIS and the EnMAP-Box (backend + GUI)
@@ -170,8 +145,7 @@ requirement polymer_ into the enpt_full environment as described above.
 .. _conda: https://docs.conda.io
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
-.. _HYGEOS support forum: https://forum.hygeos.com
-.. _polymer: https://github.com/hygeos/polymer
+.. _Polymer: https://github.com/hygeos/polymer
 .. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _GUI: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
@@ -179,4 +153,3 @@ requirement polymer_ into the enpt_full environment as described above.
 .. _QGIS: https://www.qgis.org
 .. _CDS registration page: https://cds.climate.copernicus.eu/
 .. _CDS API key: https://cds.climate.copernicus.eu/how-to-api
-.. _Microsoft build tools for visual studio: https://visualstudio.microsoft.com/de/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16
