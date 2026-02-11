@@ -1,9 +1,5 @@
 FROM ci_base_ubuntu:0.5
 
-# set Polymer version string
-# NOTE: Polymer 4.16.1 compilation fails with Cython 3, https://github.com/conda-forge/acwater-feedstock/pull/4
-ENV polymer_v_str='polymer-v4.16.1'
-
 # use bash shell instead of sh shell for all docker commands
 SHELL ["/bin/bash", "-c"]
 
@@ -11,7 +7,6 @@ SHELL ["/bin/bash", "-c"]
 # NOTE: This fails for non-existing files with docker versions released before 2021.
 COPY *.yml /root/
 COPY sicor/dist/* /root/
-COPY ${polymer_v_str}.tar.gz /root/
 COPY sRTMnet_v120* /root/.isofit/srtmnet/
 COPY 6sv-2.1.tar /root/.isofit/sixs/
 
@@ -27,20 +22,6 @@ RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
 RUN source activate ci_env && \
     mamba remove sicor --force && \
     pip install /root/sicor*.whl
-
-# install Polymer into the ci_env environment
-RUN source activate ci_env && \
-    cd /root/ ; \
-    tar -zxvf ${polymer_v_str}.tar.gz ; \
-    cd ${polymer_v_str} ;\
-    make ;\
-    pip install -e . ;\
-    make auxdata_common ;\
-    mkdir -p ANCILLARY/ERA5/ ANCILLARY/METEO/ ;\
-    mkdir -p ANCILLARY/ERA5/2017/02/18
-
-# copy pre-downloaded AUX data to Polymer root to avoid at-runtime downloads
-COPY era5_20170218*.nc /root/${polymer_v_str}/ANCILLARY/ERA5/2017/02/18/
 
 # install isofit using the dev branch (uninstall conda-version without touching dependencies)
 RUN source activate ci_env && \
