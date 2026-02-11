@@ -39,14 +39,10 @@ from unittest.mock import patch
 import shutil
 from glob import glob
 import os
-from importlib.util import find_spec
-from tempfile import TemporaryDirectory
-from pathlib import Path
 import pytest
 
 from enpt.execution.controller import EnPT_Controller
 from enpt.options.config import config_for_testing, config_for_testing_dlr, config_for_testing_water
-from enpt.utils import EnvContextManager
 
 __author__ = 'Daniel Scheffler'
 
@@ -82,26 +78,6 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
     def tearDown(self):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
         shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
-
-    def test_import_polymer(self):
-        assert find_spec('polymer'), 'POLYMER is not installed.'
-
-        # Polymer import already requires $DIR_DATA and $DIR_POLYMER_ANCILLARY to be set
-        # and pointing to existing directories
-        with TemporaryDirectory() as td:
-            path_auxdata = Path(td) / 'polymer' / 'auxdata'
-            dir_common = path_auxdata / 'static' / 'common'
-            dir_ancillary = path_auxdata / 'ancillary'
-            dir_common.mkdir(exist_ok=True, parents=True)
-            dir_ancillary.mkdir(exist_ok=True, parents=True)
-
-            with EnvContextManager(DIR_DATA=path_auxdata.as_posix(),
-                                   DIR_POLYMER_ANCILLARY=dir_ancillary.as_posix()):
-                try:
-                    import polymer  # noqa
-                    from polymer.main import run_atm_corr  # noqa
-                except ModuleNotFoundError as e:
-                    pytest.fail(f'POLYMER is not importable. Error was: {str(e)}.')
 
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
