@@ -37,4 +37,4 @@ dependencies:
   - urlchecker
 
   - pip:
-    - pytest-reporter-html1<0.9.5  # 0.9.5 requires docutils>=0.22 which is not yet supported by sphinx/sphinx_rtd_theme
+    - pytest-reporter-html1>=0.9.5  # 0.9.4 misses constraint for docutils>=0.22
