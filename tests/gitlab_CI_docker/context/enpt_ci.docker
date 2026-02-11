@@ -15,7 +15,7 @@ RUN mamba update -y -n base mamba conda && \
     conda clean -afy
 
 # create ci_env environment
-RUN mamba env create -n ci_env -f /root/environment_enpt.yml && \
+RUN mamba env create -n ci_env -f /root/environment_enpt_dev.yml && \
     conda clean -afy
 
 # force to install latest sicor version which is currently not available from PyPI/conda-forge
