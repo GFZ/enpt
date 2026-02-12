@@ -33,11 +33,6 @@ test_enpt:
     # - pip uninstall -y isofit  # use the main branch for now
     # - mamba install -y "isofit=3.4.3"  # compatibility for >=3.5 not yet implemented
 
-    # workaround for wrong sphinx/docutils pinnings in conda-forge::sphinx_rtd_theme
-    # -> can be removed once https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41 is merged
-    - mamba uninstall -f -y sphinx_rtd_theme
-    - pip install sphinx_rtd_theme "pytest-reporter-html1>=0.9.5"
-
     # run tests
     - make pytest  # test are called here
 
