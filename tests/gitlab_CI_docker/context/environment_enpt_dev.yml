@@ -6,7 +6,7 @@ channels: &id1
 dependencies:
   - python>=3.10
   - pip  # avoids that conda uses the wrong pip
-  - acwater>=0.3.0
+  - acwater>=0.4.1
   - arosics>1.0.0
   - cerberus
   - gdal
@@ -38,8 +38,9 @@ dependencies:
   - pytest
   - pytest-cov
   - sphinx-argparse
-  - sphinx_rtd_theme
+  # - sphinx_rtd_theme  # pinnings out of sync - https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41
   - urlchecker
 
   - pip:
-    - pytest-reporter-html1<0.9.5  # 0.9.5 requires docutils>=0.22 which is not yet supported by sphinx/sphinx_rtd_theme
+    - sphinx_rtd_theme
+    - pytest-reporter-html1>=0.9.5  # 0.9.4 misses constraint for docutils>=0.22

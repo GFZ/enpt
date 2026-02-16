@@ -66,7 +66,7 @@ keywords = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "acwater>=0.3.0",
+    "acwater>=0.4.1",
     "arosics>=1.0.0",
     "cerberus",
     "gdal",
@@ -111,7 +111,7 @@ doc = [
 test = [
     "pytest",
     "pytest-cov",
-    "pytest-reporter-html1<0.9.5",  # 0.9.5 requires docutils>=0.22 -> not yet supported by sphinx/sphinx_rtd_theme
+    "pytest-reporter-html1>=0.9.5",  # 0.9.4 misses constraint for docutils>=0.22"
     "urlchecker",
 ]
 lint = [
