@@ -33,6 +33,8 @@ test_enpt:
     # - pip uninstall -y isofit  # use the main branch for now
     # - mamba install -y "isofit=3.4.3"  # compatibility for >=3.5 not yet implemented
 
+    - mamba install -y "acwater>=0.4.1"  # TODO remove after rebuilding the CI container
+
     # run tests
     - make pytest  # test are called here
 
