@@ -2,8 +2,8 @@
 History
 =======
 
-1.1.4 (coming soon)
--------------------
+1.2.0 (2026-02-16)
+------------------
 
 * !130: Replaced git.gfz-potsdam.de with git.gfz.de.
 * !131: Replaced deprecated call of np.trapz.
