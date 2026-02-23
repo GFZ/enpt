@@ -2,6 +2,13 @@
 History
 =======
 
+
+1.2.1 (coming soon)
+-------------------
+
+* !134: Blocked Polymer on Windows for now (AUX downloads and multiprocessing are not yet operable).
+
+
 1.2.0 (2026-02-16)
 ------------------
 

@@ -36,6 +36,7 @@ import numpy as np
 from multiprocessing import cpu_count
 from logging import Logger
 import sys
+import os
 
 from packaging.version import parse as parse_version
 from sicor.sicor_enmap import sicor_ac_enmap
@@ -104,6 +105,12 @@ class AtmosphericCorrector(object):
 
     def _is_acwater_operable(self, logger: Logger):
         """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
+        if os.name == 'nt':
+            logger.warning("The Polymer atmospheric correction for water is not yet fully operable on Windows. "
+                           "As a fallback, SICOR is applied to water surfaces instead.")
+
+            return False
+
         try:
             import acwater as _acwater  # noqa: F401
 
