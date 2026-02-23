@@ -106,7 +106,7 @@ class AtmosphericCorrector(object):
     def _is_acwater_operable(self, logger: Logger):
         """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
         if os.name == 'nt':
-            logger.warning(f"The Polymer atmospheric correction for water is not yet fully operable on Windows. "
+            logger.warning("The Polymer atmospheric correction for water is not yet fully operable on Windows. "
                            "As a fallback, SICOR is applied to water surfaces instead.")
 
             return False
