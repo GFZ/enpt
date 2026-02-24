@@ -77,6 +77,10 @@ class EnPT_Controller(object):
         self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
         self.L2_obj: Optional[EnMAPL2Product_MapGeo] = None
 
+    @property
+    def logger(self):
+        return self.L2_obj.logger if self.L2_obj else self.L1_obj.logger if self.L1_obj else None
+
     def extract_zip_archive(self, path_zipfile: str, subdir: str = '') -> str:
         """Extract the given EnMAP image zip archive and return the L1B image root directory path.
 
@@ -269,9 +273,8 @@ class EnPT_Controller(object):
                 self.run_orthorectification()
 
             self.write_output()
-
-            self.L1_obj.logger.info('Total runtime of the processing chain: %s'
-                                    % timedelta(seconds=time() - self._time_startup))
+            self.logger.info('Total runtime of the processing chain: %s'
+                             % timedelta(seconds=time() - self._time_startup))
 
         finally:
             self.cleanup()
