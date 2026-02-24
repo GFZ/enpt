@@ -3,8 +3,8 @@ History
 =======
 
 
-1.2.1 (coming soon)
--------------------
+1.2.1 (2026-02-25)
+------------------
 
 * !134: Blocked Polymer on Windows for now (AUX downloads and multiprocessing are not yet operable).
 * !135: Use latest version of EnPT in environment files to prevent installation of outdated versions.
