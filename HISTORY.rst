@@ -8,6 +8,7 @@ History
 
 * !134: Blocked Polymer on Windows for now (AUX downloads and multiprocessing are not yet operable).
 * !135: Use latest version of EnPT in environment files to prevent installation of outdated versions.
+* !136: Fixed #151 ([Windows] PermissionError when moving log file to final L2A product).
 
 
 1.2.0 (2026-02-16)
