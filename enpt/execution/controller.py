@@ -310,7 +310,7 @@ class EnPT_Controller(object):
 
             remaining_files = glob(os.path.join(self.cfg.working_dir, '**', '*'))
             if remaining_files:
-                self.L1_obj.logger.warning(
+                self.logger.warning(
                     f"Failed to completely delete EnPT´s temporary files at {self.cfg.working_dir}. \n"
                     f"Remaining files: \n"
                     f"{f'{chr(10)}'.join(natsorted(remaining_files))}")
