@@ -33,7 +33,7 @@ import logging
 import os
 import warnings
 import sys
-from io import StringIO  # Python 3 only
+from io import StringIO
 
 __author__ = 'Daniel Scheffler'
 
