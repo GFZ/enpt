@@ -29,3 +29,5 @@ dependencies:
   - sicor>=0.19.1
   - tqdm
   - utm
+
+  - xarray<2025.12  # workaround for https://github.com/conda-forge/rioxarray-feedstock/pull/93

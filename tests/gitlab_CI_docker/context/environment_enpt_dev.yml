@@ -41,6 +41,8 @@ dependencies:
   # - sphinx_rtd_theme  # pinnings out of sync - https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41
   - urlchecker
 
+  - xarray<2025.12  # workaround for https://github.com/conda-forge/rioxarray-feedstock/pull/93
+
   - pip:
     - sphinx_rtd_theme
     - pytest-reporter-html1>=0.9.5  # 0.9.4 misses constraint for docutils>=0.22
