@@ -79,6 +79,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
         shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
 
+    @pytest.mark.skipif(os.name == 'nt', reason='POLYMER is not yet operable on Windows.')
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
