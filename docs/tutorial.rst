@@ -134,7 +134,7 @@ more information on the underlying algorithms.
 Open the EnPT GUI to run the processing chain. You can find it here:
 :menuselection:`QGIS 3.xx --> EnMAP-Box --> Applications Menu --> EnPT (EnMAP Processing Tool) --> Start EnPT GUI`.
 
-.. image:: img/screenshot_enpt_enmapboxapp_v0.7.4.png
+.. image:: img/screenshot_enpt_enmapboxapp_v1.0.0.png
 
 Select the EnMAP L1B zip-archive (:file:`ENMAP01-____L1B*.ZIP`) at the parameter **L1B EnMAP image**. All other
 parameters are set to a default or not strictly needed to generate Level-2A data. However, they may improve the output
