@@ -277,7 +277,11 @@ class EnPT_Controller(object):
                              % timedelta(seconds=time() - self._time_startup))
 
         finally:
+            # clean up temporary files
             self.cleanup()
+
+            # close the latest active logger (either self.L1_obj.logger or self.L2_obj.logger)
+            self.logger.close()
 
     @staticmethod
     def _write_to_stdout_stderr():
