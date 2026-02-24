@@ -120,6 +120,11 @@ class EnPT_Logger(logging.Logger):
             self.addHandler(consoleHandler_out)
             self.addHandler(consoleHandler_err)
 
+        # read existing log file to captured_stream if append is True
+        if append and os.path.isfile(path_logfile) and not self.captured_stream:
+            with open(path_logfile, 'r') as f:
+                self.captured_stream += f.read()
+
     def __getstate__(self):
         self.close()
         return self.__dict__
