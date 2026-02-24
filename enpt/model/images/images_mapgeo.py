@@ -373,7 +373,15 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         self.logger.info("L2A product successfully written!")
 
-        # move logfile to output folder and rename to L2A format
-        shutil.move(self.logger.path_logfile, path.join(product_dir, f'{self.meta.scene_basename}-ENPT_LOG.log'))
+        # move logfile to output folder and rename to L2A format (logger needs to be closed and reinitialized)
+        path_l1b_logfile = self.logger.path_logfile
+        path_l2a_logfile = path.join(product_dir, f'{self.meta.scene_basename}-ENPT_LOG.log')
+        self.logger.close()
+        shutil.move(path_l1b_logfile, path_l2a_logfile)
+        self._logger = EnPT_Logger('log__' + self.meta.scene_basename,
+                                   fmt_suffix=None,
+                                   path_logfile=path_l2a_logfile,
+                                   log_level=self.cfg.log_level,
+                                   append=True)
 
         return product_dir
