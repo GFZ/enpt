@@ -144,10 +144,7 @@ class EnPT_Logger(logging.Logger):
             - set self.captured_stream:
                 self.captured_stream = 'any string'
         """
-        if not self._captured_stream:
-            self._captured_stream = self.streamObj.getvalue()
-
-        return self._captured_stream
+        return self._captured_stream + self.streamObj.getvalue()
 
     @captured_stream.setter
     def captured_stream(self, string: str):
