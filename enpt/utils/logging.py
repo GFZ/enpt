@@ -144,7 +144,12 @@ class EnPT_Logger(logging.Logger):
             - set self.captured_stream:
                 self.captured_stream = 'any string'
         """
-        return self._captured_stream + self.streamObj.getvalue()
+        value = self.streamObj.getvalue()
+        if value:
+            self._captured_stream += value
+            self.streamObj.truncate(0)
+            self.streamObj.seek(0)
+        return self._captured_stream
 
     @captured_stream.setter
     def captured_stream(self, string: str):
@@ -153,8 +158,8 @@ class EnPT_Logger(logging.Logger):
 
     def close(self):
         """Close all logging handlers."""
-        # update captured_stream and flush stream
-        self.captured_stream += self.streamObj.getvalue()
+        # drain StringIO once
+        _ = self.captured_stream
 
         for handler in self.handlers[:]:
             try:
