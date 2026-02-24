@@ -33,7 +33,7 @@ import logging
 import os
 import warnings
 import sys
-from io import StringIO  # Python 3 only
+from io import StringIO
 
 __author__ = 'Daniel Scheffler'
 
@@ -120,6 +120,11 @@ class EnPT_Logger(logging.Logger):
             self.addHandler(consoleHandler_out)
             self.addHandler(consoleHandler_err)
 
+        # read existing log file to captured_stream if append is True
+        if append and path_logfile and os.path.isfile(path_logfile):
+            with open(path_logfile, 'r') as f:
+                self.captured_stream += f.read()
+
     def __getstate__(self):
         self.close()
         return self.__dict__
@@ -139,9 +144,11 @@ class EnPT_Logger(logging.Logger):
             - set self.captured_stream:
                 self.captured_stream = 'any string'
         """
-        if not self._captured_stream:
-            self._captured_stream = self.streamObj.getvalue()
-
+        value = self.streamObj.getvalue()
+        if value:
+            self._captured_stream += value
+            self.streamObj.truncate(0)
+            self.streamObj.seek(0)
         return self._captured_stream
 
     @captured_stream.setter
@@ -151,8 +158,8 @@ class EnPT_Logger(logging.Logger):
 
     def close(self):
         """Close all logging handlers."""
-        # update captured_stream and flush stream
-        self.captured_stream += self.streamObj.getvalue()
+        # drain StringIO once
+        _ = self.captured_stream
 
         for handler in self.handlers[:]:
             try:

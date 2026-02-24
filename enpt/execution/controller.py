@@ -77,6 +77,10 @@ class EnPT_Controller(object):
         self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
         self.L2_obj: Optional[EnMAPL2Product_MapGeo] = None
 
+    @property
+    def logger(self):
+        return self.L2_obj.logger if self.L2_obj else self.L1_obj.logger if self.L1_obj else None
+
     def extract_zip_archive(self, path_zipfile: str, subdir: str = '') -> str:
         """Extract the given EnMAP image zip archive and return the L1B image root directory path.
 
@@ -269,12 +273,15 @@ class EnPT_Controller(object):
                 self.run_orthorectification()
 
             self.write_output()
-
-            self.L1_obj.logger.info('Total runtime of the processing chain: %s'
-                                    % timedelta(seconds=time() - self._time_startup))
+            self.logger.info('Total runtime of the processing chain: %s'
+                             % timedelta(seconds=time() - self._time_startup))
 
         finally:
+            # clean up temporary files
             self.cleanup()
+
+            # close the latest active logger (either self.L1_obj.logger or self.L2_obj.logger)
+            self.logger.close()
 
     @staticmethod
     def _write_to_stdout_stderr():
@@ -303,7 +310,7 @@ class EnPT_Controller(object):
 
             remaining_files = glob(os.path.join(self.cfg.working_dir, '**', '*'))
             if remaining_files:
-                self.L1_obj.logger.warning(
+                self.logger.warning(
                     f"Failed to completely delete EnPT´s temporary files at {self.cfg.working_dir}. \n"
                     f"Remaining files: \n"
                     f"{f'{chr(10)}'.join(natsorted(remaining_files))}")

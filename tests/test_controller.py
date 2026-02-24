@@ -79,6 +79,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
         shutil.rmtree(self.CTR.cfg.output_dir, ignore_errors=True)
 
+    @pytest.mark.skipif(os.name == 'nt', reason='POLYMER is not yet operable on Windows.')
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
@@ -92,7 +93,7 @@ class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
         """Test to run all processors while replacing polymer_ac_enmap with None using mock.patch."""
         self.CTR.run_all_processors()
 
-        assert "As a fallback, SICOR is applied to water surfaces instead." in self.CTR.L1_obj.logger.captured_stream
+        assert "As a fallback, SICOR is applied to water surfaces instead." in self.CTR.L2_obj._logger.captured_stream
 
 
 if __name__ == '__main__':
