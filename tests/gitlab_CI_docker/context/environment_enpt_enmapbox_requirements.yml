@@ -1,15 +1,16 @@
+# This environment is used to test certain versions of EnPT requirements within the EnMAP-Box environment.
+
 name: enpt
 
 channels: &id1
   - conda-forge
 
 dependencies:
-  - python>=3.10
+  - python>3.12
   - pip  # avoids that conda uses the wrong pip
   - acwater>=0.4.1
   - arosics>1.0.0
   - cerberus
-  - enpt >= 1.2.1
   - gdal
   - geoarray>=0.19.2
   - isofit=3.4.3  # compatibility for >=3.5 not yet implemented
@@ -18,7 +19,7 @@ dependencies:
   - matplotlib
   - mvgavg
   - natsort
-  - numpy>=2
+  - numpy
   - numpy-indexed
   - packaging
   - pandas
@@ -31,6 +32,29 @@ dependencies:
   - tqdm
   - utm
 
+  # EnMAP-Box
+  - astropy
+  - catboost
+  - enfrosp_enmapboxapp
+  - h5py
+  - lightgbm
+  - lightning
+  - matplotlib
+  - netcdf4
+  - numba>=0.63
+  - numpy
+  - opencv
+  - pandas=2.2.3
+  - pyopengl
+  - pytorch
+  - qgis>=3.42.2
+  - scikit-learn>=1
+  - segmentation-models-pytorch
+  - sympy
+  - tensorboard
+  - torchvision
+  - xgboost
+
   # test/doc/lint requirements
   - flake8
   - pycodestyle
@@ -42,8 +66,7 @@ dependencies:
   # - sphinx_rtd_theme  # pinnings out of sync - https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41
   - urlchecker
 
-  - xarray<2025.12  # workaround for https://github.com/conda-forge/rioxarray-feedstock/pull/93
-
   - pip:
+    - flake8-qgis
     - sphinx_rtd_theme
     - pytest-reporter-html1>=0.9.5  # 0.9.4 misses constraint for docutils>=0.22

@@ -6,23 +6,30 @@ channels: &id1
 dependencies:
   - python>=3.10
   - pip  # avoids that conda uses the wrong pip
-  - enpt>=1.2.0
+  - enpt>=1.2.1
   - enpt_enmapboxapp>=1.0.2
 
   # EnMAP-Box
   - astropy
   - catboost
+  - enfrosp_enmapboxapp
   - h5py
   - lightgbm
+  - lightning
   - matplotlib
   - netcdf4
   - numba>=0.63
   - numpy
+  - opencv
+  - pandas=2.2.3
   - pyopengl
-  - qgis>=3.40.3
+  - pytorch
+  - qgis>=3.42.2
   - scikit-learn>=1
-  - scipy>=1.1
+  - segmentation-models-pytorch
   - sympy
+  - tensorboard
+  - torchvision
   - xgboost
 
   # test/doc/lint requirements
