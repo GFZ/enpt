@@ -44,7 +44,7 @@ dependencies:
   - numba>=0.63
   - numpy
   - opencv
-  - pandas=2.2.3
+  - pandas
   - pyopengl
   - pytorch
   - qgis>=3.42.2
