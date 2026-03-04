@@ -28,6 +28,7 @@ dependencies:
   - scipy
   - sensormapgeo>=1.0.0
   - sicor>=0.19.1
+  - sixabos  # for now, only in the dev requirements until !138 is merged
   - tqdm
   - utm
 
