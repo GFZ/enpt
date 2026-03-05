@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
@@ -27,9 +28,37 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""EnPT module 'spatial transform', containing everthing related to spatial transformations."""
+"""
+test_dem_preprocessing
+----------------------
 
-from .dem_preprocessing import DEM_Processor
-from .dem_download import DEM_Downloader, CopernicusDEMGenerator
+Tests for `processors.dem_preprocessing.dem_download` module.
+"""
 
-__all__ = ['DEM_Processor', 'DEM_Downloader', 'CopernicusDEMGenerator']
+from unittest import TestCase
+from tempfile import TemporaryDirectory
+import os
+
+import pytest
+from geoarray import GeoArray
+
+from enpt.processors.dem_preprocessing import CopernicusDEMGenerator
+
+__author__ = 'Daniel Scheffler'
+
+
+class Test_CopernicusDEMGenerator(TestCase):
+    def test_CopernicusDEMGenerator(self):
+        with TemporaryDirectory() as td:
+            demgen = CopernicusDEMGenerator(
+                west=11.0, south=47.0, east=11.3, north=47.2,
+                product="GLO-30", out_format="GTiff"
+            )
+            demgen.run(os.path.join(td, "output_dem.tif"))
+            GeoArray(os.path.join(td, "output_dem.tif")).show()
+
+            assert os.path.exists(os.path.join(td, "output_dem.tif"))
+
+
+if __name__ == '__main__':
+    pytest.main()
