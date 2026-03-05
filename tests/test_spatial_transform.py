@@ -48,7 +48,7 @@ from py_tools_ds.geo.coord_grid import is_point_on_grid
 
 from enpt.processors.spatial_transform import \
     Geometry_Transformer, RPC_Geolayer_Generator, RPC_3D_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
-from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
+from enpt.options.config import EnPTConfig, config_for_testing_dlr
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid_utm
 
@@ -60,13 +60,13 @@ path_testdata = os.path.abspath(os.path.join(__file__, '..', 'data'))
 
 class Test_Geometry_Transformer(TestCase):
     def setUp(self):
-        config = EnPTConfig(**config_for_testing)
+        config = EnPTConfig(**config_for_testing_dlr)
 
         # get lons / lats
         with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
             zf.extractall(td)
             L1_obj = L1B_Reader(config=config).read_inputdata(
-                root_dir_main=os.path.join(td, os.path.splitext(os.path.basename(config.path_l1b_enmap_image))[0]),
+                root_dir_main=td,
                 compute_snr=False)
 
         R, C = L1_obj.vnir.data.shape[:2]
