@@ -86,7 +86,7 @@ config_for_testing_water = dict(
                      'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2'
                      '__DEM_ASTER.bsq')),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
+    output_dir=os.path.abspath(os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs')),
     disable_progress_bars=False,
     is_dummy_dataformat=False,
     auto_download_ecmwf=True,
@@ -121,7 +121,7 @@ config_for_testing = dict(
     path_dem=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'dem_map_geo.bsq')),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
+    output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
     n_lines_to_append=50,
     disable_progress_bars=True,
     is_dummy_dataformat=True,
@@ -174,7 +174,7 @@ config_for_testing_dlr = dict(
                      # '15_DEM_UTM__with_prj.tif'
                      )),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
+    output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
     n_lines_to_append=50,
     disable_progress_bars=False,
     is_dummy_dataformat=False,
