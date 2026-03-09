@@ -164,25 +164,28 @@ class Test_L1B_Reader(unittest.TestCase):
 class Test_L1B_Reader_DLR(unittest.TestCase):
     """Tests for L1B_Reader class."""
 
-    def setUp(self):
-        self.config = EnPTConfig(**config_for_testing_dlr)
-        self.pathList_testimages = [self.config.path_l1b_enmap_image,
-                                    self.config.path_l1b_enmap_image_gapfill]
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
-        os.makedirs(self.config.output_dir, exist_ok=True)
+    @classmethod
+    def setUpClass(cls):
+        cls.config = EnPTConfig(**config_for_testing_dlr)
+        cls.config.drop_bad_bands = False  # otherwise the read/write/read tests will fail
+        cls.pathList_testimages = [cls.config.path_l1b_enmap_image,
+                                    cls.config.path_l1b_enmap_image_gapfill]
+        cls.tmpdir = tempfile.mkdtemp(dir=cls.config.working_dir)
+        os.makedirs(cls.config.output_dir, exist_ok=True)
 
         # unzip both test images
-        for l1b_file in self.pathList_testimages:
+        for l1b_file in cls.pathList_testimages:
             with zipfile.ZipFile(l1b_file, "r") as zf:
                 basename = os.path.basename(os.path.splitext(l1b_file)[0])
-                zf.extractall(os.path.join(self.tmpdir, basename))
+                zf.extractall(os.path.join(cls.tmpdir, basename))
 
-        self.testproducts = glob(os.path.join(self.tmpdir, '*'))
-        self.RD = L1B_Reader(config=self.config)
+        cls.testproducts = glob(os.path.join(cls.tmpdir, '*'))
+        cls.RD = L1B_Reader(config=cls.config)
 
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
-        shutil.rmtree(self.config.output_dir)
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmpdir)
+        shutil.rmtree(cls.config.output_dir)
 
     def test_read_inputdata_dont_drop_bad_bands(self):
         cfg = self.config
