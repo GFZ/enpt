@@ -113,6 +113,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.paths.mask_cirrus = path_or_None(self.detector_meta.filename_mask_cirrus)
         self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_deadpixelmap)
         self.paths.quicklook = path_or_None(self.detector_meta.filename_quicklook)
+        self.paths.testflags = path_or_None(self.detector_meta.filename_testflags)
 
         return self.paths
 
@@ -303,8 +304,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     self.logger.warning("Could not append the '%s' attribute "
                                         "as it does not exist in the current image." % attrName)
 
+        # append deadpixelmap and testflags (provided for VNIR and SWIR sensor geometry)
         if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
+            self.testflags = np.append(self.testflags[:], img2.testflags[0:n_lines, :], axis=0)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
@@ -605,6 +608,8 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.data = self.paths.vnir.data
         self.swir.data = self.paths.swir.data
         self.vnir.read_masks()
+        self.vnir.testflags = GeoArray(self.paths.vnir.testflags)[:]
+        self.swir.testflags = GeoArray(self.paths.swir.testflags)[:]
 
         if self.cfg.drop_bad_bands:
             self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
@@ -930,7 +935,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the VNIR
         self.vnir.save_raster_attributes(['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow',
-                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap'],
+                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap', 'testflags'],
                                          product_dir)
 
         # FIXME we could also write the quicklook included in DLR L1B format instead of generating an own one
@@ -939,7 +944,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the SWIR
         # NOTE: The masks only exist in VNIR sensor geometry (would have to be transformed before to match for the SWIR)
-        self.swir.save_raster_attributes(['data', 'deadpixelmap'], product_dir)
+        self.swir.save_raster_attributes(['data', 'deadpixelmap', 'testflags'], product_dir)
 
         self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
             .save(path.join(product_dir, path.splitext(self.meta.swir.filename_quicklook)[0] + '.png'), fmt='PNG')

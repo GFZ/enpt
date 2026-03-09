@@ -281,7 +281,8 @@ class EnPT_Controller(object):
             self.cleanup()
 
             # close the latest active logger (either self.L1_obj.logger or self.L2_obj.logger)
-            self.logger.close()
+            if self.logger:
+                self.logger.close()
 
     @staticmethod
     def _write_to_stdout_stderr():

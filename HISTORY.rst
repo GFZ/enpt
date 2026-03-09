@@ -7,6 +7,7 @@ History
 
 * !137: Updated environment files (integrated updated EnMAP-Box requirements, dropped deprecated
   environments and added environment_enpt_enmapbox_requirements.yml).
+* !142: Implemented processing of TESTFLAGS-VNIR and TESTFLAGS-SWIR layers in Level-1B reader.
 
 
 1.2.1 (2026-02-25)
