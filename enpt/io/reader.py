@@ -146,7 +146,7 @@ class L1B_Reader(object):
             '*-SPECTRAL_IMAGE_VNIR.?',
         ]:
             matches = []
-            for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
+            for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2', '.png']:
                 matches.extend(filter(files, pattern.replace('.?', ext)))
 
                 if matches:
