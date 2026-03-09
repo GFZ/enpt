@@ -188,9 +188,6 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         shutil.rmtree(cls.config.output_dir)
 
     def test_read_inputdata_dont_drop_bad_bands(self):
-        cfg = self.config
-        cfg.drop_bad_bands = False
-
         L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
         assert L1_obj.swir.detector_meta.nwvl == 130
 
