@@ -43,6 +43,8 @@ import zipfile
 import shutil
 from glob import glob
 
+import numpy as np
+
 from enpt.io.reader import L1B_Reader
 from enpt.model.images import EnMAPL1Product_SensorGeo
 from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
@@ -189,39 +191,35 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
         assert L1_obj.swir.detector_meta.nwvl == 130
 
-    def test_read_and_save_single_image_no_snr(self):
-        """Test to read test image 1, save it and read the saved result again - without SNR."""
+    def _test_read_and_save_single_image(self, compute_snr: bool):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
             # read
-            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
+            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=compute_snr)
             assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
-            assert L1_obj.vnir.detector_meta.snr is None
-            assert L1_obj.swir.detector_meta.snr is None
+            if compute_snr:
+                assert isinstance(L1_obj.vnir.detector_meta.snr, np.ndarray)
+                assert isinstance(L1_obj.swir.detector_meta.snr, np.ndarray)
+                assert L1_obj.vnir.detector_meta.snr.shape == L1_obj.vnir.data.shape
+                assert L1_obj.swir.detector_meta.snr.shape == L1_obj.swir.data.shape
+            else:
+                assert L1_obj.vnir.detector_meta.snr is None
+                assert L1_obj.swir.detector_meta.snr is None
 
             # save
             L1_obj.save(tempdir)
             root_dir_written_L1_data = path.join(tempdir, L1_obj.meta.scene_basename)
 
             # read saved result
-            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=compute_snr)
             assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+
+    def test_read_and_save_single_image_no_snr(self):
+        """Test to read test image 1, save it and read the saved result again - without SNR."""
+        self._test_read_and_save_single_image(compute_snr=False)
 
     def test_read_and_save_single_image_with_snr(self):
         """Test to read test image 1, save it and read the saved result again - with SNR."""
-        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
-            # read
-            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=True)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
-            assert L1_obj.vnir.detector_meta.snr is not None
-            assert L1_obj.swir.detector_meta.snr is not None
-
-            # save
-            L1_obj.save(tempdir)
-            root_dir_written_L1_data = path.join(tempdir, L1_obj.meta.scene_basename)
-
-            # read saved result
-            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+        self._test_read_and_save_single_image(compute_snr=True)
 
     def _test_append_n_lines(self, *reader_args, **reader_kwargs):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
