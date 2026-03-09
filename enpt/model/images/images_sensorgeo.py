@@ -935,7 +935,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the VNIR
         self.vnir.save_raster_attributes(['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow',
-                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap'],
+                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap', 'testflags'],
                                          product_dir)
 
         # FIXME we could also write the quicklook included in DLR L1B format instead of generating an own one
@@ -944,7 +944,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the SWIR
         # NOTE: The masks only exist in VNIR sensor geometry (would have to be transformed before to match for the SWIR)
-        self.swir.save_raster_attributes(['data', 'deadpixelmap'], product_dir)
+        self.swir.save_raster_attributes(['data', 'deadpixelmap', 'testflags'], product_dir)
 
         self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
             .save(path.join(product_dir, path.splitext(self.meta.swir.filename_quicklook)[0] + '.png'), fmt='PNG')
