@@ -113,6 +113,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.paths.mask_cirrus = path_or_None(self.detector_meta.filename_mask_cirrus)
         self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_deadpixelmap)
         self.paths.quicklook = path_or_None(self.detector_meta.filename_quicklook)
+        self.paths.testflags = path_or_None(self.detector_meta.filename_testflags)
 
         return self.paths
 

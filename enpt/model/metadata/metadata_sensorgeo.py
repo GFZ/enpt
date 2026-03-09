@@ -77,6 +77,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.scene_basename: Optional[str] = ''  # basename of the EnMAP image
         self.filename_deadpixelmap: Optional[str] = ''  # filename of the dead pixel file
         self.filename_quicklook: Optional[str] = ''  # filename of the quicklook file
+        self.filename_testflags: Optional[str] = ''  # filename of the testflags file
         # FIXME masks of BOTH detectors
         self.filename_mask_landwater: Optional[str] = ''  # filename of the land/water mask file
         self.filename_mask_snow: Optional[str] = ''  # filename of the snow mask file
@@ -152,9 +153,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.filename_mask_clouds = get_filename('*-QL_QUALITY_CLOUD')
             self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
             self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
+            self.filename_testflags = get_filename('*QL_QUALITY_TESTFLAGS_%s' % self.detector_name)
 
             # FIXME combine different cloud masks?
-            # TODO: Add test flags layer.
 
             # read some basic information concerning the detector
             self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
