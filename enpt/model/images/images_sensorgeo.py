@@ -608,8 +608,8 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.data = self.paths.vnir.data
         self.swir.data = self.paths.swir.data
         self.vnir.read_masks()
-        self.vnir.testflags = self.paths.vnir.testflags
-        self.swir.testflags = self.paths.swir.testflags
+        self.vnir.testflags = GeoArray(self.paths.vnir.testflags)[:]
+        self.swir.testflags = GeoArray(self.paths.swir.testflags)[:]
 
         if self.cfg.drop_bad_bands:
             self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
