@@ -304,8 +304,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     self.logger.warning("Could not append the '%s' attribute "
                                         "as it does not exist in the current image." % attrName)
 
+        # append deadpixelmap and testflags (provided for VNIR and SWIR sensor geometry)
         if not self.cfg.is_dummy_dataformat:
             self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
+            self.testflags = np.append(self.testflags[:], img2.testflags[0:n_lines, :], axis=0)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
