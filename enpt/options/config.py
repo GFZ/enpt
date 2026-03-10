@@ -113,22 +113,6 @@ config_for_testing_water = dict(
 )
 
 
-config_for_testing = dict(
-    path_l1b_enmap_image=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
-    path_l1b_enmap_image_gapfill=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest2_CWV2_SM0.zip')),
-    path_dem=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'dem_map_geo.bsq')),
-    log_level='DEBUG',
-    output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
-    n_lines_to_append=50,
-    disable_progress_bars=True,
-    is_dummy_dataformat=True,
-    enable_ac=False,
-)
-
-
 config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
