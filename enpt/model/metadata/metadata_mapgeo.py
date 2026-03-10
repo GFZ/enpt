@@ -113,10 +113,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         def convert_fn(fn):
             return fn.replace('L1B-', 'L2A-').replace(file_ext_l1b, file_ext_l2a)
 
-        if not self.cfg.is_dummy_dataformat:
-            self.scene_basename = convert_fn(meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0])
-        else:
-            self.scene_basename = os.path.splitext(meta_l1b.vnir.filename_data)[0]
+        self.scene_basename = convert_fn(meta_l1b.vnir.filename_data.split('-SPECTRAL_IMAGE')[0])
         self.filename_data = convert_fn(meta_l1b.vnir.filename_data).replace('_VNIR', '')
         self.filename_deadpixelmap_vnir = convert_fn(meta_l1b.vnir.filename_deadpixelmap)
         self.filename_deadpixelmap_swir = convert_fn(meta_l1b.swir.filename_deadpixelmap)
@@ -151,13 +148,10 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.smile_coef = np.vstack([meta_l1b.vnir.smile_coef, meta_l1b.swir.smile_coef])[bandidx_order, :]
         self.smile = np.hstack([meta_l1b.vnir.smile, meta_l1b.swir.smile])[:, bandidx_order]
 
-        if not self.cfg.is_dummy_dataformat:
-            all_rpc_coeffs = OrderedDict(list(meta_l1b.vnir.rpc_coeffs.items()) +
-                                         list(meta_l1b.swir.rpc_coeffs.items()))
-            self.rpc_coeffs = OrderedDict([(k, v) for i, (k, v) in enumerate(all_rpc_coeffs.items())
-                                           if i in bandidx_order])
-        else:
-            self.rpc_coeffs = OrderedDict()
+        all_rpc_coeffs = OrderedDict(list(meta_l1b.vnir.rpc_coeffs.items()) +
+                                     list(meta_l1b.swir.rpc_coeffs.items()))
+        self.rpc_coeffs = OrderedDict([(k, v) for i, (k, v) in enumerate(all_rpc_coeffs.items())
+                                       if i in bandidx_order])
 
         self.nrows = dims_mapgeo[0]
         self.ncols = dims_mapgeo[1]
@@ -203,102 +197,89 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                 (max([vnir_lrx, swir_lrx]), min([vnir_lry, swir_lry])))
 
     def _get_view_acq_geometry_arrays(self):
-        if not self.cfg.is_dummy_dataformat:
-            ll_cornerCoords = tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR))
-            if self.epsg == 4326:
-                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in ll_cornerCoords]
-            else:
-                im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in
-                                   [transform_any_prj(4326, self.epsg, x, y) for x, y in ll_cornerCoords]]
-
-            def _interpolate(cols_in, rows_in, data_in, outshape):
-                # from scipy.interpolate import griddata, interp2d, bi
-                #
-                # rows_full = np.arange(outshape[0])
-                # cols_full = np.arange(outshape[1])
-                # x_out, y_out = np.meshgrid(cols_full, rows_full)
-                # data_interpolated = griddata((cols_in, rows_in), data_in, (x_out, y_out), method='linear')
-
-                import numpy as np
-                from scipy.linalg import lstsq
-
-                # Given data
-                x = np.array(cols_in)
-                y = np.array(rows_in)
-                data = np.array(data_in)
-
-                # Create matrix A for the plane equation coefficients
-                A = np.column_stack((x, y, np.ones_like(x)))
-
-                # Solve Ax = b, where x contains coefficients of the plane equation
-                coefficients, _, _, _ = lstsq(A, data)
-
-                # Extract coefficients
-                a, b, c = coefficients
-
-                # Define output grid
-                rows_full = np.arange(outshape[0])
-                cols_full = np.arange(outshape[1])
-                x_out, y_out = np.meshgrid(cols_full, rows_full)
-
-                # Evaluate plane equation to get interpolated values
-                data_interpolated = a * x_out + b * y_out + c
-
-                return data_interpolated
-
-                # data_2d[badmask_full] = \
-                #     griddata(np.array([x[~badmask_full], y[~badmask_full]]).T,  # points we know
-                #              data_2d[~badmask_full],  # values we know
-                #              np.array([x[badmask_full], y[badmask_full]]).T,  # points to interpolate
-                #              method=method, fill_value=fill_value)
-                #
-                # RGI = RegularGridInterpolator(points=[cols_in, rows_in],
-                #                               values=np.array(data_in).T,  # must be in shape [x, y]
-                #                               method='linear',
-                #                               bounds_error=False)
-                # rows_full = np.arange(outshape[0])
-                # cols_full = np.arange(outshape[1])
-                # data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full)))
-                # return data_full
-
-            def interpolate_between_corners(corners_xy, data):
-                cols_in, rows_in = zip(*corners_xy)  # UL, UR, LL, LR
-                data_in = data['upper_left'], data['upper_right'], data['lower_left'], data['lower_right']
-                return _interpolate(cols_in, rows_in, data_in, (self.nrows, self.ncols))
-
-            # read Geometry (observation/illumination) angle
-            # NOTE: EnMAP metadata provide also the angles for the image corners
-            #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
-            # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
-            # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
-            vza_all = self._meta_l1b.geom_angles_all['view_zenith']
-            vaa_all = self._meta_l1b.geom_angles_all['view_azimuth']
-            sza_all = self._meta_l1b.geom_angles_all['sun_zenith']
-            saa_all = self._meta_l1b.geom_angles_all['sun_azimuth']
-            self._geom_view_zenith_array = interpolate_between_corners(im_cornerCoords, vza_all)
-            self._geom_view_azimuth_array = interpolate_between_corners(im_cornerCoords, vaa_all)
-            self._geom_sun_zenith_array = interpolate_between_corners(im_cornerCoords, sza_all)
-            self._geom_sun_azimuth_array = interpolate_between_corners(im_cornerCoords, saa_all)
-
+        ll_cornerCoords = tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR))
+        if self.epsg == 4326:
+            im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in ll_cornerCoords]
         else:
-            # static values for  dummy EnMAP data format
-            rows, cols = self.nrows, self.ncols
+            im_cornerCoords = [mapXY2imXY(xy, self.geotransform) for xy in
+                               [transform_any_prj(4326, self.epsg, x, y) for x, y in ll_cornerCoords]]
 
-            self._geom_view_zenith_array = np.full((rows, cols), fill_value=self.geom_view_zenith)
-            self._geom_view_azimuth_array = np.full((rows, cols), fill_value=self.geom_view_azimuth)
-            self._geom_sun_zenith_array = np.full((rows, cols), fill_value=self.geom_sun_zenith)
-            self._geom_sun_azimuth_array = np.full((rows, cols), fill_value=self.geom_sun_azimuth)
+        def _interpolate(cols_in, rows_in, data_in, outshape):
+            # from scipy.interpolate import griddata, interp2d, bi
+            #
+            # rows_full = np.arange(outshape[0])
+            # cols_full = np.arange(outshape[1])
+            # x_out, y_out = np.meshgrid(cols_full, rows_full)
+            # data_interpolated = griddata((cols_in, rows_in), data_in, (x_out, y_out), method='linear')
+
+            import numpy as np
+            from scipy.linalg import lstsq
+
+            # Given data
+            x = np.array(cols_in)
+            y = np.array(rows_in)
+            data = np.array(data_in)
+
+            # Create matrix A for the plane equation coefficients
+            A = np.column_stack((x, y, np.ones_like(x)))
+
+            # Solve Ax = b, where x contains coefficients of the plane equation
+            coefficients, _, _, _ = lstsq(A, data)
+
+            # Extract coefficients
+            a, b, c = coefficients
+
+            # Define output grid
+            rows_full = np.arange(outshape[0])
+            cols_full = np.arange(outshape[1])
+            x_out, y_out = np.meshgrid(cols_full, rows_full)
+
+            # Evaluate plane equation to get interpolated values
+            data_interpolated = a * x_out + b * y_out + c
+
+            return data_interpolated
+
+            # data_2d[badmask_full] = \
+            #     griddata(np.array([x[~badmask_full], y[~badmask_full]]).T,  # points we know
+            #              data_2d[~badmask_full],  # values we know
+            #              np.array([x[badmask_full], y[badmask_full]]).T,  # points to interpolate
+            #              method=method, fill_value=fill_value)
+            #
+            # RGI = RegularGridInterpolator(points=[cols_in, rows_in],
+            #                               values=np.array(data_in).T,  # must be in shape [x, y]
+            #                               method='linear',
+            #                               bounds_error=False)
+            # rows_full = np.arange(outshape[0])
+            # cols_full = np.arange(outshape[1])
+            # data_full = RGI(np.dstack(np.meshgrid(cols_full, rows_full)))
+            # return data_full
+
+        def interpolate_between_corners(corners_xy, data):
+            cols_in, rows_in = zip(*corners_xy)  # UL, UR, LL, LR
+            data_in = data['upper_left'], data['upper_right'], data['lower_left'], data['lower_right']
+            return _interpolate(cols_in, rows_in, data_in, (self.nrows, self.ncols))
+
+        # read Geometry (observation/illumination) angle
+        # NOTE: EnMAP metadata provide also the angles for the image corners
+        #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
+        # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
+        # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
+        vza_all = self._meta_l1b.geom_angles_all['view_zenith']
+        vaa_all = self._meta_l1b.geom_angles_all['view_azimuth']
+        sza_all = self._meta_l1b.geom_angles_all['sun_zenith']
+        saa_all = self._meta_l1b.geom_angles_all['sun_azimuth']
+        self._geom_view_zenith_array = interpolate_between_corners(im_cornerCoords, vza_all)
+        self._geom_view_azimuth_array = interpolate_between_corners(im_cornerCoords, vaa_all)
+        self._geom_sun_zenith_array = interpolate_between_corners(im_cornerCoords, sza_all)
+        self._geom_sun_azimuth_array = interpolate_between_corners(im_cornerCoords, saa_all)
 
     def _get_aqtime_utc_array(self):
-        if not self.cfg.is_dummy_dataformat:
-            rows, cols = self.nrows, self.ncols
+        rows, cols = self.nrows, self.ncols
 
-            # TODO replace this by interpolating all angles
-            dt = self._meta_l1b.observation_datetime
-            decimal_hours = dt.hour + dt.minute / 60. * dt.second / 3600
-            self._aqtime_utc_array = np.full((rows, cols), fill_value=decimal_hours)
-        else:
-            raise NotImplementedError()
+        # TODO replace this by interpolating all angles
+        dt = self._meta_l1b.observation_datetime
+        decimal_hours = dt.hour + dt.minute / 60. * dt.second / 3600
+        self._aqtime_utc_array = np.full((rows, cols), fill_value=decimal_hours)
 
     @property
     def geom_view_zenith_array(self) -> np.ndarray:
@@ -375,11 +356,6 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # parse (use L1B metadata as template)
         xml = ElementTree.parse(self._meta_l1b.path_xml, parser).getroot()
-
-        if self.cfg.is_dummy_dataformat:
-            self.logger.warning('No XML metadata conversion implemented for datasets different to the DLR format.'
-                                'Metadata XML file will be empty.')
-            return ''
 
         self.logger.warning('Currently, the L2A metadata XML file does not contain all relevant keys and contains '
                             'not updated values!')  # FIXME

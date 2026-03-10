@@ -88,7 +88,6 @@ config_for_testing_water = dict(
     log_level='DEBUG',
     output_dir=os.path.abspath(os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs')),
     disable_progress_bars=False,
-    is_dummy_dataformat=False,
     auto_download_ecmwf=True,
     average_elevation=0,
     deadpix_P_algorithm='spectral',
@@ -161,7 +160,6 @@ config_for_testing_dlr = dict(
     output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
     n_lines_to_append=50,
     disable_progress_bars=False,
-    is_dummy_dataformat=False,
     # output_format='ENVI',
     # output_interleave='band',
     # target_projection_type='Geographic',
@@ -375,12 +373,6 @@ class EnPTConfig(object):
         ###################
         # general options #
         ###################
-
-        self.is_dummy_dataformat = gp('is_dummy_dataformat')
-        if 'is_dlr_dataformat' in user_opts:
-            warnings.warn("The 'is_dlr_dataformat' flag is deprecated and will not exist in future. "
-                          "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
-            self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
         if self.CPUs > cpu_count():

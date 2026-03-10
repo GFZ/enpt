@@ -66,10 +66,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         from . import L1B_product_props, L1B_product_props_DLR
         self.cfg = config
         self.detector_name: str = detector_name
-        if not self.cfg.is_dummy_dataformat:
-            self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
-        else:
-            self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
+        self.detector_label = L1B_product_props_DLR['xml_detector_label'][detector_name]
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
@@ -123,154 +120,89 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         """
         xml = ElementTree.parse(path_xml).getroot()
 
-        if not self.cfg.is_dummy_dataformat:
-            lbl = self.detector_label
-            self.logger.info("Reading metadata for %s detector..." % self.detector_name)
+        lbl = self.detector_label
+        self.logger.info("Reading metadata for %s detector..." % self.detector_name)
 
-            # read data filenames
-            all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
+        # read data filenames
+        all_filenames = [ele.text for ele in xml.findall("product/productFileInformation/file/name")]
 
-            def get_filename(matching_exp: str):
-                matches = []
-                for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
-                    matches.extend(fnmatch.filter(all_filenames, f'{matching_exp}{ext}'))
+        def get_filename(matching_exp: str):
+            matches = []
+            for ext in ['', '.TIF', '.GEOTIFF', '.BSQ', '.BIL', '.BIP', 'JPEG2000', '.JP2', '.jp2']:
+                matches.extend(fnmatch.filter(all_filenames, f'{matching_exp}{ext}'))
 
-                    if matches:
-                        break
+                if matches:
+                    break
 
-                if not matches:
-                    raise FileNotFoundError("Could not find a file that matches the expression '%s'." % matching_exp)
+            if not matches:
+                raise FileNotFoundError("Could not find a file that matches the expression '%s'." % matching_exp)
 
-                return matches[0]
+            return matches[0]
 
-            self.filename_data = xml.find("product/image/%s/name" % lbl).text
-            self.scene_basename = self.filename_data.split('-SPECTRAL_IMAGE')[0]
-            self.filename_quicklook = xml.find("product/quicklook/%s/name" % lbl).text
-            self.filename_deadpixelmap = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
-            self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
-            self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
-            self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
-            self.filename_mask_clouds = get_filename('*-QL_QUALITY_CLOUD')
-            self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
-            self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
-            self.filename_testflags = get_filename('*QL_QUALITY_TESTFLAGS_%s' % self.detector_name)
+        self.filename_data = xml.find("product/image/%s/name" % lbl).text
+        self.scene_basename = self.filename_data.split('-SPECTRAL_IMAGE')[0]
+        self.filename_quicklook = xml.find("product/quicklook/%s/name" % lbl).text
+        self.filename_deadpixelmap = get_filename('*QL_PIXELMASK_%s' % self.detector_name)
+        self.filename_mask_landwater = get_filename('*QL_QUALITY_CLASSES')
+        self.filename_mask_snow = get_filename('*QL_QUALITY_SNOW')
+        self.filename_mask_cloudshadow = get_filename('*QL_QUALITY_CLOUDSHADOW')
+        self.filename_mask_clouds = get_filename('*-QL_QUALITY_CLOUD')
+        self.filename_mask_haze = get_filename('*QL_QUALITY_HAZE')
+        self.filename_mask_cirrus = get_filename('*QL_QUALITY_CIRRUS')
+        self.filename_testflags = get_filename('*QL_QUALITY_TESTFLAGS_%s' % self.detector_name)
 
-            # FIXME combine different cloud masks?
+        # FIXME combine different cloud masks?
 
-            # read some basic information concerning the detector
-            self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
-            self.ncols = int(xml.find("product/image/%s/dimension/columns" % lbl).text)
-            self.unitcode = 'DN'
-            self.unit = ''
+        # read some basic information concerning the detector
+        self.nrows = int(xml.find("product/image/%s/dimension/rows" % lbl).text)
+        self.ncols = int(xml.find("product/image/%s/dimension/columns" % lbl).text)
+        self.unitcode = 'DN'
+        self.unit = ''
 
-            # Read image coordinates
-            # FIXME why do we have the same corner coordinates for VNIR and SWIR?
-            points = xml.findall("base/spatialCoverage/boundingPolygon/point")
-            coords_xy = {p.find('frame').text: (float(p.find('longitude').text),
-                                                float(p.find('latitude').text))
-                         for p in points}
-            coord_tags = ['upper_left', 'upper_right', 'lower_left', 'lower_right']
-            self.lon_UL_UR_LL_LR = [coords_xy[ct][0] for ct in coord_tags]
-            self.lat_UL_UR_LL_LR = [coords_xy[ct][1] for ct in coord_tags]
+        # Read image coordinates
+        # FIXME why do we have the same corner coordinates for VNIR and SWIR?
+        points = xml.findall("base/spatialCoverage/boundingPolygon/point")
+        coords_xy = {p.find('frame').text: (float(p.find('longitude').text),
+                                            float(p.find('latitude').text))
+                     for p in points}
+        coord_tags = ['upper_left', 'upper_right', 'lower_left', 'lower_right']
+        self.lon_UL_UR_LL_LR = [coords_xy[ct][0] for ct in coord_tags]
+        self.lat_UL_UR_LL_LR = [coords_xy[ct][1] for ct in coord_tags]
 
-            # read the band related information: wavelength, fwhm
-            self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
-            # FIXME hardcoded - DLR does not provide any smile information
-            #   => smile coefficients are set to zero until we have valid ones
-            self.nsmile_coef = 5
-            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
+        # read the band related information: wavelength, fwhm
+        self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
+        # FIXME hardcoded - DLR does not provide any smile information
+        #   => smile coefficients are set to zero until we have valid ones
+        self.nsmile_coef = 5
+        self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
 
-            startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
-            subset = slice(startband, startband + self.nwvl)
-            bi = "specific/bandCharacterisation/bandID/"
-            self.wvl_center = np.array([float(ele.text) for ele in xml.findall(bi + "wavelengthCenterOfBand")[subset]])
-            self.fwhm = np.array([float(ele.text) for ele in xml.findall(bi + "FWHMOfBand")[subset]])
-            self.gains = np.array([float(ele.text) for ele in xml.findall(bi + "GainOfBand")[subset]])
-            self.offsets = np.array([float(ele.text) for ele in xml.findall(bi + "OffsetOfBand")[subset]])
+        startband = 0 if self.detector_name == 'VNIR' else int(xml.find("product/image/vnir/channels").text)
+        subset = slice(startband, startband + self.nwvl)
+        bi = "specific/bandCharacterisation/bandID/"
+        self.wvl_center = np.array([float(ele.text) for ele in xml.findall(bi + "wavelengthCenterOfBand")[subset]])
+        self.fwhm = np.array([float(ele.text) for ele in xml.findall(bi + "FWHMOfBand")[subset]])
+        self.gains = np.array([float(ele.text) for ele in xml.findall(bi + "GainOfBand")[subset]])
+        self.offsets = np.array([float(ele.text) for ele in xml.findall(bi + "OffsetOfBand")[subset]])
 
-            # read preview bands
-            wvl_red = float(xml.find("product/image/%s/qlChannels/red" % lbl).text)
-            wvl_green = float(xml.find("product/image/%s/qlChannels/green" % lbl).text)
-            wvl_blue = float(xml.find("product/image/%s/qlChannels/blue" % lbl).text)
-            self.preview_wvls = [wvl_red, wvl_green, wvl_blue]
-            self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl)) for wvl in self.preview_wvls])
+        # read preview bands
+        wvl_red = float(xml.find("product/image/%s/qlChannels/red" % lbl).text)
+        wvl_green = float(xml.find("product/image/%s/qlChannels/green" % lbl).text)
+        wvl_blue = float(xml.find("product/image/%s/qlChannels/blue" % lbl).text)
+        self.preview_wvls = [wvl_red, wvl_green, wvl_blue]
+        self.preview_bands = np.array([np.argmin(np.abs(self.wvl_center - wvl)) for wvl in self.preview_wvls])
 
-            # read RPC coefficients
-            for bID in xml.findall("product/navigation/RPC/bandID")[subset]:
-                bN = 'band_%d' % np.int64(bID.attrib['number'])
+        # read RPC coefficients
+        for bID in xml.findall("product/navigation/RPC/bandID")[subset]:
+            bN = 'band_%d' % np.int64(bID.attrib['number'])
 
-                keys2combine = ('row_num', 'row_den', 'col_num', 'col_den')
+            keys2combine = ('row_num', 'row_den', 'col_num', 'col_den')
 
-                tmp = OrderedDict([(ele.tag.lower(), float(ele.text)) for ele in bID.findall('./')])
-                self.rpc_coeffs[bN] = {k: v for k, v in tmp.items() if not k.startswith(keys2combine)}
+            tmp = OrderedDict([(ele.tag.lower(), float(ele.text)) for ele in bID.findall('./')])
+            self.rpc_coeffs[bN] = {k: v for k, v in tmp.items() if not k.startswith(keys2combine)}
 
-                for n in keys2combine:
-                    self.rpc_coeffs[bN]['%s_coeffs' % n.lower()] = \
-                        np.array([v for k, v in tmp.items() if k.startswith(n)])
-
-        else:
-            lbl = self.detector_label
-            self.logger.info("Reading metadata for %s detector..." % self.detector_name)
-
-            # read data filenames
-            self.filename_data = xml.findall("ProductComponent/%s/Data/Filename" % lbl)[0].text
-            self.scene_basename = os.path.splitext(self.filename_data)[0]
-            self.filename_deadpixelmap = xml.findall("ProductComponent/%s/Sensor/DeadPixel/Filename" % lbl)[0].text
-            self.filename_quicklook = xml.findall("ProductComponent/%s/Preview/Filename" % lbl)[0].text
-            self.filename_mask_clouds = xml.findall("ProductComponent/%s/Data/CloudMaskMap/Filename" % lbl)[0].text
-
-            # read preview bands
-            self.preview_bands = np.zeros(3, dtype=int)
-            self.preview_bands[0] = int(xml.findall("ProductComponent/%s/Preview/Bands/Red" % lbl)[0].text)
-            self.preview_bands[1] = int(xml.findall("ProductComponent/%s/Preview/Bands/Green" % lbl)[0].text)
-            self.preview_bands[2] = int(xml.findall("ProductComponent/%s/Preview/Bands/Blue" % lbl)[0].text)
-
-            # read some basic information concerning the detector
-            self.nrows = int(xml.findall("ProductComponent/%s/Data/Size/NRows" % lbl)[0].text)
-            self.ncols = int(xml.findall("ProductComponent/%s/Data/Size/NCols" % lbl)[0].text)
-            self.unitcode = xml.findall("ProductComponent/%s/Data/Type/UnitCode" % lbl)[0].text
-            self.unit = xml.findall("ProductComponent/%s/Data/Type/Unit" % lbl)[0].text
-
-            # Read image coordinates
-            scene_corner_coordinates = xml.findall("ProductComponent/%s/Data/SceneInformation/"
-                                                   "SceneCornerCoordinates" % lbl)
-            self.lat_UL_UR_LL_LR = [
-                float(scene_corner_coordinates[0].findall("Latitude")[0].text),
-                float(scene_corner_coordinates[1].findall("Latitude")[0].text),
-                float(scene_corner_coordinates[2].findall("Latitude")[0].text),
-                float(scene_corner_coordinates[3].findall("Latitude")[0].text)
-            ]
-            self.lon_UL_UR_LL_LR = [
-                float(scene_corner_coordinates[0].findall("Longitude")[0].text),
-                float(scene_corner_coordinates[1].findall("Longitude")[0].text),
-                float(scene_corner_coordinates[2].findall("Longitude")[0].text),
-                float(scene_corner_coordinates[3].findall("Longitude")[0].text)
-            ]
-
-            # read the band related information: wavelength, fwhm
-            self.nwvl = int(xml.findall("ProductComponent/%s/Data/BandInformationList/NumberOfBands" % lbl)[0].text)
-            self.nsmile_coef = int(xml.findall(
-                "ProductComponent/%s/Data/BandInformationList/SmileInformation/NumberOfCoefficients" % lbl)[0].text)
-            self.fwhm = np.zeros(self.nwvl, dtype=float)
-            self.wvl_center = np.zeros(self.nwvl, dtype=float)
-            self.smile_coef = np.zeros((self.nwvl, self.nsmile_coef), dtype=float)
-            self.l_min = np.zeros(self.nwvl, dtype=float)
-            self.l_max = np.zeros(self.nwvl, dtype=float)
-            band_informations = xml.findall("ProductComponent/%s/Data/BandInformationList/BandInformation" % lbl)
-            for bi in band_informations:
-                k = np.int64(bi.attrib['Id']) - 1
-                self.wvl_center[k] = float(bi.findall("CenterWavelength")[0].text)
-                self.fwhm[k] = float(bi.findall("FullWidthHalfMaximum")[0].text)
-                self.l_min[k] = float(bi.findall("L_min")[0].text)
-                self.l_max[k] = float(bi.findall("L_max")[0].text)
-                scl = bi.findall("Smile/Coefficient")
-                for sc in scl:
-                    self.smile_coef[k, np.int64(sc.attrib['exponent'])] = float(sc.text)
-
-            self.lats = self.interpolate_corners(*self.lat_UL_UR_LL_LR, self.ncols, self.nrows)
-            self.lons = self.interpolate_corners(*self.lon_UL_UR_LL_LR, self.ncols, self.nrows)
-            self.geolayer_has_keystone = False
-            self.preview_wvls = np.array([self.wvl_center[i] for i in self.preview_bands])
+            for n in keys2combine:
+                self.rpc_coeffs[bN]['%s_coeffs' % n.lower()] = \
+                    np.array([v for k, v in tmp.items() if k.startswith(n)])
 
         # drop bad bands from metadata if desired
         if self.cfg.drop_bad_bands:
@@ -530,67 +462,50 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
         self.filename_metaxml = os.path.basename(path_xml)
 
-        if not self.cfg.is_dummy_dataformat:
-            # read processing level
-            self.proc_level = xml.find("base/level").text
-            if self.proc_level != 'L1B':
-                raise RuntimeError(self.proc_level, "Unexpected input data processing level. Expected 'L1B'.")
+        # read processing level
+        self.proc_level = xml.find("base/level").text
+        if self.proc_level != 'L1B':
+            raise RuntimeError(self.proc_level, "Unexpected input data processing level. Expected 'L1B'.")
 
-            # read version of ground segment processing system
-            self.version_provider = xml.find("base/revision").text
+        # read version of ground segment processing system
+        self.version_provider = xml.find("base/revision").text
 
-            # raise a warning in case of old processing version (de-striping was implemented in version 01.02.00)
-            if parse_version(self.version_provider) < parse_version('01.02.00'):
-                self.logger.warning(
-                    f"The input EnMAP Level-1B image was processed with an old version of the ground segment "
-                    f"processing system (version {self.version_provider}), which, e.g. did not include de-striping. "
-                    f"It is highly recommended to re-download the dataset in the latest processing version from the "
-                    f"archive via the EOWEB GeoPortal (www.eoweb.dlr.de) before passing it to EnPT.")
+        # raise a warning in case of old processing version (de-striping was implemented in version 01.02.00)
+        if parse_version(self.version_provider) < parse_version('01.02.00'):
+            self.logger.warning(
+                f"The input EnMAP Level-1B image was processed with an old version of the ground segment "
+                f"processing system (version {self.version_provider}), which, e.g. did not include de-striping. "
+                f"It is highly recommended to re-download the dataset in the latest processing version from the "
+                f"archive via the EOWEB GeoPortal (www.eoweb.dlr.de) before passing it to EnPT.")
 
-            # read the acquisition time
-            self.observation_datetime = \
-                datetime.strptime(xml.find("base/temporalCoverage/startTime").text, '%Y-%m-%dT%H:%M:%S.%fZ')
+        # read the acquisition time
+        self.observation_datetime = \
+            datetime.strptime(xml.find("base/temporalCoverage/startTime").text, '%Y-%m-%dT%H:%M:%S.%fZ')
 
-            # get the distance earth sun from the acquisition date
-            self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
+        # get the distance earth sun from the acquisition date
+        self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
 
-            # read Geometry (observation/illumination) angle
-            # NOTE: EnMAP metadata provide also the angles for the image corners
-            #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
-            # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
-            # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
-            self.geom_view_zenith = np.abs(float(xml.find("specific/acrossOffNadirAngle/center").text))
-            # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
-            self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
-            self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
-            self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
-            self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
-            self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
-            self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
+        # read Geometry (observation/illumination) angle
+        # NOTE: EnMAP metadata provide also the angles for the image corners
+        #       -> would allow even more precise computation (e.g., specific/sunElevationAngle/upper_left)
+        # NOTE: alongOffNadirAngle is always near 0 and therefore ignored here (not relevant for AC)
+        # FIXME VZA may be negative in DLR L1B data -> correct to always use the absolute value for SICOR?
+        self.geom_view_zenith = np.abs(float(xml.find("specific/acrossOffNadirAngle/center").text))
+        # FIXME correct to directly use sceneAzimuthAngle (14.24 (DLR) vs. 101.1 (AlpineTest)
+        self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
+        self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
+        self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
+        self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
+        self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
+        self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
 
-            # TODO: revise this later to get rid of the duplicates with self.geom_xxx
-            self.geom_angles_all = dict(
-                view_zenith={e.tag: abs(float(e.text)) for e in xml.findall("specific/acrossOffNadirAngle/")},
-                view_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sceneAzimuthAngle/")},
-                sun_zenith={e.tag: 90 - float(e.text)for e in xml.findall("specific/sunElevationAngle/")},
-                sun_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sunAzimuthAngle/")}
-            )
-
-        else:
-            # read the acquisition time
-            self.observation_datetime = \
-                datetime.strptime(xml.findall("GeneralInfo/ProductInfo/ProductStartTime")[0].text,
-                                  '%Y-%m-%dT%H:%M:%S.%fZ')
-
-            # get the distance earth sun from the acquisition date
-            self.earthSunDist = self.get_earth_sun_distance(self.observation_datetime)
-
-            # read Geometry (observation/illumination) angle
-            self.geom_view_zenith = float(xml.findall("GeneralInfo/Geometry/Observation/ZenithAngle")[0].text)
-            self.geom_view_azimuth = float(xml.findall("GeneralInfo/Geometry/Observation/AzimuthAngle")[0].text)
-            self.geom_sun_zenith = float(xml.findall("GeneralInfo/Geometry/Illumination/ZenithAngle")[0].text)
-            self.geom_sun_azimuth = float(xml.findall("GeneralInfo/Geometry/Illumination/AzimuthAngle")[0].text)
-            self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
+        # TODO: revise this later to get rid of the duplicates with self.geom_xxx
+        self.geom_angles_all = dict(
+            view_zenith={e.tag: abs(float(e.text)) for e in xml.findall("specific/acrossOffNadirAngle/")},
+            view_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sceneAzimuthAngle/")},
+            sun_zenith={e.tag: 90 - float(e.text)for e in xml.findall("specific/sunElevationAngle/")},
+            sun_azimuth={e.tag: float(e.text) for e in xml.findall("specific/sunAzimuthAngle/")}
+        )
 
     def get_earth_sun_distance(self, acqDate: datetime):
         """Get earth-sun distance (requires file of pre-calculated earth sun distance per day).
@@ -632,20 +547,12 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         from . import L1B_product_props, L1B_product_props_DLR
         xml = ElementTree.parse(self.path_xml).getroot()
 
-        if not self.cfg.is_dummy_dataformat:
-            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
-                lbl = L1B_product_props_DLR['xml_detector_label'][detName]
-                xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
-                xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
-                xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
-                xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
-
-        else:
-            for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
-                lbl = L1B_product_props['xml_detector_label'][detName]
-                xml.find("ProductComponent/%s/Data/Size/NRows" % lbl).text = str(detMeta.nrows)
-                xml.find("ProductComponent/%s/Data/Type/UnitCode" % lbl).text = detMeta.unitcode
-                xml.find("ProductComponent/%s/Data/Type/Unit" % lbl).text = detMeta.unit
+        for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
+            lbl = L1B_product_props_DLR['xml_detector_label'][detName]
+            xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+            xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
+            xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
+            xml.find("product/quicklook/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
 
         xml_string = ElementTree.tostring(xml, encoding='unicode', pretty_print=True)
 
