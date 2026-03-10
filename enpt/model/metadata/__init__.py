@@ -34,27 +34,3 @@ from .metadata_mapgeo import EnMAP_Metadata_L2A_MapGeo  # noqa: F401
 
 
 __author__ = 'Daniel Scheffler'
-
-
-L1B_product_props = dict(
-    xml_detector_label=dict(
-        VNIR='vnir',
-        SWIR='swir'
-    ),
-    fn_detector_suffix=dict(
-        VNIR='D1',
-        SWIR='D2'
-    )
-)
-
-
-L2A_product_props = dict(
-    xml_detector_label=dict(
-        VNIR='vnir',
-        SWIR='swir'
-    ),
-    fn_detector_suffix=dict(
-        VNIR='D1',
-        SWIR='D2'
-    )
-)

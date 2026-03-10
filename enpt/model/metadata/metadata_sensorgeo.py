@@ -63,10 +63,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param config:          EnPT configuration object
         :param logger:          instance of logging.logger or subclassed
         """
-        from . import L1B_product_props
         self.cfg = config
         self.detector_name: str = detector_name
-        self.detector_label = L1B_product_props['xml_detector_label'][detector_name]
+        self.detector_label = detector_name.lower()
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
@@ -544,11 +543,9 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
 
     def to_XML(self) -> str:
         """Generate an XML metadata string from the L1B metadata."""
-        from . import L1B_product_props
         xml = ElementTree.parse(self.path_xml).getroot()
 
-        for detName, detMeta in zip(['VNIR', 'SWIR'], [self.vnir, self.swir]):
-            lbl = L1B_product_props['xml_detector_label'][detName]
+        for detName, detMeta in zip(['vnir', 'swir'], [self.vnir, self.swir]):
             xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
             xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
             xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
