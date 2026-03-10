@@ -38,13 +38,17 @@ Tests for `l1b_reader` module.
 import unittest
 import os
 from os import path
+from pathlib import Path
 import tempfile
 import zipfile
 import shutil
+from glob import glob
+
+import numpy as np
 
 from enpt.io.reader import L1B_Reader
 from enpt.model.images import EnMAPL1Product_SensorGeo
-from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
+from enpt.options.config import EnPTConfig, path_enptlib
 
 __author__ = 'Daniel Scheffler'
 
@@ -52,64 +56,72 @@ __author__ = 'Daniel Scheffler'
 class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class."""
 
-    def setUp(self):
-        self.config = EnPTConfig(**config_for_testing)
+    @classmethod
+    def setUpClass(cls):
+        path_l1b_testimages = (Path(path_enptlib) / ".." / "tests" / "data" / "EnMAP_Level_1B").resolve()
+        cls.config = EnPTConfig(
+            path_l1b_enmap_image=str(
+                path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
+                                      "__rows700-799.zip"
+            ),
+            path_l1b_enmap_image_gapfill=str(
+                path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
+                                      "__rows800-899.zip"
+            ),
+            output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve())
+        )
+        cls.config.drop_bad_bands = False  # otherwise the read/write/read tests will fail
+        cls.pathList_testimages = [cls.config.path_l1b_enmap_image,
+                                   cls.config.path_l1b_enmap_image_gapfill]
+        cls.tmpdir = tempfile.mkdtemp(dir=cls.config.working_dir)
+        os.makedirs(cls.config.output_dir, exist_ok=True)
 
-        # don't drop bands - otherwise we can't run write-read-tests as the writer does not include the full bandlist
-        self.config.drop_bad_bands = False
-
-        self.pathList_testimages = [self.config.path_l1b_enmap_image,
-                                    self.config.path_l1b_enmap_image_gapfill]
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
-        os.makedirs(self.config.output_dir, exist_ok=True)
-
-        # unzip both test images in dummy format
-        for l1b_file in self.pathList_testimages:
+        # unzip both test images
+        for l1b_file in cls.pathList_testimages:
             with zipfile.ZipFile(l1b_file, "r") as zf:
-                zf.extractall(self.tmpdir)
+                zf.extractall(Path(cls.tmpdir) / Path(l1b_file).stem)
 
-        self.testproducts = [os.path.join(self.tmpdir, os.path.basename(self.pathList_testimages[i]).split(".zip")[0])
-                             for i in range(len(self.pathList_testimages))]
+        cls.testproducts = glob(os.path.join(cls.tmpdir, '*'))
+        cls.RD = L1B_Reader(config=cls.config)
 
-        self.RD = L1B_Reader(config=self.config)
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmpdir)
+        shutil.rmtree(cls.config.output_dir)
 
-    def tearDown(self):
-        if os.path.isdir(self.tmpdir):
-            shutil.rmtree(self.tmpdir)
-        if os.path.isdir(self.config.output_dir):
-            shutil.rmtree(self.config.output_dir)
+    def test_read_inputdata_dont_drop_bad_bands(self):
+        L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
+        assert L1_obj.swir.detector_meta.nwvl == 130
+
+    def _test_read_and_save_single_image(self, compute_snr: bool):
+        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
+            # read
+            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=compute_snr)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+            if compute_snr:
+                assert isinstance(L1_obj.vnir.detector_meta.snr, np.ndarray)
+                assert isinstance(L1_obj.swir.detector_meta.snr, np.ndarray)
+                assert L1_obj.vnir.detector_meta.snr.shape == L1_obj.vnir.data.shape
+                assert L1_obj.swir.detector_meta.snr.shape == L1_obj.swir.data.shape
+            else:
+                assert L1_obj.vnir.detector_meta.snr is None
+                assert L1_obj.swir.detector_meta.snr is None
+
+            # save
+            L1_obj.save(tempdir)
+            root_dir_written_L1_data = path.join(tempdir, L1_obj.meta.scene_basename)
+
+            # read saved result
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=compute_snr)
+            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
     def test_read_and_save_single_image_no_snr(self):
         """Test to read test image 1, save it and read the saved result again - without SNR."""
-        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
-            # read
-            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
-            assert L1_obj.vnir.detector_meta.snr is None
-            assert L1_obj.swir.detector_meta.snr is None
-
-            # save
-            root_dir_written_L1_data = L1_obj.save(tempdir)
-
-            # read saved result
-            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+        self._test_read_and_save_single_image(compute_snr=False)
 
     def test_read_and_save_single_image_with_snr(self):
         """Test to read test image 1, save it and read the saved result again - with SNR."""
-        with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
-            # read
-            L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=True)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
-            assert L1_obj.vnir.detector_meta.snr is not None
-            assert L1_obj.swir.detector_meta.snr is not None
-
-            # save
-            root_dir_written_L1_data = L1_obj.save(tempdir)
-
-            # read saved result
-            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=False)
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+        self._test_read_and_save_single_image(compute_snr=True)
 
     def _test_append_n_lines(self, *reader_args, **reader_kwargs):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
@@ -124,10 +136,12 @@ class Test_L1B_Reader(unittest.TestCase):
                 assert L1_obj.swir.detector_meta.snr is None
 
             # save
-            root_dir_written_L1_data = L1_obj.save(path.join(tempdir))
+            L1_obj.save(tempdir)
+            root_dir_written_L1_data = path.join(tempdir, L1_obj.meta.scene_basename)
 
             # read saved result
-            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data, compute_snr=reader_kwargs['compute_snr'])
+            L1_obj = self.RD.read_inputdata(root_dir_written_L1_data,
+                                            compute_snr=reader_kwargs['compute_snr'])
             assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
     def _test_append_n_lines_allimagecombinations_withwithoutSNR(self, n_lines):
@@ -156,40 +170,6 @@ class Test_L1B_Reader(unittest.TestCase):
 
     def test_append_150_lines(self):
         self._test_append_n_lines_allimagecombinations_withwithoutSNR(n_lines=150)
-
-
-class Test_L1B_Reader_DLR(unittest.TestCase):
-    """Tests for L1B_Reader class."""
-
-    def setUp(self):
-        self.config = EnPTConfig(**config_for_testing_dlr)
-        self.pathList_testimages = [self.config.path_l1b_enmap_image,
-                                    self.config.path_l1b_enmap_image_gapfill]
-        self.tmpdir = tempfile.mkdtemp(dir=self.config.working_dir)
-
-    def tearDown(self):
-        shutil.rmtree(self.tmpdir)
-        shutil.rmtree(self.config.output_dir)
-
-    def test_read_inputdata(self):
-        with zipfile.ZipFile(self.pathList_testimages[0], "r") as zf:
-            zf.extractall(self.tmpdir)
-
-        RD = L1B_Reader(config=self.config)
-
-        L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
-        L1_obj.save(path.join(self.config.output_dir, "no_snr"))
-
-    def test_read_inputdata_dont_drop_bad_bands(self):
-        with zipfile.ZipFile(self.pathList_testimages[0], "r") as zf:
-            zf.extractall(self.tmpdir)
-
-        cfg = self.config
-        cfg.drop_bad_bands = False
-        RD = L1B_Reader(config=cfg)
-
-        L1_obj = RD.read_inputdata(self.tmpdir, compute_snr=False)
-        assert L1_obj.swir.detector_meta.nwvl == 130
 
 
 if __name__ == '__main__':

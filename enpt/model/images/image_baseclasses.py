@@ -77,6 +77,7 @@ class _EnMAP_Image(object):
         self._mask_haze = None
         self._mask_snow = None
         self._mask_cirrus = None
+        self._testflags = None
         self._dem = None
         self._deadpixelmap = None
         self._sicor_cwv = None
@@ -264,6 +265,22 @@ class _EnMAP_Image(object):
     @mask_cirrus.deleter
     def mask_cirrus(self):
         self._mask_cirrus = None
+
+    @property
+    def testflags(self) -> GeoArray:
+        """Return the test flags (?).
+
+        :return: geoarray.GeoArray
+        """
+        return self._testflags
+
+    @testflags.setter
+    def testflags(self, *geoArr_initArgs):
+        self._testflags = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'testflags', nodataVal=0)
+
+    @testflags.deleter
+    def testflags(self):
+        self._testflags = None
 
     @property
     def dem(self) -> GeoArray:

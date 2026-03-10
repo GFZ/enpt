@@ -55,7 +55,7 @@ from geoarray import GeoArray
 
 from enpt.io.reader import L1B_Reader
 from enpt.processors.orthorectification import Orthorectifier
-from enpt.options.config import EnPTConfig, config_for_testing, config_for_testing_dlr
+from enpt.options.config import EnPTConfig, config_for_testing
 from enpt.processors.atmospheric_correction._isofit_downloads import download_isofit_resources
 from enpt.processors.atmospheric_correction._isofit_enmap import IsofitEnMAP
 from enpt.processors.atmospheric_correction._isofit_lut_preparation import LUTTransformer
@@ -82,7 +82,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
 
     @staticmethod
     def _get_enmap_l2a_obj():
-        cfg_dict = dict(config_for_testing_dlr, **dict(target_projection_type='UTM'))
+        cfg_dict = dict(config_for_testing, **dict(target_projection_type='UTM'))
         cfg = EnPTConfig(**cfg_dict)
 
         with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \

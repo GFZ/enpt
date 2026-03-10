@@ -42,7 +42,7 @@ import shutil
 import numpy as np
 
 from enpt.processors.spatial_optimization import Spatial_Optimizer
-from enpt.options.config import config_for_testing_dlr, EnPTConfig
+from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.model.images.images_sensorgeo import EnMAPL1Product_SensorGeo
 
@@ -51,7 +51,7 @@ __author__ = 'Daniel Scheffler'
 
 class Test_Spatial_Optimizer(TestCase):
     def setUp(self):
-        self.config = EnPTConfig(**config_for_testing_dlr)
+        self.config = EnPTConfig(**config_for_testing)
 
         # create a temporary directory
         # NOTE: This must exist during the whole runtime of Test_Spatial_Optimizer, otherwise

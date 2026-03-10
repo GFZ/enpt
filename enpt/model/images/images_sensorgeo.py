@@ -38,7 +38,6 @@ import numpy as np
 from os import path, makedirs
 from glob import glob
 import utm
-from scipy.interpolate import RegularGridInterpolator
 from geoarray import GeoArray
 from py_tools_ds.geo.vector.topology import get_footprint_polygon
 
@@ -113,6 +112,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.paths.mask_cirrus = path_or_None(self.detector_meta.filename_mask_cirrus)
         self.paths.deadpixelmap = path_or_None(self.detector_meta.filename_deadpixelmap)
         self.paths.quicklook = path_or_None(self.detector_meta.filename_quicklook)
+        self.paths.testflags = path_or_None(self.detector_meta.filename_testflags)
 
         return self.paths
 
@@ -187,12 +187,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         :param n_lines: number of lines to be added from the new image
         :return: None
         """
-        if not self.cfg.is_dummy_dataformat:
-            basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
-            basename_img2 = img2.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
-        else:
-            basename_img1 = path.basename(self._root_dir)
-            basename_img2 = path.basename(img2._root_dir)
+        basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
+        basename_img2 = img2.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % img2.detector_name
 
         self.logger.info("Check new image for %s: %s " % (self.detector_name, basename_img2))
 
@@ -231,55 +227,24 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         self.detector_meta.nrows += n_lines
 
         # Compute new lower coordinates
-        if not self.cfg.is_dummy_dataformat:
-            img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
-                                          img2.detector_meta.lat_UL_UR_LL_LR))
-            elevation = DEM_Processor(img2.cfg.path_dem,
-                                      enmapIm_cornerCoords=img2_cornerCoords,
-                                      progress=not self.cfg.disable_progress_bars).dem \
-                if img2.cfg.path_dem else self.cfg.average_elevation
+        img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
+                                      img2.detector_meta.lat_UL_UR_LL_LR))
+        elevation = DEM_Processor(img2.cfg.path_dem,
+                                  enmapIm_cornerCoords=img2_cornerCoords,
+                                  progress=not self.cfg.disable_progress_bars).dem \
+            if img2.cfg.path_dem else self.cfg.average_elevation
 
-            LL, LR = compute_mapCoords_within_sensorGeoDims(
-                sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
-                                    (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
-                rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
-                elevation=elevation,
-                enmapIm_cornerCoords=img2_cornerCoords,
-                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
-            )
+        LL, LR = compute_mapCoords_within_sensorGeoDims(
+            sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
+                                (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
+            rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
+            elevation=elevation,
+            enmapIm_cornerCoords=img2_cornerCoords,
+            enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
+        )
 
-            self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
-            self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
-        else:
-            cols_lowres, rows_lowres = [0, 1], [0, 1]
-            lats_lowres = [[img2.detector_meta.lat_UL_UR_LL_LR[0], img2.detector_meta.lat_UL_UR_LL_LR[2]],
-                           [img2.detector_meta.lat_UL_UR_LL_LR[1], img2.detector_meta.lat_UL_UR_LL_LR[3]]]  # [x, y]
-            lons_lowres = [[img2.detector_meta.lon_UL_UR_LL_LR[0], img2.detector_meta.lon_UL_UR_LL_LR[2]],
-                           [img2.detector_meta.lon_UL_UR_LL_LR[1], img2.detector_meta.lon_UL_UR_LL_LR[3]]]  # [x, y]
-            RGI_lats = RegularGridInterpolator(points=[cols_lowres, rows_lowres], values=lats_lowres, method='linear')
-            RGI_lons = RegularGridInterpolator(points=[cols_lowres, rows_lowres], values=lons_lowres, method='linear')
-            cols_full = np.array([[0, 1]])
-            rows_full = np.array([[int(n_lines / img2.detector_meta.nrows)]])
-            lats_LL_LR = RGI_lats(np.dstack(np.meshgrid(cols_full, rows_full))).flatten()
-            lons_LL_LR = RGI_lons(np.dstack(np.meshgrid(cols_full, rows_full))).flatten()
-
-            self.detector_meta.lat_UL_UR_LL_LR[2] = float(lats_LL_LR[0])
-            self.detector_meta.lat_UL_UR_LL_LR[3] = float(lats_LL_LR[1])
-            self.detector_meta.lon_UL_UR_LL_LR[2] = float(lons_LL_LR[0])
-            self.detector_meta.lon_UL_UR_LL_LR[3] = float(lons_LL_LR[1])
-
-            self.detector_meta.lats = (
-                self.detector_meta.interpolate_corners(
-                    *self.detector_meta.lat_UL_UR_LL_LR,
-                    self.detector_meta.ncols,
-                    self.detector_meta.nrows)
-            )
-            self.detector_meta.lons = (
-                self.detector_meta.interpolate_corners(
-                    *self.detector_meta.lon_UL_UR_LL_LR,
-                    self.detector_meta.ncols,
-                    self.detector_meta.nrows)
-            )
+        self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
+        self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
 
         # update map polygon
         self.detector_meta.ll_mapPoly = \
@@ -302,9 +267,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     # this mainly applies to the dummy data format that does not have all mask files
                     self.logger.warning("Could not append the '%s' attribute "
                                         "as it does not exist in the current image." % attrName)
+                    raise RuntimeError()
 
-        if not self.cfg.is_dummy_dataformat:
-            self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
+        # append deadpixelmap and testflags (provided for VNIR and SWIR sensor geometry)
+        self.deadpixelmap = np.append(self.deadpixelmap[:], img2.deadpixelmap[0:n_lines, :], axis=0)
+        self.testflags = np.append(self.testflags[:], img2.testflags[0:n_lines, :], axis=0)
 
         # NOTE: We leave the quicklook out here because merging the quicklook of adjacent scenes might cause a
         #       brightness jump that can be avoided by recomputing the quicklook after DN/radiance conversion.
@@ -584,12 +551,8 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger = logger
 
         # Read metadata here in order to get all information needed by to get paths.
-        if not self.cfg.is_dummy_dataformat:
-            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
-                                                     config=self.cfg, logger=self.logger)
-        else:
-            self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*_header.xml"))[0],
-                                                     config=self.cfg, logger=self.logger)
+        self.meta = EnMAP_Metadata_L1B_SensorGeo(glob(path.join(root_dir, "*METADATA.XML"))[0],
+                                                 config=self.cfg, logger=self.logger)
         self.meta.read_metadata()
 
         # define VNIR and SWIR detector
@@ -605,14 +568,16 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.data = self.paths.vnir.data
         self.swir.data = self.paths.swir.data
         self.vnir.read_masks()
+        self.vnir.testflags = GeoArray(self.paths.vnir.testflags)[:]
+        self.swir.testflags = GeoArray(self.paths.swir.testflags)[:]
 
         if self.cfg.drop_bad_bands:
             self.vnir.data = self.vnir.data[:, :, self.meta.vnir.goodbands_inds]
             self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
-            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
+            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)[:]
+            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)[:]
 
             if self.cfg.drop_bad_bands:
                 if vnir_dpm.ndim == 3:
@@ -930,7 +895,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the VNIR
         self.vnir.save_raster_attributes(['data', 'mask_landwater', 'mask_clouds', 'mask_cloudshadow',
-                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap'],
+                                          'mask_haze', 'mask_snow', 'mask_cirrus', 'deadpixelmap', 'testflags'],
                                          product_dir)
 
         # FIXME we could also write the quicklook included in DLR L1B format instead of generating an own one
@@ -939,7 +904,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # write the SWIR
         # NOTE: The masks only exist in VNIR sensor geometry (would have to be transformed before to match for the SWIR)
-        self.swir.save_raster_attributes(['data', 'deadpixelmap'], product_dir)
+        self.swir.save_raster_attributes(['data', 'deadpixelmap', 'testflags'], product_dir)
 
         self.swir.generate_quicklook(bands2use=self.swir.detector_meta.preview_bands) \
             .save(path.join(product_dir, path.splitext(self.meta.swir.filename_quicklook)[0] + '.png'), fmt='PNG')

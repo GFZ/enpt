@@ -48,7 +48,7 @@ from py_tools_ds.geo.coord_grid import is_point_on_grid
 
 from enpt.processors.spatial_transform import \
     Geometry_Transformer, RPC_Geolayer_Generator, RPC_3D_Geolayer_Generator, VNIR_SWIR_SensorGeometryTransformer
-from enpt.options.config import config_for_testing, EnPTConfig, config_for_testing_dlr
+from enpt.options.config import EnPTConfig, config_for_testing
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid_utm
 
@@ -66,7 +66,7 @@ class Test_Geometry_Transformer(TestCase):
         with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
             zf.extractall(td)
             L1_obj = L1B_Reader(config=config).read_inputdata(
-                root_dir_main=os.path.join(td, os.path.splitext(os.path.basename(config.path_l1b_enmap_image))[0]),
+                root_dir_main=td,
                 compute_snr=False)
 
         R, C = L1_obj.vnir.data.shape[:2]
@@ -113,7 +113,7 @@ class Test_VNIR_SWIR_SensorGeometryTransformer(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        config = EnPTConfig(**config_for_testing_dlr)
+        config = EnPTConfig(**config_for_testing)
 
         # get lons / lats
         with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
@@ -268,12 +268,12 @@ class Test_RPC_3D_Geolayer_Generator(TestCase):
 
         self.rpc_coeffs_per_band = {'band_%d' % b: rpc_coeffs_oneband.copy() for b in range(1, 7)}
 
-        # bounding polygon DLR test data
+        # bounding polygon
         self.lats = np.array([47.7872236, 47.7232358, 47.5195676, 47.4557831])
         self.lons = np.array([10.7966311, 11.1693436, 10.7111131, 11.0815993])
         self.corner_coords = np.vstack([self.lons, self.lats]).T.tolist()
 
-        # spatial coverage of datatake DLR test data
+        # spatial coverage of datatake
         # self.lats = np.array([47.7870358956, 47.723060779, 46.9808418244, 46.9174014681])
         # self.lons = np.array([10.7968099213, 11.1693752478, 10.5262233116, 10.8932492494])
 

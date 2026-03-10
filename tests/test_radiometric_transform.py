@@ -28,7 +28,6 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import os
 from unittest import TestCase
 import tempfile
 import zipfile
@@ -44,35 +43,30 @@ class Test_Radiometric_Transformer(TestCase):
     def setUp(self):
         """Set up the needed test data"""
         self.cfg = EnPTConfig(**config_for_testing)
-        self.pathList_testimages = [self.cfg.path_l1b_enmap_image,
-                                    self.cfg.path_l1b_enmap_image_gapfill]
         self.RT = Radiometric_Transformer(config=self.cfg)
 
     def test_transform_TOARad2TOARef(self):
         from enpt.io.reader import L1B_Reader
         from enpt.model.images import EnMAPL1Product_SensorGeo
 
-        for l1b_file in self.pathList_testimages:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                print("Tmp dir: %s" % tmpdir)
-                with zipfile.ZipFile(l1b_file, "r") as zf:
-                    zf.extractall(tmpdir)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            print("Tmp dir: %s" % tmpdir)
+            with zipfile.ZipFile(self.cfg.path_l1b_enmap_image, "r") as zf:
+                zf.extractall(tmpdir)
 
-                    root_dir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
+                # create EnPT Level 1 image
+                L1_obj = L1B_Reader(config=self.cfg).read_inputdata(tmpdir)
 
-                    # create EnPT Level 1 image
-                    L1_obj = L1B_Reader(config=self.cfg).read_inputdata(root_dir)
+                # input assertions
+                assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
 
-                    # input assertions
-                    assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+                # run transformation
+                L1_obj = self.RT.transform_TOARad2TOARef(L1_obj)  # for now only test if its runnable without error
 
-                    # run transformation
-                    L1_obj = self.RT.transform_TOARad2TOARef(L1_obj)  # for now only test if its runnable without error
-
-            # output assertions
-            assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
-            assert L1_obj.vnir.detector_meta.unitcode == 'TOARef'
-            assert L1_obj.swir.detector_meta.unitcode == 'TOARef'
+        # output assertions
+        assert isinstance(L1_obj, EnMAPL1Product_SensorGeo)
+        assert L1_obj.vnir.detector_meta.unitcode == 'TOARef'
+        assert L1_obj.swir.detector_meta.unitcode == 'TOARef'
 
 
 if __name__ == '__main__':

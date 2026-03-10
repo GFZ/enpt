@@ -86,9 +86,8 @@ config_for_testing_water = dict(
                      'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2'
                      '__DEM_ASTER.bsq')),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs'),
+    output_dir=os.path.abspath(os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs')),
     disable_progress_bars=False,
-    is_dummy_dataformat=False,
     auto_download_ecmwf=True,
     average_elevation=0,
     deadpix_P_algorithm='spectral',
@@ -114,22 +113,6 @@ config_for_testing_water = dict(
 
 
 config_for_testing = dict(
-    path_l1b_enmap_image=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest1_CWV2_SM0.zip')),
-    path_l1b_enmap_image_gapfill=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B', 'AlpineTest2_CWV2_SM0.zip')),
-    path_dem=os.path.abspath(
-        os.path.join(path_enptlib, '..', 'tests', 'data', 'dem_map_geo.bsq')),
-    log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
-    n_lines_to_append=50,
-    disable_progress_bars=True,
-    is_dummy_dataformat=True,
-    enable_ac=False,
-)
-
-
-config_for_testing_dlr = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
                      # Alps
@@ -174,10 +157,9 @@ config_for_testing_dlr = dict(
                      # '15_DEM_UTM__with_prj.tif'
                      )),
     log_level='DEBUG',
-    output_dir=os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs'),
+    output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
     n_lines_to_append=50,
     disable_progress_bars=False,
-    is_dummy_dataformat=False,
     # output_format='ENVI',
     # output_interleave='band',
     # target_projection_type='Geographic',
@@ -391,12 +373,6 @@ class EnPTConfig(object):
         ###################
         # general options #
         ###################
-
-        self.is_dummy_dataformat = gp('is_dummy_dataformat')
-        if 'is_dlr_dataformat' in user_opts:
-            warnings.warn("The 'is_dlr_dataformat' flag is deprecated and will not exist in future. "
-                          "Please set 'is_dummy_dataformat' to False instead.", DeprecationWarning)
-            self.is_dummy_dataformat = user_opts['is_dlr_dataformat'] is False
 
         self.CPUs = gp('CPUs', fallback=cpu_count())
         if self.CPUs > cpu_count():

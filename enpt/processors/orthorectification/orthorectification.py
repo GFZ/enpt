@@ -233,7 +233,7 @@ class Orthorectifier(object):
         :param enmap_grid:
         :return:
         """
-        # get geolayers - 2D for dummy data format else 3D
+        # get 3D geolayers
         V_lons, V_lats = enmap_ImageL1.meta.vnir.lons, enmap_ImageL1.meta.vnir.lats
         S_lons, S_lats = enmap_ImageL1.meta.swir.lons, enmap_ImageL1.meta.swir.lats
 
@@ -253,14 +253,13 @@ class Orthorectifier(object):
         V_X_prj, V_Y_prj = zip(*V_UL_UR_LL_LR_prj)
         S_X_prj, S_Y_prj = zip(*S_UL_UR_LL_LR_prj)
 
-        # in case of 3D geolayers, the corner coordinates have multiple values for multiple bands
+        # 3D geolayers, i.e., the corner coordinates have multiple values for multiple bands
         # -> use the innermost coordinates to avoid pixels with VNIR-only/SWIR-only values due to keystone
         #    (these pixels would be set to nodata later anyway, so we don't need to increase the extent for them)
-        if V_lons.ndim == 3:
-            V_X_prj = (V_X_prj[0].max(), V_X_prj[1].min(), V_X_prj[2].max(), V_X_prj[3].min())
-            V_Y_prj = (V_Y_prj[0].min(), V_Y_prj[1].min(), V_Y_prj[2].max(), V_Y_prj[3].max())
-            S_X_prj = (S_X_prj[0].max(), S_X_prj[1].min(), S_X_prj[2].max(), S_X_prj[3].min())
-            S_Y_prj = (S_Y_prj[0].min(), S_Y_prj[1].min(), S_Y_prj[2].max(), S_Y_prj[3].max())
+        V_X_prj = (V_X_prj[0].max(), V_X_prj[1].min(), V_X_prj[2].max(), V_X_prj[3].min())
+        V_Y_prj = (V_Y_prj[0].min(), V_Y_prj[1].min(), V_Y_prj[2].max(), V_Y_prj[3].max())
+        S_X_prj = (S_X_prj[0].max(), S_X_prj[1].min(), S_X_prj[2].max(), S_X_prj[3].min())
+        S_Y_prj = (S_Y_prj[0].min(), S_Y_prj[1].min(), S_Y_prj[2].max(), S_Y_prj[3].max())
 
         # use inner coordinates of VNIR and SWIR as common extent
         xmin_prj = max([min(V_X_prj), min(S_X_prj)])
