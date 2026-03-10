@@ -47,19 +47,19 @@ from geoarray import GeoArray
 from py_tools_ds.geo.projection import isProjectedOrGeographic
 
 from enpt.processors.orthorectification import Orthorectifier, VNIR_SWIR_Stacker
-from enpt.options.config import config_for_testing_dlr, EnPTConfig
+from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.model.images import EnMAPL2Product_MapGeo
 
 __author__ = 'Daniel Scheffler'
 
 
-class Test_Orthorectifier_DLR(TestCase):
+class Test_Orthorectifier(TestCase):
     def test_run_transformation_utm(self):
-        self._test_run_transformation(config_for_testing_dlr, 'UTM', 'projected')
+        self._test_run_transformation(config_for_testing, 'UTM', 'projected')
 
     def test_run_transformation_ll(self):
-        self._test_run_transformation(config_for_testing_dlr, 'Geographic', 'geographic')
+        self._test_run_transformation(config_for_testing, 'Geographic', 'geographic')
 
     def _test_run_transformation(self, config_dict: dict, prj_type: str, prj_type_val: str):
         cfg_dict = dict(config_dict, **dict(target_projection_type=prj_type))

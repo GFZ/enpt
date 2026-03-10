@@ -112,7 +112,7 @@ config_for_testing_water = dict(
 )
 
 
-config_for_testing_dlr = dict(
+config_for_testing = dict(
     path_l1b_enmap_image=os.path.abspath(
         os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
                      # Alps

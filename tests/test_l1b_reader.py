@@ -53,7 +53,7 @@ from enpt.options.config import EnPTConfig, path_enptlib
 __author__ = 'Daniel Scheffler'
 
 
-class Test_L1B_Reader_DLR(unittest.TestCase):
+class Test_L1B_Reader(unittest.TestCase):
     """Tests for L1B_Reader class."""
 
     @classmethod

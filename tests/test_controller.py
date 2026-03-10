@@ -42,14 +42,14 @@ import os
 import pytest
 
 from enpt.execution.controller import EnPT_Controller
-from enpt.options.config import config_for_testing_dlr, config_for_testing_water
+from enpt.options.config import config_for_testing, config_for_testing_water
 
 __author__ = 'Daniel Scheffler'
 
 
-class Test_EnPT_Controller_DLR_testdata(TestCase):
+class Test_EnPT_Controller(TestCase):
     def setUp(self):
-        self.CTR = EnPT_Controller(**config_for_testing_dlr)
+        self.CTR = EnPT_Controller(**config_for_testing)
 
     def tearDown(self):
         # NOTE: ignore_errors deletes the folder, regardless of whether it contains read-only files
@@ -59,7 +59,7 @@ class Test_EnPT_Controller_DLR_testdata(TestCase):
         self.CTR.run_all_processors()
 
 
-class Test_EnPT_Controller_DLR_testdata_ACWater(TestCase):
+class Test_EnPT_Controller_ACWater(TestCase):
     def setUp(self):
         self.CTR = EnPT_Controller(**config_for_testing_water)
 

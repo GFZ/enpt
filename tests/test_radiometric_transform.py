@@ -33,7 +33,7 @@ import tempfile
 import zipfile
 
 from enpt.processors.radiometric_transform import Radiometric_Transformer
-from enpt.options.config import EnPTConfig, config_for_testing_dlr
+from enpt.options.config import EnPTConfig, config_for_testing
 
 __author__ = 'Daniel Scheffler'
 
@@ -42,7 +42,7 @@ class Test_Radiometric_Transformer(TestCase):
 
     def setUp(self):
         """Set up the needed test data"""
-        self.cfg = EnPTConfig(**config_for_testing_dlr)
+        self.cfg = EnPTConfig(**config_for_testing)
         self.RT = Radiometric_Transformer(config=self.cfg)
 
     def test_transform_TOARad2TOARef(self):

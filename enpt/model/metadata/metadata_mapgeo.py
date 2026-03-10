@@ -490,9 +490,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         # quicklook #
         #############
 
-        from . import L2A_product_props_DLR
+        from . import L2A_product_props
         for detName, detMetaL1B in zip(['VNIR', 'SWIR'], [self._meta_l1b.vnir, self._meta_l1b.swir]):
-            lbl = L2A_product_props_DLR['xml_detector_label'][detName]
+            lbl = L2A_product_props['xml_detector_label'][detName]
 
             fN_quicklook = self.filename_quicklook_vnir if detName == 'VNIR' else self.filename_quicklook_swir
             size_quicklook = [F['size'] for F in self.fileinfos
