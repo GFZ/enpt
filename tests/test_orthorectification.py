@@ -35,12 +35,10 @@ test_orthorectification
 Tests for `processors.orthorectification.orthorectification` module.
 """
 
-import os
 from unittest import TestCase
 import pytest
 from zipfile import ZipFile
 from tempfile import TemporaryDirectory
-from glob import glob
 from copy import deepcopy
 
 from pyproj import CRS
@@ -49,15 +47,21 @@ from geoarray import GeoArray
 from py_tools_ds.geo.projection import isProjectedOrGeographic
 
 from enpt.processors.orthorectification import Orthorectifier, VNIR_SWIR_Stacker
-from enpt.options.config import config_for_testing, config_for_testing_dlr, EnPTConfig
+from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 from enpt.model.images import EnMAPL2Product_MapGeo
 
 __author__ = 'Daniel Scheffler'
 
 
-class _Base_Test_Orthorectifier(TestCase):
-    def _test_run_transformation(self, config_dict: dict, prj_type: str, prj_type_val: str, root_has_subdir: bool):
+class Test_Orthorectifier(TestCase):
+    def test_run_transformation_utm(self):
+        self._test_run_transformation(config_for_testing, 'UTM', 'projected')
+
+    def test_run_transformation_ll(self):
+        self._test_run_transformation(config_for_testing, 'Geographic', 'geographic')
+
+    def _test_run_transformation(self, config_dict: dict, prj_type: str, prj_type_val: str):
         cfg_dict = dict(config_dict, **dict(target_projection_type=prj_type))
         cfg = EnPTConfig(**cfg_dict)
 
@@ -65,7 +69,7 @@ class _Base_Test_Orthorectifier(TestCase):
              TemporaryDirectory(cfg.working_dir) as td:
             zf.extractall(td)
             L1_obj = L1B_Reader(config=cfg).read_inputdata(
-                root_dir_main=td if not root_has_subdir else glob(os.path.join(td, '*'))[0],
+                root_dir_main=td,
                 compute_snr=False)
 
             L2_obj = Orthorectifier(config=cfg).run_transformation(L1_obj)
@@ -83,22 +87,6 @@ class _Base_Test_Orthorectifier(TestCase):
                           np.mean(L2_obj.data[:, :, 0][L2_obj.data[:, :, 0] != L2_obj.data.nodata]),
                           rtol=0.01)
         assert isProjectedOrGeographic(L2_obj.data.prj) == prj_type
-
-
-class Test_Orthorectifier(_Base_Test_Orthorectifier):
-    def test_run_transformation_utm(self):
-        self._test_run_transformation(config_for_testing, 'UTM', 'projected', True)
-
-    def test_run_transformation_ll(self):
-        self._test_run_transformation(config_for_testing, 'Geographic', 'geographic', True)
-
-
-class Test_Orthorectifier_DLR(_Base_Test_Orthorectifier):
-    def test_run_transformation_utm(self):
-        self._test_run_transformation(config_for_testing_dlr, 'UTM', 'projected', False)
-
-    def test_run_transformation_ll(self):
-        self._test_run_transformation(config_for_testing_dlr, 'Geographic', 'geographic', False)
 
 
 class Test_VNIR_SWIR_Stacker(TestCase):

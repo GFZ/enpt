@@ -88,30 +88,23 @@ class EnPT_Controller(object):
         :param subdir:          subdirectory name to be created within temporary directory
         :return:                /tmp/tmpk2qp0yri/rootdir/
         """
-        outdir = (
-            os.path.join(self.cfg.working_dir, subdir)) if not self.cfg.is_dummy_dataformat else (
-            self.cfg.working_dir
-        )
+        outdir = os.path.join(self.cfg.working_dir, subdir)
 
         with zipfile.ZipFile(path_zipfile, "r") as zf:
             zf.extractall(outdir)
 
         # move the data one level up in case they are within a sub-folder in the zip file
-        if not self.cfg.is_dummy_dataformat:
-            content = glob(os.path.join(outdir, '*'))
+        content = glob(os.path.join(outdir, '*'))
 
-            if len(content) == 1 and os.path.isdir(content[0]):
-                for fp in glob(os.path.join(outdir, '**', '*')):
-                    shutil.move(fp, outdir)
-                shutil.rmtree(content[0])
+        if len(content) == 1 and os.path.isdir(content[0]):
+            for fp in glob(os.path.join(outdir, '**', '*')):
+                shutil.move(fp, outdir)
+            shutil.rmtree(content[0])
 
         if not os.path.isdir(outdir):
             raise NotADirectoryError(outdir)
 
-        if not self.cfg.is_dummy_dataformat:
-            return outdir
-        else:
-            return os.path.join(self.cfg.working_dir, os.path.splitext(os.path.basename(path_zipfile))[0])
+        return outdir
 
     def read_L1B_data(self) -> None:
         """Read the provider L1B data given in config and return an EnMAP image object."""
@@ -281,7 +274,8 @@ class EnPT_Controller(object):
             self.cleanup()
 
             # close the latest active logger (either self.L1_obj.logger or self.L2_obj.logger)
-            self.logger.close()
+            if self.logger:
+                self.logger.close()
 
     @staticmethod
     def _write_to_stdout_stderr():

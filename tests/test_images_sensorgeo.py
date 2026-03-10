@@ -43,7 +43,7 @@ import shutil
 import numpy as np
 from geoarray import GeoArray
 
-from enpt.options.config import config_for_testing_dlr, EnPTConfig
+from enpt.options.config import config_for_testing, EnPTConfig
 from enpt.io.reader import L1B_Reader
 
 
@@ -56,7 +56,7 @@ class Test_EnMAPL1Product_SensorGeo(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.config = EnPTConfig(**config_for_testing_dlr)
+        cls.config = EnPTConfig(**config_for_testing)
 
         cls.tmpdir = tempfile.mkdtemp(dir=cls.config.working_dir)
 

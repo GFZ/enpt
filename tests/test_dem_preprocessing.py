@@ -36,6 +36,7 @@ Tests for `processors.dem_preprocessing` module.
 """
 
 from unittest import TestCase
+from pathlib import Path
 import pytest
 
 import numpy as np
@@ -43,7 +44,7 @@ from pyproj import CRS
 from geoarray import GeoArray
 
 from enpt.processors.dem_preprocessing import DEM_Processor
-from enpt.options.config import config_for_testing
+from enpt.options.config import path_enptlib
 from enpt.model.metadata import EnMAP_Metadata_L1B_Detector_SensorGeo
 
 __author__ = 'Daniel Scheffler'
@@ -51,7 +52,7 @@ __author__ = 'Daniel Scheffler'
 
 class Test_DEM_Processor(TestCase):
     def setUp(self):
-        self.path_demfile = config_for_testing['path_dem']
+        self.path_demfile = (Path(path_enptlib).parent / 'tests' / 'data' / 'dem_map_geo.bsq').as_posix()
 
         # get lons/lats
         lat_UL_UR_LL_LR = [47.545359963328366, 47.48153190433143, 47.505282507365813, 47.441546248160961]

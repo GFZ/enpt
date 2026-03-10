@@ -44,7 +44,6 @@ from sicor.options import get_options as get_ac_options
 
 from ...model.images import EnMAPL1Product_SensorGeo
 from ...options.config import EnPTConfig
-from ...utils.path_generator import get_path_ac_options
 
 __author__ = 'Daniel Scheffler'
 
@@ -63,7 +62,11 @@ class AtmosphericCorrector(object):
         :param land_only:       True: SICOR is applied to land only; False: SICOR is applied to all pixels
         :return:                dictionary of SICOR options
         """
-        path_opts = get_path_ac_options()
+        from sicor import options
+
+        path_opts = os.path.join(os.path.dirname(options.__file__), 'enmap_options.json')
+        # FIXME temporarily disabled because not implemented at the moment:
+        # path_opts = os.path.join(os.path.dirname(options.__file__), 'sicor_enmap_user_options.json')
 
         try:
             options = get_ac_options(path_opts, validation=True)
