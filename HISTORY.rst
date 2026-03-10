@@ -9,6 +9,7 @@ History
   environments and added environment_enpt_enmapbox_requirements.yml).
 * !141: Removed all initial implementations tailored to the GFZ-internal preliminary (pre-launch) EnMAP format.
 * !142: Implemented processing of TESTFLAGS-VNIR and TESTFLAGS-SWIR layers in Level-1B reader.
+* !143: Updated copyright.
 
 
 1.2.1 (2026-02-25)
