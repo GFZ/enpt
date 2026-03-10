@@ -545,7 +545,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         """Generate an XML metadata string from the L1B metadata."""
         xml = ElementTree.parse(self.path_xml).getroot()
 
-        for detName, detMeta in zip(['vnir', 'swir'], [self.vnir, self.swir]):
+        for lbl, detMeta in zip(['vnir', 'swir'], [self.vnir, self.swir]):
             xml.find("product/image/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
             xml.find("product/image/%s/dimension/columns" % lbl).text = str(detMeta.ncols)
             xml.find("product/quicklook/%s/dimension/rows" % lbl).text = str(detMeta.nrows)
