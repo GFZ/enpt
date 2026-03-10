@@ -77,8 +77,7 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
         # unzip both test images
         for l1b_file in cls.pathList_testimages:
             with zipfile.ZipFile(l1b_file, "r") as zf:
-                basename = os.path.basename(os.path.splitext(l1b_file)[0])
-                zf.extractall(os.path.join(cls.tmpdir, basename))
+                zf.extractall(Path(cls.tmpdir) / Path(l1b_file).stem)
 
         cls.testproducts = glob(os.path.join(cls.tmpdir, '*'))
         cls.RD = L1B_Reader(config=cls.config)
