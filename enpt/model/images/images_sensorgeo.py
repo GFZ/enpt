@@ -38,7 +38,6 @@ import numpy as np
 from os import path, makedirs
 from glob import glob
 import utm
-from scipy.interpolate import RegularGridInterpolator
 from geoarray import GeoArray
 from py_tools_ds.geo.vector.topology import get_footprint_polygon
 

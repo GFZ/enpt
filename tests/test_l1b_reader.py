@@ -60,17 +60,19 @@ class Test_L1B_Reader_DLR(unittest.TestCase):
     def setUpClass(cls):
         path_l1b_testimages = (Path(path_enptlib) / ".." / "tests" / "data" / "EnMAP_Level_1B").resolve()
         cls.config = EnPTConfig(
-            path_l1b_enmap_image=\
-                str(path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
-                                          "__rows700-799.zip"),
-            path_l1b_enmap_image_gapfill=\
-                str(path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
-                                          "__rows800-899.zip"),
+            path_l1b_enmap_image=str(
+                path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
+                                      "__rows700-799.zip"
+            ),
+            path_l1b_enmap_image_gapfill=str(
+                path_l1b_testimages / "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z"
+                                      "__rows800-899.zip"
+            ),
             output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve())
         )
         cls.config.drop_bad_bands = False  # otherwise the read/write/read tests will fail
         cls.pathList_testimages = [cls.config.path_l1b_enmap_image,
-                                    cls.config.path_l1b_enmap_image_gapfill]
+                                   cls.config.path_l1b_enmap_image_gapfill]
         cls.tmpdir = tempfile.mkdtemp(dir=cls.config.working_dir)
         os.makedirs(cls.config.output_dir, exist_ok=True)
 
