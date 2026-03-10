@@ -616,8 +616,8 @@ class EnMAPL1Product_SensorGeo(object):
             self.swir.data = self.swir.data[:, :, self.meta.swir.goodbands_inds]
 
         try:
-            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)
-            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)
+            vnir_dpm = GeoArray(self.paths.vnir.deadpixelmap)[:]
+            swir_dpm = GeoArray(self.paths.swir.deadpixelmap)[:]
 
             if self.cfg.drop_bad_bands:
                 if vnir_dpm.ndim == 3:
