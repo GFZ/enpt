@@ -32,6 +32,9 @@
 from typing import Union, Tuple  # noqa: F401
 import math
 
+import numpy as np
+from osgeo import gdal, osr
+
 __author__ = 'Daniel Scheffler'
 
 
@@ -119,12 +122,6 @@ class DEM_Downloader(object):
         out_ds.GetRasterBand(1).WriteArray(dem_arr)
         out_ds.GetRasterBand(1).SetNoDataValue(nodata)
         out_ds = None
-
-
-
-import math
-import numpy as np
-from osgeo import gdal, osr
 
 
 class CopernicusDEMGenerator:
