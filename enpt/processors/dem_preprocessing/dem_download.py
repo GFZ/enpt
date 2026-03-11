@@ -29,7 +29,6 @@
 
 """EnPT downloader module for digital elevation models."""
 
-from typing import Union, Tuple  # noqa: F401
 import math
 
 import numpy as np
@@ -83,12 +82,12 @@ class CopernicusDEMGenerator:
         print("Done.")
 
     @staticmethod
-    def _get_utm_epsg(lon, lat):
+    def _get_utm_epsg(lon: float, lat: float) -> int:
         """Return UTM EPSG code based on lon/lat center."""
         zone = int((lon + 180) / 6) + 1
         return 32600 + zone if lat >= 0 else 32700 + zone
 
-    def _construct_tile_urls(self):
+    def _construct_tile_urls(self) -> list[str]:
         """Generate Copernicus DEM COG URLs covering bbox."""
         if self.product == "GLO-30":
             bucket, arcsec = "copernicus-dem-30m.s3.amazonaws.com", "10"
@@ -108,13 +107,16 @@ class CopernicusDEMGenerator:
                 urls.append(f"https://{bucket}/{folder}/{fname}")
         return urls
 
-    def _build_vrt(self, urls):
+    def _build_vrt(self, urls: list[str]):
         """Create an in-memory VRT mosaic from URLs."""
         vrt_path = "/vsimem/copernicus_mosaic.vrt"
         gdal.BuildVRT(vrt_path, urls)
         return gdal.Open(vrt_path)
 
-    def _reproject_to_utm(self, src_ds, utm_epsg):
+    def _reproject_to_utm(
+            self, src_ds: gdal.Dataset,
+            utm_epsg: int
+    ) -> tuple[np.ndarray, tuple, str, float]:
         """Warp DEM mosaic into UTM projection with fixed 30 m pixels."""
         UL_UR_LL_LR_ll = (
             (self.west, self.north),
@@ -146,7 +148,13 @@ class CopernicusDEMGenerator:
 
         return arr, gt, prj_wkt, nodata
 
-    def _write_dem(self, path_out, arr, gt, prj, nodata):
+    def _write_dem(
+            self, path_out: str,
+            arr: np.ndarray,
+            gt: tuple,
+            prj: str,
+            nodata: float
+    ):
         """Write DEM array to disk."""
         driver = gdal.GetDriverByName(self.out_format)
         if driver is None:
