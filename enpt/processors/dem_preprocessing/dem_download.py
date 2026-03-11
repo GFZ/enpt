@@ -33,97 +33,11 @@ from typing import Union, Tuple  # noqa: F401
 import math
 
 import numpy as np
-from osgeo import gdal, osr
+from osgeo import gdal
 
 from py_tools_ds.geo.coord_trafo import transform_any_prj
 
 __author__ = 'Daniel Scheffler'
-
-
-class DEM_Downloader(object):
-    def __init__(self,
-                 enmapIm_cornerCoords: Tuple[Tuple[float, float]],
-                 progress: bool = False):
-        self.enmapIm_cornerCoords = enmapIm_cornerCoords
-        self.progress = progress
-
-    @staticmethod
-    def _integer_degree_range(self, min_deg: float, max_deg: float):
-        return list(range(math.floor(min_deg), math.floor(max_deg) + 1))
-
-    @staticmethod
-    def _format_tile_name(self, lat_deg: int, lon_deg: int, arcsec_str: str):
-        ns = f"N{abs(lat_deg):02d}_00" if lat_deg >= 0 else f"S{abs(lat_deg):02d}_00"
-        ew = f"E{abs(lon_deg):03d}_00" if lon_deg >= 0 else f"W{abs(lon_deg):03d}_00"
-        folder = f"Copernicus_DSM_COG_{arcsec_str}_{ns}_{ew}_DEM"
-        filename = f"Copernicus_DSM_COG_{arcsec_str}_{ns}_{ew}_DEM.tif"
-        return folder, filename
-
-    @staticmethod
-    def _construct_cog_urls_for_bbox(self, west, south, east, north, product="GLO-30"):
-        if product == "GLO-30":
-            bucket = "copernicus-dem-30m.s3.amazonaws.com"
-            arcsec_str = "10"
-        else:
-            bucket = "copernicus-dem-90m.s3.amazonaws.com"
-            arcsec_str = "30"
-
-        urls = []
-        for latd in self._integer_degree_range(south, north):
-            for lond in self._integer_degree_range(west, east):
-                folder, filename = self._format_tile_name(latd, lond, arcsec_str)
-                url = f"https://{bucket}/{folder}/{filename}"
-                urls.append(url)
-        return urls
-
-    def _download_dem_from_url(self, url, output_dir):
-        pass
-
-    def make_dem_from_header(self, hdr_file, out_prefix, product="GLO-30", out_format="ENVI", topo=False):
-        width, height, transform, epsg = parse_map_info(hdr_file)
-
-        west, north = transform[0], transform[3]
-        east = west + width * transform[1]
-        south = north + height * transform[5]
-
-        wgs_west, wgs_south, wgs_east, wgs_north = transform_bbox_to_wgs84(west, south, east, north, epsg)
-
-        urls = construct_cog_urls_for_bbox(wgs_west, wgs_south, wgs_east, wgs_north, product)
-        print(f"{len(urls)} possible DEM tiles...")
-
-        # Download and mosaic all DEM tiles
-        vrt_path = "/vsimem/temp_mosaic.vrt"
-        gdal.BuildVRT(vrt_path, urls)
-        src_ds = gdal.Open(vrt_path)
-        if src_ds is None:
-            raise RuntimeError("No DEM tiles found or could not open them.")
-
-        # Reproject to target grid
-        mem_drv = gdal.GetDriverByName("MEM")
-        dst_ds = mem_drv.Create("", width, height, 1, gdal.GDT_Float32)
-        dst_ds.SetGeoTransform(transform)
-
-        dst_srs = osr.SpatialReference()
-        dst_srs.ImportFromEPSG(epsg)
-        dst_ds.SetProjection(dst_srs.ExportToWkt())
-
-        gdal.Warp(dst_ds, src_ds, format="MEM", resampleAlg="bilinear")
-
-        dem_arr = dst_ds.GetRasterBand(1).ReadAsArray()
-        nodata = np.finfo(np.float32).min
-        dem_arr[np.isnan(dem_arr)] = nodata
-
-        # Write output file
-        driver = gdal.GetDriverByName(out_format)
-        if driver is None:
-            raise RuntimeError(f"Unsupported format: {out_format}")
-
-        out_ds = driver.Create(out_prefix, width, height, 1, gdal.GDT_Float32)
-        out_ds.SetGeoTransform(transform)
-        out_ds.SetProjection(dst_srs.ExportToWkt())
-        out_ds.GetRasterBand(1).WriteArray(dem_arr)
-        out_ds.GetRasterBand(1).SetNoDataValue(nodata)
-        out_ds = None
 
 
 class CopernicusDEMGenerator:
