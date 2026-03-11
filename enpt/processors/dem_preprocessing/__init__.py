@@ -30,6 +30,6 @@
 """EnPT module 'spatial transform', containing everthing related to spatial transformations."""
 
 from .dem_preprocessing import DEM_Processor
-from .dem_download import DEM_Downloader, CopernicusDEMGenerator
+from .dem_download import CopernicusDEMGenerator
 
-__all__ = ['DEM_Processor', 'DEM_Downloader', 'CopernicusDEMGenerator']
+__all__ = ['DEM_Processor', 'CopernicusDEMGenerator']
