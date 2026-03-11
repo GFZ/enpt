@@ -51,6 +51,7 @@ from enpt.processors.spatial_transform import \
 from enpt.options.config import EnPTConfig, config_for_testing
 from enpt.io.reader import L1B_Reader
 from enpt.options.config import enmap_coordinate_grid_utm
+from . import interpolate_lonlat_corners
 
 __author__ = 'Daniel Scheffler'
 
@@ -62,7 +63,7 @@ class Test_Geometry_Transformer(TestCase):
     def setUp(self):
         config = EnPTConfig(**config_for_testing)
 
-        # get lons / lats
+        # get lons / lats (linear interpolation between corners is sufficient for these tests)
         with TemporaryDirectory() as td, ZipFile(config.path_l1b_enmap_image, "r") as zf:
             zf.extractall(td)
             L1_obj = L1B_Reader(config=config).read_inputdata(
@@ -70,8 +71,8 @@ class Test_Geometry_Transformer(TestCase):
                 compute_snr=False)
 
         R, C = L1_obj.vnir.data.shape[:2]
-        self.lons_vnir = L1_obj.meta.vnir.interpolate_corners(*L1_obj.meta.vnir.lon_UL_UR_LL_LR, nx=C, ny=R)
-        self.lats_vnir = L1_obj.meta.vnir.interpolate_corners(*L1_obj.meta.vnir.lat_UL_UR_LL_LR, nx=C, ny=R)
+        self.lons_vnir = interpolate_lonlat_corners(*L1_obj.meta.vnir.lon_UL_UR_LL_LR, nx=C, ny=R)
+        self.lats_vnir = interpolate_lonlat_corners(*L1_obj.meta.vnir.lat_UL_UR_LL_LR, nx=C, ny=R)
 
         self.gA2transform_sensorgeo = L1_obj.vnir.data[:, :, 50]  # a single VNIR band in sensor geometry
         self.gA2transform_mapgeo = GeoArray(config.path_dem)  # a DEM in map geometry given by the user

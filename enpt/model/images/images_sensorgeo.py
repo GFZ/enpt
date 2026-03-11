@@ -142,30 +142,16 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                progress=not self.cfg.disable_progress_bars)
             DP.fill_gaps()  # FIXME this will also be needed at other places
 
-            R, C = self.data.shape[:2]
             if DP.dem.is_map_geo:
                 lons = self.detector_meta.lons
                 lats = self.detector_meta.lats
 
-                if not (lons.ndim == 2 and lats.ndim == 2) and not (lons.ndim == 3 and lats.ndim == 3):
-                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be either 2- or 3-dimensional.')
+                if not (lons.ndim == 3 and lats.ndim == 3):
+                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be 3-dimensional.')
 
-                msg_bandinfo = ''
-                if lons.ndim == 3:
-                    # 3D geolayer (the usual case for EnMAP data provided by DLR)
-                    lons = lons[:, :, 0]
-                    lats = lats[:, :, 0]
-                    msg_bandinfo = ' (using first band of %s geolayer)' % self.detector_name
-                else:
-                    # 2D geolayer (GFZ-internal test case)
-                    # FIXME replace linear interpolation by native geolayers
-                    if lons.shape != self.data.shape:
-                        lons = self.detector_meta.interpolate_corners(*self.detector_meta.lon_UL_UR_LL_LR, nx=C, ny=R)
-                    if lats.shape != self.data.shape:
-                        lats = self.detector_meta.interpolate_corners(*self.detector_meta.lat_UL_UR_LL_LR, nx=C, ny=R)
-
-                self.logger.info(('Transforming DEM to %s sensor geometry%s...' % (self.detector_name, msg_bandinfo)))
-                self.dem = DP.get_dem_in_sensor_geometry(lons=lons, lats=lats)
+                self.logger.info(f'Transforming DEM to {self.detector_name} sensor geometry '
+                                 f'(using first band of {self.detector_name} geolayer)...')
+                self.dem = DP.get_dem_in_sensor_geometry(lons=lons[:, :, 0], lats=lats[:, :, 0])
             else:
                 self.dem = DP.dem
 

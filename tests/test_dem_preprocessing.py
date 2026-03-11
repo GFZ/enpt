@@ -45,7 +45,7 @@ from geoarray import GeoArray
 
 from enpt.processors.dem_preprocessing import DEM_Processor
 from enpt.options.config import path_enptlib
-from enpt.model.metadata import EnMAP_Metadata_L1B_Detector_SensorGeo
+from . import interpolate_lonlat_corners
 
 __author__ = 'Daniel Scheffler'
 
@@ -54,12 +54,12 @@ class Test_DEM_Processor(TestCase):
     def setUp(self):
         self.path_demfile = (Path(path_enptlib).parent / 'tests' / 'data' / 'dem_map_geo.bsq').as_posix()
 
-        # get lons/lats
+        # get lons/lats (linear interpolation between corners is sufficient for these tests)
         lat_UL_UR_LL_LR = [47.545359963328366, 47.48153190433143, 47.505282507365813, 47.441546248160961]
         lon_UL_UR_LL_LR = [10.701359191637021, 11.072698329235017, 10.686064194247395, 11.056744608586392]
         self.ll_cornerCoords = tuple(zip(lon_UL_UR_LL_LR, lat_UL_UR_LL_LR))
-        self.lats = EnMAP_Metadata_L1B_Detector_SensorGeo.interpolate_corners(*lat_UL_UR_LL_LR, 1000, 100)
-        self.lons = EnMAP_Metadata_L1B_Detector_SensorGeo.interpolate_corners(*lon_UL_UR_LL_LR, 1000, 100)
+        self.lats = interpolate_lonlat_corners(*lat_UL_UR_LL_LR, 1000, 100)
+        self.lons = interpolate_lonlat_corners(*lon_UL_UR_LL_LR, 1000, 100)
 
         self.DP_mapgeo = DEM_Processor(self.path_demfile, enmapIm_cornerCoords=self.ll_cornerCoords)
 
