@@ -246,27 +246,29 @@ class CopernicusDEMGenerator:
         height = int((ymax - ymin) / self.resolution)
         gt = (xmin, self.resolution, 0, ymax, 0, -self.resolution)
 
-        mem_drv = gdal.GetDriverByName("MEM")
-        dst_ds = mem_drv.Create("", width, height, 1, gdal.GDT_Float32)
-        dst_ds.SetGeoTransform(gt)
-        dst_ds.SetProjection(dst_srs.ExportToWkt())
+        with gdal.GetDriverByName("MEM").Create("", width, height, 1, gdal.GDT_Float32) as dst_ds:
+            dst_ds.SetGeoTransform(gt)
+            dst_ds.SetProjection(f'EPSG:{utm_epsg}')
 
-        print("Reprojecting and resampling DEM...")
-        gdal.Warp(dst_ds, src_ds, format="MEM", dstSRS=dst_srs.ExportToWkt(),
-                  resampleAlg="bilinear", outputBounds=(xmin, ymin, xmax, ymax))
+            print("Reprojecting and resampling DEM...")
+            gdal.Warp(dst_ds, src_ds, format="MEM", dstSRS=f'EPSG:{utm_epsg}',
+                      resampleAlg="bilinear", outputBounds=(xmin, ymin, xmax, ymax))
 
-        arr = dst_ds.GetRasterBand(1).ReadAsArray()
-        nodata = float(np.finfo(np.float32).min)
+            arr = dst_ds.GetRasterBand(1).ReadAsArray()
+            prj_wkt = dst_ds.GetProjection()
+
+        nodata = 0
         arr[np.isnan(arr)] = nodata
-        return arr, gt, dst_srs, nodata
 
-    def _write_dem(self, prefix, arr, gt, srs, nodata):
+        return arr, gt, prj_wkt, nodata
+
+    def _write_dem(self, prefix, arr, gt, prj, nodata):
         """Write DEM array to disk."""
         driver = gdal.GetDriverByName(self.out_format)
         width, height = arr.shape[1], arr.shape[0]
         ds = driver.Create(prefix, width, height, 1, gdal.GDT_Float32)
         ds.SetGeoTransform(gt)
-        ds.SetProjection(srs.ExportToWkt())
+        ds.SetProjection(prj)
         band = ds.GetRasterBand(1)
         band.WriteArray(arr)
         band.SetNoDataValue(nodata)
