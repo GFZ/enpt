@@ -236,6 +236,8 @@ class CopernicusDEMGenerator:
     def _write_dem(self, path_out, arr, gt, prj, nodata):
         """Write DEM array to disk."""
         driver = gdal.GetDriverByName(self.out_format)
+        if driver is None:
+            raise RuntimeError(f"Unsupported format: {self.out_format}")
         rows, cols = arr.shape
 
         with driver.Create(path_out, cols, rows, 1, gdal.GDT_Float32) as ds:
