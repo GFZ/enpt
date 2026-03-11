@@ -159,7 +159,7 @@ class CopernicusDEMGenerator:
         # Build VRT mosaic
         src_ds = self._build_vrt(urls)
         if src_ds is None:
-            raise RuntimeError("Could not open Copernicus DEM tiles.")
+            raise RuntimeError("No DEM tiles found or could not open them.")
 
         # Reproject to UTM
         arr, gt, prj, nodata = self._reproject_to_utm(src_ds, utm_epsg)
