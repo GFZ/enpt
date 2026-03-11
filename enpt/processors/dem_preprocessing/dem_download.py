@@ -236,7 +236,7 @@ class CopernicusDEMGenerator:
         src_srs.ImportFromEPSG(4326)
         tx = osr.CoordinateTransformation(src_srs, dst_srs)
 
-        # ✅ Transform all corners to ensure correct projected bbox
+        # Transform all corners to ensure correct projected bbox
         corners = [
             tx.TransformPoint(self.west, self.south),
             tx.TransformPoint(self.west, self.north),
