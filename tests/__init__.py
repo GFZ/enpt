@@ -28,3 +28,33 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 __author__ = 'Daniel Scheffler'
+
+import numpy as np
+
+
+def interpolate_lonlat_corners(ul: float, ur: float, ll: float, lr: float, nx: int, ny: int):
+    """Compute interpolated field from corner values of a scalar field given at: ul, ur, ll, lr.
+
+    :param ul:  tbd
+    :param ur:  tbd
+    :param ll:  tbd
+    :param lr:  tbd
+    :param nx: final shape (x-axis direction)
+    :param ny: final shape (y-axis direction)
+
+    Note: Linear interpolation can not model earth curvature and causes > 180 m y-coordinate offset for EnMAP.
+          Only use for simple tests where this does not matter.
+    """
+    corner_coords = np.array([[ul, ur],
+                              [ll, lr]])
+    rowpos, colpos = [0, 1], [0, 1]
+
+    from scipy.interpolate import RegularGridInterpolator
+    rgi = RegularGridInterpolator([rowpos, colpos], corner_coords, method='linear')
+    out_rows_grid, out_cols_grid = np.meshgrid(np.linspace(0, 1, ny),
+                                               np.linspace(0, 1, nx),
+                                               indexing='ij')
+
+    coords = rgi(np.dstack([out_rows_grid, out_cols_grid]))
+
+    return coords
