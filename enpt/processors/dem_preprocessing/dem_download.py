@@ -125,8 +125,16 @@ class DEM_Downloader(object):
 
 
 class CopernicusDEMGenerator:
-    def __init__(self, west, south, east, north,
-                 resolution=30, product="GLO-30", out_format="ENVI"):
+    def __init__(
+            self,
+            west: float,
+            south: float,
+            east: float,
+            north: float,
+            resolution: float = 30,
+            product: str = "GLO-30",
+            out_format: str = "ENVI"
+    ):
         self.west = west
         self.south = south
         self.east = east
