@@ -145,7 +145,7 @@ class CopernicusDEMGenerator:
         self.product = product
         self.out_format = out_format
 
-    def run(self, output_prefix):
+    def run(self, path_out: str):
         """Main entry point: download, mosaic, reproject, and save DEM."""
         # Determine the correct UTM zone and EPSG code
         utm_epsg = self._get_utm_epsg((self.west + self.east) / 2,
@@ -165,7 +165,7 @@ class CopernicusDEMGenerator:
         arr, gt, prj, nodata = self._reproject_to_utm(src_ds, utm_epsg)
 
         # Write output
-        self._write_dem(output_prefix, arr, gt, prj, nodata)
+        self._write_dem(path_out, arr, gt, prj, nodata)
         print("Done.")
 
     def _get_utm_epsg(self, lon, lat):
@@ -232,16 +232,17 @@ class CopernicusDEMGenerator:
 
         return arr, gt, prj_wkt, nodata
 
-    def _write_dem(self, prefix, arr, gt, prj, nodata):
+    def _write_dem(self, path_out, arr, gt, prj, nodata):
         """Write DEM array to disk."""
         driver = gdal.GetDriverByName(self.out_format)
-        width, height = arr.shape[1], arr.shape[0]
-        ds = driver.Create(prefix, width, height, 1, gdal.GDT_Float32)
-        ds.SetGeoTransform(gt)
-        ds.SetProjection(prj)
-        band = ds.GetRasterBand(1)
-        band.WriteArray(arr)
-        band.SetNoDataValue(nodata)
-        ds.FlushCache()
-        ds = None
-        print(f"DEM saved: {prefix}")
+        rows, cols = arr.shape
+
+        with driver.Create(path_out, cols, rows, 1, gdal.GDT_Float32) as ds:
+            ds.SetGeoTransform(gt)
+            ds.SetProjection(prj)
+            band = ds.GetRasterBand(1)
+            band.WriteArray(arr)
+            band.SetNoDataValue(nodata)
+            ds.FlushCache()
+
+        print(f"DEM saved: {path_out}")
