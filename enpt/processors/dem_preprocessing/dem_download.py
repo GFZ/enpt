@@ -35,6 +35,8 @@ import math
 import numpy as np
 from osgeo import gdal, osr
 
+from py_tools_ds.geo.coord_trafo import transform_any_prj
+
 __author__ = 'Daniel Scheffler'
 
 
@@ -160,10 +162,10 @@ class CopernicusDEMGenerator:
             raise RuntimeError("Could not open Copernicus DEM tiles.")
 
         # Reproject to UTM
-        arr, transform, srs, nodata = self._reproject_to_utm(src_ds, utm_epsg)
+        arr, gt, prj, nodata = self._reproject_to_utm(src_ds, utm_epsg)
 
         # Write output
-        self._write_dem(output_prefix, arr, transform, srs, nodata)
+        self._write_dem(output_prefix, arr, gt, prj, nodata)
         print("Done.")
 
     def _get_utm_epsg(self, lon, lat):
@@ -229,22 +231,14 @@ class CopernicusDEMGenerator:
 
     def _reproject_to_utm(self, src_ds, utm_epsg):
         """Warp DEM mosaic into UTM projection with fixed 30 m pixels."""
-        dst_srs = osr.SpatialReference()
-        dst_srs.ImportFromEPSG(utm_epsg)
-
-        src_srs = osr.SpatialReference()
-        src_srs.ImportFromEPSG(4326)
-        tx = osr.CoordinateTransformation(src_srs, dst_srs)
-
-        # Transform all corners to ensure correct projected bbox
-        corners = [
-            tx.TransformPoint(self.west, self.south),
-            tx.TransformPoint(self.west, self.north),
-            tx.TransformPoint(self.east, self.south),
-            tx.TransformPoint(self.east, self.north),
-        ]
-        xs = [c[0] for c in corners]
-        ys = [c[1] for c in corners]
+        UL_UR_LL_LR_ll = (
+            (self.west, self.north),
+            (self.east, self.north),
+            (self.west, self.south),
+            (self.east, self.south),
+        )
+        UL_UR_LL_LR_prj = [transform_any_prj(4326, utm_epsg, x, y) for x, y in UL_UR_LL_LR_ll]
+        xs, ys = zip(*UL_UR_LL_LR_prj)
         xmin, xmax = min(xs), max(xs)
         ymin, ymax = min(ys), max(ys)
 
