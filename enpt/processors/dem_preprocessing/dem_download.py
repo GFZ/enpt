@@ -138,12 +138,12 @@ class CopernicusDEMGenerator:
             dst_ds.SetProjection(f'EPSG:{utm_epsg}')
 
             print("Reprojecting and resampling DEM...")
-            gdal.Warp(dst_ds, src_ds, resampleAlg="bilinear")
+            gdal.Warp(dst_ds, src_ds, resampleAlg="bilinear", dstNodata=-9999)
 
             arr = dst_ds.GetRasterBand(1).ReadAsArray()
             prj_wkt = dst_ds.GetProjection()
 
-        nodata = 0
+        nodata = -9999
         arr[np.isnan(arr)] = nodata
 
         return arr, gt, prj_wkt, nodata
