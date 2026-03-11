@@ -55,11 +55,10 @@ class Test_CopernicusDEMGenerator(TestCase):
                 product="GLO-30", out_format="GTiff"
             )
             demgen.run(os.path.join(td, "output_dem.tif"))
-            dem = GeoArray(os.path.join(td, "output_dem.tif"))
-            dem.show()
+            dem = GeoArray(os.path.join(td, "output_dem.tif"))[:]
 
             assert os.path.exists(os.path.join(td, "output_dem.tif"))
-            assert dem[:].std() > 0
+            assert dem.std() > 0
 
 if __name__ == '__main__':
     pytest.main()
