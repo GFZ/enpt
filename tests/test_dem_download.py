@@ -50,14 +50,15 @@ __author__ = 'Daniel Scheffler'
 class Test_CopernicusDEMGenerator(TestCase):
     def test_CopernicusDEMGenerator(self):
         with TemporaryDirectory() as td:
+            path_out = os.path.join(td, "output_dem.tif")
             demgen = CopernicusDEMGenerator(
                 west=11.0, south=47.0, east=11.3, north=47.2,
                 product="GLO-30", out_format="GTiff"
             )
-            demgen.run(os.path.join(td, "output_dem.tif"))
-            dem = GeoArray(os.path.join(td, "output_dem.tif"))[:]
+            demgen.run(path_out)
+            dem = GeoArray(path_out)[:]
 
-            assert os.path.exists(os.path.join(td, "output_dem.tif"))
+            assert os.path.exists(path_out)
             assert dem.std() > 0
 
 
