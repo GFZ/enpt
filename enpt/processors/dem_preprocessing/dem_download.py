@@ -199,36 +199,6 @@ class CopernicusDEMGenerator:
         gdal.BuildVRT(vrt_path, urls)
         return gdal.Open(vrt_path)
 
-    # def _reproject_to_utm(self, src_ds, utm_epsg):
-    #     """Warp DEM mosaic into UTM projection with fixed 30 m pixels."""
-    #     dst_srs = osr.SpatialReference()
-    #     dst_srs.ImportFromEPSG(utm_epsg)
-    #
-    #     src_srs = osr.SpatialReference()
-    #     src_srs.ImportFromEPSG(4326)
-    #     tx = osr.CoordinateTransformation(src_srs, dst_srs)
-    #
-    #     (xmin, ymin, _) = tx.TransformPoint(self.west, self.south)
-    #     (xmax, ymax, _) = tx.TransformPoint(self.east, self.north)
-    #
-    #     width = int((xmax - xmin) / self.resolution)
-    #     height = int((ymax - ymin) / self.resolution)
-    #     gt = (xmin, self.resolution, 0, ymax, 0, -self.resolution)
-    #
-    #     mem_drv = gdal.GetDriverByName("MEM")
-    #     dst_ds = mem_drv.Create("", width, height, 1, gdal.GDT_Float32)
-    #     dst_ds.SetGeoTransform(gt)
-    #     dst_ds.SetProjection(dst_srs.ExportToWkt())
-    #
-    #     print("Reprojecting and resampling DEM...")
-    #     gdal.Warp(dst_ds, src_ds, dstSRS=dst_srs.ExportToWkt(),
-    #               resampleAlg="bilinear")
-    #
-    #     arr = dst_ds.GetRasterBand(1).ReadAsArray()
-    #     nodata = float(np.finfo(np.float32).min)
-    #     arr[np.isnan(arr)] = nodata
-    #     return arr, gt, dst_srs, nodata
-
     def _reproject_to_utm(self, src_ds, utm_epsg):
         """Warp DEM mosaic into UTM projection with fixed 30 m pixels."""
         UL_UR_LL_LR_ll = (
