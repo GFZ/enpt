@@ -341,7 +341,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
         return lons, lats
 
-    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> np.array:
+    def calc_solar_irradiance_CWL_FWHM_per_band(self) -> np.ndarray:
         from ...io.reader import read_solar_irradiance
 
         self.logger.debug('Calculating solar irradiance...')

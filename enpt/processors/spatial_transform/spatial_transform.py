@@ -521,8 +521,8 @@ class RPC_3D_Geolayer_Generator(object):
     def __init__(self,
                  rpc_coeffs_per_band: dict,
                  elevation: Union[str, GeoArray, int, float],
-                 enmapIm_cornerCoords: Tuple[Tuple[float, float]],
-                 enmapIm_dims_sensorgeo: Tuple[int, int],
+                 enmapIm_cornerCoords: tuple[tuple[float, float], ...],
+                 enmapIm_dims_sensorgeo: tuple[int, int],
                  CPUs: int = None):
         """Get an instance of RPC_3D_Geolayer_Generator.
 

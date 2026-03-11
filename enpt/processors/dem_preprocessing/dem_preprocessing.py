@@ -29,7 +29,7 @@
 
 """EnPT pre-processing module for digital elevation models."""
 
-from typing import Union, Tuple  # noqa: F401
+from typing import Union  # noqa: F401
 from multiprocessing import cpu_count
 import numpy as np
 from pyproj import CRS
@@ -47,7 +47,7 @@ __author__ = 'Daniel Scheffler'
 
 class DEM_Processor(object):
     def __init__(self, dem_path_geoarray: Union[str, GeoArray],
-                 enmapIm_cornerCoords: Tuple[Tuple[float, float]],
+                 enmapIm_cornerCoords: tuple[tuple[float, float], ...],
                  CPUs: int = None,
                  progress: bool = False):
         self.dem = GeoArray(dem_path_geoarray, progress=progress)
