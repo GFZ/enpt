@@ -60,5 +60,6 @@ class Test_CopernicusDEMGenerator(TestCase):
             assert os.path.exists(os.path.join(td, "output_dem.tif"))
             assert dem.std() > 0
 
+
 if __name__ == '__main__':
     pytest.main()
