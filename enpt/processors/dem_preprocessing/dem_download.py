@@ -168,7 +168,8 @@ class CopernicusDEMGenerator:
         self._write_dem(path_out, arr, gt, prj, nodata)
         print("Done.")
 
-    def _get_utm_epsg(self, lon, lat):
+    @staticmethod
+    def _get_utm_epsg(lon, lat):
         """Return UTM EPSG code based on lon/lat center."""
         zone = int((lon + 180) / 6) + 1
         return 32600 + zone if lat >= 0 else 32700 + zone
