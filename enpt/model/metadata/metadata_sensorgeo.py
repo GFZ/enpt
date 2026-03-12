@@ -102,7 +102,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
         self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
         self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
-        self.avg_elevation: Optional[float] = None  # average elevation of the scene in meters above sea level
         self.lats: Optional[np.ndarray] = None  # 2D/3D array of latitude coordinates
         self.lons: Optional[np.ndarray] = None  # 2D/3D array of longitude coordinates
         self.geolayer_has_keystone: Optional[bool] = None  # indicates if lon/lat geolayer considers keystone (3D array)
@@ -168,9 +167,6 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         coord_tags = ['upper_left', 'upper_right', 'lower_left', 'lower_right']
         self.lon_UL_UR_LL_LR = [coords_xy[ct][0] for ct in coord_tags]
         self.lat_UL_UR_LL_LR = [coords_xy[ct][1] for ct in coord_tags]
-
-        # read average elevation and slope
-        self.avg_elevation = float(xml.find("specific/meanGroundElevation").text)
 
         # read the band related information: wavelength, fwhm
         self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
@@ -373,6 +369,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         - geom_view_azimuth: viewing azimuth angle
         - geom_sun_zenith: sun zenith angle
         - geom_sun_azimuth: sun azimuth angle
+        - avg_elevation: average elevation of the scene in meters above sea level
         - mu_sun: needed by SICOR for TOARad > TOARef conversion
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
@@ -400,6 +397,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
         self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
         self.geom_angles_all: Optional[dict] = None  # all view and sun angles available
+        self.avg_elevation: Optional[float] = None  # average elevation of the scene in meters above sea level
         self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: Optional[float] = None  # earth-sun distance
         self.aot: Optional[float] = None  # scene aerosol optical thickness
@@ -465,9 +463,11 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
         self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
         self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
+        self.avg_elevation = float(xml.find("specific/meanGroundElevation").text)
         self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
         self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
+
 
         # TODO: revise this later to get rid of the duplicates with self.geom_xxx
         self.geom_angles_all = dict(
