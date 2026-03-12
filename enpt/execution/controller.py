@@ -61,6 +61,11 @@ class EnPT_Controller(object):
         :param config:          an instance of the EnPTConfig class (overrides config_kwargs)
         :param config_kwargs:   configuration parameters to be passed to EnPTConfig class
         """
+        if 'average_elevation' in config_kwargs:
+            warnings.warn("The average_elevation parameter was removed in EnPT 1.3.0. " 
+                          "Instead, EnPT now features an automatic Copernicus-DEM download at runtime.")
+            del config_kwargs['average_elevation']
+
         self.cfg: EnPTConfig = config or EnPTConfig(**config_kwargs)
 
         # generate temporary directory (must be deleted at the end of the pipeline)
