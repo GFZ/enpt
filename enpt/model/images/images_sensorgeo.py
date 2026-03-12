@@ -159,40 +159,45 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.dem = DP.dem
 
         else:
-            # auto-download DEM if not provided
-            from enpt.processors.dem_preprocessing import CopernicusDEMGenerator
+            try:
+                # auto-download DEM if not provided
+                from enpt.processors.dem_preprocessing import CopernicusDEMGenerator
 
-            with TemporaryDirectory() as td:
-                demgen = CopernicusDEMGenerator(
-                    west=min(self.detector_meta.lon_UL_UR_LL_LR),
-                    south=min(self.detector_meta.lat_UL_UR_LL_LR),
-                    east=max(self.detector_meta.lon_UL_UR_LL_LR),
-                    north=max(self.detector_meta.lat_UL_UR_LL_LR),
-                    product="GLO-30",
-                    out_format="GTiff"
+                self.logger.info(f'Automatic download of Copernicus DEM for {self.detector_name} detector...')
+
+                with TemporaryDirectory() as td:
+                    demgen = CopernicusDEMGenerator(
+                        west=min(self.detector_meta.lon_UL_UR_LL_LR),
+                        south=min(self.detector_meta.lat_UL_UR_LL_LR),
+                        east=max(self.detector_meta.lon_UL_UR_LL_LR),
+                        north=max(self.detector_meta.lat_UL_UR_LL_LR),
+                        product="GLO-30",
+                        out_format="GTiff"
+                    )
+                    demgen.run(path.join(td, "dem.tif"))
+
+                    DP = DEM_Processor(
+                        dem_path_geoarray=GeoArray(path.join(td, "dem.tif")),
+                        enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
+                                                       self.detector_meta.lat_UL_UR_LL_LR)),
+                        CPUs=self.cfg.CPUs,
+                        progress=not self.cfg.disable_progress_bars
+                    )
+
+                    self.logger.info(f'Transforming Copernicus DEM to {self.detector_name} sensor geometry '
+                                     f'(using first band of {self.detector_name} geolayer)...')
+                    self.dem = DP.get_dem_in_sensor_geometry(
+                        lons=self.detector_meta.lons[:, :, 0],
+                        lats=self.detector_meta.lats[:, :, 0])
+
+            except Exception as e:
+                self.logger.warning(
+                    f"Automatic download of Copernicus DEM failed. Error was:\n{e.msg}).")
+                self.logger.info(
+                    f'No DEM for the {self.detector_name} detector available. '
+                    f'Falling back to the average elevation of {int(fallback_avg_elevation)} meters.'
                 )
-                demgen.run(path.join(td, "dem.tif"))
-
-                DP = DEM_Processor(
-                    dem_path_geoarray=GeoArray(path.join(td, "dem.tif")),
-                    enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
-                                                   self.detector_meta.lat_UL_UR_LL_LR)),
-                    CPUs=self.cfg.CPUs,
-                    progress=not self.cfg.disable_progress_bars
-                )
-
-                self.logger.info(f'Transforming Copernicus DEM to {self.detector_name} sensor geometry '
-                                 f'(using first band of {self.detector_name} geolayer)...')
-                self.dem = DP.get_dem_in_sensor_geometry(
-                    lons=self.detector_meta.lons[:, :, 0],
-                    lats=self.detector_meta.lats[:, :, 0])
-
-            # self.logger.info('No DEM for the %s detector provided. Falling back to an average elevation of %d meters.'
-            #                  % (self.detector_name, self.cfg.average_elevation))
-            # self.dem = GeoArray(np.full(self.data.shape[:2], self.cfg.average_elevation).astype(np.int16))
-            self.logger.info('No DEM for the %s detector provided. Falling back to the average elevation of %d meters.'
-                             % (self.detector_name, fallback_avg_elevation))
-            self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
+                self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
 
         return self.dem
 
