@@ -131,8 +131,11 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
-    def get_preprocessed_dem(self) -> GeoArray:
-        """Get a digital elevation model in EnMAP sensor geometry of the current detector."""
+    def get_preprocessed_dem(self, fallback_avg_elevation: float = 0) -> GeoArray:
+        """Get a digital elevation model in EnMAP sensor geometry of the current detector.
+
+        :param fallback_avg_elevation: elevation to use if no DEM is provided
+        """
         if self.cfg.path_dem:
             self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
             DP = DEM_Processor(self.cfg.path_dem,
@@ -156,9 +159,9 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 self.dem = DP.dem
 
         else:
-            self.logger.info('No DEM for the %s detector provided. Falling back to an average elevation of %d meters.'
-                             % (self.detector_name, self.cfg.average_elevation))
-            self.dem = GeoArray(np.full(self.data.shape[:2], self.cfg.average_elevation).astype(np.int16))
+            self.logger.info('No DEM for the %s detector provided. Falling back to the average elevation of %d meters.'
+                             % (self.detector_name, fallback_avg_elevation))
+            self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
 
         return self.dem
 
@@ -762,8 +765,8 @@ class EnMAPL1Product_SensorGeo(object):
     #     self.vnir.data.get_mapPos()  # FIXME
 
     def get_preprocessed_dem(self):
-        self.vnir.get_preprocessed_dem()
-        self.swir.get_preprocessed_dem()
+        self.vnir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
+        self.swir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
 
     def transform_vnir_to_swir_raster(self,
                                       array_vnirsensorgeo: np.ndarray,
