@@ -102,6 +102,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
         self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
         self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
+        self.avg_elevation: Optional[float] = None  # average elevation of the scene in meters above sea level
         self.lats: Optional[np.ndarray] = None  # 2D/3D array of latitude coordinates
         self.lons: Optional[np.ndarray] = None  # 2D/3D array of longitude coordinates
         self.geolayer_has_keystone: Optional[bool] = None  # indicates if lon/lat geolayer considers keystone (3D array)
@@ -167,6 +168,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         coord_tags = ['upper_left', 'upper_right', 'lower_left', 'lower_right']
         self.lon_UL_UR_LL_LR = [coords_xy[ct][0] for ct in coord_tags]
         self.lat_UL_UR_LL_LR = [coords_xy[ct][1] for ct in coord_tags]
+
+        # read average elevation and slope
+        self.avg_elevation = float(xml.find("specific/meanGroundElevation").text)
 
         # read the band related information: wavelength, fwhm
         self.nwvl = int(xml.find("product/image/%s/channels" % lbl).text)
