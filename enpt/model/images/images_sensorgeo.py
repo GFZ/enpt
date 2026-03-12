@@ -165,15 +165,20 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         return self.dem
 
-    def append_new_image(self, img2: 'EnMAP_Detector_SensorGeo', n_lines: int = None) -> None:
+    def append_new_image(self,
+                         img2: 'EnMAP_Detector_SensorGeo',
+                         n_lines: int = None,
+                         img2_avg_elevation: float = 0
+                         ) -> None:
         # TODO convert method to function?
         """Check if a second image matches with the first image and if so, append the given number of lines below.
 
         In this version we assume that the image will be added below. If it is the case, the method will create
         temporary files that will be used in the following.
 
-        :param img2:
-        :param n_lines: number of lines to be added from the new image
+        :param img2:                image to be appended
+        :param n_lines:             number of lines to be added from the new image
+        :param img2_avg_elevation:  average elevation of image to be appended in meter above sea level
         :return: None
         """
         basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
@@ -218,19 +223,26 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # Compute new lower coordinates
         img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                       img2.detector_meta.lat_UL_UR_LL_LR))
-        elevation = DEM_Processor(img2.cfg.path_dem,
-                                  enmapIm_cornerCoords=img2_cornerCoords,
-                                  progress=not self.cfg.disable_progress_bars).dem \
-            if img2.cfg.path_dem else self.cfg.average_elevation
 
-        LL, LR = compute_mapCoords_within_sensorGeoDims(
-            sensorgeoCoords_YX=[(n_lines - 1, 0),  # LL
-                                (n_lines - 1, img2.detector_meta.ncols - 1)],  # LR
-            rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
-            elevation=elevation,
-            enmapIm_cornerCoords=img2_cornerCoords,
-            enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
-        )
+        # -- use either DEM in map geometry or average elevation
+        elevation = (
+            DEM_Processor(
+                img2.cfg.path_dem,
+                enmapIm_cornerCoords=img2_cornerCoords,
+                progress=not self.cfg.disable_progress_bars).dem) \
+            if img2.cfg.path_dem else img2_avg_elevation
+
+        def get_map_xy(col, row):
+            return compute_mapCoords_within_sensorGeoDims(
+                sensorgeoCoords_YX=[(col, row)],
+                rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
+                elevation=elevation,
+                enmapIm_cornerCoords=img2_cornerCoords,
+                enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
+            )[0]
+
+        LL = get_map_xy(col=n_lines - 1, row=0)
+        LR = get_map_xy(col=n_lines - 1, row=img2.detector_meta.ncols - 1)
 
         self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
         self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
@@ -709,8 +721,8 @@ class EnMAPL1Product_SensorGeo(object):
         """
         l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
 
-        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext)
-        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext)
+        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext, l1b_ext_obj.meta.avg_elevation)
+        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext, l1b_ext_obj.meta.avg_elevation)
 
     def calc_snr_from_radiance(self):
         """Compute EnMAP SNR from radiance data.
