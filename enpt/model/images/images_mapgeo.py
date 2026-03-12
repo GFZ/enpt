@@ -266,9 +266,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         else:
             self.logger.info(f'No DEM provided. '
-                             f'Falling back to an average elevation of {self.cfg.average_elevation} meters.')
+                             f'Falling back to using the average elevation of {self.meta.avg_elevation} meters.')
             self._dem = GeoArray(
-                np.full(self.data.shape[:2], self.cfg.average_elevation),
+                np.full(self.data.shape[:2], self.meta.avg_elevation),
                 geotransform=self.data.gt,
                 projection=self.data.prj,
                 nodata=-9999

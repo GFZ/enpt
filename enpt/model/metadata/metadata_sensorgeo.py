@@ -325,12 +325,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             return gA_
 
-    def compute_geolayer_for_cube(self):
+    def compute_geolayer_for_cube(self, fallback_average_elevation: float = 0):
         self.logger.info('Computing %s geolayer...' % self.detector_name)
         GeolayerGen = \
             RPC_3D_Geolayer_Generator(
                 rpc_coeffs_per_band=self.rpc_coeffs,
-                elevation=self.cfg.path_dem if self.cfg.path_dem else self.cfg.average_elevation,
+                elevation=self.cfg.path_dem if self.cfg.path_dem else fallback_average_elevation,
                 enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
                 enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
                 CPUs=self.cfg.CPUs
@@ -369,6 +369,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         - geom_view_azimuth: viewing azimuth angle
         - geom_sun_zenith: sun zenith angle
         - geom_sun_azimuth: sun azimuth angle
+        - avg_elevation: average elevation of the scene in meters above sea level
         - mu_sun: needed by SICOR for TOARad > TOARef conversion
         - vnir(EnMAP_Metadata_VNIR_SensorGeo)
         - swir(EnMAP_Metadata_SWIR_SensorGeo)
@@ -396,6 +397,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
         self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
         self.geom_angles_all: Optional[dict] = None  # all view and sun angles available
+        self.avg_elevation: Optional[float] = None  # average elevation of the scene in meters above sea level
         self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: Optional[float] = None  # earth-sun distance
         self.aot: Optional[float] = None  # scene aerosol optical thickness
@@ -461,6 +463,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
         self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
         self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
+        self.avg_elevation = float(xml.find("specific/meanGroundElevation").text)
         self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
         self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
