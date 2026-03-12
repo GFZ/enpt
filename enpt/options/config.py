@@ -89,7 +89,6 @@ config_for_testing_water = dict(
     output_dir=os.path.abspath(os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs')),
     disable_progress_bars=False,
     auto_download_ecmwf=True,
-    average_elevation=0,
     deadpix_P_algorithm='spectral',
     deadpix_P_interp_spatial='linear',
     deadpix_P_interp_spectral='linear',
