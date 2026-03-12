@@ -468,7 +468,6 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
         self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
 
-
         # TODO: revise this later to get rid of the duplicates with self.geom_xxx
         self.geom_angles_all = dict(
             view_zenith={e.tag: abs(float(e.text)) for e in xml.findall("specific/acrossOffNadirAngle/")},

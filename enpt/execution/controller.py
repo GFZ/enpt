@@ -62,7 +62,7 @@ class EnPT_Controller(object):
         :param config_kwargs:   configuration parameters to be passed to EnPTConfig class
         """
         if 'average_elevation' in config_kwargs:
-            warnings.warn("The average_elevation parameter was removed in EnPT 1.3.0. " 
+            warnings.warn("The average_elevation parameter was removed in EnPT 1.3.0. "
                           "Instead, EnPT now features an automatic Copernicus-DEM download at runtime.")
             del config_kwargs['average_elevation']
 
