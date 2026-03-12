@@ -89,7 +89,6 @@ config_for_testing_water = dict(
     output_dir=os.path.abspath(os.path.join(path_enptlib, '..', 'tests', 'data', 'test_outputs')),
     disable_progress_bars=False,
     auto_download_ecmwf=True,
-    average_elevation=0,
     deadpix_P_algorithm='spectral',
     deadpix_P_interp_spatial='linear',
     deadpix_P_interp_spectral='linear',
@@ -201,9 +200,6 @@ class EnPTConfig(object):
             input path of digital elevation model in map or sensor geometry; GDAL compatible file format (must cover
             the EnMAP L1B data completely if given in map geometry or must have the same pixel dimensions like the
             EnMAP L1B data if given in sensor geometry)
-
-        :key average_elevation:
-            average elevation in meters above sea level; may be provided if no DEM is available; ignored if DEM is given
 
         :key output_dir:
             output directory where processed data and log files are saved
@@ -385,7 +381,6 @@ class EnPTConfig(object):
         self.path_l1b_enmap_image = self.absPath(gp('path_l1b_enmap_image'))
         self.path_l1b_enmap_image_gapfill = self.absPath(gp('path_l1b_enmap_image_gapfill'))
         self.path_dem = self.absPath(gp('path_dem'))
-        self.average_elevation = gp('average_elevation')
         self.path_l1b_snr_model = self.absPath(gp('path_l1b_snr_model'))
         self.working_dir = self.absPath(gp('working_dir')) or None
         self.n_lines_to_append = gp('n_lines_to_append')

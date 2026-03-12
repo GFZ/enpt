@@ -95,11 +95,15 @@ class L1B_Reader(object):
         # compute geolayer if not already done
         if l1b_main_obj.meta.vnir.lons is None or l1b_main_obj.meta.vnir.lats is None:
             l1b_main_obj.meta.vnir.lons, l1b_main_obj.meta.vnir.lats = \
-                l1b_main_obj.meta.vnir.compute_geolayer_for_cube()
+                l1b_main_obj.meta.vnir.compute_geolayer_for_cube(
+                    fallback_average_elevation=l1b_main_obj.meta.avg_elevation
+                )
 
         if l1b_main_obj.meta.swir.lons is None or l1b_main_obj.meta.swir.lats is None:
             l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
-                l1b_main_obj.meta.swir.compute_geolayer_for_cube()
+                l1b_main_obj.meta.swir.compute_geolayer_for_cube(
+                    fallback_average_elevation=l1b_main_obj.meta.avg_elevation
+                )
 
         # l1b_main_obj.correct_VNIR_SWIR_shift()
 

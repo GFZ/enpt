@@ -163,6 +163,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.lat_UL_UR_LL_LR = [lat for lon, lat in common_UL_UR_LL_LR]
         self.ll_mapPoly = get_footprint_polygon(tuple(zip(self.lon_UL_UR_LL_LR,
                                                           self.lat_UL_UR_LL_LR)), fix_invalid=True)
+        self.avg_elevation = meta_l1b.avg_elevation
         self.epsg = self._meta_l1b.vnir.epsg_ortho
 
         if meta_l1b.vnir.unit != meta_l1b.swir.unit or meta_l1b.vnir.unitcode != meta_l1b.swir.unitcode:
