@@ -68,6 +68,10 @@ class Test_L1B_Reader(unittest.TestCase):
                 path_l1b_testimages /
                 "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip"
             ),
+            # path_dem=str(
+            #     path_l1b_testimages.parent /
+            #     "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
+            # ),
             output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve())
         )
         cls.config.drop_bad_bands = False  # otherwise the read/write/read tests will fail
