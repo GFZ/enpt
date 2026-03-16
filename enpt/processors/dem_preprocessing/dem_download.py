@@ -37,6 +37,8 @@ from osgeo import gdal
 
 from py_tools_ds.geo.coord_trafo import transform_any_prj
 
+from ..spatial_transform import move_extent_to_coord_grid
+
 __author__ = 'Daniel Scheffler'
 
 
@@ -164,3 +166,47 @@ class CopernicusDEMGenerator:
         arr[np.isnan(arr)] = dst_nodata
 
         return arr, gt, prj_wkt, dst_nodata
+
+
+def compute_suitable_dem_extent(
+        corner_lons: list,
+        corner_lats: list,
+        tgt_epsg,
+        buffer_percent: float = 1,
+        tgt_coordgrid: dict = None
+):
+    """
+    Compute a suitable DEM extent for the given corner coordinates in the target projection.
+
+    :param corner_lons:     corner coordinate longitudes (any order)
+    :param corner_lats:     corner coordinate latitudes corresponding to longitudes
+    :param tgt_epsg:        EPSG code of target projection
+    :param buffer_percent:  buffer the output extent by the given percentage
+    :param tgt_coordgrid:   target coordinate grid (x, y) to align the output extent to
+    :return:    (xmin, ymin, xmax, ymax) in the target projection
+    """
+    # get corner coordinates in target projection
+    lonlats = zip(corner_lons, corner_lats)
+    xy_prj = (
+        lonlats) if tgt_epsg == 4626 else \
+        [transform_any_prj(4326, tgt_epsg, x, y) for x, y in lonlats]
+
+    # get common extent and apply buffer if requested
+    x_prj, y_prj = zip(*xy_prj)
+    buf = (
+            buffer_percent / 100 *
+            max([np.ptp([min(x_prj), max(x_prj)]),
+                 np.ptp([min(y_prj), max(y_prj)])])
+    )
+    extent_prj = (min(x_prj) - buf, min(y_prj) - buf, max(x_prj) + buf, max(y_prj) + buf)
+
+    # move to EnMAP grid if possible to avoid resampling the DEM later
+    if tgt_coordgrid:
+        extent_prj = (
+            move_extent_to_coord_grid(
+                extent_prj,
+                tgt_coordgrid['x'],
+                tgt_coordgrid['y'], )
+        )
+
+    return extent_prj
