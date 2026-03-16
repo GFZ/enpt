@@ -51,14 +51,12 @@ class CopernicusDEMGenerator:
         product: str = "GLO-30"
     ):
         """
-        Parameters
-        ----------
-        extent
-            (xmin, ymin, xmax, ymax) in target projection
-        tgt_epsg
-            EPSG code of the target projection
-        resolution
-            Output pixel size in target projection units
+        Initialize the CopernicusDEMGenerator.
+
+        :param extent:          (xmin, ymin, xmax, ymax) in target projection
+        :param tgt_epsg:        EPSG code of the target projection
+        :param resolution:      Output pixel size in target projection units
+        :param product:         DEM product to use (GLO-30 or GLO-90)
         """
         self.xmin, self.ymin, self.xmax, self.ymax = extent
         self.tgt_epsg = tgt_epsg
@@ -66,7 +64,7 @@ class CopernicusDEMGenerator:
         self.product = product
 
     def run(self) -> GeoArray:
-        """Download, mosaic, reproject, and save DEM."""
+        """Download, mosaic, reproject DEM, and return as in-memory GeoArray."""
         print(f"Target projection: EPSG:{self.tgt_epsg}")
 
         # convert target extent → WGS84
