@@ -83,7 +83,7 @@ class CopernicusDEMGenerator:
             raise RuntimeError("No DEM tiles found or could not open them.")
 
         # warp to requested grid
-        arr, gt, prj, nodata = self._warp_to_target(src_ds)
+        arr, gt, prj, nodata = self._warp_to_target(vrt)
 
         return GeoArray(arr, geotransform=gt, projection=prj, nodata=nodata)
 
@@ -109,13 +109,13 @@ class CopernicusDEMGenerator:
         res_m, arcsec = (30, 10) if self.product == 'GLO-30' else (90, 30)
         bucket = f"copernicus-dem-{res_m}m.s3.amazonaws.com"
 
-        def deg_range(a, b):
-            return range(math.floor(a), math.floor(b) + 1)
+        lats = range(math.floor(south), math.ceil(north))
+        lons = range(math.floor(west), math.ceil(east))
 
         urls = []
 
-        for lat in deg_range(south, north):
-            for lon in deg_range(west, east):
+        for lat in lats:
+            for lon in lons:
                 ns = f"N{abs(lat):02d}_00" if lat >= 0 else f"S{abs(lat):02d}_00"
                 ew = f"E{abs(lon):03d}_00" if lon >= 0 else f"W{abs(lon):03d}_00"
 
