@@ -48,31 +48,54 @@ __author__ = 'Daniel Scheffler'
 
 
 class Test_CopernicusDEMGenerator(TestCase):
-    def test_run_lonlat(self):
+    @staticmethod
+    def _validate(dem: GeoArray, tgt_epsg: int):
+        assert dem.size
+        assert dem.is_map_geo
+        assert dem.is_inmem
+        assert dem.epsg == tgt_epsg
+        assert dem[:].std() > 0
+
+    def test_run_lonlat_glo30(self):
         dem = CopernicusDEMGenerator(
             extent=(11.0, 47.0, 11.3, 47.2),
             tgt_epsg=4326,
             product="GLO-30",
         ).run()
+        self._validate(dem, 4326)
 
-        assert dem.size
-        assert dem.is_map_geo
-        assert dem.is_inmem
-        assert dem.epsg == 4326
-        assert dem[:].std() > 0
 
-    def test_run_utm(self):
+    def test_run_utm_glo30(self):
         dem = CopernicusDEMGenerator(
             extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
             tgt_epsg=32630,
             product="GLO-30",
         ).run()
+        self._validate(dem, 32630)
 
-        assert dem.size
-        assert dem.is_map_geo
-        assert dem.is_inmem
-        assert dem.epsg == 32630
-        assert dem[:].std() > 0
+    def test_run_lonlat_glo90(self):
+        dem = CopernicusDEMGenerator(
+            extent=(11.0, 47.0, 11.3, 47.2),
+            tgt_epsg=4326,
+            product="GLO-90",
+        ).run()
+        self._validate(dem, 4326)
+
+
+    def test_run_utm_glo90(self):
+        dem = CopernicusDEMGenerator(
+            extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
+            tgt_epsg=32630,
+            product="GLO-90",
+        ).run()
+        self._validate(dem, 32630)
+
+    def test_wrong_product(self):
+        with pytest.raises(ValueError):
+            CopernicusDEMGenerator(
+                extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
+                tgt_epsg=32630,
+                product="GLO-120")
 
 
 if __name__ == '__main__':
