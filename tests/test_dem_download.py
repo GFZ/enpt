@@ -36,8 +36,6 @@ Tests for `processors.dem_preprocessing.dem_download` module.
 """
 
 from unittest import TestCase
-from tempfile import TemporaryDirectory
-import os
 
 import pytest
 from geoarray import GeoArray
