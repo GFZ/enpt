@@ -32,6 +32,7 @@
 import math
 
 import numpy as np
+from geoarray import GeoArray
 from osgeo import gdal
 
 from py_tools_ds.geo.coord_trafo import transform_any_prj
@@ -41,54 +42,67 @@ __author__ = 'Daniel Scheffler'
 
 class CopernicusDEMGenerator:
     def __init__(
-            self,
-            west: float,
-            south: float,
-            east: float,
-            north: float,
-            resolution: float = 30,
-            product: str = "GLO-30",
-            out_format: str = "ENVI"
+        self,
+        extent: tuple[float, float, float, float],
+        tgt_epsg: int,
+        resolution: float = 30,
+        product: str = "GLO-30"
     ):
-        self.west = west
-        self.south = south
-        self.east = east
-        self.north = north
+        """
+        Parameters
+        ----------
+        extent
+            (xmin, ymin, xmax, ymax) in target projection
+        tgt_epsg
+            EPSG code of the target projection
+        resolution
+            Output pixel size in target projection units
+        """
+        self.xmin, self.ymin, self.xmax, self.ymax = extent
+        self.tgt_epsg = tgt_epsg
         self.resolution = resolution
         self.product = product
-        self.out_format = out_format
 
-    def run(self, path_out: str):
-        """Main entry point: download, mosaic, reproject, and save DEM."""
-        # Determine the correct UTM zone and EPSG code
-        utm_epsg = self._get_utm_epsg((self.west + self.east) / 2,
-                                      (self.south + self.north) / 2)
-        print(f"Target projection: EPSG:{utm_epsg} (UTM zone)")
+    def run(self) -> GeoArray:
+        """Download, mosaic, reproject, and save DEM."""
+        print(f"Target projection: EPSG:{self.tgt_epsg}")
 
-        # Determine tile URLs (in WGS84 degrees)
-        urls = self._construct_tile_urls()
+        # convert target extent → WGS84
+        wgs_bbox = self._extent_to_wgs84()
+
+        # determine tile URLs
+        urls = self._construct_tile_urls(wgs_bbox)
         print(f"{len(urls)} DEM tiles potentially required...")
 
-        # Build VRT mosaic
+        # build VRT mosaic
         src_ds = self._build_vrt(urls)
         if src_ds is None:
             raise RuntimeError("No DEM tiles found or could not open them.")
 
-        # Reproject to UTM
-        arr, gt, prj, nodata = self._reproject_to_utm(src_ds, utm_epsg)
+        # warp to requested grid
+        arr, gt, prj, nodata = self._warp_to_target(src_ds)
 
-        # Write output
-        self._write_dem(path_out, arr, gt, prj, nodata)
-        print("Done.")
+        return GeoArray(arr, geotransform=gt, projection=prj, nodata=nodata)
 
-    @staticmethod
-    def _get_utm_epsg(lon: float, lat: float) -> int:
-        """Return UTM EPSG code based on lon/lat center."""
-        zone = int((lon + 180) / 6) + 1
-        return 32600 + zone if lat >= 0 else 32700 + zone
+    def _extent_to_wgs84(self) -> tuple[float, float, float, float]:
+        """Transform target extent to WGS84."""
+        corners = [
+            (self.xmin, self.ymin),
+            (self.xmin, self.ymax),
+            (self.xmax, self.ymin),
+            (self.xmax, self.ymax),
+        ]
 
-    def _construct_tile_urls(self) -> list[str]:
-        """Generate Copernicus DEM COG URLs covering bbox."""
+        ll = [transform_any_prj(self.tgt_epsg, 4326, x, y) for x, y in corners]
+
+        xs, ys = zip(*ll)
+
+        return min(xs), min(ys), max(xs), max(ys)
+
+    def _construct_tile_urls(self, wgs_bbox: tuple[float, float, float, float]) -> list[str]:
+        """Generate Copernicus DEM URLs covering WGS84 bbox."""
+        west, south, east, north = wgs_bbox
+
         if self.product == "GLO-30":
             bucket, arcsec = "copernicus-dem-30m.s3.amazonaws.com", "10"
         else:
@@ -98,75 +112,55 @@ class CopernicusDEMGenerator:
             return range(math.floor(a), math.floor(b) + 1)
 
         urls = []
-        for lat in deg_range(self.south, self.north):
-            for lon in deg_range(self.west, self.east):
+
+        for lat in deg_range(south, north):
+            for lon in deg_range(west, east):
                 ns = f"N{abs(lat):02d}_00" if lat >= 0 else f"S{abs(lat):02d}_00"
                 ew = f"E{abs(lon):03d}_00" if lon >= 0 else f"W{abs(lon):03d}_00"
+
                 folder = f"Copernicus_DSM_COG_{arcsec}_{ns}_{ew}_DEM"
                 fname = f"{folder}.tif"
+
                 urls.append(f"https://{bucket}/{folder}/{fname}")
+
         return urls
 
-    def _build_vrt(self, urls: list[str]):
-        """Create an in-memory VRT mosaic from URLs."""
+    def _build_vrt(self, urls: list[str]) -> gdal.Dataset:
+        """Create in-memory VRT mosaic."""
         vrt_path = "/vsimem/copernicus_mosaic.vrt"
         gdal.BuildVRT(vrt_path, urls)
         return gdal.Open(vrt_path)
 
-    def _reproject_to_utm(
-            self, src_ds: gdal.Dataset,
-            utm_epsg: int
+    def _warp_to_target(
+            self,
+            src_ds: gdal.Dataset,
+            dst_nodata: int = -9999
     ) -> tuple[np.ndarray, tuple, str, float]:
-        """Warp DEM mosaic into UTM projection with fixed 30 m pixels."""
-        UL_UR_LL_LR_ll = (
-            (self.west, self.north),
-            (self.east, self.north),
-            (self.west, self.south),
-            (self.east, self.south),
-        )
-        UL_UR_LL_LR_prj = [transform_any_prj(4326, utm_epsg, x, y) for x, y in UL_UR_LL_LR_ll]
-        xs, ys = zip(*UL_UR_LL_LR_prj)
-        xmin, xmax = min(xs), max(xs)
-        ymin, ymax = min(ys), max(ys)
-
-        width = int((xmax - xmin) / self.resolution)
-        height = int((ymax - ymin) / self.resolution)
-        gt = (xmin, self.resolution, 0, ymax, 0, -self.resolution)
-
-        with gdal.GetDriverByName("MEM").Create("", width, height, 1, gdal.GDT_Float32) as dst_ds:
-            dst_ds.SetGeoTransform(gt)
-            dst_ds.SetProjection(f'EPSG:{utm_epsg}')
-
+        """Subset or warp DEM depending on target projection."""
+        if self.tgt_epsg == 4326:
+            print("Subsetting DEM (native Copernicus grid retained)...")
+            rsp_alg = "nearest"
+            xres = yres = None
+        else:
             print("Reprojecting and resampling DEM...")
-            gdal.Warp(dst_ds, src_ds, resampleAlg="bilinear", dstNodata=-9999)
+            rsp_alg = "bilinear"
+            xres = yres = self.resolution
 
-            arr = dst_ds.GetRasterBand(1).ReadAsArray()
-            prj_wkt = dst_ds.GetProjection()
+        with gdal.Warp(
+                "",
+                src_ds,
+                format="MEM",
+                dstSRS=f"EPSG:{self.tgt_epsg}",
+                outputBounds=(self.xmin, self.ymin, self.xmax, self.ymax),
+                resampleAlg=rsp_alg,
+                xRes=xres,
+                yRes=yres,
+                dstNodata=dst_nodata
+            ) as ds:
+            arr = ds.GetRasterBand(1).ReadAsArray()
+            gt = ds.GetGeoTransform()
+            prj_wkt = ds.GetProjection()
 
-        nodata = -9999
-        arr[np.isnan(arr)] = nodata
+        arr[np.isnan(arr)] = dst_nodata
 
-        return arr, gt, prj_wkt, nodata
-
-    def _write_dem(
-            self, path_out: str,
-            arr: np.ndarray,
-            gt: tuple,
-            prj: str,
-            nodata: float
-    ):
-        """Write DEM array to disk."""
-        driver = gdal.GetDriverByName(self.out_format)
-        if driver is None:
-            raise RuntimeError(f"Unsupported format: {self.out_format}")
-        rows, cols = arr.shape
-
-        with driver.Create(path_out, cols, rows, 1, gdal.GDT_Float32) as ds:
-            ds.SetGeoTransform(gt)
-            ds.SetProjection(prj)
-            band = ds.GetRasterBand(1)
-            band.WriteArray(arr)
-            band.SetNoDataValue(nodata)
-            ds.FlushCache()
-
-        print(f"DEM saved: {path_out}")
+        return arr, gt, prj_wkt, dst_nodata
