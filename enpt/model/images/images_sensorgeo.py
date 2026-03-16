@@ -48,6 +48,7 @@ from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only us
 from ...options.config import EnPTConfig
 from ...processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ...processors.dem_preprocessing import DEM_Processor
+from ...processors.dem_preprocessing.dem_download import compute_suitable_dem_extent, CopernicusDEMGenerator
 from ...processors.spatial_transform import compute_mapCoords_within_sensorGeoDims
 
 __author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
@@ -600,6 +601,9 @@ class EnMAPL1Product_SensorGeo(object):
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths()
 
+        # set dem_mapgeo (either use the user-provided path or download automatically so that it covers VNIR and SWIR)
+        self.dem_mapgeo = self.cfg.path_dem if self.cfg.path_dem else self.download_dem()
+
         # associate raster attributes with file links (raster data is read lazily / on demand)
         # or directly read here in case the user does not want to include all L1B bands into the processing
         self.vnir.data = self.paths.vnir.data
@@ -815,6 +819,31 @@ class EnMAPL1Product_SensorGeo(object):
     def get_preprocessed_dem(self):
         self.vnir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
         self.swir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
+
+    def download_dem(self) -> GeoArray:
+        """
+        Download Copernicus DEM for the scene.
+
+        Returns:
+            GeoArray: The downloaded DEM.
+        """
+        extent = compute_suitable_dem_extent(
+            corner_lons=self.meta.vnir.lon_UL_UR_LL_LR,  # equal for VNIR/SWIR, i.e., covers both detectors
+            corner_lats=self.meta.vnir.lat_UL_UR_LL_LR,
+            tgt_epsg=self.meta.vnir.epsg_ortho,
+            buffer_percent=1,  # make DEM slightly larger than EnMAP
+            tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
+        )
+
+        self.logger.info(f'Automatic download of Copernicus DEM...')
+        dem = CopernicusDEMGenerator(
+            extent=extent,
+            tgt_epsg=self.meta.vnir.epsg_ortho,
+            resolution=30 if self.meta.vnir.epsg_ortho != 4326 else None,
+            product="GLO-30"
+        ).run()
+
+        return dem
 
     def transform_vnir_to_swir_raster(self,
                                       array_vnirsensorgeo: np.ndarray,
