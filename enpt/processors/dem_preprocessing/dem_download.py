@@ -58,7 +58,7 @@ class CopernicusDEMGenerator:
         :param resolution:      Output pixel size in target projection units
         :param product:         DEM product to use (GLO-30 or GLO-90)
         """
-        if not product in ['GLO-30', 'GLO-90']:
+        if product not in ['GLO-30', 'GLO-90']:
             raise ValueError(f"Invalid product: {product}. Must be 'GLO-30' or 'GLO-90'")
 
         self.xmin, self.ymin, self.xmax, self.ymax = extent
@@ -157,7 +157,7 @@ class CopernicusDEMGenerator:
                 xRes=xres,
                 yRes=yres,
                 dstNodata=dst_nodata
-            ) as ds:
+        ) as ds:
             arr = ds.GetRasterBand(1).ReadAsArray()
             gt = ds.GetGeoTransform()
             prj_wkt = ds.GetProjection()

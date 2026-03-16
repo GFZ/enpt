@@ -62,7 +62,6 @@ class Test_CopernicusDEMGenerator(TestCase):
         ).run()
         self._validate(dem, 4326)
 
-
     def test_run_utm_glo30(self):
         dem = CopernicusDEMGenerator(
             extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
@@ -78,7 +77,6 @@ class Test_CopernicusDEMGenerator(TestCase):
             product="GLO-90",
         ).run()
         self._validate(dem, 4326)
-
 
     def test_run_utm_glo90(self):
         dem = CopernicusDEMGenerator(

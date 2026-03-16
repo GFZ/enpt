@@ -835,7 +835,7 @@ class EnMAPL1Product_SensorGeo(object):
             tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
         )
 
-        self.logger.info(f'Automatic download of Copernicus DEM...')
+        self.logger.info('Automatic download of Copernicus DEM...')
         dem = CopernicusDEMGenerator(
             extent=extent,
             tgt_epsg=self.meta.vnir.epsg_ortho,
