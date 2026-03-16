@@ -34,6 +34,8 @@ import os
 import warnings
 import sys
 from io import StringIO
+from contextlib import contextmanager
+from osgeo import gdal
 
 __author__ = 'Daniel Scheffler'
 
@@ -242,3 +244,20 @@ class LessThanFilter(logging.Filter):
         """
         # non-zero return means we log this message
         return True if record.levelno < self.max_level else False
+
+
+@contextmanager
+def gdal_logging(logger):
+    def handler(err_class, err_no, msg):
+        if err_class == gdal.CE_Warning:
+            logger.warning(msg)
+        elif err_class >= gdal.CE_Failure:
+            logger.error(msg)
+        else:
+            logger.debug(msg)
+
+    gdal.PushErrorHandler(handler)
+    try:
+        yield
+    finally:
+        gdal.PopErrorHandler()

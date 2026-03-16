@@ -39,6 +39,8 @@ from osgeo import gdal
 from py_tools_ds.geo.coord_trafo import transform_any_prj
 
 from ..spatial_transform import move_extent_to_coord_grid
+from ...utils.logging import gdal_logging
+
 
 __author__ = 'Daniel Scheffler'
 
@@ -84,13 +86,14 @@ class CopernicusDEMGenerator:
         urls = self._construct_tile_urls(wgs_bbox)
         self.logger.info(f"{len(urls)} DEM tiles potentially required...")
 
-        # build VRT mosaic
-        vrt = gdal.BuildVRT("/vsimem/copernicus_mosaic.vrt", urls)
-        if vrt is None:
-            raise RuntimeError("No Copernicus DEM tiles found or could not open them.")
+        with gdal_logging(self.logger):
+            # build VRT mosaic
+            vrt = gdal.BuildVRT("/vsimem/copernicus_mosaic.vrt", urls)
+            if vrt is None:
+                raise RuntimeError("No Copernicus DEM tiles found or could not open them.")
 
-        # warp to requested grid
-        arr, gt, prj, nodata = self._warp_to_target(vrt)
+            # warp to requested grid
+            arr, gt, prj, nodata = self._warp_to_target(vrt)
 
         self.logger.info(f"DEM download complete. Shape: {arr.shape}")
 
