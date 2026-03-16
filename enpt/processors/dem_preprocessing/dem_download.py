@@ -106,10 +106,8 @@ class CopernicusDEMGenerator:
         """Generate Copernicus DEM URLs covering WGS84 bbox."""
         west, south, east, north = wgs_bbox
 
-        if self.product == "GLO-30":
-            bucket, arcsec = "copernicus-dem-30m.s3.amazonaws.com", "10"
-        else:
-            bucket, arcsec = "copernicus-dem-90m.s3.amazonaws.com", "30"
+        res_m, arcsec = (30, 10) if self.product == 'GLO-30' else (90, 30)
+        bucket = f"copernicus-dem-{res_m}m.s3.amazonaws.com"
 
         def deg_range(a, b):
             return range(math.floor(a), math.floor(b) + 1)
