@@ -78,9 +78,9 @@ class CopernicusDEMGenerator:
         print(f"{len(urls)} DEM tiles potentially required...")
 
         # build VRT mosaic
-        src_ds = self._build_vrt(urls)
-        if src_ds is None:
-            raise RuntimeError("No DEM tiles found or could not open them.")
+        vrt = gdal.BuildVRT("/vsimem/copernicus_mosaic.vrt", urls)
+        if vrt is None:
+            raise RuntimeError("No Copernicus DEM tiles found or could not open them.")
 
         # warp to requested grid
         arr, gt, prj, nodata = self._warp_to_target(vrt)
@@ -125,13 +125,6 @@ class CopernicusDEMGenerator:
                 urls.append(f"https://{bucket}/{folder}/{fname}")
 
         return urls
-
-    @staticmethod
-    def _build_vrt(urls: list[str]) -> gdal.Dataset:
-        """Create in-memory VRT mosaic."""
-        vrt_path = "/vsimem/copernicus_mosaic.vrt"
-        gdal.BuildVRT(vrt_path, urls)
-        return gdal.Open(vrt_path)
 
     def _warp_to_target(
             self,
