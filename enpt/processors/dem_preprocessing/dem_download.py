@@ -126,7 +126,8 @@ class CopernicusDEMGenerator:
 
         return urls
 
-    def _build_vrt(self, urls: list[str]) -> gdal.Dataset:
+    @staticmethod
+    def _build_vrt(urls: list[str]) -> gdal.Dataset:
         """Create in-memory VRT mosaic."""
         vrt_path = "/vsimem/copernicus_mosaic.vrt"
         gdal.BuildVRT(vrt_path, urls)
