@@ -48,18 +48,31 @@ __author__ = 'Daniel Scheffler'
 
 
 class Test_CopernicusDEMGenerator(TestCase):
-    def test_CopernicusDEMGenerator(self):
-        with TemporaryDirectory() as td:
-            path_out = os.path.join(td, "output_dem.tif")
-            demgen = CopernicusDEMGenerator(
-                west=11.0, south=47.0, east=11.3, north=47.2,
-                product="GLO-30", out_format="GTiff"
-            )
-            demgen.run(path_out)
-            dem = GeoArray(path_out)[:]
+    def test_run_lonlat(self):
+        dem = CopernicusDEMGenerator(
+            extent=(11.0, 47.0, 11.3, 47.2),
+            tgt_epsg=4326,
+            product="GLO-30",
+        ).run()
 
-            assert os.path.exists(path_out)
-            assert dem.std() > 0
+        assert dem.size
+        assert dem.is_map_geo
+        assert dem.is_inmem
+        assert dem.epsg == 4326
+        assert dem[:].std() > 0
+
+    def test_run_utm(self):
+        dem = CopernicusDEMGenerator(
+            extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
+            tgt_epsg=32630,
+            product="GLO-30",
+        ).run()
+
+        assert dem.size
+        assert dem.is_map_geo
+        assert dem.is_inmem
+        assert dem.epsg == 32630
+        assert dem[:].std() > 0
 
 
 if __name__ == '__main__':
