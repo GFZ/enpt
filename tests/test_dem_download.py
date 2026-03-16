@@ -47,12 +47,15 @@ __author__ = 'Daniel Scheffler'
 
 class Test_CopernicusDEMGenerator(TestCase):
     @staticmethod
-    def _validate(dem: GeoArray, tgt_epsg: int):
+    def _validate(dem: GeoArray, tgt_epsg: int, res: float = None):
         assert dem.size
         assert dem.is_map_geo
         assert dem.is_inmem
         assert dem.epsg == tgt_epsg
         assert dem[:].std() > 0
+        if res is not None:
+            assert dem.xgsd == res
+            assert dem.ygsd == res
 
     def test_run_lonlat_glo30(self):
         dem = CopernicusDEMGenerator(
@@ -69,6 +72,26 @@ class Test_CopernicusDEMGenerator(TestCase):
             product="GLO-30",
         ).run()
         self._validate(dem, 32630)
+
+    def test_run_lonlat_glo30_res1px(self):
+        dem = CopernicusDEMGenerator(
+            extent=(11.0, 47.0, 11.3, 47.2),
+            tgt_epsg=4326,
+            product="GLO-30",
+            xres=0.0002777778,
+            yres=0.0002777778,
+        ).run()
+        self._validate(dem, 4326, 0.0002777778)
+
+    def test_run_utm_glo30_res30(self):
+        dem = CopernicusDEMGenerator(
+            extent=(636690.0, 4940340.0, 666600.0, 4950210.0),
+            tgt_epsg=32630,
+            product="GLO-30",
+            xres=30,
+            yres=30,
+        ).run()
+        self._validate(dem, 32630, 30)
 
     def test_run_lonlat_glo90(self):
         dem = CopernicusDEMGenerator(

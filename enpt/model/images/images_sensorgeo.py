@@ -839,7 +839,8 @@ class EnMAPL1Product_SensorGeo(object):
         dem = CopernicusDEMGenerator(
             extent=extent,
             tgt_epsg=self.meta.vnir.epsg_ortho,
-            resolution=30 if self.meta.vnir.epsg_ortho != 4326 else None,
+            xres=np.ptp(self.cfg.target_coord_grid['x']) if self.cfg.target_coord_grid else None,
+            yres=np.ptp(self.cfg.target_coord_grid['y']) if self.cfg.target_coord_grid else None,
             product="GLO-30"
         ).run()
 

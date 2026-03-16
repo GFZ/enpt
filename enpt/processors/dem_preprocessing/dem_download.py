@@ -47,7 +47,8 @@ class CopernicusDEMGenerator:
         self,
         extent: tuple[float, float, float, float],
         tgt_epsg: int,
-        resolution: float = 30,
+        xres: float = None,
+        yres: float = None,
         product: str = "GLO-30"
     ):
         """
@@ -55,7 +56,8 @@ class CopernicusDEMGenerator:
 
         :param extent:          (xmin, ymin, xmax, ymax) in target projection
         :param tgt_epsg:        EPSG code of the target projection
-        :param resolution:      Output pixel size in target projection units
+        :param xres:            Output pixel size in target projection units (x-direction)
+        :param yres:            Output pixel size in target projection units (y-direction)
         :param product:         DEM product to use (GLO-30 or GLO-90)
         """
         if product not in ['GLO-30', 'GLO-90']:
@@ -63,7 +65,8 @@ class CopernicusDEMGenerator:
 
         self.xmin, self.ymin, self.xmax, self.ymax = extent
         self.tgt_epsg = tgt_epsg
-        self.resolution = resolution
+        self.xres = xres
+        self.yres = yres
         self.product = product
 
     def run(self) -> GeoArray:
@@ -132,14 +135,12 @@ class CopernicusDEMGenerator:
             dst_nodata: int = -9999
     ) -> tuple[np.ndarray, tuple, str, float]:
         """Subset or warp DEM depending on target projection."""
-        if self.tgt_epsg == 4326:
+        if self.tgt_epsg == 4326 and self.xres is None and self.yres is None:
             print("Subsetting DEM (native Copernicus grid retained)...")
             rsp_alg = "nearest"
-            xres = yres = None
         else:
             print("Reprojecting and resampling DEM...")
             rsp_alg = "bilinear"
-            xres = yres = self.resolution
 
         with gdal.Warp(
                 "",
@@ -148,8 +149,8 @@ class CopernicusDEMGenerator:
                 dstSRS=f"EPSG:{self.tgt_epsg}",
                 outputBounds=(self.xmin, self.ymin, self.xmax, self.ymax),
                 resampleAlg=rsp_alg,
-                xRes=xres,
-                yRes=yres,
+                xRes=self.xres,
+                yRes=self.yres,
                 dstNodata=dst_nodata
         ) as ds:
             arr = ds.GetRasterBand(1).ReadAsArray()
