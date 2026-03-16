@@ -86,6 +86,30 @@ class Test_CopernicusDEMGenerator(TestCase):
         ).run()
         self._validate(dem, 32630)
 
+    def test_run_only_water(self):
+        with pytest.raises(RuntimeError, match='No Copernicus DEM tiles found.'):
+            CopernicusDEMGenerator(
+                extent=(-0.5, -0.7, 0.5, 0.2),
+                tgt_epsg=4326,
+                product="GLO-30",
+            ).run()
+
+    def test_run_equator_crossing(self):
+        dem = CopernicusDEMGenerator(
+            extent=(20.0, -0.7, 20.5, 0.2),
+            tgt_epsg=4326,
+            product="GLO-30",
+        ).run()
+        self._validate(dem, 4326)
+
+    def test_run_zero_meridian_crossing(self):
+        dem = CopernicusDEMGenerator(
+            extent=(-0.5, 30.0, 0.5, 30.2),
+            tgt_epsg=4326,
+            product="GLO-30",
+        ).run()
+        self._validate(dem, 4326)
+
     def test_wrong_product(self):
         with pytest.raises(ValueError):
             CopernicusDEMGenerator(
