@@ -834,14 +834,13 @@ class EnMAPL1Product_SensorGeo(object):
             buffer_percent=1,  # make DEM slightly larger than EnMAP
             tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
         )
-
-        self.logger.info('Automatic download of Copernicus DEM...')
         dem = CopernicusDEMGenerator(
             extent=extent,
             tgt_epsg=self.meta.vnir.epsg_ortho,
             xres=np.ptp(self.cfg.target_coord_grid['x']) if self.cfg.target_coord_grid else None,
             yres=np.ptp(self.cfg.target_coord_grid['y']) if self.cfg.target_coord_grid else None,
-            product="GLO-30"
+            product="GLO-30",
+            logger=self.logger
         ).run()
 
         return dem

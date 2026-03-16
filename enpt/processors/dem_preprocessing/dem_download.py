@@ -30,6 +30,7 @@
 """EnPT downloader module for digital elevation models."""
 
 import math
+from logging import Logger, getLogger
 
 import numpy as np
 from geoarray import GeoArray
@@ -49,7 +50,8 @@ class CopernicusDEMGenerator:
         tgt_epsg: int,
         xres: float = None,
         yres: float = None,
-        product: str = "GLO-30"
+        product: str = "GLO-30",
+        logger: Logger | None = None
     ):
         """
         Initialize the CopernicusDEMGenerator.
@@ -59,6 +61,7 @@ class CopernicusDEMGenerator:
         :param xres:            Output pixel size in target projection units (x-direction)
         :param yres:            Output pixel size in target projection units (y-direction)
         :param product:         DEM product to use (GLO-30 or GLO-90)
+        :param logger:          Logger instance
         """
         if product not in ['GLO-30', 'GLO-90']:
             raise ValueError(f"Invalid product: {product}. Must be 'GLO-30' or 'GLO-90'")
@@ -68,17 +71,18 @@ class CopernicusDEMGenerator:
         self.xres = xres
         self.yres = yres
         self.product = product
+        self.logger = logger or getLogger(__name__)
 
     def run(self) -> GeoArray:
         """Download, mosaic, reproject DEM, and return as in-memory GeoArray."""
-        print(f"Target projection: EPSG:{self.tgt_epsg}")
+        self.logger.info(f"Automatic download of Copernicus {self.product} DEM (target EPSG: {self.tgt_epsg})...")
 
         # convert target extent → WGS84
         wgs_bbox = self._extent_to_wgs84()
 
         # determine tile URLs
         urls = self._construct_tile_urls(wgs_bbox)
-        print(f"{len(urls)} DEM tiles potentially required...")
+        self.logger.info(f"{len(urls)} DEM tiles potentially required...")
 
         # build VRT mosaic
         vrt = gdal.BuildVRT("/vsimem/copernicus_mosaic.vrt", urls)
@@ -87,6 +91,8 @@ class CopernicusDEMGenerator:
 
         # warp to requested grid
         arr, gt, prj, nodata = self._warp_to_target(vrt)
+
+        self.logger.info(f"DEM download complete. Shape: {arr.shape}")
 
         return GeoArray(arr, geotransform=gt, projection=prj, nodata=nodata)
 
@@ -136,10 +142,10 @@ class CopernicusDEMGenerator:
     ) -> tuple[np.ndarray, tuple, str, float]:
         """Subset or warp DEM depending on target projection."""
         if self.tgt_epsg == 4326 and self.xres is None and self.yres is None:
-            print("Subsetting DEM (native Copernicus grid retained)...")
+            self.logger.info("Subsetting DEM (native Copernicus grid retained)...")
             rsp_alg = "nearest"
         else:
-            print("Reprojecting and resampling DEM...")
+            self.logger.info("Reprojecting and resampling DEM...")
             rsp_alg = "bilinear"
 
         with gdal.Warp(
