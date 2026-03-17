@@ -162,7 +162,7 @@ class CopernicusDEMGenerator:
                 yRes=self.yres,
                 dstNodata=dst_nodata
         ) as ds:
-            arr = ds.GetRasterBand(1).ReadAsArray()
+            arr = ds.GetRasterBand(1).ReadAsArray().astype(np.int16)
             gt = ds.GetGeoTransform()
             prj_wkt = ds.GetProjection()
 

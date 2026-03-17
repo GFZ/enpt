@@ -134,7 +134,7 @@ class DEM_Processor(object):
                                    lons: np.ndarray,
                                    lats: np.ndarray):
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
-        data_sensorgeo = GT.to_sensor_geometry(self.dem)
+        data_sensorgeo = GT.to_sensor_geometry(self.dem).astype(np.int16)
 
         return GeoArray(data_sensorgeo, progress=self.progress)
 
@@ -175,4 +175,5 @@ class DEM_Processor(object):
                 progress=self.progress
             )
         )
+        dem_mapgeo[:] = dem_mapgeo[:].astype(np.int16)
         return dem_mapgeo
