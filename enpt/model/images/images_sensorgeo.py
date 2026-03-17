@@ -727,23 +727,6 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext, elevation=elevation)
         self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext, elevation=elevation)
 
-        # from osgeo import gdal
-        # import os
-        #
-        # from tempfile import TemporaryDirectory
-        # with TemporaryDirectory() as td:
-        #     p_main = os.path.join(td, "dem_main.tif")
-        #     p_ext = os.path.join(td, "dem_ext.tif")
-        #     p_merged = os.path.join(td, "dem_merged.tif")
-        #
-        #     self.dem_mapgeo.save(p_main, fmt='GTiff')
-        #     l1b_ext_obj.dem_mapgeo.save(p_ext, fmt='GTiff')
-        #
-        #     vrt = gdal.BuildVRT("merged.vrt", [p_main, p_ext])
-        #     gdal.Translate(p_merged, vrt)
-        #     dem = GeoArray(p_merged)
-        #     dem.to_mem()
-
         # update downloaded DEM so that it again covers the merged dataset
         if not self.cfg.path_dem:
             self.get_dem_mapgeo()
