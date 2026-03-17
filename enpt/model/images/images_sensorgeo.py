@@ -794,7 +794,7 @@ class EnMAPL1Product_SensorGeo(object):
     def get_dem_mapgeo(self) -> GeoArray:
         """Get a digital elevation model in map geometry covering VNIR and SWIR of the EnMAP image."""
         if self.cfg.path_dem:
-            self.logger.info(f'Pre-processing user-provided DEM...')
+            self.logger.info('Pre-processing user-provided DEM...')
             DP = DEM_Processor(
                 self.cfg.path_dem,
                 enmapIm_cornerCoords=tuple(
