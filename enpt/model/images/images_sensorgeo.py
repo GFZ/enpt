@@ -137,7 +137,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
         :param fallback_avg_elevation: elevation to use if no DEM is provided
         """
-        if not self.detector_meta.lons or not self.detector_meta.lats:
+        if self.detector_meta.lons is None or self.detector_meta.lats is None:
             raise ValueError("Detector metadata must contain a valid geolayer "
                              "before computing a DEM in map gemetry.")
 
