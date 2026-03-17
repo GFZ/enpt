@@ -283,7 +283,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 ).run()
 
             except Exception as e:
-                self.logger.warning(f"No DEM provided and automatic download of Copernicus DEM failed. Error was: '{e}'.")
+                self.logger.warning(f"No DEM provided and automatic download of Copernicus DEM failed. "
+                                    f"Error was: '{e}'.")
                 self.logger.info(f'Falling back to using the average elevation of {self.meta.avg_elevation} meters.')
                 self.dem = GeoArray(
                     np.full(self.data.shape[:2], self.meta.avg_elevation),
