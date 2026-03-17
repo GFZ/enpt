@@ -132,73 +132,42 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
-    def get_preprocessed_dem(self, fallback_avg_elevation: float = 0) -> GeoArray:
+    def get_preprocessed_dem(self, dem_mapgeo: GeoArray, fallback_avg_elevation: float = 0) -> GeoArray:
         """Get a digital elevation model in EnMAP sensor geometry of the current detector.
 
         :param fallback_avg_elevation: elevation to use if no DEM is provided
         """
-        if self.cfg.path_dem:
-            self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
-            DP = DEM_Processor(self.cfg.path_dem,
-                               enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
-                                                              self.detector_meta.lat_UL_UR_LL_LR)),
-                               CPUs=self.cfg.CPUs,
-                               progress=not self.cfg.disable_progress_bars)
-            DP.fill_gaps()  # FIXME this will also be needed at other places
+        if not self.detector_meta.lons or not self.detector_meta.lats:
+            raise ValueError("Detector metadata must contain a valid geolayer "
+                             "before computing a DEM in map gemetry.")
 
-            if DP.dem.is_map_geo:
-                lons = self.detector_meta.lons
-                lats = self.detector_meta.lats
+        if dem_mapgeo:
+            lons = self.detector_meta.lons
+            lats = self.detector_meta.lats
 
-                if not (lons.ndim == 3 and lats.ndim == 3):
-                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be 3-dimensional.')
+            if not (lons.ndim == 3 and lats.ndim == 3):
+                raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be 3-dimensional.')
 
-                self.logger.info(f'Transforming DEM to {self.detector_name} sensor geometry '
-                                 f'(using first band of {self.detector_name} geolayer)...')
-                self.dem = DP.get_dem_in_sensor_geometry(lons=lons[:, :, 0], lats=lats[:, :, 0])
-            else:
-                self.dem = DP.dem
-
+            self.logger.info(f'Transforming DEM to {self.detector_name} sensor geometry '
+                             f'(using first band of {self.detector_name} geolayer)...')
+            self.dem = DEM_Processor(
+                dem_mapgeo,
+                enmapIm_cornerCoords=tuple(
+                    zip(self.detector_meta.lon_UL_UR_LL_LR,
+                        self.detector_meta.lat_UL_UR_LL_LR)
+                ),
+                CPUs=self.cfg.CPUs,
+                progress=not self.cfg.disable_progress_bars
+            ).get_dem_in_sensor_geometry(
+                lons=lons[:, :, 0],
+                lats=lats[:, :, 0]
+            )
         else:
-            try:
-                # auto-download DEM if not provided
-                from enpt.processors.dem_preprocessing import CopernicusDEMGenerator
-
-                self.logger.info(f'Automatic download of Copernicus DEM for {self.detector_name} detector...')
-
-                with TemporaryDirectory() as td:
-                    demgen = CopernicusDEMGenerator(
-                        west=min(self.detector_meta.lon_UL_UR_LL_LR),
-                        south=min(self.detector_meta.lat_UL_UR_LL_LR),
-                        east=max(self.detector_meta.lon_UL_UR_LL_LR),
-                        north=max(self.detector_meta.lat_UL_UR_LL_LR),
-                        product="GLO-30",
-                        out_format="GTiff"
-                    )
-                    demgen.run(path.join(td, "dem.tif"))
-
-                    DP = DEM_Processor(
-                        dem_path_geoarray=GeoArray(path.join(td, "dem.tif")),
-                        enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
-                                                       self.detector_meta.lat_UL_UR_LL_LR)),
-                        CPUs=self.cfg.CPUs,
-                        progress=not self.cfg.disable_progress_bars
-                    )
-
-                    self.logger.info(f'Transforming Copernicus DEM to {self.detector_name} sensor geometry '
-                                     f'(using first band of {self.detector_name} geolayer)...')
-                    self.dem = DP.get_dem_in_sensor_geometry(
-                        lons=self.detector_meta.lons[:, :, 0],
-                        lats=self.detector_meta.lats[:, :, 0])
-
-            except Exception as e:
-                self.logger.warning(
-                    f"Automatic download of Copernicus DEM failed. Error was:\n{e.msg}).")
-                self.logger.info(
-                    f'No DEM for the {self.detector_name} detector available. '
-                    f'Falling back to the average elevation of {int(fallback_avg_elevation)} meters.'
-                )
-                self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
+            self.logger.info(
+                f'No DEM for the {self.detector_name} detector available. '
+                f'Falling back to the average elevation of {int(fallback_avg_elevation)} meters.'
+            )
+            self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
 
         return self.dem
 
@@ -817,8 +786,11 @@ class EnMAPL1Product_SensorGeo(object):
     #     self.vnir.data.get_mapPos()  # FIXME
 
     def get_preprocessed_dem(self):
-        self.vnir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
-        self.swir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
+        for det in [self.vnir, self.swir]:
+            det.get_preprocessed_dem(
+                dem_mapgeo=self.dem_mapgeo,  # covers VNIR and SWIR
+                fallback_avg_elevation=self.meta.avg_elevation
+            )
 
     def get_dem_mapgeo(self) -> GeoArray:
         """Get a digital elevation model in map geometry covering VNIR and SWIR of the EnMAP image."""
