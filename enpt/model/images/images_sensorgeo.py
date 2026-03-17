@@ -174,7 +174,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
     def append_new_image(self,
                          img2: 'EnMAP_Detector_SensorGeo',
                          n_lines: int = None,
-                         img2_avg_elevation: float = 0
+                         elevation: GeoArray | float = 0
                          ) -> None:
         # TODO convert method to function?
         """Check if a second image matches with the first image and if so, append the given number of lines below.
@@ -182,9 +182,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         In this version we assume that the image will be added below. If it is the case, the method will create
         temporary files that will be used in the following.
 
-        :param img2:                image to be appended
-        :param n_lines:             number of lines to be added from the new image
-        :param img2_avg_elevation:  average elevation of image to be appended in meter above sea level
+        :param img2:       image to be appended
+        :param n_lines:    number of lines to be added from the new image
+        :param elevation:  elevation to be used to compute new lower corner coordinates
+                           (DEM in map geometry or single value in m above sea level)
         :return: None
         """
         basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
@@ -229,14 +230,6 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # Compute new lower coordinates
         img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                       img2.detector_meta.lat_UL_UR_LL_LR))
-
-        # -- use either DEM in map geometry or average elevation
-        elevation = (
-            DEM_Processor(
-                img2.cfg.path_dem,
-                enmapIm_cornerCoords=img2_cornerCoords,
-                progress=not self.cfg.disable_progress_bars).dem) \
-            if img2.cfg.path_dem else img2_avg_elevation
 
         def get_map_xy(col, row):
             return compute_mapCoords_within_sensorGeoDims(
