@@ -146,7 +146,7 @@ class DEM_Processor(object):
                                 ):
         # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
         xmin, ymin, xmax, ymax = mapBounds
-        dem = GeoArray(self.dem.filePath,
+        dem = GeoArray(self.dem,
                        progress=self.progress)  # do not overwrite self.dem due to in-place re-projection below
 
         if not prj_equal(self.dem.prj, out_prj) or \
