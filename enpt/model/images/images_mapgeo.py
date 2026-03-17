@@ -243,20 +243,25 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
         return paths
 
-    def get_preprocessed_dem(self):
+    def get_preprocessed_dem(self, dem_mapgeo: GeoArray = None):
+        """Get a digital elevation model in map geometry covering the EnMAP image."""
         from ...processors.dem_preprocessing import DEM_Processor
+        from ...processors.dem_preprocessing.dem_download import CopernicusDEMGenerator
 
-        if self.cfg.path_dem:
-            self.logger.info('Pre-processing DEM in map geometry...')
+        if dem_mapgeo or self.cfg.path_dem:
+            self.logger.info('Pre-processing DEM to match EnMAP grid...')
+
             DP = DEM_Processor(
-                self.cfg.path_dem,
-                enmapIm_cornerCoords=tuple(zip(self.meta.lon_UL_UR_LL_LR,
-                                               self.meta.lat_UL_UR_LL_LR)),
+                dem_mapgeo or self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(
+                    zip(self.meta.lon_UL_UR_LL_LR,
+                        self.meta.lat_UL_UR_LL_LR)
+                ),
                 CPUs=self.cfg.CPUs,
-                progress=not self.cfg.disable_progress_bars,
-            )
-            DP.fill_gaps()  # FIXME this will also be needed at other places
-            self._dem =\
+                progress=not self.cfg.disable_progress_bars
+            )  # only map geometry DEMs with 100% overlap are accepted
+            DP.fill_gaps()
+            self.dem = \
                 DP.get_dem_in_map_geometry(
                     mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
                     mapBounds_prj=self.data.epsg,
@@ -265,14 +270,29 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 )
 
         else:
-            self.logger.info(f'No DEM provided. '
-                             f'Falling back to using the average elevation of {self.meta.avg_elevation} meters.')
-            self._dem = GeoArray(
-                np.full(self.data.shape[:2], self.meta.avg_elevation),
-                geotransform=self.data.gt,
-                projection=self.data.prj,
-                nodata=-9999
-            )
+            try:
+                # Download Copernicus DEM for the scene.
+                # NOTE: The native grid of the Copernicus DEM (EPSG 4326) is retained here to avoid resampling
+                #       twice when transforming to sensor geometry. For map geometry, the DEM needs to be
+                #       resampled anyway because co-registration likely changes the data extent.
+                self.dem = CopernicusDEMGenerator(
+                    extent=tuple(self.data.box.boundsMap[i] for i in [0, 2, 1, 3]),
+                    tgt_epsg=self.data.epsg,
+                    product="GLO-30",
+                    logger=self.logger
+                ).run()
+
+            except Exception as e:
+                self.logger.warning(f"No DEM provided and automatic download of Copernicus DEM failed. Error was: '{e}'.")
+                self.logger.info(f'Falling back to using the average elevation of {self.meta.avg_elevation} meters.')
+                self.dem = GeoArray(
+                    np.full(self.data.shape[:2], self.meta.avg_elevation),
+                    geotransform=self.data.gt,
+                    projection=self.data.prj,
+                    nodata=-9999
+                )
+
+        return self.dem
 
     def save(self, outdir: str, suffix="") -> str:
         """Save the product to disk using almost the same input format.
