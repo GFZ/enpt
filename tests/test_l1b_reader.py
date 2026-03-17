@@ -58,22 +58,19 @@ class Test_L1B_Reader(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        path_l1b_testimages = (Path(path_enptlib) / ".." / "tests" / "data" / "EnMAP_Level_1B").resolve()
-        cls.config = EnPTConfig(
+        cls.path_l1b_testimages = (Path(path_enptlib) / ".." / "tests" / "data" / "EnMAP_Level_1B").resolve()
+        cls.params_cfg = dict(
             path_l1b_enmap_image=str(
-                path_l1b_testimages /
+                cls.path_l1b_testimages /
                 "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows700-799.zip"
             ),
             path_l1b_enmap_image_gapfill=str(
-                path_l1b_testimages /
+                cls.path_l1b_testimages /
                 "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip"
             ),
-            # path_dem=str(
-            #     path_l1b_testimages.parent /
-            #     "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
-            # ),
-            output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve())
+            output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve()),
         )
+        cls.config = EnPTConfig(**cls.params_cfg)
         cls.config.drop_bad_bands = False  # otherwise the read/write/read tests will fail
         cls.pathList_testimages = [cls.config.path_l1b_enmap_image,
                                    cls.config.path_l1b_enmap_image_gapfill]
@@ -96,6 +93,26 @@ class Test_L1B_Reader(unittest.TestCase):
     def test_read_inputdata_dont_drop_bad_bands(self):
         L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
         assert L1_obj.swir.detector_meta.nwvl == 130
+
+    def test_read_inputdata_custom_dem__tgt_utm(self):
+        params = self.params_cfg.copy()
+        params['path_dem'] = str(
+            self.path_l1b_testimages.parent /
+            "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
+        )
+        params['target_projection_type'] = 'UTM'
+        L1B_Reader(config=EnPTConfig(**params)) \
+            .read_inputdata(self.testproducts[0], compute_snr=False)
+
+    def test_read_inputdata_custom_dem__tgt_lonlat(self):
+        params = self.params_cfg.copy()
+        params['path_dem'] = str(
+            self.path_l1b_testimages.parent /
+            "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
+        )
+        params['target_projection_type'] = 'Geographic'
+        L1B_Reader(config=EnPTConfig(**params)) \
+            .read_inputdata(self.testproducts[0], compute_snr=False)
 
     def _test_read_and_save_single_image(self, compute_snr: bool):
         with tempfile.TemporaryDirectory(dir=self.config.output_dir) as tempdir:
