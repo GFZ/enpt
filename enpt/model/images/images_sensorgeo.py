@@ -564,7 +564,7 @@ class EnMAPL1Product_SensorGeo(object):
         self.paths = self.get_paths()
 
         # set dem_mapgeo (either use the user-provided path or download automatically so that it covers VNIR and SWIR)
-        self.dem_mapgeo = self.cfg.path_dem if self.cfg.path_dem else self.download_dem()
+        self.dem_mapgeo = self.get_dem_mapgeo()
 
         # associate raster attributes with file links (raster data is read lazily / on demand)
         # or directly read here in case the user does not want to include all L1B bands into the processing
