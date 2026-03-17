@@ -205,7 +205,7 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
 
     @dem.setter
     def dem(self, *geoArr_initArgs):
-        self._dem = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'dem', nodataVal=0)  # FIXME 0?
+        self._dem = self._get_geoarray_with_datalike_geometry(geoArr_initArgs, 'dem', nodataVal=-9999)
 
     @dem.deleter
     def dem(self):
