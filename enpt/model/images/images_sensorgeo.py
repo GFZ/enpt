@@ -793,14 +793,15 @@ class EnMAPL1Product_SensorGeo(object):
 
     def get_dem_mapgeo(self) -> GeoArray:
         """Get a digital elevation model in map geometry covering VNIR and SWIR of the EnMAP image."""
+        # get corner coordinates which the DEM should cover
+        corner_lons = self.meta.vnir.lon_UL_UR_LL_LR  # equal for VNIR/SWIR, i.e., covers both detectors
+        corner_lats = self.meta.vnir.lat_UL_UR_LL_LR
+
         if self.cfg.path_dem:
             self.logger.info('Pre-processing user-provided DEM...')
             DP = DEM_Processor(
                 self.cfg.path_dem,
-                enmapIm_cornerCoords=tuple(
-                    zip(self.detector_meta.lon_UL_UR_LL_LR,
-                        self.detector_meta.lat_UL_UR_LL_LR)
-                ),
+                enmapIm_cornerCoords=tuple(zip(corner_lons, corner_lons)),
                 CPUs=self.cfg.CPUs,
                 progress=not self.cfg.disable_progress_bars
             )  # only map geometry DEMs with 100% overlap are accepted
@@ -812,8 +813,8 @@ class EnMAPL1Product_SensorGeo(object):
         else:
             # get suitable DEM extent
             extent = compute_suitable_dem_extent(
-                corner_lons=self.meta.vnir.lon_UL_UR_LL_LR,  # equal for VNIR/SWIR, i.e., covers both detectors
-                corner_lats=self.meta.vnir.lat_UL_UR_LL_LR,
+                corner_lons=corner_lons,
+                corner_lats=corner_lats,
                 tgt_epsg=4326,
                 buffer_percent=2  # make DEM slightly larger than EnMAP
             )
