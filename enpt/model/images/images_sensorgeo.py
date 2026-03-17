@@ -801,7 +801,7 @@ class EnMAPL1Product_SensorGeo(object):
             self.logger.info('Pre-processing user-provided DEM...')
             DP = DEM_Processor(
                 self.cfg.path_dem,
-                enmapIm_cornerCoords=tuple(zip(corner_lons, corner_lons)),
+                enmapIm_cornerCoords=tuple(zip(corner_lons, corner_lats)),
                 CPUs=self.cfg.CPUs,
                 progress=not self.cfg.disable_progress_bars
             )  # only map geometry DEMs with 100% overlap are accepted
