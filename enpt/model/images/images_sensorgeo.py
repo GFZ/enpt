@@ -820,30 +820,51 @@ class EnMAPL1Product_SensorGeo(object):
         self.vnir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
         self.swir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
 
-    def download_dem(self) -> GeoArray:
-        """
-        Download Copernicus DEM for the scene.
+    def get_dem_mapgeo(self) -> GeoArray:
+        """Get a digital elevation model in map geometry covering VNIR and SWIR of the EnMAP image."""
+        if self.cfg.path_dem:
+            self.logger.info(f'Pre-processing user-provided DEM...')
+            DP = DEM_Processor(
+                self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(
+                    zip(self.detector_meta.lon_UL_UR_LL_LR,
+                        self.detector_meta.lat_UL_UR_LL_LR)
+                ),
+                CPUs=self.cfg.CPUs,
+                progress=not self.cfg.disable_progress_bars
+            )  # only map geometry DEMs with 100% overlap are accepted
+            DP.fill_gaps()  # FIXME this will also be needed at other places
+            # TODO: clip DEM to needed extent
 
-        Returns:
-            GeoArray: The downloaded DEM.
-        """
-        extent = compute_suitable_dem_extent(
-            corner_lons=self.meta.vnir.lon_UL_UR_LL_LR,  # equal for VNIR/SWIR, i.e., covers both detectors
-            corner_lats=self.meta.vnir.lat_UL_UR_LL_LR,
-            tgt_epsg=self.meta.vnir.epsg_ortho,
-            buffer_percent=1,  # make DEM slightly larger than EnMAP
-            tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
-        )
-        dem = CopernicusDEMGenerator(
-            extent=extent,
-            tgt_epsg=self.meta.vnir.epsg_ortho,
-            xres=np.ptp(self.cfg.target_coord_grid['x']) if self.cfg.target_coord_grid else None,
-            yres=np.ptp(self.cfg.target_coord_grid['y']) if self.cfg.target_coord_grid else None,
-            product="GLO-30",
-            logger=self.logger
-        ).run()
+            self.dem_mapgeo = DP.dem
 
-        return dem
+        else:
+            # get suitable DEM extent
+            extent = compute_suitable_dem_extent(
+                corner_lons=self.meta.vnir.lon_UL_UR_LL_LR,  # equal for VNIR/SWIR, i.e., covers both detectors
+                corner_lats=self.meta.vnir.lat_UL_UR_LL_LR,
+                tgt_epsg=self.meta.vnir.epsg_ortho,
+                buffer_percent=2,  # make DEM slightly larger than EnMAP
+                tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
+            )
+
+            try:
+                # TODO: do not resample here
+                # Download Copernicus DEM for the scene.
+                self.dem_mapgeo = CopernicusDEMGenerator(
+                    extent=extent,
+                    tgt_epsg=self.meta.vnir.epsg_ortho,
+                    xres=np.ptp(self.cfg.target_coord_grid['x']) if self.cfg.target_coord_grid else None,
+                    yres=np.ptp(self.cfg.target_coord_grid['y']) if self.cfg.target_coord_grid else None,
+                    product="GLO-30",
+                    logger=self.logger
+                ).run()
+
+            except Exception as e:
+                self.logger.warning(f"Automatic download of Copernicus DEM failed. Error was: '{e}'.")
+                self.dem_mapgeo = None
+
+        return self.dem_mapgeo
 
     def transform_vnir_to_swir_raster(self,
                                       array_vnirsensorgeo: np.ndarray,
