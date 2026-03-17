@@ -77,7 +77,8 @@ class DEM_Processor(object):
 
         if overlap_perc < 100:
             # compute minimal extent in user provided projection
-            cornersXY = np.array([transform_any_prj(4326, self.dem.epsg, x, y) for x, y in self.enmapIm_cornerCoords])
+            cornersXY = np.array([transform_any_prj(4326, self.dem.epsg, x, y)
+                                  for x, y in self.enmapIm_cornerCoords])
             xmin, xmax = cornersXY[:, 0].min(), cornersXY[:, 0].max()
             ymin, ymax = cornersXY[:, 1].min(), cornersXY[:, 1].max()
 
