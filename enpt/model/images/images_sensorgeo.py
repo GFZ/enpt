@@ -729,6 +729,7 @@ class EnMAPL1Product_SensorGeo(object):
 
         # update downloaded DEM so that it again covers the merged dataset
         if not self.cfg.path_dem:
+            self.logger.info('Re-downloading DEM to cover merged dataset...')
             self.get_dem_mapgeo()
 
     def calc_snr_from_radiance(self):
