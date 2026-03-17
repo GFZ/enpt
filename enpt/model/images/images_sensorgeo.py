@@ -814,19 +814,18 @@ class EnMAPL1Product_SensorGeo(object):
             extent = compute_suitable_dem_extent(
                 corner_lons=self.meta.vnir.lon_UL_UR_LL_LR,  # equal for VNIR/SWIR, i.e., covers both detectors
                 corner_lats=self.meta.vnir.lat_UL_UR_LL_LR,
-                tgt_epsg=self.meta.vnir.epsg_ortho,
-                buffer_percent=2,  # make DEM slightly larger than EnMAP
-                tgt_coordgrid=self.cfg.target_coord_grid  # directly resample to EnMAP grid to avoid resampling
+                tgt_epsg=4326,
+                buffer_percent=2  # make DEM slightly larger than EnMAP
             )
 
             try:
-                # TODO: do not resample here
                 # Download Copernicus DEM for the scene.
+                # NOTE: The native grid of the Copernicus DEM (EPSG 4326) is retained here to avoid resampling
+                #       twice when transforming to sensor geometry. For map geometry, the DEM needs to be
+                #       resampled anyway because co-registration likely changes the data extent.
                 self.dem_mapgeo = CopernicusDEMGenerator(
                     extent=extent,
-                    tgt_epsg=self.meta.vnir.epsg_ortho,
-                    xres=np.ptp(self.cfg.target_coord_grid['x']) if self.cfg.target_coord_grid else None,
-                    yres=np.ptp(self.cfg.target_coord_grid['y']) if self.cfg.target_coord_grid else None,
+                    tgt_epsg=4326,
                     product="GLO-30",
                     logger=self.logger
                 ).run()
