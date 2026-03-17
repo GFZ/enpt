@@ -325,12 +325,18 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             return gA_
 
-    def compute_geolayer_for_cube(self, fallback_average_elevation: float = 0):
+    def compute_geolayer_for_cube(self, elevation: GeoArray | float):
+        """
+        Compute the geolayer for the current detector.
+
+        :param elevation:  elevation to be used
+                           (DEM in map geometry or single value in meter above sea level)
+        """
         self.logger.info('Computing %s geolayer...' % self.detector_name)
         GeolayerGen = \
             RPC_3D_Geolayer_Generator(
                 rpc_coeffs_per_band=self.rpc_coeffs,
-                elevation=self.cfg.path_dem if self.cfg.path_dem else fallback_average_elevation,
+                elevation=elevation,
                 enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
                 enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
                 CPUs=self.cfg.CPUs
