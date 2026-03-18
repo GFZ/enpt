@@ -469,7 +469,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
         self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
         self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
-        self.avg_elevation = int(xml.find("specific/meanGroundElevation").text)
+        self.avg_elevation = int(float(xml.find("specific/meanGroundElevation").text))
         self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
         self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000
