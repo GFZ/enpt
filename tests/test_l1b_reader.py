@@ -68,6 +68,9 @@ class Test_L1B_Reader(unittest.TestCase):
                 cls.path_l1b_testimages /
                 "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip"
             ),
+            path_dem=str(
+                cls.path_l1b_testimages.parent /
+                "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"),
             output_dir=str((Path(path_enptlib) / ".." / "tests" / "data" / "test_outputs" / 'test_reader').resolve()),
         )
         cls.config = EnPTConfig(**cls.params_cfg)
@@ -94,22 +97,16 @@ class Test_L1B_Reader(unittest.TestCase):
         L1_obj = self.RD.read_inputdata(self.testproducts[0], compute_snr=False)
         assert L1_obj.swir.detector_meta.nwvl == 130
 
-    def test_read_inputdata_custom_dem__tgt_utm(self):
+    def test_read_inputdata__download_dem__tgt_utm(self):
         params = self.params_cfg.copy()
-        params['path_dem'] = str(
-            self.path_l1b_testimages.parent /
-            "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
-        )
+        del params['path_dem']  # let EnPT download the DEM automatically
         params['target_projection_type'] = 'UTM'
         L1B_Reader(config=EnPTConfig(**params)) \
             .read_inputdata(self.testproducts[0], compute_snr=False)
 
-    def test_read_inputdata_custom_dem__tgt_lonlat(self):
+    def test_read_inputdata__download_dem__tgt_lonlat(self):
         params = self.params_cfg.copy()
-        params['path_dem'] = str(
-            self.path_l1b_testimages.parent /
-            "ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq"
-        )
+        del params['path_dem']  # let EnPT download the DEM automatically
         params['target_projection_type'] = 'Geographic'
         L1B_Reader(config=EnPTConfig(**params)) \
             .read_inputdata(self.testproducts[0], compute_snr=False)
