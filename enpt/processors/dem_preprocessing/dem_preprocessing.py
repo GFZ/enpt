@@ -29,7 +29,6 @@
 
 """EnPT pre-processing module for digital elevation models."""
 
-from typing import Union  # noqa: F401
 from multiprocessing import cpu_count
 import numpy as np
 from pyproj import CRS
@@ -46,7 +45,7 @@ __author__ = 'Daniel Scheffler'
 
 
 class DEM_Processor(object):
-    def __init__(self, dem_path_geoarray: Union[str, GeoArray],
+    def __init__(self, dem_path_geoarray: str | GeoArray,
                  enmapIm_cornerCoords: tuple[tuple[float, float], ...],
                  CPUs: int = None,
                  progress: bool = False):
@@ -140,8 +139,8 @@ class DEM_Processor(object):
 
     def get_dem_in_map_geometry(self,
                                 mapBounds: tuple,
-                                mapBounds_prj: Union[str, int],
-                                out_prj: Union[str, int],
+                                mapBounds_prj: str | int,
+                                out_prj: str | int,
                                 out_gsd: tuple
                                 ):
         # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
