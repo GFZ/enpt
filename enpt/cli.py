@@ -70,9 +70,9 @@ def get_enpt_argparser():
     add('-imgap', '--path_l1b_enmap_image_gapfill', type=str,  default=None,
         help='input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)')
     add('-dem', '--path_dem', type=str,  default=None,
-        help='input path of digital elevation model in map or sensor geometry; GDAL compatible file format '
-             '(must cover the EnMAP L1B data completely if given in map geometry or must have the same pixel '
-             'dimensions like the EnMAP L1B data if given in sensor geometry)')
+        help='input path of a custom digital elevation model in map geometry to be used '
+             'instead of automatically downloading the default Copernicus GLO-30 DEM '
+             '(GDAL compatible file format; must cover the EnMAP L1B data completely)')
     add('-od', '--output_dir', type=str, default=None,
         help='output directory where processed data and log files are saved')
     add('-of', '--output_format', type=str, default='GTiff',

@@ -197,9 +197,9 @@ class EnPTConfig(object):
             input path of an adjacent EnMAP L1B image to be used for gap-filling (zip-archive or root directory)
 
         :key path_dem:
-            input path of digital elevation model in map or sensor geometry; GDAL compatible file format (must cover
-            the EnMAP L1B data completely if given in map geometry or must have the same pixel dimensions like the
-            EnMAP L1B data if given in sensor geometry)
+            input path of a custom digital elevation model in map geometry to be used
+            instead of automatically downloading the default Copernicus GLO-30 DEM
+            (GDAL compatible file format; must cover the EnMAP L1B data completely)
 
         :key output_dir:
             output directory where processed data and log files are saved
