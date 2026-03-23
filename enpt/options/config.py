@@ -457,10 +457,6 @@ class EnPTConfig(object):
                     raise FileNotFoundError("The file path provided at the '%s' parameter does not point "
                                             "to an existing file (%s)." % (k, fp))
 
-        if not self.path_dem:
-            warnings.warn('No digital elevation model provided. Note that this may cause uncertainties, e.g., '
-                          'in the atmospheric correction and the orthorectification.', RuntimeWarning, stacklevel=2)
-
         # check invalid interleave
         if self.output_interleave == 'line' and self.output_format == 'GTiff':
             warnings.warn("The interleaving type 'line' is not supported by the GTiff output format. Using 'pixel'.",
