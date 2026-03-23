@@ -68,12 +68,12 @@ class Test_DEM_Processor(TestCase):
         dem = GeoArray(np.array([1, 2]))
 
         # no map info, no projection
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".no valid geo-coding or projection."):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
         # no projection
         dem.gt = (10.6, 0.00036, -0.0, 47.5, -0.0, -0.00036)  # can be anything
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".no valid geo-coding or projection."):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
     def test_init_noWGS84(self):
