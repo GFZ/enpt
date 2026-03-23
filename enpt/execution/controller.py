@@ -237,9 +237,6 @@ class EnPT_Controller(object):
                             enmap_ImageL1=self.L1_obj
                         )
                     )
-                    # get DEM in map geometry
-                    self.L2_obj.get_preprocessed_dem()
-
                     # run ISOFIT
                     boa_ref, atm_state, uncertainty = \
                         (IsofitEnMAP(config=self.cfg)
