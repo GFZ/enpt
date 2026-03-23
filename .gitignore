@@ -212,6 +212,7 @@ tests/linting/pydocstyle.log.log
 /docs/enpt.processors.cloud_screening.rst
 /docs/enpt.processors.dead_pixel_correction.rst
 /docs/enpt.processors.dem_preprocessing.rst
+/docs/enpt.processors.dem_download.rst
 /docs/enpt.processors.image_correction.rst
 /docs/enpt.processors.orthorectification.rst
 /docs/enpt.processors.radiometric_transform.rst
