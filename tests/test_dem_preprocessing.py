@@ -37,6 +37,7 @@ Tests for `processors.dem_preprocessing` module.
 
 from unittest import TestCase
 from pathlib import Path
+from time import time
 import pytest
 
 import numpy as np
@@ -67,12 +68,12 @@ class Test_DEM_Processor(TestCase):
         dem = GeoArray(np.array([1, 2]))
 
         # no map info, no projection
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".no valid geo-coding or projection."):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
         # no projection
         dem.gt = (10.6, 0.00036, -0.0, 47.5, -0.0, -0.00036)  # can be anything
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".no valid geo-coding or projection."):
             DEM_Processor(dem, enmapIm_cornerCoords=self.ll_cornerCoords)
 
     def test_init_noWGS84(self):
@@ -107,10 +108,61 @@ class Test_DEM_Processor(TestCase):
     def test_compute_aspect(self):
         pass
 
-    def test_to_sensor_geometry(self):
+    def test_get_dem_in_sensor_geometry(self):
         dem_sensor_geo = self.DP_mapgeo.get_dem_in_sensor_geometry(lons=self.lons, lats=self.lats)
 
         assert dem_sensor_geo.shape == (100, 1000)
+
+    def test_get_dem_in_map_geometry__no_resampling(self):
+        dem_mapgeo = self.DP_mapgeo.get_dem_in_map_geometry(
+            mapBounds=tuple(self.DP_mapgeo.dem.box.boundsMap[i] for i in [0, 2, 1, 3]),
+            mapBounds_prj=self.DP_mapgeo.dem.prj,
+            out_prj=self.DP_mapgeo.dem.prj,
+            out_gsd=(self.DP_mapgeo.dem.xgsd, self.DP_mapgeo.dem.ygsd)
+        )
+        assert np.array_equal(dem_mapgeo[:], self.DP_mapgeo.dem[:])
+
+    def test_get_dem_in_map_geometry__with_resampling(self):
+        dem_mapgeo = self.DP_mapgeo.get_dem_in_map_geometry(
+            mapBounds=tuple(self.DP_mapgeo.dem.box.boundsMap[i] for i in [0, 2, 1, 3]),
+            mapBounds_prj=self.DP_mapgeo.dem.prj,
+            out_prj=CRS(32633).to_wkt(),
+            out_gsd=(self.DP_mapgeo.dem.xgsd, self.DP_mapgeo.dem.ygsd)
+        )
+        assert dem_mapgeo.size > self.DP_mapgeo.dem.size
+        assert dem_mapgeo[0, 0] == dem_mapgeo.nodata
+        assert dem_mapgeo[:].std() > 0
+        assert dem_mapgeo.epsg == 32633
+        assert dem_mapgeo.xgsd == self.DP_mapgeo.dem.xgsd
+        assert dem_mapgeo.ygsd == self.DP_mapgeo.dem.ygsd
+
+    def test_get_dem_in_map_geometry__with_resampling_big_array(self):
+        dem = GeoArray(self.path_demfile)
+        big_dem = GeoArray(
+            np.tile(dem[:], (20, 20)),
+            geotransform=dem.gt,
+            projection=dem.projection,
+            nodata=dem.nodata
+        )
+
+        def time_get_dem_in_map_geometry(dem_input):
+            dp = DEM_Processor(dem_input, enmapIm_cornerCoords=self.ll_cornerCoords)
+            t0 = time()
+            dem_mapgeo = \
+                dp.get_dem_in_map_geometry(
+                    mapBounds=tuple(dem.box.boundsMap[i] for i in [0, 2, 1, 3]),
+                    mapBounds_prj=dem.prj,
+                    out_prj=CRS(32633).to_wkt(),
+                    out_gsd=(dem.xgsd, dem.ygsd)
+                )
+            return time() - t0, dem_mapgeo
+
+        t_small, small_dem_out = time_get_dem_in_map_geometry(dem)
+        t_big, big_dem_out = time_get_dem_in_map_geometry(big_dem)
+
+        assert small_dem_out.size == big_dem_out.size
+        assert t_small < t_big
+        assert t_big / t_small < 8
 
 
 if __name__ == '__main__':

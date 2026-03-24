@@ -31,6 +31,7 @@
 
 import sensormapgeo as __smg  # noqa (E402 + F401)  # only to avoid later import error due to static TLS
 import os as __os
+from osgeo.gdal import UseExceptions as __gdal_use_exceptions
 
 from .version import __version__, __versionalias__   # noqa (E402 + F401)
 from .options.config import EnPTConfig
@@ -45,6 +46,9 @@ __all__ = ['__version__',
            'EnPTConfig',
            'EnPT_Controller'
            ]
+
+# enable GDAL exceptions
+__gdal_use_exceptions()
 
 # $PROJ_LIB was renamed to $PROJ_DATA in proj=9.1.1, which leads to issues with fiona>=1.8.20,<1.9
 # https://github.com/conda-forge/pyproj-feedstock/issues/130

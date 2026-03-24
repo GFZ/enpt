@@ -220,6 +220,11 @@ class Orthorectifier(object):
         # Get the paths according information delivered in the metadata
         L2_obj.paths = L2_obj.get_paths(self.cfg.output_dir)
 
+        # set DEM based on L1B DEM #
+        ############################
+
+        L2_obj.get_preprocessed_dem(enmap_ImageL1.dem_mapgeo)
+
         return L2_obj
 
     def _get_common_extent(self,

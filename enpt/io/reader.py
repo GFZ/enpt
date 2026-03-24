@@ -92,18 +92,25 @@ class L1B_Reader(object):
         if compute_snr:
             l1b_main_obj.calc_snr_from_radiance()
 
-        # compute geolayer if not already done
-        if l1b_main_obj.meta.vnir.lons is None or l1b_main_obj.meta.vnir.lats is None:
-            l1b_main_obj.meta.vnir.lons, l1b_main_obj.meta.vnir.lats = \
-                l1b_main_obj.meta.vnir.compute_geolayer_for_cube(
-                    fallback_average_elevation=l1b_main_obj.meta.avg_elevation
-                )
+        # compute geolayer and DEM
+        for det in [l1b_main_obj.vnir,
+                    l1b_main_obj.swir]:
 
-        if l1b_main_obj.meta.swir.lons is None or l1b_main_obj.meta.swir.lats is None:
-            l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
-                l1b_main_obj.meta.swir.compute_geolayer_for_cube(
-                    fallback_average_elevation=l1b_main_obj.meta.avg_elevation
-                )
+            # compute geolayer if not already done
+            if det.detector_meta.lons is None or \
+               det.detector_meta.lats is None:
+
+                _meta = det.detector_meta
+                _meta.lons, _meta.lats = \
+                    _meta.compute_geolayer_for_cube(
+                        elevation=l1b_main_obj.dem_mapgeo or l1b_main_obj.meta.avg_elevation
+                    )
+
+            # generate DEM in sensor geometry
+            det.get_preprocessed_dem(
+                dem_mapgeo=l1b_main_obj.dem_mapgeo,  # covers VNIR and SWIR
+                fallback_avg_elevation=l1b_main_obj.meta.avg_elevation
+            )
 
         # l1b_main_obj.correct_VNIR_SWIR_shift()
 

@@ -29,11 +29,11 @@
 
 """EnPT pre-processing module for digital elevation models."""
 
-from typing import Union  # noqa: F401
 from multiprocessing import cpu_count
+
 import numpy as np
 from pyproj import CRS
-
+from osgeo import gdal
 from geoarray import GeoArray
 from py_tools_ds.geo.coord_trafo import reproject_shapelyGeometry, transform_any_prj
 from py_tools_ds.geo.coord_grid import is_coord_grid_equal
@@ -46,7 +46,7 @@ __author__ = 'Daniel Scheffler'
 
 
 class DEM_Processor(object):
-    def __init__(self, dem_path_geoarray: Union[str, GeoArray],
+    def __init__(self, dem_path_geoarray: str | GeoArray,
                  enmapIm_cornerCoords: tuple[tuple[float, float], ...],
                  CPUs: int = None,
                  progress: bool = False):
@@ -64,7 +64,7 @@ class DEM_Processor(object):
             raise ValueError((self.dem.gt, self.dem.prj),
                              'The provided digital elevation model has no valid geo-coding or projection.')
 
-        # check if provided projection is WGS-84
+        # check if provided geographic datum is WGS-84
         ell = CRS(self.dem.prj).datum.name
         if not ell.startswith('World Geodetic System 1984'):
             raise ValueError(ell, "The digital elevation model must be provided with 'WGS84' as geographic datum.")
@@ -77,7 +77,8 @@ class DEM_Processor(object):
 
         if overlap_perc < 100:
             # compute minimal extent in user provided projection
-            cornersXY = np.array([transform_any_prj(4326, self.dem.epsg, x, y) for x, y in self.enmapIm_cornerCoords])
+            cornersXY = np.array([transform_any_prj(4326, self.dem.epsg, x, y)
+                                  for x, y in self.enmapIm_cornerCoords])
             xmin, xmax = cornersXY[:, 0].min(), cornersXY[:, 0].max()
             ymin, ymax = cornersXY[:, 1].min(), cornersXY[:, 1].max()
 
@@ -111,7 +112,7 @@ class DEM_Processor(object):
         rows = int(np.ceil((max(y_all) - min(y_all)) / yres)) + 2
 
         # get a GeoArray instance
-        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation).astype(np.int16),
+        dem_gA = GeoArray(np.full((rows, cols), fill_value=average_elevation).astype(int),
                           geotransform=(np.floor(min(x_all)) - xres, xres, 0, np.ceil(max(y_all)) + yres, 0, -yres),
                           projection=CRS(tgt_utm_epsg).to_wkt(),
                           progress=False)
@@ -131,47 +132,69 @@ class DEM_Processor(object):
 
     def get_dem_in_sensor_geometry(self,
                                    lons: np.ndarray,
-                                   lats: np.ndarray):
+                                   lats: np.ndarray
+                                   ) -> GeoArray:
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
-        data_sensorgeo = GT.to_sensor_geometry(self.dem)
+        data_sensorgeo = GT.to_sensor_geometry(self.dem).astype(int)
 
         return GeoArray(data_sensorgeo, progress=self.progress)
 
     def get_dem_in_map_geometry(self,
                                 mapBounds: tuple,
-                                mapBounds_prj: Union[str, int],
-                                out_prj: Union[str, int],
-                                out_gsd: tuple
-                                ):
-        # TODO revise this - reprojecting a potentially large DEM at full-res is ineffective if mapBounds is small
+                                mapBounds_prj: str | int,
+                                out_prj: str | int,
+                                out_gsd: tuple = None
+                                ) -> GeoArray:
         xmin, ymin, xmax, ymax = mapBounds
-        dem = GeoArray(self.dem.filePath,
-                       progress=self.progress)  # do not overwrite self.dem due to in-place re-projection below
+        out_gsd = out_gsd or (self.dem.xgsd, self.dem.ygsd)
 
-        if not prj_equal(self.dem.prj, out_prj) or \
-           not is_coord_grid_equal(dem.gt,
-                                   [xmin, xmin + out_gsd[0]],
-                                   [ymin, ymin + out_gsd[1]],
-                                   tolerance=0.):
-            dem.reproject_to_new_grid(
-                tgt_prj=out_prj,
-                # FIXME tgt_xygrid asserts mapbounds to be in suitable projection  # noqa
-                tgt_xygrid=[[xmin, xmin + out_gsd[0]], [ymax, ymax - out_gsd[1]]],
-                rspAlg='bilinear',
-                CPUs=self.CPUs
-            )
+        if prj_equal(self.dem.prj, out_prj) and \
+           prj_equal(mapBounds_prj, out_prj) and \
+           is_coord_grid_equal(self.dem.gt,
+                               [xmin, xmin + out_gsd[0]],
+                               [ymin, ymin + out_gsd[1]],
+                               tolerance=0.):
+            return \
+                GeoArray(
+                    *self.dem.get_mapPos(
+                        mapBounds=mapBounds,
+                        mapBounds_prj=mapBounds_prj,
+                        out_prj=out_prj,
+                        out_gsd=out_gsd,
+                        rspAlg='bilinear'
+                    ),
+                    nodata=self.dem.nodata,
+                    progress=self.progress
+                )
 
-        dem_mapgeo = (
-            GeoArray(
-                *dem.get_mapPos(
-                    mapBounds=mapBounds,
-                    mapBounds_prj=mapBounds_prj,
-                    out_prj=out_prj,
-                    out_gsd=out_gsd,
-                    rspAlg='bilinear'
-                ),
-                nodata=dem.nodata,
-                progress=self.progress
-            )
-        )
-        return dem_mapgeo
+        else:
+            dstSRS = out_prj if isinstance(out_prj, str) else f"EPSG:{out_prj}"
+            boundsSRS = mapBounds_prj if isinstance(mapBounds_prj, str) else f"EPSG:{mapBounds_prj}"
+
+            with gdal.GetDriverByName("MEM").Create(
+                    "", self.dem.cols, self.dem.rows, 1, gdal.GDT_Int16
+            ) as src_ds:
+                src_ds.GetRasterBand(1).WriteArray(self.dem[:])
+                src_ds.SetGeoTransform(self.dem.gt)
+                src_ds.SetProjection(self.dem.projection)
+
+                with gdal.Warp(
+                        "", src_ds,
+                        format="MEM",  # in-memory dataset (fast)
+                        dstSRS=dstSRS,
+                        outputBounds=mapBounds,
+                        outputBoundsSRS=boundsSRS,
+                        xRes=out_gsd[0],
+                        yRes=abs(out_gsd[1]),
+                        resampleAlg="bilinear",
+                        dstNodata=self.dem.nodata,
+                        multithread=True
+                ) as dst_ds:
+                    return \
+                        GeoArray(
+                            dst_ds.ReadAsArray().astype(int),
+                            geotransform=dst_ds.GetGeoTransform(),
+                            projection=dst_ds.GetProjection(),
+                            nodata=self.dem.nodata,
+                            progress=self.progress
+                        )

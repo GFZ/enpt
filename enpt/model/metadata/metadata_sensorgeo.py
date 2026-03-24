@@ -83,7 +83,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.filename_mask_cirrus: Optional[str] = ''  # filename of the cirrus mask file
 
         self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
-        self.fwhm: Optional[np.ndarray] = None  # Full width half maximmum for each EnMAP band
+        self.fwhm: Optional[np.ndarray] = None  # Full width half maximum for each EnMAP band
         self.srf: Optional[SRF] = None  # SRF object holding the spectral response functions for each EnMAP band
         self.solar_irrad: Optional[np.ndarray] = None  # solar irradiance in [W/m2/nm] for each band
         self.nwvl: Optional[int] = None  # Number of wave bands
@@ -109,7 +109,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.unitcode: str = ''  # code of radiometric unit
         self.preview_wvls: Optional[List[float]] = None  # wavelengths to be used for quicklook images
         self.preview_bands: Optional[List[int]] = None  # band indices to be used for quicklook images
-        self.snr: Optional[np.ndarray] = None   # Signal to noise ratio as computed from radiance data
+        self.snr: Optional[np.ndarray] = None   # Signal-to-noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
         """Read the metadata of a specific EnMAP detector in sensor geometry.
@@ -325,12 +325,18 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
 
             return gA_
 
-    def compute_geolayer_for_cube(self, fallback_average_elevation: float = 0):
+    def compute_geolayer_for_cube(self, elevation: GeoArray | float):
+        """
+        Compute the geolayer for the current detector.
+
+        :param elevation:  elevation to be used
+                           (DEM in map geometry or single value in meter above sea level)
+        """
         self.logger.info('Computing %s geolayer...' % self.detector_name)
         GeolayerGen = \
             RPC_3D_Geolayer_Generator(
                 rpc_coeffs_per_band=self.rpc_coeffs,
-                elevation=self.cfg.path_dem if self.cfg.path_dem else fallback_average_elevation,
+                elevation=elevation,
                 enmapIm_cornerCoords=tuple(zip(self.lon_UL_UR_LL_LR, self.lat_UL_UR_LL_LR)),
                 enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
                 CPUs=self.cfg.CPUs
@@ -401,7 +407,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
         self.earthSunDist: Optional[float] = None  # earth-sun distance
         self.aot: Optional[float] = None  # scene aerosol optical thickness
-        self.water_vapour: Optional[float] = None  # scene water vapour [cm]
+        self.water_vapour: Optional[float] = None  # scene water vapor [cm]
         self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
         self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
         self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
@@ -422,7 +428,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         - the acquisition time
         - the geometrical observation and illumination
 
-        :param path_xml: path to the main xml file
+        :param path_xml: path to the main XML file
         :return: None
         """
         # load the metadata xml file
@@ -463,7 +469,7 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.geom_view_azimuth = float(xml.find("specific/sceneAzimuthAngle/center").text)
         self.geom_sun_zenith = 90 - float(xml.find("specific/sunElevationAngle/center").text)
         self.geom_sun_azimuth = float(xml.find("specific/sunAzimuthAngle/center").text)
-        self.avg_elevation = float(xml.find("specific/meanGroundElevation").text)
+        self.avg_elevation = int(float(xml.find("specific/meanGroundElevation").text))
         self.mu_sun = np.cos(np.deg2rad(self.geom_sun_zenith))
         self.aot = float(xml.find("specific/qualityFlag/sceneAOT").text) / 1000  # scale factor is 1000
         self.water_vapour = float(xml.find("specific/qualityFlag/sceneWV").text) / 1000  # scale factor is 1000

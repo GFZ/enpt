@@ -27,8 +27,9 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""EnPT module 'spatial transform', containing everthing related to spatial transformations."""
+"""EnPT module 'dem_preprocessing' for downloading and processing digital elevation models."""
 
 from .dem_preprocessing import DEM_Processor
+from .dem_download import CopernicusDEMGenerator
 
-__all__ = ['DEM_Processor']
+__all__ = ['DEM_Processor', 'CopernicusDEMGenerator']

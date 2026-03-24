@@ -63,7 +63,7 @@ class EnPT_Controller(object):
         """
         if 'average_elevation' in config_kwargs:
             warnings.warn("The average_elevation parameter was removed in EnPT 1.3.0. "
-                          "Instead, EnPT now features an automatic Copernicus-DEM download at runtime.")
+                          "Instead, EnPT now features an automatic download of the Copernicus GLO-30 DEM at runtime.")
             del config_kwargs['average_elevation']
 
         self.cfg: EnPTConfig = config or EnPTConfig(**config_kwargs)
@@ -209,9 +209,6 @@ class EnPT_Controller(object):
                     # run SICOR on sensor geometry #
                     ################################
 
-                    # get DEM in sensor geometry
-                    self.L1_obj.get_preprocessed_dem()
-
                     # run SICOR
                     self.run_atmospheric_correction()
 
@@ -237,9 +234,6 @@ class EnPT_Controller(object):
                             enmap_ImageL1=self.L1_obj
                         )
                     )
-                    # get DEM in map geometry
-                    self.L2_obj.get_preprocessed_dem()
-
                     # run ISOFIT
                     boa_ref, atm_state, uncertainty = \
                         (IsofitEnMAP(config=self.cfg)

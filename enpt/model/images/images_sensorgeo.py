@@ -48,6 +48,7 @@ from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only us
 from ...options.config import EnPTConfig
 from ...processors.dead_pixel_correction import Dead_Pixel_Corrector
 from ...processors.dem_preprocessing import DEM_Processor
+from ...processors.dem_preprocessing.dem_download import compute_suitable_dem_extent, CopernicusDEMGenerator
 from ...processors.spatial_transform import compute_mapCoords_within_sensorGeoDims
 
 __author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
@@ -131,36 +132,41 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
 
-    def get_preprocessed_dem(self, fallback_avg_elevation: float = 0) -> GeoArray:
+    def get_preprocessed_dem(self, dem_mapgeo: GeoArray, fallback_avg_elevation: float = 0) -> GeoArray:
         """Get a digital elevation model in EnMAP sensor geometry of the current detector.
 
         :param fallback_avg_elevation: elevation to use if no DEM is provided
         """
-        if self.cfg.path_dem:
-            self.logger.info('Pre-processing DEM for %s...' % self.detector_name)
-            DP = DEM_Processor(self.cfg.path_dem,
-                               enmapIm_cornerCoords=tuple(zip(self.detector_meta.lon_UL_UR_LL_LR,
-                                                              self.detector_meta.lat_UL_UR_LL_LR)),
-                               CPUs=self.cfg.CPUs,
-                               progress=not self.cfg.disable_progress_bars)
-            DP.fill_gaps()  # FIXME this will also be needed at other places
+        if self.detector_meta.lons is None or self.detector_meta.lats is None:
+            raise ValueError("Detector metadata must contain a valid geolayer "
+                             "before computing a DEM in map geometry.")
 
-            if DP.dem.is_map_geo:
-                lons = self.detector_meta.lons
-                lats = self.detector_meta.lats
+        if dem_mapgeo:
+            lons = self.detector_meta.lons
+            lats = self.detector_meta.lats
 
-                if not (lons.ndim == 3 and lats.ndim == 3):
-                    raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be 3-dimensional.')
+            if not (lons.ndim == 3 and lats.ndim == 3):
+                raise ValueError((lons.ndim, lats.ndim), 'Geolayer must be 3-dimensional.')
 
-                self.logger.info(f'Transforming DEM to {self.detector_name} sensor geometry '
-                                 f'(using first band of {self.detector_name} geolayer)...')
-                self.dem = DP.get_dem_in_sensor_geometry(lons=lons[:, :, 0], lats=lats[:, :, 0])
-            else:
-                self.dem = DP.dem
-
+            self.logger.info(f'Transforming DEM to {self.detector_name} sensor geometry '
+                             f'(using first band of {self.detector_name} geolayer)...')
+            self.dem = DEM_Processor(
+                dem_mapgeo,
+                enmapIm_cornerCoords=tuple(
+                    zip(self.detector_meta.lon_UL_UR_LL_LR,
+                        self.detector_meta.lat_UL_UR_LL_LR)
+                ),
+                CPUs=self.cfg.CPUs,
+                progress=not self.cfg.disable_progress_bars
+            ).get_dem_in_sensor_geometry(
+                lons=lons[:, :, 0],
+                lats=lats[:, :, 0]
+            )
         else:
-            self.logger.info('No DEM for the %s detector provided. Falling back to the average elevation of %d meters.'
-                             % (self.detector_name, fallback_avg_elevation))
+            self.logger.info(
+                f'No DEM for the {self.detector_name} detector available. '
+                f'Falling back to the average elevation of {int(fallback_avg_elevation)} meters.'
+            )
             self.dem = GeoArray(np.full(self.data.shape[:2], int(fallback_avg_elevation)).astype(np.int16))
 
         return self.dem
@@ -168,7 +174,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
     def append_new_image(self,
                          img2: 'EnMAP_Detector_SensorGeo',
                          n_lines: int = None,
-                         img2_avg_elevation: float = 0
+                         elevation: GeoArray | float = 0
                          ) -> None:
         # TODO convert method to function?
         """Check if a second image matches with the first image and if so, append the given number of lines below.
@@ -176,9 +182,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         In this version we assume that the image will be added below. If it is the case, the method will create
         temporary files that will be used in the following.
 
-        :param img2:                image to be appended
-        :param n_lines:             number of lines to be added from the new image
-        :param img2_avg_elevation:  average elevation of image to be appended in meter above sea level
+        :param img2:       image to be appended
+        :param n_lines:    number of lines to be added from the new image
+        :param elevation:  elevation to be used to compute new lower corner coordinates
+                           (DEM in map geometry or single value in m above sea level)
         :return: None
         """
         basename_img1 = self.detector_meta.filename_data.split('-SPECTRAL_IMAGE')[0] + '::%s' % self.detector_name
@@ -223,14 +230,6 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         # Compute new lower coordinates
         img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                       img2.detector_meta.lat_UL_UR_LL_LR))
-
-        # -- use either DEM in map geometry or average elevation
-        elevation = (
-            DEM_Processor(
-                img2.cfg.path_dem,
-                enmapIm_cornerCoords=img2_cornerCoords,
-                progress=not self.cfg.disable_progress_bars).dem) \
-            if img2.cfg.path_dem else img2_avg_elevation
 
         def get_map_xy(col, row):
             return compute_mapCoords_within_sensorGeoDims(
@@ -564,6 +563,9 @@ class EnMAPL1Product_SensorGeo(object):
         # Get the paths according information delivered in the metadata
         self.paths = self.get_paths()
 
+        # set dem_mapgeo (either use the user-provided path or download automatically so that it covers VNIR and SWIR)
+        self.dem_mapgeo = self.get_dem_mapgeo()
+
         # associate raster attributes with file links (raster data is read lazily / on demand)
         # or directly read here in case the user does not want to include all L1B bands into the processing
         self.vnir.data = self.paths.vnir.data
@@ -720,9 +722,15 @@ class EnMAPL1Product_SensorGeo(object):
         :return:
         """
         l1b_ext_obj = EnMAPL1Product_SensorGeo(root_dir, config=self.cfg)
+        elevation = l1b_ext_obj.dem_mapgeo or l1b_ext_obj.meta.avg_elevation
 
-        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext, l1b_ext_obj.meta.avg_elevation)
-        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext, l1b_ext_obj.meta.avg_elevation)
+        self.vnir.append_new_image(l1b_ext_obj.vnir, n_line_ext, elevation=elevation)
+        self.swir.append_new_image(l1b_ext_obj.swir, n_line_ext, elevation=elevation)
+
+        # update downloaded DEM so that it again covers the merged dataset
+        if not self.cfg.path_dem:
+            self.logger.info('Re-downloading DEM to cover merged dataset...')
+            self.get_dem_mapgeo()
 
     def calc_snr_from_radiance(self):
         """Compute EnMAP SNR from radiance data.
@@ -734,11 +742,11 @@ class EnMAPL1Product_SensorGeo(object):
 
             zf.extractall(tmpDir)
 
-            if self.meta.vnir.unitcode == 'TOARad':
-                self.vnir.detector_meta.calc_snr_from_radiance(rad_data=self.vnir.data, dir_snr_models=tmpDir)
-
-            if self.meta.swir.unitcode == 'TOARad':
-                self.swir.detector_meta.calc_snr_from_radiance(rad_data=self.swir.data, dir_snr_models=tmpDir)
+            for det in [self.vnir, self.swir]:
+                if det.detector_meta.unitcode == 'TOARad':
+                    det.detector_meta.calc_snr_from_radiance(
+                        rad_data=det.data, dir_snr_models=tmpDir
+                    )
 
     def correct_dead_pixels(self):
         """Correct dead pixels of both detectors."""
@@ -777,8 +785,56 @@ class EnMAPL1Product_SensorGeo(object):
     #     self.vnir.data.get_mapPos()  # FIXME
 
     def get_preprocessed_dem(self):
-        self.vnir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
-        self.swir.get_preprocessed_dem(fallback_avg_elevation=self.meta.avg_elevation)
+        for det in [self.vnir, self.swir]:
+            det.get_preprocessed_dem(
+                dem_mapgeo=self.dem_mapgeo,  # covers VNIR and SWIR
+                fallback_avg_elevation=self.meta.avg_elevation
+            )
+
+    def get_dem_mapgeo(self) -> GeoArray:
+        """Get a digital elevation model in map geometry covering VNIR and SWIR of the EnMAP image."""
+        # get corner coordinates which the DEM should cover
+        corner_lons = self.meta.vnir.lon_UL_UR_LL_LR  # equal for VNIR/SWIR, i.e., covers both detectors
+        corner_lats = self.meta.vnir.lat_UL_UR_LL_LR
+
+        if self.cfg.path_dem:
+            self.logger.info('Pre-processing user-provided DEM...')
+            DP = DEM_Processor(
+                self.cfg.path_dem,
+                enmapIm_cornerCoords=tuple(zip(corner_lons, corner_lats)),
+                CPUs=self.cfg.CPUs,
+                progress=not self.cfg.disable_progress_bars
+            )  # only map geometry DEMs with 100% overlap are accepted
+            # TODO: clip DEM to needed extent
+
+            self.dem_mapgeo = DP.dem
+
+        else:
+            # get suitable DEM extent
+            extent = compute_suitable_dem_extent(
+                corner_lons=corner_lons,
+                corner_lats=corner_lats,
+                tgt_epsg=4326,
+                buffer_percent=2  # make DEM slightly larger than EnMAP
+            )  # (xmin, ymin, xmax, ymax) in geographic coordinates
+
+            try:
+                # Download Copernicus DEM for the scene.
+                # NOTE: The native grid of the Copernicus DEM (EPSG 4326) is retained here to avoid resampling
+                #       twice when transforming to sensor geometry. For map geometry, the DEM needs to be
+                #       resampled anyway because co-registration likely changes the data extent.
+                self.dem_mapgeo = CopernicusDEMGenerator(
+                    extent=extent,
+                    tgt_epsg=4326,
+                    product="GLO-30",
+                    logger=self.logger
+                ).run()
+
+            except Exception as e:
+                self.logger.warning(f"Automatic download of Copernicus DEM failed. Error was: '{e}'.")
+                self.dem_mapgeo = None
+
+        return self.dem_mapgeo
 
     def transform_vnir_to_swir_raster(self,
                                       array_vnirsensorgeo: np.ndarray,

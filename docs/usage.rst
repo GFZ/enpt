@@ -15,8 +15,7 @@ To run the whole EnPT processing pipeline via the Python API:
     from enpt.execution.controller import EnPT_Controller
 
     config_minimal = dict(
-        path_l1b_enmap_image='/path/ENMAP*L1B*.zip',
-        path_dem='/path/to/overlapping/DEM.bsq'
+        path_l1b_enmap_image='/path/ENMAP*L1B*.zip'
     )
     CTR = EnPT_Controller(**config_minimal)
     CTR.run_all_processors()
