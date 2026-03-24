@@ -139,7 +139,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         """
         if self.detector_meta.lons is None or self.detector_meta.lats is None:
             raise ValueError("Detector metadata must contain a valid geolayer "
-                             "before computing a DEM in map gemetry.")
+                             "before computing a DEM in map geometry.")
 
         if dem_mapgeo:
             lons = self.detector_meta.lons
