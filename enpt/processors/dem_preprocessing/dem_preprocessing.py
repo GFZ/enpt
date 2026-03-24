@@ -132,7 +132,8 @@ class DEM_Processor(object):
 
     def get_dem_in_sensor_geometry(self,
                                    lons: np.ndarray,
-                                   lats: np.ndarray):
+                                   lats: np.ndarray
+                                   ) -> GeoArray:
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
         data_sensorgeo = GT.to_sensor_geometry(self.dem).astype(int)
 
@@ -142,9 +143,10 @@ class DEM_Processor(object):
                                 mapBounds: tuple,
                                 mapBounds_prj: str | int,
                                 out_prj: str | int,
-                                out_gsd: tuple
-                                ):
+                                out_gsd: tuple = None
+                                ) -> GeoArray:
         xmin, ymin, xmax, ymax = mapBounds
+        out_gsd = out_gsd or (self.dem.xgsd, self.dem.ygsd)
 
         if prj_equal(self.dem.prj, out_prj) and \
            prj_equal(mapBounds_prj, out_prj) and \
