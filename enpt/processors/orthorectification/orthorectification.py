@@ -31,8 +31,6 @@
 based on a pixel- and band-wise coordinate-layer (geolayer).
 """
 
-
-from typing import Tuple  # noqa: F401
 from types import SimpleNamespace
 
 import numpy as np
@@ -74,7 +72,7 @@ class Orthorectifier(object):
 
     @staticmethod
     def get_enmap_coordinate_grid_ll(lon: float, lat: float
-                                     ) -> (Tuple[float, float], Tuple[float, float]):
+                                     ) -> tuple[tuple[float, float], tuple[float, float]]:
         """Return EnMAP-like (30x30m) longitude/latitude pixel grid specs at the given position."""
         geod = Geod(ellps="WGS84")
         delta_lon = abs(lon - geod.fwd(lon, lat, az=90, dist=30)[0])
@@ -230,7 +228,7 @@ class Orthorectifier(object):
     def _get_common_extent(self,
                            enmap_ImageL1: EnMAPL1Product_SensorGeo,
                            tgt_epsg: int,
-                           enmap_grid: bool = True) -> Tuple[float, float, float, float]:
+                           enmap_grid: bool = True) -> tuple[float, float, float, float]:
         """Get common target extent for VNIR and SWIR.
 
         :para enmap_ImageL1:
@@ -320,14 +318,14 @@ class VNIR_SWIR_Stacker(object):
             raise ValueError("The number of SWIR bands must be equal to the number of elements in 'swir_wvls': "
                              "%d != %d" % (self.swir.bands, len(self.wvls.swir)))
 
-    def _get_stack_order_by_wvl(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_stack_order_by_wvl(self) -> tuple[np.ndarray, np.ndarray]:
         """Stack bands ordered by wavelengths."""
         bandidx_order = np.array([np.argmin(np.abs(self.wvls.vswir - cwl))
                                   for cwl in self.wvls.vswir_sorted])
 
         return np.dstack([self.vnir[:], self.swir[:]])[:, :, bandidx_order], self.wvls.vswir_sorted
 
-    def _get_stack_average(self, filterwidth: int = 3) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_stack_average(self, filterwidth: int = 3) -> tuple[np.ndarray, np.ndarray]:
         """Stack bands and use averaging to compute the spectral information in the VNIR/SWIR overlap.
 
         :param filterwidth:     number of bands to be included in the averaging - must be an uneven number
@@ -354,7 +352,7 @@ class VNIR_SWIR_Stacker(object):
 
         return data_stacked, self.wvls.vswir_sorted
 
-    def _get_stack_vnir_only(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_stack_vnir_only(self) -> tuple[np.ndarray, np.ndarray]:
         """Stack bands while removing overlapping SWIR bands."""
         wvls_swir_cut = self.wvls.swir[self.wvls.swir > self.wvls.vnir.max()]
         wvls_vswir_sorted = np.hstack([self.wvls.vnir, wvls_swir_cut])
@@ -362,7 +360,7 @@ class VNIR_SWIR_Stacker(object):
 
         return np.dstack([self.vnir[:], self.swir[:, :, idx_swir_firstband:]]), wvls_vswir_sorted
 
-    def _get_stack_swir_only(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_stack_swir_only(self) -> tuple[np.ndarray, np.ndarray]:
         """Stack bands while removing overlapping VNIR bands."""
         wvls_vnir_cut = self.wvls.vnir[self.wvls.vnir < self.wvls.swir.min()]
         wvls_vswir_sorted = np.hstack([wvls_vnir_cut, self.wvls.swir])

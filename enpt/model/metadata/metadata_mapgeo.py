@@ -34,7 +34,6 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Tuple  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -55,8 +54,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
                  config: EnPTConfig,
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
                  wvls_l2a: list | np.ndarray,
-                 dims_mapgeo: Tuple[int, int, int],
-                 geotransform_l2a: Tuple[float, float, float, float, float, float],
+                 dims_mapgeo: tuple[int, int, int],
+                 geotransform_l2a: tuple[float, float, float, float, float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 

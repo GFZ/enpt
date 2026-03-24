@@ -31,7 +31,6 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple  # noqa: F401
 from os import path, makedirs
 import shutil
 

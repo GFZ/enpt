@@ -33,7 +33,6 @@ Performs the atmospheric correction of EnMAP L1B data.
 """
 import shutil
 from tempfile import TemporaryDirectory, mkdtemp, gettempdir
-from typing import Tuple, List
 from fnmatch import fnmatch
 import os
 from os.path import isdir, isfile, join as pjoin, abspath as pabs
@@ -508,8 +507,8 @@ class IsofitEnMAP(object):
                   ray_temp_dir=pjoin(gettempdir(), "ray"),
                   emulator_base: str = None,
                   segmentation_size: int = 40,
-                  num_neighbors: Tuple[int] = (),
-                  atm_sigma: Tuple[float] = (2.0,),
+                  num_neighbors: tuple[int] = (),
+                  atm_sigma: tuple[float] = (2.0,),
                   pressure_elevation: bool = False,
                   prebuilt_lut: str = None,
                   no_min_lut_spacing: bool = False,

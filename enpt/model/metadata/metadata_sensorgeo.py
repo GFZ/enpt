@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import List, Tuple  # noqa: F401
+from typing import List  # noqa: F401
 from collections import OrderedDict
 from packaging.version import parse as parse_version
 import numpy as np

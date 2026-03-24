@@ -28,7 +28,7 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-from typing import Tuple, Sequence  # noqa: F401
+from typing import Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -56,7 +56,7 @@ class Geometry_Transformer(Transformer):
 
     def to_sensor_geometry(self,
                            path_or_geoarray_mapgeo: str | GeoArray,
-                           src_gt: Tuple[float, float, float, float, float, float] = None,
+                           src_gt: tuple[float, float, float, float, float, float] = None,
                            src_prj: str | int = None,
                            src_nodata: int = None,
                            tgt_nodata: int = None
@@ -77,13 +77,13 @@ class Geometry_Transformer(Transformer):
     def to_map_geometry(self,
                         path_or_geoarray_sensorgeo: str | GeoArray | np.ndarray,
                         tgt_prj: str | int,
-                        tgt_extent: Tuple[float, float, float, float] = None,
-                        tgt_res: Tuple = None,
-                        tgt_coordgrid: Tuple[Tuple, Tuple] = None,
+                        tgt_extent: tuple[float, float, float, float] = None,
+                        tgt_res: tuple = None,
+                        tgt_coordgrid: tuple[tuple, tuple] = None,
                         src_nodata: int = None,
                         tgt_nodata: int = None,
                         area_definition: AreaDefinition = None
-                        ) -> Tuple[np.ndarray, tuple, str]:
+                        ) -> tuple[np.ndarray, tuple, str]:
         data_sensorgeo = GeoArray(path_or_geoarray_sensorgeo)
 
         if data_sensorgeo.is_map_geo and not data_sensorgeo.is_rotated:
@@ -115,8 +115,8 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  lats_swir: np.ndarray,
                  prj_vnir: str | int,
                  prj_swir: str | int,
-                 res_vnir: Tuple[float, float],
-                 res_swir: Tuple[float, float],
+                 res_vnir: tuple[float, float],
+                 res_swir: tuple[float, float],
                  resamp_alg: str = 'nearest',
                  src_nodata: int = None,
                  tgt_nodata: int = None,
@@ -229,10 +229,10 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
         return tgt_data_sensorgeo
 
 
-def move_extent_to_coord_grid(extent_utm: Tuple[float, float, float, float],
+def move_extent_to_coord_grid(extent_utm: tuple[float, float, float, float],
                               tgt_xgrid: Sequence[float],
                               tgt_ygrid: Sequence[float],
-                              ) -> Tuple[float, float, float, float]:
+                              ) -> tuple[float, float, float, float]:
     """Move the given coordinate extent to a coordinate grid.
 
     :param extent_utm:  xmin, ymin, xmax, ymax coordinates
@@ -254,8 +254,8 @@ class RPC_Geolayer_Generator(object):
     def __init__(self,
                  rpc_coeffs: dict,
                  elevation: str | GeoArray | int | float,
-                 enmapIm_cornerCoords: Tuple[Tuple[float, float]],
-                 enmapIm_dims_sensorgeo: Tuple[int, int]):
+                 enmapIm_cornerCoords: tuple[tuple[float, float]],
+                 enmapIm_dims_sensorgeo: tuple[int, int]):
         """Get an instance of RPC_Geolayer_Generator.
 
         :param rpc_coeffs:              RPC coefficients for a single EnMAP band
@@ -645,12 +645,12 @@ class RPC_3D_Geolayer_Generator(object):
         return lons, lats
 
 
-def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: list[Tuple[float, float]],
+def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: list[tuple[float, float]],
                                            rpc_coeffs: dict,
                                            elevation: str | GeoArray | int | float,
-                                           enmapIm_cornerCoords: Tuple[Tuple[float, float]],
-                                           enmapIm_dims_sensorgeo: Tuple[int, int],
-                                           ) -> list[Tuple[float, float]]:
+                                           enmapIm_cornerCoords: tuple[tuple[float, float]],
+                                           enmapIm_dims_sensorgeo: tuple[int, int],
+                                           ) -> list[tuple[float, float]]:
     """Compute map coordinates for a given image coordinate-pair of an EnMAP image in sensor geometry.
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
