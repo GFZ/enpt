@@ -30,7 +30,6 @@
 """EnPT EnMAP object base classes."""
 
 from types import SimpleNamespace
-from typing import List, Optional  # noqa: F401
 import numpy as np
 
 # noinspection PyPackageRequirements
@@ -560,7 +559,7 @@ class _EnMAP_Image(object):
                                              geoArr_initArgs: tuple,
                                              attrName: str,
                                              nodataVal: int = None,
-                                             specialclass=None) -> Optional[GeoArray]:
+                                             specialclass=None) -> GeoArray | None:
         if geoArr_initArgs[0] is None:
             return None
         else:
@@ -580,7 +579,7 @@ class _EnMAP_Image(object):
 
             return gA
 
-    def generate_quicklook(self, bands2use: List[int]) -> GeoArray:
+    def generate_quicklook(self, bands2use: list[int]) -> GeoArray:
         """
         Generate image quicklook and save into a file.
 

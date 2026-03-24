@@ -36,7 +36,6 @@ Fits the VNIR detector data to the reference image. Corrects for keystone.
 __author__ = 'Daniel Scheffler'
 
 import os
-from typing import Optional
 
 import numpy as np
 from osgeo import gdal  # noqa
@@ -56,12 +55,12 @@ class Spatial_Optimizer(object):
     def __init__(self, config: EnPTConfig):
         """Create an instance of Spatial_Optimizer."""
         self.cfg = config
-        self._ref_Im: Optional[GeoArray, None] = GeoArray(self.cfg.path_reference_image)
+        self._ref_Im: GeoArray | None = GeoArray(self.cfg.path_reference_image)
 
-        self._EnMAP_Im: Optional[EnMAPL1Product_SensorGeo, None] = None
-        self._EnMAP_band: Optional[GeoArray, None] = None
-        self._EnMAP_mask: Optional[GeoArray, None] = None
-        self._ref_band_prep: Optional[GeoArray, None] = None
+        self._EnMAP_Im: EnMAPL1Product_SensorGeo | None = None
+        self._EnMAP_band: GeoArray | None = None
+        self._EnMAP_mask: GeoArray | None = None
+        self._ref_band_prep: GeoArray | None = None
         self._EnMAP_bandIdx = 39  # FIXME hardcoded
 
     def _get_enmap_band_for_matching(self) \

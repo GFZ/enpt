@@ -34,7 +34,6 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -54,9 +53,9 @@ class EnMAP_Metadata_L2A_MapGeo(object):
     def __init__(self,
                  config: EnPTConfig,
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
-                 wvls_l2a: Union[List, np.ndarray],
-                 dims_mapgeo: Tuple[int, int, int],
-                 geotransform_l2a: Tuple[float, float, float, float, float, float],
+                 wvls_l2a: list | np.ndarray,
+                 dims_mapgeo: tuple[int, int, int],
+                 geotransform_l2a: tuple[float, float, float, float, float, float],
                  logger=None):
         """EnMAP Metadata class for the metadata of the complete EnMAP L2A product in map geometry incl. VNIR and SWIR.
 
@@ -74,15 +73,15 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # privates
         self._meta_l1b = meta_l1b
-        self._geom_view_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing zenith angles
-        self._geom_view_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing azimuth angles
-        self._geom_sun_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar zenith angles
-        self._geom_sun_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar azimuth angles
-        self._aqtime_utc_array: Optional[np.ndarray] = None  # 2D array of pixel-wise UTC times (decimal hours)
+        self._geom_view_zenith_array: np.ndarray | None = None  # 2D array of pixel-wise viewing zenith angles
+        self._geom_view_azimuth_array: np.ndarray | None = None  # 2D array of pixel-wise viewing azimuth angles
+        self._geom_sun_zenith_array: np.ndarray | None = None  # 2D array of pixel-wise solar zenith angles
+        self._geom_sun_azimuth_array: np.ndarray | None = None  # 2D array of pixel-wise solar azimuth angles
+        self._aqtime_utc_array: np.ndarray | None = None  # 2D array of pixel-wise UTC times (decimal hours)
 
         # defaults
-        self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
-        self.band_stds: Optional[np.ndarray] = None  # band-wise standard deviations in unscaled values
+        self.band_means: np.ndarray | None = None  # band-wise means in unscaled values (percent for reflectance)
+        self.band_stds: np.ndarray | None = None  # band-wise standard deviations in unscaled values
         self.fileinfos: list = []  # file information for each file belonging to the EnMAP L2A product
 
         # input validation
@@ -312,14 +311,14 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             self._get_aqtime_utc_array()
         return self._aqtime_utc_array
 
-    def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
+    def add_band_statistics(self, datastack_vnir_swir: np.ndarray | GeoArray):
         R, C, B = datastack_vnir_swir.shape
         # NOTE:  Multiply by gains to get reflectance in the range 0-1
         data = datastack_vnir_swir[datastack_vnir_swir.mask_nodata[:]]
         self.band_means = np.mean(data, axis=0) * self.gains
         self.band_stds = np.std(data, axis=0) * self.gains
 
-    def add_product_fileinformation(self, filepaths: List[str], sizes: List[int] = None, versions: List[str] = None):
+    def add_product_fileinformation(self, filepaths: list[str], sizes: list[int] = None, versions: list[str] = None):
         self.fileinfos = []
 
         for i, fp in enumerate(filepaths):

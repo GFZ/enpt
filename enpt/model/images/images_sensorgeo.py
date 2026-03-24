@@ -31,7 +31,6 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple, Optional, List  # noqa: F401
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import numpy as np
@@ -320,7 +319,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                     code=self.detector_meta.unitcode)
             )
 
-    def save_raster_attributes(self, attrNames: List[str], outputDir: str):
+    def save_raster_attributes(self, attrNames: list[str], outputDir: str):
         """Save the specified raster attributes to the given output directory.
 
         :param attrNames:   list of attribute names to be saved
