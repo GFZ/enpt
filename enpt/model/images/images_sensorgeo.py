@@ -742,11 +742,11 @@ class EnMAPL1Product_SensorGeo(object):
 
             zf.extractall(tmpDir)
 
-            if self.meta.vnir.unitcode == 'TOARad':
-                self.vnir.detector_meta.calc_snr_from_radiance(rad_data=self.vnir.data, dir_snr_models=tmpDir)
-
-            if self.meta.swir.unitcode == 'TOARad':
-                self.swir.detector_meta.calc_snr_from_radiance(rad_data=self.swir.data, dir_snr_models=tmpDir)
+            for det in [self.vnir, self.swir]:
+                if det.detector_meta.unitcode == 'TOARad':
+                    det.detector_meta.calc_snr_from_radiance(
+                        rad_data=det.data, dir_snr_models=tmpDir
+                    )
 
     def correct_dead_pixels(self):
         """Correct dead pixels of both detectors."""
