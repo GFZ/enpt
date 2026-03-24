@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, Tuple, Optional  # noqa: F401
+from typing import Union, Tuple  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -74,15 +74,15 @@ class EnMAP_Metadata_L2A_MapGeo(object):
 
         # privates
         self._meta_l1b = meta_l1b
-        self._geom_view_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing zenith angles
-        self._geom_view_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise viewing azimuth angles
-        self._geom_sun_zenith_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar zenith angles
-        self._geom_sun_azimuth_array: Optional[np.ndarray] = None  # 2D array of pixel-wise solar azimuth angles
-        self._aqtime_utc_array: Optional[np.ndarray] = None  # 2D array of pixel-wise UTC times (decimal hours)
+        self._geom_view_zenith_array: np.ndarray | None = None  # 2D array of pixel-wise viewing zenith angles
+        self._geom_view_azimuth_array: np.ndarray | None = None  # 2D array of pixel-wise viewing azimuth angles
+        self._geom_sun_zenith_array: np.ndarray | None = None  # 2D array of pixel-wise solar zenith angles
+        self._geom_sun_azimuth_array: np.ndarray | None = None  # 2D array of pixel-wise solar azimuth angles
+        self._aqtime_utc_array: np.ndarray | None = None  # 2D array of pixel-wise UTC times (decimal hours)
 
         # defaults
-        self.band_means: Optional[np.ndarray] = None  # band-wise means in unscaled values (percent for reflectance)
-        self.band_stds: Optional[np.ndarray] = None  # band-wise standard deviations in unscaled values
+        self.band_means: np.ndarray | None = None  # band-wise means in unscaled values (percent for reflectance)
+        self.band_stds: np.ndarray | None = None  # band-wise standard deviations in unscaled values
         self.fileinfos: list = []  # file information for each file belonging to the EnMAP L2A product
 
         # input validation

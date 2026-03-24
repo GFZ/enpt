@@ -28,7 +28,7 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-from typing import Union, Tuple, Optional, Sequence  # noqa: F401
+from typing import Union, Tuple, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -503,7 +503,7 @@ class RPC_Geolayer_Generator(object):
         return self.compute_geolayer()
 
 
-global_dem_sensorgeo: Optional[GeoArray] = None
+global_dem_sensorgeo: GeoArray | None = None
 
 
 def _initialize_mp(elevation: Union[float, np.ndarray]):

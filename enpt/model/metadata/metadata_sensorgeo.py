@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple, Optional  # noqa: F401
+from typing import Union, List, Tuple  # noqa: F401
 from collections import OrderedDict
 from packaging.version import parse as parse_version
 import numpy as np
@@ -69,47 +69,47 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.logger = logger or logging.getLogger()
 
         # These lines are used to load path information
-        self.filename_data: Optional[str] = ''  # detector data filename
-        self.scene_basename: Optional[str] = ''  # basename of the EnMAP image
-        self.filename_deadpixelmap: Optional[str] = ''  # filename of the dead pixel file
-        self.filename_quicklook: Optional[str] = ''  # filename of the quicklook file
-        self.filename_testflags: Optional[str] = ''  # filename of the testflags file
+        self.filename_data: str = ''  # detector data filename
+        self.scene_basename: str = ''  # basename of the EnMAP image
+        self.filename_deadpixelmap: str = ''  # filename of the dead pixel file
+        self.filename_quicklook: str = ''  # filename of the quicklook file
+        self.filename_testflags: str = ''  # filename of the testflags file
         # FIXME masks of BOTH detectors
-        self.filename_mask_landwater: Optional[str] = ''  # filename of the land/water mask file
-        self.filename_mask_snow: Optional[str] = ''  # filename of the snow mask file
-        self.filename_mask_cloudshadow: Optional[str] = ''  # filename of the cloud shadow mask file
-        self.filename_mask_clouds: Optional[str] = ''  # filename of the cloud mask file
-        self.filename_mask_haze: Optional[str] = ''  # filename of the haze mask file
-        self.filename_mask_cirrus: Optional[str] = ''  # filename of the cirrus mask file
+        self.filename_mask_landwater: str = ''  # filename of the land/water mask file
+        self.filename_mask_snow: str = ''  # filename of the snow mask file
+        self.filename_mask_cloudshadow: str = ''  # filename of the cloud shadow mask file
+        self.filename_mask_clouds: str = ''  # filename of the cloud mask file
+        self.filename_mask_haze: str = ''  # filename of the haze mask file
+        self.filename_mask_cirrus: str = ''  # filename of the cirrus mask file
 
-        self.wvl_center: Optional[np.ndarray] = None  # Center wavelengths for each EnMAP band
-        self.fwhm: Optional[np.ndarray] = None  # Full width half maximum for each EnMAP band
-        self.srf: Optional[SRF] = None  # SRF object holding the spectral response functions for each EnMAP band
-        self.solar_irrad: Optional[np.ndarray] = None  # solar irradiance in [W/m2/nm] for each band
-        self.nwvl: Optional[int] = None  # Number of wave bands
-        self.nrows: Optional[int] = None  # number of rows
-        self.ncols: Optional[int] = None  # number of columns
-        self.smile_coef: Optional[np.ndarray] = None  # smile coefficients needed for smile computation
-        self.nsmile_coef: Optional[int] = None  # number of smile coefficients
-        self.smile: Optional[np.ndarray] = None  # smile for each EnMAP image column
-        self.gains: Optional[np.ndarray] = None  # band-wise gains for computing radiance from DNs
-        self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
-        self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
-        self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
-        self.goodbands_inds: Optional[list] = None  # list of band indices included in the processing (all other bands are removed)  # noqa
-        self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
-        self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
+        self.wvl_center: np.ndarray | None = None  # Center wavelengths for each EnMAP band
+        self.fwhm: np.ndarray | None = None  # Full width half maximum for each EnMAP band
+        self.srf: SRF | None = None  # SRF object holding the spectral response functions for each EnMAP band
+        self.solar_irrad: np.ndarray | None = None  # solar irradiance in [W/m2/nm] for each band
+        self.nwvl: int | None = None  # Number of wave bands
+        self.nrows: int | None = None  # number of rows
+        self.ncols: int | None = None  # number of columns
+        self.smile_coef: np.ndarray | None = None  # smile coefficients needed for smile computation
+        self.nsmile_coef: int | None = None  # number of smile coefficients
+        self.smile: np.ndarray | None = None  # smile for each EnMAP image column
+        self.gains: np.ndarray | None = None  # band-wise gains for computing radiance from DNs
+        self.offsets: np.ndarray | None = None   # band-wise offsets for computing radiance from DNs
+        self.l_min: np.ndarray | None = None  # band-wise l-min for computing radiance from DNs
+        self.l_max: np.ndarray | None = None  # band-wise l-max for computing radiance from DNs
+        self.goodbands_inds: list | None = None  # list of band indices included in the processing (all other bands are removed)  # noqa
+        self.lat_UL_UR_LL_LR: List[float, float, float, float] | None = None  # latitude coords for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR: List[float, float, float, float] | None = None  # longitude coords for UL, UR, LL, LR
+        self.epsg_ortho: int | None = None  # EPSG code of the orthorectified image
         self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
-        self.ll_mapPoly: Optional[Polygon] = None  # footprint polygon in longitude/latitude map coordinates
-        self.lats: Optional[np.ndarray] = None  # 2D/3D array of latitude coordinates
-        self.lons: Optional[np.ndarray] = None  # 2D/3D array of longitude coordinates
-        self.geolayer_has_keystone: Optional[bool] = None  # indicates if lon/lat geolayer considers keystone (3D array)
+        self.ll_mapPoly: Polygon | None = None  # footprint polygon in longitude/latitude map coordinates
+        self.lats: np.ndarray | None = None  # 2D/3D array of latitude coordinates
+        self.lons: np.ndarray | None = None  # 2D/3D array of longitude coordinates
+        self.geolayer_has_keystone: bool | None = None  # indicates if lon/lat geolayer considers keystone (3D array)
         self.unit: str = ''  # radiometric unit of pixel values
         self.unitcode: str = ''  # code of radiometric unit
-        self.preview_wvls: Optional[list[float]] = None  # wavelengths to be used for quicklook images
-        self.preview_bands: Optional[list[int]] = None  # band indices to be used for quicklook images
-        self.snr: Optional[np.ndarray] = None   # Signal-to-noise ratio as computed from radiance data
+        self.preview_wvls: list[float] | None = None  # wavelengths to be used for quicklook images
+        self.preview_bands: list[int] | None = None  # band indices to be used for quicklook images
+        self.snr: np.ndarray | None = None   # Signal-to-noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):
         """Read the metadata of a specific EnMAP detector in sensor geometry.
@@ -395,25 +395,25 @@ class EnMAP_Metadata_L1B_SensorGeo(object):
         self.rootdir = os.path.dirname(path_metaxml)
 
         # defaults - Common
-        self.proc_level: Optional[str] = None   # Dataset processing level
-        self.version_provider: Optional[str] = ''  # version of ground segment processing system
-        self.observation_datetime: Optional[datetime] = None  # Date and Time of image observation
-        self.geom_view_zenith: Optional[float] = None  # viewing zenith angle
-        self.geom_view_azimuth: Optional[float] = None  # viewing azimuth angle
-        self.geom_sun_zenith: Optional[float] = None  # sun zenith angle
-        self.geom_sun_azimuth: Optional[float] = None   # sun azimuth angle
-        self.geom_angles_all: Optional[dict] = None  # all view and sun angles available
-        self.avg_elevation: Optional[float] = None  # average elevation of the scene in meters above sea level
-        self.mu_sun: Optional[float] = None   # needed by SICOR for TOARad > TOARef conversion
-        self.earthSunDist: Optional[float] = None  # earth-sun distance
-        self.aot: Optional[float] = None  # scene aerosol optical thickness
-        self.water_vapour: Optional[float] = None  # scene water vapor [cm]
-        self.vnir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of VNIR only
-        self.swir: Optional[EnMAP_Metadata_L1B_Detector_SensorGeo] = None  # metadata of SWIR only
+        self.proc_level: str | None = None   # Dataset processing level
+        self.version_provider: str = ''  # version of ground segment processing system
+        self.observation_datetime: datetime | None = None  # Date and Time of image observation
+        self.geom_view_zenith: float | None = None  # viewing zenith angle
+        self.geom_view_azimuth: float | None = None  # viewing azimuth angle
+        self.geom_sun_zenith: float | None = None  # sun zenith angle
+        self.geom_sun_azimuth: float | None = None   # sun azimuth angle
+        self.geom_angles_all: dict | None = None  # all view and sun angles available
+        self.avg_elevation: float | None = None  # average elevation of the scene in meters above sea level
+        self.mu_sun: float | None = None   # needed by SICOR for TOARad > TOARef conversion
+        self.earthSunDist: float | None = None  # earth-sun distance
+        self.aot: float | None = None  # scene aerosol optical thickness
+        self.water_vapour: float | None = None  # scene water vapor [cm]
+        self.vnir: EnMAP_Metadata_L1B_Detector_SensorGeo | None = None  # metadata of VNIR only
+        self.swir: EnMAP_Metadata_L1B_Detector_SensorGeo | None = None  # metadata of SWIR only
         self.detector_attrNames: list = ['vnir', 'swir']  # attribute names of the detector objects
-        self.filename_metaxml: Optional[str] = None  # filename of XML metadata file
+        self.filename_metaxml: str | None = None  # filename of XML metadata file
 
-        self._scene_basename: Optional[str] = None  # basename of the EnMAP image
+        self._scene_basename: str | None = None  # basename of the EnMAP image
 
     @property
     def scene_basename(self):

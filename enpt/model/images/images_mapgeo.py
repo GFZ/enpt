@@ -31,7 +31,7 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple, Optional  # noqa: F401
+from typing import Tuple  # noqa: F401
 from os import path, makedirs
 import shutil
 
@@ -139,8 +139,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
         if logger:
             self.logger = logger
 
-        self.meta: Optional[EnMAP_Metadata_L2A_MapGeo] = None
-        self.paths: Optional[SimpleNamespace] = None
+        self.meta: EnMAP_Metadata_L2A_MapGeo | None = None
+        self.paths: SimpleNamespace | None = None
 
         super(EnMAPL2Product_MapGeo, self).__init__()
 

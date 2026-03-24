@@ -31,7 +31,6 @@
 
 import logging
 from types import SimpleNamespace
-from typing import Tuple, Optional  # noqa: F401
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import numpy as np

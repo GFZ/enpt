@@ -37,7 +37,6 @@ import shutil
 import weakref
 import warnings
 import pickle
-from typing import Optional
 from time import time
 from datetime import timedelta
 from glob import glob
@@ -79,8 +78,8 @@ class EnPT_Controller(object):
         self._time_startup = time()
 
         # defaults
-        self.L1_obj: Optional[EnMAPL1Product_SensorGeo] = None
-        self.L2_obj: Optional[EnMAPL2Product_MapGeo] = None
+        self.L1_obj: EnMAPL1Product_SensorGeo | None = None
+        self.L2_obj: EnMAPL1Product_SensorGeo | None = None
 
     @property
     def logger(self):
