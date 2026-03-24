@@ -34,7 +34,6 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import List  # noqa: F401
 from collections import OrderedDict
 from packaging.version import parse as parse_version
 import numpy as np
@@ -97,8 +96,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.l_min: np.ndarray | None = None  # band-wise l-min for computing radiance from DNs
         self.l_max: np.ndarray | None = None  # band-wise l-max for computing radiance from DNs
         self.goodbands_inds: list | None = None  # list of band indices included in the processing (all other bands are removed)  # noqa
-        self.lat_UL_UR_LL_LR: List[float, float, float, float] | None = None  # latitude coords for UL, UR, LL, LR
-        self.lon_UL_UR_LL_LR: List[float, float, float, float] | None = None  # longitude coords for UL, UR, LL, LR
+        self.lat_UL_UR_LL_LR: tuple[float, float, float, float] | None = None  # latitude coords for UL, UR, LL, LR
+        self.lon_UL_UR_LL_LR: tuple[float, float, float, float] | None = None  # longitude coords for UL, UR, LL, LR
         self.epsg_ortho: int | None = None  # EPSG code of the orthorectified image
         self.rpc_coeffs: OrderedDict = OrderedDict()  # RPC coefficients for geolayer computation
         self.ll_mapPoly: Polygon | None = None  # footprint polygon in longitude/latitude map coordinates

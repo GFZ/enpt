@@ -28,7 +28,6 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-from typing import Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -230,8 +229,8 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
 
 
 def move_extent_to_coord_grid(extent_utm: tuple[float, float, float, float],
-                              tgt_xgrid: Sequence[float],
-                              tgt_ygrid: Sequence[float],
+                              tgt_xgrid: tuple[float],
+                              tgt_ygrid: tuple[float],
                               ) -> tuple[float, float, float, float]:
     """Move the given coordinate extent to a coordinate grid.
 
