@@ -2,8 +2,8 @@
 History
 =======
 
-1.3.0 (coming soon)
--------------------
+1.3.0 (2026-03-24)
+------------------
 
 * !137: Updated environment files (integrated updated EnMAP-Box requirements, dropped deprecated
   environments and added environment_enpt_enmapbox_requirements.yml).
