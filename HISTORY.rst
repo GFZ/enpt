@@ -12,6 +12,7 @@ History
 * !143: Updated copyright.
 * !147: Replaced the user-provided average_elevation by the mean ground elevation provided in the EnMAP metadata.
 * !140: Implemented automatic Copernicus DEM download to ensure high L2A quality, also if users do not provide a DEM.
+* !148: Replaced usages of typing package with built-in types as supported in Python 3.10+.
 
 
 1.2.1 (2026-02-25)
