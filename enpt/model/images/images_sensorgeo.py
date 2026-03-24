@@ -816,7 +816,7 @@ class EnMAPL1Product_SensorGeo(object):
                 corner_lats=corner_lats,
                 tgt_epsg=4326,
                 buffer_percent=2  # make DEM slightly larger than EnMAP
-            )
+            )  # (xmin, ymin, xmax, ymax) in geographic coordinates
 
             try:
                 # Download Copernicus DEM for the scene.
