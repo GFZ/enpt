@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple  # noqa: F401
+from typing import List, Tuple  # noqa: F401
 from collections import OrderedDict
 from packaging.version import parse as parse_version
 import numpy as np
@@ -246,7 +246,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             self.smile_coef  # shape = (nwvl, nsmile_coef)
         )  # shape = (ncols, nwvl)
 
-    def calc_snr_from_radiance(self, rad_data: Union[GeoArray, np.ndarray], dir_snr_models: str):
+    def calc_snr_from_radiance(self, rad_data: GeoArray | np.ndarray, dir_snr_models: str):
         """Compute EnMAP SNR from radiance data for the given detector.
 
         SNR equation:    SNR = p0 + p1 * LTOA + p2 * LTOA ^ 2   [W/(m^2 sr nm)].

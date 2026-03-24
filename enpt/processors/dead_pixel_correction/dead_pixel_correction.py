@@ -31,7 +31,6 @@
 
 Performs the Dead Pixel Correction using a linear interpolation in spectral dimension.
 """
-from typing import Union
 from numbers import Number  # noqa: F401
 import logging
 from warnings import filterwarnings
@@ -142,8 +141,8 @@ class Dead_Pixel_Corrector(object):
         return image2correct
 
     def correct(self,
-                image2correct: Union[np.ndarray, GeoArray],
-                deadpixel_map: Union[np.ndarray, GeoArray]):
+                image2correct: np.ndarray | GeoArray,
+                deadpixel_map: np.ndarray | GeoArray):
         """Run the dead pixel correction.
 
         :param image2correct:   image to correct
@@ -188,7 +187,7 @@ class Dead_Pixel_Corrector(object):
 
 
 def _get_baddata_mask(data: np.ndarray,
-                      nodata: Union[np.ndarray, Number] = np.nan,
+                      nodata: np.ndarray | Number = np.nan,
                       transpose_inNodata: bool = False):
     if isinstance(nodata, np.ndarray):
         badmask = nodata.T if transpose_inNodata else nodata
@@ -204,7 +203,7 @@ def _get_baddata_mask(data: np.ndarray,
 
 def interp_nodata_along_axis_2d(data_2d: np.ndarray,
                                 axis: int = 0,
-                                nodata: Union[np.ndarray, Number] = np.nan,
+                                nodata: np.ndarray | Number = np.nan,
                                 method: str = 'linear',
                                 **kw):
     """Interpolate a 2D array along the given axis (based on scipy.interpolate.make_interp_spline).
@@ -254,7 +253,7 @@ def interp_nodata_along_axis_2d(data_2d: np.ndarray,
 
 def interp_nodata_along_axis(data,
                              axis=0,
-                             nodata: Union[np.ndarray, Number] = np.nan,
+                             nodata: np.ndarray | Number = np.nan,
                              method: str = 'linear',
                              **kw):
     """Interpolate a 2D or 3D array along the given axis (based on scipy.interpolate.make_interp_spline).
@@ -299,7 +298,7 @@ def interp_nodata_along_axis(data,
 
 def interp_nodata_spatially_2d(data_2d: np.ndarray,
                                axis: int = 0,
-                               nodata: Union[np.ndarray, Number] = np.nan,
+                               nodata: np.ndarray | Number = np.nan,
                                method: str = 'linear',
                                fill_value: float = np.nan,
                                implementation: str = 'pandas'
@@ -359,7 +358,7 @@ def interp_nodata_spatially_2d(data_2d: np.ndarray,
 
 def interp_nodata_spatially_3d(data_3d: np.ndarray,
                                axis: int = 0,
-                               nodata: Union[np.ndarray, Number] = np.nan,
+                               nodata: np.ndarray | Number = np.nan,
                                method: str = 'linear',
                                fill_value: float = np.nan,
                                implementation: str = 'pandas',

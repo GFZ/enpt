@@ -28,7 +28,7 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-from typing import Union, Tuple, Sequence  # noqa: F401
+from typing import Tuple, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -55,9 +55,9 @@ class Geometry_Transformer(Transformer):
     # EnMAP geolayer contains pixel center coordinate
 
     def to_sensor_geometry(self,
-                           path_or_geoarray_mapgeo: Union[str, GeoArray],
+                           path_or_geoarray_mapgeo: str | GeoArray,
                            src_gt: Tuple[float, float, float, float, float, float] = None,
-                           src_prj: Union[str, int] = None,
+                           src_prj: str | int = None,
                            src_nodata: int = None,
                            tgt_nodata: int = None
                            ) -> np.ndarray:
@@ -75,8 +75,8 @@ class Geometry_Transformer(Transformer):
         )
 
     def to_map_geometry(self,
-                        path_or_geoarray_sensorgeo: Union[str, GeoArray, np.ndarray],
-                        tgt_prj: Union[str, int],
+                        path_or_geoarray_sensorgeo: str | GeoArray | np.ndarray,
+                        tgt_prj: str | int,
                         tgt_extent: Tuple[float, float, float, float] = None,
                         tgt_res: Tuple = None,
                         tgt_coordgrid: Tuple[Tuple, Tuple] = None,
@@ -113,8 +113,8 @@ class VNIR_SWIR_SensorGeometryTransformer(object):
                  lats_vnir: np.ndarray,
                  lons_swir: np.ndarray,
                  lats_swir: np.ndarray,
-                 prj_vnir: Union[str, int],
-                 prj_swir: Union[str, int],
+                 prj_vnir: str | int,
+                 prj_swir: str | int,
                  res_vnir: Tuple[float, float],
                  res_swir: Tuple[float, float],
                  resamp_alg: str = 'nearest',
@@ -253,7 +253,7 @@ class RPC_Geolayer_Generator(object):
 
     def __init__(self,
                  rpc_coeffs: dict,
-                 elevation: Union[str, GeoArray, int, float],
+                 elevation: str | GeoArray | int | float,
                  enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                  enmapIm_dims_sensorgeo: Tuple[int, int]):
         """Get an instance of RPC_Geolayer_Generator.
@@ -506,7 +506,7 @@ class RPC_Geolayer_Generator(object):
 global_dem_sensorgeo: GeoArray | None = None
 
 
-def _initialize_mp(elevation: Union[float, np.ndarray]):
+def _initialize_mp(elevation: float | np.ndarray):
     """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_unique_coeffgroup().
 
     :param elevation:   elevation - either as average value (float) or as a numpy array
@@ -520,7 +520,7 @@ class RPC_3D_Geolayer_Generator(object):
 
     def __init__(self,
                  rpc_coeffs_per_band: dict,
-                 elevation: Union[str, GeoArray, int, float],
+                 elevation: str | GeoArray | int | float,
                  enmapIm_cornerCoords: tuple[tuple[float, float], ...],
                  enmapIm_dims_sensorgeo: tuple[int, int],
                  CPUs: int = None):
@@ -647,7 +647,7 @@ class RPC_3D_Geolayer_Generator(object):
 
 def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: list[Tuple[float, float]],
                                            rpc_coeffs: dict,
-                                           elevation: Union[str, GeoArray, int, float],
+                                           elevation: str | GeoArray | int | float,
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
                                            ) -> list[Tuple[float, float]]:

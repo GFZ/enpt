@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, Tuple  # noqa: F401
+from typing import Tuple  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -54,7 +54,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
     def __init__(self,
                  config: EnPTConfig,
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
-                 wvls_l2a: Union[list, np.ndarray],
+                 wvls_l2a: list | np.ndarray,
                  dims_mapgeo: Tuple[int, int, int],
                  geotransform_l2a: Tuple[float, float, float, float, float, float],
                  logger=None):
@@ -312,7 +312,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
             self._get_aqtime_utc_array()
         return self._aqtime_utc_array
 
-    def add_band_statistics(self, datastack_vnir_swir: Union[np.ndarray, GeoArray]):
+    def add_band_statistics(self, datastack_vnir_swir: np.ndarray | GeoArray):
         R, C, B = datastack_vnir_swir.shape
         # NOTE:  Multiply by gains to get reflectance in the range 0-1
         data = datastack_vnir_swir[datastack_vnir_swir.mask_nodata[:]]

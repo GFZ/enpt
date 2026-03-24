@@ -29,8 +29,6 @@
 
 """EnPT module for handling spectral response functions."""
 
-from typing import Union
-
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats
@@ -96,7 +94,7 @@ class SRF(object):
         return rsp
 
     @classmethod
-    def from_cwl_fwhm(cls, cwls: Union[list, np.ndarray], fwhms: Union[list, np.ndarray], **kwargs: dict) -> 'SRF':
+    def from_cwl_fwhm(cls, cwls: list | np.ndarray, fwhms: list | np.ndarray, **kwargs: dict) -> 'SRF':
         """Create an instance of SRF based on center wavelength positions and bandwidths (using gaussian responses).
 
         :param cwls:    center wavelength positions
@@ -152,7 +150,7 @@ class SRF(object):
         for band in self.bands:
             yield self[band]
 
-    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, list[str]] = None, normalize: bool = True,
+    def plot_srfs(self, figsize: tuple = (15, 5), band: str | list[str] = None, normalize: bool = True,
                   title: str = 'EnMAP spectral response functions', legend: bool = True):
         """Show a plot of all spectral response functions.
 

@@ -32,7 +32,7 @@ based on a pixel- and band-wise coordinate-layer (geolayer).
 """
 
 
-from typing import Tuple, Union  # noqa: F401
+from typing import Tuple  # noqa: F401
 from types import SimpleNamespace
 
 import numpy as np
@@ -289,8 +289,8 @@ class VNIR_SWIR_Stacker(object):
     def __init__(self,
                  vnir: GeoArray,
                  swir: GeoArray,
-                 vnir_wvls: Union[list, np.ndarray],
-                 swir_wvls: Union[list, np.ndarray])\
+                 vnir_wvls: list | np.ndarray,
+                 swir_wvls: list | np.ndarray)\
             -> None:
         """Get an instance of VNIR_SWIR_Stacker.
 
