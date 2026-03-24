@@ -106,11 +106,11 @@ class L1B_Reader(object):
                         elevation=l1b_main_obj.dem_mapgeo or l1b_main_obj.meta.avg_elevation
                     )
 
-        if l1b_main_obj.meta.swir.lons is None or l1b_main_obj.meta.swir.lats is None:
-            l1b_main_obj.meta.swir.lons, l1b_main_obj.meta.swir.lats = \
-                l1b_main_obj.meta.swir.compute_geolayer_for_cube(
-                    elevation=l1b_main_obj.dem_mapgeo or l1b_main_obj.meta.avg_elevation
-                )
+            # generate DEM in sensor geometry
+            det.get_preprocessed_dem(
+                dem_mapgeo=l1b_main_obj.dem_mapgeo,  # covers VNIR and SWIR
+                fallback_avg_elevation=l1b_main_obj.meta.avg_elevation
+            )
 
         # l1b_main_obj.correct_VNIR_SWIR_shift()
 

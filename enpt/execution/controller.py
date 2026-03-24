@@ -209,9 +209,6 @@ class EnPT_Controller(object):
                     # run SICOR on sensor geometry #
                     ################################
 
-                    # get DEM in sensor geometry
-                    self.L1_obj.get_preprocessed_dem()
-
                     # run SICOR
                     self.run_atmospheric_correction()
 
