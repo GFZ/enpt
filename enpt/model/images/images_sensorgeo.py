@@ -805,7 +805,6 @@ class EnMAPL1Product_SensorGeo(object):
                 CPUs=self.cfg.CPUs,
                 progress=not self.cfg.disable_progress_bars
             )  # only map geometry DEMs with 100% overlap are accepted
-            DP.fill_gaps()  # FIXME this will also be needed at other places
             # TODO: clip DEM to needed extent
 
             self.dem_mapgeo = DP.dem

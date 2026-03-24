@@ -260,7 +260,6 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 CPUs=self.cfg.CPUs,
                 progress=not self.cfg.disable_progress_bars
             )  # only map geometry DEMs with 100% overlap are accepted
-            DP.fill_gaps()
             self.dem = \
                 DP.get_dem_in_map_geometry(
                     mapBounds=tuple(np.array(self.data.box.boundsMap)[[0, 2, 1, 3]]),  # xmin, ymin, xmax, ymax
