@@ -28,7 +28,7 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """EnPT module 'spatial transform', containing everything related to spatial transformations."""
-from typing import Union, Tuple, List, Optional, Sequence  # noqa: F401
+from typing import Union, Tuple, Optional, Sequence  # noqa: F401
 from multiprocessing import Pool, cpu_count
 from collections import OrderedDict
 import numpy as np
@@ -554,7 +554,7 @@ class RPC_3D_Geolayer_Generator(object):
 
         self.bandgroups_with_unique_rpc_coeffs = self._get_bandgroups_with_unique_rpc_coeffs()
 
-    def _get_bandgroups_with_unique_rpc_coeffs(self) -> List[List]:
+    def _get_bandgroups_with_unique_rpc_coeffs(self) -> list[list]:
         # combine RPC coefficients of all bands in a single numpy array
         band_inds = list(range(len(self.rpc_coeffs_per_band)))
         coeffs_first_band = list(self.rpc_coeffs_per_band.values())[0]
@@ -645,12 +645,12 @@ class RPC_3D_Geolayer_Generator(object):
         return lons, lats
 
 
-def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: List[Tuple[float, float]],
+def compute_mapCoords_within_sensorGeoDims(sensorgeoCoords_YX: list[Tuple[float, float]],
                                            rpc_coeffs: dict,
                                            elevation: Union[str, GeoArray, int, float],
                                            enmapIm_cornerCoords: Tuple[Tuple[float, float]],
                                            enmapIm_dims_sensorgeo: Tuple[int, int],
-                                           ) -> List[Tuple[float, float]]:
+                                           ) -> list[Tuple[float, float]]:
     """Compute map coordinates for a given image coordinate-pair of an EnMAP image in sensor geometry.
 
     :param sensorgeoCoords_YX:      list of requested sensor geometry positions [(row, column), (row, column), ...]
@@ -703,5 +703,5 @@ def get_center_coord(cornerCoordsXY):
     return x_center, y_center
 
 
-def get_UTMEPSG_from_LonLat_cornersXY(lons: List[float], lats: List[float]):
+def get_UTMEPSG_from_LonLat_cornersXY(lons: list[float], lats: list[float]):
     return get_UTMEPSG_from_LonLat(*get_center_coord(list(zip(lons, lats))))

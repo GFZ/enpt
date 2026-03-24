@@ -96,7 +96,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.offsets: Optional[np.ndarray] = None   # band-wise offsets for computing radiance from DNs
         self.l_min: Optional[np.ndarray] = None  # band-wise l-min for computing radiance from DNs
         self.l_max: Optional[np.ndarray] = None  # band-wise l-max for computing radiance from DNs
-        self.goodbands_inds: Optional[List] = None  # list of band indices included in the processing (all other bands are removed)  # noqa
+        self.goodbands_inds: Optional[list] = None  # list of band indices included in the processing (all other bands are removed)  # noqa
         self.lat_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # latitude coords for UL, UR, LL, LR
         self.lon_UL_UR_LL_LR: Optional[List[float, float, float, float]] = None  # longitude coords for UL, UR, LL, LR
         self.epsg_ortho: Optional[int] = None  # EPSG code of the orthorectified image
@@ -107,8 +107,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         self.geolayer_has_keystone: Optional[bool] = None  # indicates if lon/lat geolayer considers keystone (3D array)
         self.unit: str = ''  # radiometric unit of pixel values
         self.unitcode: str = ''  # code of radiometric unit
-        self.preview_wvls: Optional[List[float]] = None  # wavelengths to be used for quicklook images
-        self.preview_bands: Optional[List[int]] = None  # band indices to be used for quicklook images
+        self.preview_wvls: Optional[list[float]] = None  # wavelengths to be used for quicklook images
+        self.preview_bands: Optional[list[int]] = None  # band indices to be used for quicklook images
         self.snr: Optional[np.ndarray] = None   # Signal-to-noise ratio as computed from radiance data
 
     def read_metadata(self, path_xml):

@@ -513,7 +513,7 @@ class IsofitEnMAP(object):
                   pressure_elevation: bool = False,
                   prebuilt_lut: str = None,
                   no_min_lut_spacing: bool = False,
-                  inversion_windows: List[float] = None,
+                  inversion_windows: list[float] = None,
                   config_only: bool = False,
                   interpolate_bad_rdn=False,
                   interpolate_inplace=False,

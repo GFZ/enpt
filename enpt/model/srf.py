@@ -29,7 +29,7 @@
 
 """EnPT module for handling spectral response functions."""
 
-from typing import Union, List
+from typing import Union
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -152,7 +152,7 @@ class SRF(object):
         for band in self.bands:
             yield self[band]
 
-    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, List[str]] = None, normalize: bool = True,
+    def plot_srfs(self, figsize: tuple = (15, 5), band: Union[str, list[str]] = None, normalize: bool = True,
                   title: str = 'EnMAP spectral response functions', legend: bool = True):
         """Show a plot of all spectral response functions.
 

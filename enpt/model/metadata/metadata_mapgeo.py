@@ -34,7 +34,7 @@ from lxml import etree as ElementTree
 import logging
 import os
 import fnmatch
-from typing import Union, List, Tuple, Optional  # noqa: F401
+from typing import Union, Tuple, Optional  # noqa: F401
 from collections import OrderedDict
 import numpy as np
 from py_tools_ds.geo.vector.topology import Polygon, get_footprint_polygon  # noqa: F401  # flake8 issue
@@ -54,7 +54,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
     def __init__(self,
                  config: EnPTConfig,
                  meta_l1b: EnMAP_Metadata_L1B_SensorGeo,
-                 wvls_l2a: Union[List, np.ndarray],
+                 wvls_l2a: Union[list, np.ndarray],
                  dims_mapgeo: Tuple[int, int, int],
                  geotransform_l2a: Tuple[float, float, float, float, float, float],
                  logger=None):
@@ -319,7 +319,7 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         self.band_means = np.mean(data, axis=0) * self.gains
         self.band_stds = np.std(data, axis=0) * self.gains
 
-    def add_product_fileinformation(self, filepaths: List[str], sizes: List[int] = None, versions: List[str] = None):
+    def add_product_fileinformation(self, filepaths: list[str], sizes: list[int] = None, versions: list[str] = None):
         self.fileinfos = []
 
         for i, fp in enumerate(filepaths):
