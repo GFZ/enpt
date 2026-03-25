@@ -169,6 +169,7 @@ config_for_testing = dict(
     enable_ac=True,
     mode_ac='land',
     land_ac_alg='SICOR',
+    enable_segmentation=True,
     ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
 )
