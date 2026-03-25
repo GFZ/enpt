@@ -581,8 +581,8 @@ class IsofitEnMAP(object):
 
         # read the AC results back into memory
         boa_rfl = GeoArray(glob(pjoin(self._tmpdir, 'output', 'estimated_reflectance.bsq'))[0])
-        # state = GeoArray(glob(pjoin(self._tmpdir, 'output', 'estimated_state.bsq'))[0])
-        # uncert = GeoArray(glob(pjoin(self._tmpdir, 'output', 'posterior_uncertainty.bsq'))[0])
+        # state = GeoArray(glob(pjoin(self._tmpdir, 'output', 'estimated_state.bsq'))[0])  # TODO
+        # uncert = GeoArray(glob(pjoin(self._tmpdir, 'output', 'posterior_uncertainty.bsq'))[0])  # TODO
         boa_rfl.to_mem()
 
         return boa_rfl
