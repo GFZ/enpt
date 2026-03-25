@@ -87,7 +87,7 @@ class AtmosphericCorrector(object):
             # set land_only mode
             options["retrieval"]["land_only"] = land_only
 
-            # disable first guess water vapor retrieval
+            # disable first guess water vapor retrieval for now
             # options["retrieval"]["state_vector"]["water_vapor"]["use_prior_mean"] = True
             # options["retrieval"]["state_vector"]["water_vapor"]["prior_mean"] = \
             #     enmap_ImageL1.meta.water_vapour  # = default = 2.5
