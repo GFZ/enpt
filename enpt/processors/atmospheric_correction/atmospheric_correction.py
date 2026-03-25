@@ -106,7 +106,7 @@ class AtmosphericCorrector(object):
 
         return options
 
-    def _is_acwater_operable(self, logger: Logger):
+    def _is_acwater_operable(self, logger: Logger) -> bool:
         """Return True if ACWater/Polymer is operable, else raise a warning and return False."""
         if os.name == 'nt':
             logger.warning("The Polymer atmospheric correction for water is not yet fully operable on Windows. "
@@ -151,7 +151,7 @@ class AtmosphericCorrector(object):
 
     def run_sicor(self,
                   enmap_ImageL1: EnMAPL1Product_SensorGeo
-                  ) -> (np.ndarray, np.ndarray, dict):
+                  ) -> tuple[np.ndarray, np.ndarray, dict]:
         """Run atmospheric correction in 'land' mode, i.e., use SICOR for all surfaces."""
         if 2 in enmap_ImageL1.vnir.mask_landwater[:]:
             enmap_ImageL1.logger.info(
@@ -179,7 +179,7 @@ class AtmosphericCorrector(object):
 
     def run_isofit(self,
                    enmap_ImageL1: EnMAPL1Product_SensorGeo
-                   ) -> (np.ndarray, np.ndarray, dict):
+                   ) -> tuple[np.ndarray, np.ndarray, dict]:
         """Run atmospheric correction in 'land' mode and use ISOFIT for all surfaces."""
         if 2 in enmap_ImageL1.vnir.mask_landwater[:]:
             enmap_ImageL1.logger.info(
@@ -194,7 +194,7 @@ class AtmosphericCorrector(object):
 
     def _run_ac__land_mode(self,
                            enmap_ImageL1: EnMAPL1Product_SensorGeo
-                           ) -> (np.ndarray, np.ndarray, dict):
+                           ) -> tuple[np.ndarray, np.ndarray, dict]:
         boa_ref_vnir, boa_ref_swir, land_additional_results = \
             self.run_sicor(enmap_ImageL1)
 
@@ -204,7 +204,7 @@ class AtmosphericCorrector(object):
         return boa_ref_vnir, boa_ref_swir, land_additional_results
 
     def _run_ac__water_mode(self, enmap_ImageL1: EnMAPL1Product_SensorGeo
-                            ) -> (np.ndarray, np.ndarray, dict):
+                            ) -> tuple[np.ndarray, np.ndarray, dict]:
         """Run atmospheric correction in 'water' mode, i.e., use ACWater/Polymer for water surfaces only.
 
         NOTE:
@@ -247,7 +247,7 @@ class AtmosphericCorrector(object):
 
     def _run_ac__combined_mode(self,
                                enmap_ImageL1: EnMAPL1Product_SensorGeo
-                               ) -> (np.ndarray, np.ndarray, dict, dict):
+                               ) -> tuple[np.ndarray, np.ndarray, dict, dict]:
         """Run atmospheric corr. in 'combined' mode, i.e., use SICOR for land and ACWater/Polymer for water surfaces.
 
         NOTE:

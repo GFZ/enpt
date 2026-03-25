@@ -902,7 +902,7 @@ class IsofitEnMAP(object):
                             enmap: EnMAPL2Product_MapGeo,
                             segmentation: bool = False,
                             n_cores: int = None
-                            ) -> (GeoArray, GeoArray, GeoArray):
+                            ) -> tuple[GeoArray, GeoArray, GeoArray]:
         """
         Run ISOFIT atmospheric correction on map geometry.
 
