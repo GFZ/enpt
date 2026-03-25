@@ -43,7 +43,6 @@ dependencies:
   # - sphinx_rtd_theme  # pinnings out of sync - https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41
   - urlchecker
 
-  - xarray<2025.12  # workaround for https://github.com/conda-forge/rioxarray-feedstock/pull/93
   - hygeos-core<1.3.0  # workaround for https://github.com/hygeos/polymer/issues/23
 
   - pip:
