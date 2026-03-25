@@ -166,7 +166,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
             files = glob(pjoin(p_root, '*'))
 
             IR = IsofitEnMAP(log_level='INFO')
-            IR._run(
+            out = IR._run(
                 path_toarad=fnfilter(files, '*ENMAP*__subX800-810Y370-380')[0],
                 path_loc=fnfilter(files, '*ENMAP*loc')[0],
                 path_obs=fnfilter(files, '*ENMAP*obs*v2')[0],
@@ -179,6 +179,7 @@ class Test_ISOFIT_EnMAP(unittest.TestCase):
                 segmentation=False
             )
 
+            assert out
             self._validate_BOA_reflectance(path_boaref=glob(pjoin(td, 'output', '*estimated_reflectance.bsq'))[0],
                                            path_reference=pjoin(p_root, 'reference_spectra.bsq'))
 
