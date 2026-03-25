@@ -706,6 +706,7 @@ class IsofitEnMAP(object):
                 debug_mode=False,
                 # debug_mode=True,  # TODO deactivate if done
                 n_cores=n_cores,
+                # n_cores=1,  # TODO deactivate if done
                 ray_temp_dir=pjoin(gettempdir(), "ray"),
             ),
             input=dict(
@@ -729,6 +730,13 @@ class IsofitEnMAP(object):
             return dic
 
         isocfg = update_nested_dict(isocfg_default, updatedict)
+
+        # remove those keys from the config which are only needed for 6S
+        if not use_6s:
+            for k in ['aerosol_model_file', 'aerosol_template_file', 'emulator_aux_file', 'emulator_file',
+                      'engine_base_dir', 'interpolator_base_path', 'sim_path', 'template_file']:
+                del isocfg['forward_model']['radiative_transfer']['radiative_transfer_engines']['vswir'][k]
+
         paths = Pathnames(
             input_radiance=path_toarad,
             input_loc=path_loc,
