@@ -678,15 +678,13 @@ class IsofitEnMAP(object):
                             engine_base_dir=pjoin(Path.home(), '.isofit', 'sixs'),
                             interpolator_base_path=pjoin(path_workdir, 'lut_full', 'sRTMnet_v120_vi'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
-                            # use lut_path if existing, otherwise simulate to lut.nc
-                            lut_path=path_lut or pjoin(path_workdir, 'lut_full', 'lut.nc'),
+                            lut_path=pjoin(path_workdir, 'lut_full', 'lut.nc'),  # create it as it does not exist
                             sim_path=pjoin(path_workdir, 'lut_full'),
                             template_file=pjoin(path_workdir, 'config', f'{enmap_timestamp}_modtran_tpl.json')
                         ) if use_6s else dict(
                             earth_sun_distance_file=pjoin(path_data, 'earth_sun_distance.txt'),
                             irradiance_file=pjoin(path_examples, '20151026_SantaMonica/data/prism_optimized_irr.dat'),
-                            # use lut_path if existing, otherwise simulate to lut.nc
-                            lut_path=path_lut
+                            lut_path=path_lut,  # use existing lut
                         )
                     ),
                     statevector=dict(
