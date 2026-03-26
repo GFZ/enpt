@@ -79,7 +79,7 @@ class EnPT_Controller(object):
 
         # defaults
         self.L1_obj: EnMAPL1Product_SensorGeo | None = None
-        self.L2_obj: EnMAPL1Product_SensorGeo | None = None
+        self.L2_obj: EnMAPL2Product_MapGeo | None = None
 
     @property
     def logger(self):
