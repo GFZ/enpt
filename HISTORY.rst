@@ -2,6 +2,13 @@
 History
 =======
 
+1.3.0 (coming soon)
+-------------------
+
+* !149: Fixed #155 (RuntimeError when appending adjacent image: Coordinate normalization yields significantly
+  out-of-range values for longitudes).
+
+
 1.3.0 (2026-03-24)
 ------------------
 

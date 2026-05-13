@@ -301,8 +301,10 @@ class RPC_Geolayer_Generator(object):
         height_norm = (height - self.height_off) / self.height_scale  # elevation
 
         # for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes', 'heights']):
-        for llh, name in zip([lon_norm, lat_norm, height_norm], ['longitudes', 'latitudes']):
-            if llh.min() < -1.1 or llh.max() > 1.1:
+        for llh, name in zip([lon_norm, lat_norm], ['longitudes', 'latitudes']):
+            if llh.min() < -1.5 or llh.max() > 1.5:
+                # 1.5 allows to append a full image
+                # -> can become larger than 1 in case RPCs don´t actually fit to the image (e.g., appended EnMAP image)
                 raise RuntimeError((llh.min(), llh.max()),
                                    f'Coordinate normalization yields significantly out-of-range values for {name}. '
                                    f'Check the coordinates and RPC coefficients.')
