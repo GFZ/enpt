@@ -230,17 +230,17 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         img2_cornerCoords = tuple(zip(img2.detector_meta.lon_UL_UR_LL_LR,
                                       img2.detector_meta.lat_UL_UR_LL_LR))
 
-        def get_map_xy(col, row):
+        def get_map_xy(row, col):
             return compute_mapCoords_within_sensorGeoDims(
-                sensorgeoCoords_YX=[(col, row)],
+                sensorgeoCoords_YX=[(row, col)],
                 rpc_coeffs=list(img2.detector_meta.rpc_coeffs.values())[0],  # RPC coeffs of first band of the detector
                 elevation=elevation,
                 enmapIm_cornerCoords=img2_cornerCoords,
                 enmapIm_dims_sensorgeo=(img2.detector_meta.nrows, img2.detector_meta.ncols)
             )[0]
 
-        LL = get_map_xy(col=n_lines - 1, row=0)
-        LR = get_map_xy(col=n_lines - 1, row=img2.detector_meta.ncols - 1)
+        LL = get_map_xy(row=n_lines - 1, col=0)
+        LR = get_map_xy(row=n_lines - 1, col=img2.detector_meta.ncols - 1)
 
         self.detector_meta.lon_UL_UR_LL_LR[2], self.detector_meta.lat_UL_UR_LL_LR[2] = LL
         self.detector_meta.lon_UL_UR_LL_LR[3], self.detector_meta.lat_UL_UR_LL_LR[3] = LR
