@@ -172,7 +172,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     def append_new_image(self,
                          img2: 'EnMAP_Detector_SensorGeo',
-                         n_lines: int = None,
+                         n_lines: int | None = None,
                          elevation: GeoArray | float = 0
                          ) -> None:
         # TODO convert method to function?
