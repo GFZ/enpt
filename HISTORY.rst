@@ -2,6 +2,12 @@
 History
 =======
 
+1.3.2 (2026-05-27)
+------------------
+
+* !152: Fixed numpy warning due to invalid values when reading Copernicus DEM elevation data within EnMAP extent.
+
+
 1.3.1 (2026-05-13)
 ------------------
 
