@@ -280,7 +280,7 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
             coeffs_lowgain = gA[3:6, :, :]  # [3 x ncols x nbands]
             gain_threshold = np.squeeze(gA[6, :, :])
 
-            self.snr = np.zeros(rad_data.shape)
+            self.snr = np.zeros(rad_data.shape, np.float16)
             for irow in range(self.nrows):
                 highgain_mask = rad_data[irow, :, :] < gain_threshold  # a single row
                 rad_highgain = rad_data[irow, highgain_mask]
@@ -297,9 +297,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                     coeffs_lowgain[2, lowgain_mask] * rad_lowgain ** 2
 
         else:
-            gA = self._get_snr_model(dir_snr_models)
-            coeffs = gA[:]
-            self.snr = coeffs[0, :, :] + coeffs[1, :, :] * rad_data[:, :, :] + coeffs[2, :, :] * rad_data[:, :, :] ** 2
+            coeffs = self._get_snr_model(dir_snr_models)[:]
+            self.snr = (
+                    coeffs[0, :, :] +
+                    coeffs[1, :, :] * rad_data[:, :, :] +
+                    coeffs[2, :, :] * rad_data[:, :, :] ** 2
+            ).astype(np.float16)
 
     def _get_snr_model(self, dir_snr_models: str) -> GeoArray:
         """Get the SNR model coefficients for the current detector.
