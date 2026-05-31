@@ -2,10 +2,10 @@
 History
 =======
 
-1.3.3 (coming soon)
--------------------
+1.3.3 (2026-05-31)
+------------------
 
-* !153: Use float16 for SNR arrays instead of float64 to reduce the memory load.
+* !153/!154: Reduced memory load by downcasting some arrays.
 
 
 1.3.2 (2026-05-27)

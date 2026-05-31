@@ -615,9 +615,8 @@ class RPC_3D_Geolayer_Generator(object):
         if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
             lons_oneband, lats_oneband = self._compute_geolayer_for_unique_coeffgroup(kwargs_list[0])[:2]
 
-            lons = np.repeat(lons_oneband[:, :, np.newaxis], bands, axis=2)
-            lats = np.repeat(lats_oneband[:, :, np.newaxis], bands, axis=2)
-
+            lons = np.broadcast_to(lons_oneband[:, :, np.newaxis], (rows, cols, bands))
+            lats = np.broadcast_to(lats_oneband[:, :, np.newaxis], (rows, cols, bands))
         else:
             if self.CPUs > 1:
                 # multiprocessing (only in case there are multiple unique sets of RPC coefficients)
@@ -640,8 +639,10 @@ class RPC_3D_Geolayer_Generator(object):
                 bandinds_to_assign = self.bandgroups_with_unique_rpc_coeffs[group_idx]
                 nbands_to_assign = len(bandinds_to_assign)
 
-                lons[:, :, bandinds_to_assign] = np.repeat(band_lons[:, :, np.newaxis], nbands_to_assign, axis=2)
-                lats[:, :, bandinds_to_assign] = np.repeat(band_lats[:, :, np.newaxis], nbands_to_assign, axis=2)
+                lons[:, :, bandinds_to_assign] = np.broadcast_to(band_lons[:, :, np.newaxis],
+                                                                 (rows, cols, nbands_to_assign))
+                lats[:, :, bandinds_to_assign] = np.broadcast_to(band_lats[:, :, np.newaxis],
+                                                                 (rows, cols, nbands_to_assign))
 
         return lons, lats
 
