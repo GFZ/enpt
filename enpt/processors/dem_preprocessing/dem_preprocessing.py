@@ -162,7 +162,7 @@ class DEM_Processor(object):
                         out_prj=out_prj,
                         out_gsd=out_gsd,
                         rspAlg='bilinear'
-                    ),
+                    ).astype(np.int16),
                     nodata=self.dem.nodata,
                     progress=self.progress
                 )
@@ -192,7 +192,7 @@ class DEM_Processor(object):
                 ) as dst_ds:
                     return \
                         GeoArray(
-                            dst_ds.ReadAsArray().astype(int),
+                            dst_ds.ReadAsArray().astype(np.int16),
                             geotransform=dst_ds.GetGeoTransform(),
                             projection=dst_ds.GetProjection(),
                             nodata=self.dem.nodata,
