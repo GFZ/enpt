@@ -154,15 +154,20 @@ class DEM_Processor(object):
                                [xmin, xmin + out_gsd[0]],
                                [ymin, ymin + out_gsd[1]],
                                tolerance=0.):
+            dem_mapgeo, gt, prj = \
+                self.dem.get_mapPos(
+                    mapBounds=mapBounds,
+                    mapBounds_prj=mapBounds_prj,
+                    out_prj=out_prj,
+                    out_gsd=out_gsd,
+                    rspAlg='bilinear'
+                )
+            dem_mapgeo = dem_mapgeo.astype(np.int16)
             return \
                 GeoArray(
-                    *self.dem.get_mapPos(
-                        mapBounds=mapBounds,
-                        mapBounds_prj=mapBounds_prj,
-                        out_prj=out_prj,
-                        out_gsd=out_gsd,
-                        rspAlg='bilinear'
-                    ).astype(np.int16),
+                    dem_mapgeo,
+                    geotransform=gt,
+                    projection=prj,
                     nodata=self.dem.nodata,
                     progress=self.progress
                 )
