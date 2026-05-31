@@ -2,7 +2,7 @@
 History
 =======
 
-1.3.3 (2026-05-31)
+1.3.3 (2026-06-01)
 ------------------
 
 * !153/!154: Reduced memory load by downcasting some arrays.
