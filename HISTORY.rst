@@ -2,6 +2,12 @@
 History
 =======
 
+1.3.4 (2026-06-02)
+------------------
+
+* !155: Fixed #158 (ERROR 1: Attempt to create ENVI .hdr labelled dataset with an illegal data type (Float16)).
+
+
 1.3.3 (2026-06-01)
 ------------------
 
