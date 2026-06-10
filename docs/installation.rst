@@ -107,7 +107,7 @@ To do so, run the following command on a Miniforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ mamba env create -n enmapbox enmapbox
+  $ mamba create -n enmapbox enmapbox
 
 Then activate the newly created conda_ environment and start QGIS_:
 
