@@ -2,6 +2,13 @@
 History
 =======
 
+1.3.5 (coming soon)
+-------------------
+
+* !156: Adapted conda environment files to now install enmapbox from conda-forge.
+  Adapted installation instructions accordingly.
+
+
 1.3.4 (2026-06-02)
 ------------------
 
