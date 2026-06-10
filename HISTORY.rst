@@ -2,12 +2,12 @@
 History
 =======
 
-1.3.5 (coming soon)
--------------------
+1.3.5 (2026-06-10)
+------------------
 
 * !156: Adapted conda environment files to now install enmapbox from conda-forge.
   Adapted installation instructions accordingly.
-* !157: Fixed #161 (ValueError within orthorectification of SICOR retrieval maps if gdal 3.10 is installed).
+* !157: Fixed #161 (ValueError within orthorectification of SICOR retrieval maps if gdal<3.11 is installed).
 
 
 1.3.4 (2026-06-02)
