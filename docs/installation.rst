@@ -136,7 +136,7 @@ from within the EnMAP-Box_ as described
     EnPT has been tested with Python 3.10+ on Linux, Windows and Mac OSX.
 
 
-.. _Miniforge: https://github.com/conda-forge/miniforge
+.. _Miniforge: https://conda-forge.org/download/
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://docs.conda.io
