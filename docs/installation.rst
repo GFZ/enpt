@@ -143,8 +143,6 @@ from within the EnMAP-Box_ as described
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
 .. _Polymer: https://github.com/hygeos/polymer
-.. _SICOR: https://git.gfz.de/EnMAP/sicor
-.. _ISOFIT: https://github.com/isofit/isofit
 .. _GUI: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _EnMAP-Box: https://github.com/EnMAP-Box/enmap-box
 .. _QGIS: https://www.qgis.org
