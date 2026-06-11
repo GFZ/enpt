@@ -2,6 +2,32 @@
 History
 =======
 
+1.3.5 (2026-06-10)
+------------------
+
+* !156: Adapted conda environment files to now install enmapbox from conda-forge.
+  Adapted installation instructions accordingly.
+* !157: Fixed #161 (ValueError within orthorectification of SICOR retrieval maps if gdal<3.11 is installed).
+
+
+1.3.4 (2026-06-02)
+------------------
+
+* !155: Fixed #158 (ERROR 1: Attempt to create ENVI .hdr labelled dataset with an illegal data type (Float16)).
+
+
+1.3.3 (2026-06-01)
+------------------
+
+* !153/!154: Reduced memory load by downcasting some arrays.
+
+
+1.3.2 (2026-05-27)
+------------------
+
+* !152: Fixed numpy warning due to invalid values when reading Copernicus DEM elevation data within EnMAP extent.
+
+
 1.3.1 (2026-05-13)
 ------------------
 

@@ -315,8 +315,8 @@ class EnMAP_Metadata_L2A_MapGeo(object):
         R, C, B = datastack_vnir_swir.shape
         # NOTE:  Multiply by gains to get reflectance in the range 0-1
         data = datastack_vnir_swir[datastack_vnir_swir.mask_nodata[:]]
-        self.band_means = np.mean(data, axis=0) * self.gains
-        self.band_stds = np.std(data, axis=0) * self.gains
+        self.band_means = np.mean(data, axis=0, dtype=np.float32) * self.gains
+        self.band_stds = np.std(data, dtype=np.float32, axis=0, mean=self.band_means) * self.gains
 
     def add_product_fileinformation(self, filepaths: list[str], sizes: list[int] = None, versions: list[str] = None):
         self.fileinfos = []

@@ -360,6 +360,10 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 getattr(self, attrName)
 
             if attr_gA is not None:
+                # GDAL does not support float16, so we need to convert to float32
+                if attr_gA.dtype == np.float16:
+                    attr_gA.arr = attr_gA[:].astype(np.float32)
+
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:

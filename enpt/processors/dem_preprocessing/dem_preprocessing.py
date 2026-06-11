@@ -135,7 +135,7 @@ class DEM_Processor(object):
                                    lats: np.ndarray
                                    ) -> GeoArray:
         GT = Geometry_Transformer(lons=lons, lats=lats, backend='gdal', resamp_alg='bilinear', nprocs=self.CPUs)
-        data_sensorgeo = GT.to_sensor_geometry(self.dem).astype(int)
+        data_sensorgeo = GT.to_sensor_geometry(self.dem).astype(self.dem.dtype)
 
         return GeoArray(data_sensorgeo, progress=self.progress)
 
@@ -154,15 +154,20 @@ class DEM_Processor(object):
                                [xmin, xmin + out_gsd[0]],
                                [ymin, ymin + out_gsd[1]],
                                tolerance=0.):
+            dem_mapgeo, gt, prj = \
+                self.dem.get_mapPos(
+                    mapBounds=mapBounds,
+                    mapBounds_prj=mapBounds_prj,
+                    out_prj=out_prj,
+                    out_gsd=out_gsd,
+                    rspAlg='bilinear'
+                )
+            dem_mapgeo = dem_mapgeo.astype(np.int16)
             return \
                 GeoArray(
-                    *self.dem.get_mapPos(
-                        mapBounds=mapBounds,
-                        mapBounds_prj=mapBounds_prj,
-                        out_prj=out_prj,
-                        out_gsd=out_gsd,
-                        rspAlg='bilinear'
-                    ),
+                    dem_mapgeo,
+                    geotransform=gt,
+                    projection=prj,
                     nodata=self.dem.nodata,
                     progress=self.progress
                 )
@@ -192,7 +197,7 @@ class DEM_Processor(object):
                 ) as dst_ds:
                     return \
                         GeoArray(
-                            dst_ds.ReadAsArray().astype(int),
+                            dst_ds.ReadAsArray().astype(np.int16),
                             geotransform=dst_ds.GetGeoTransform(),
                             projection=dst_ds.GetProjection(),
                             nodata=self.dem.nodata,

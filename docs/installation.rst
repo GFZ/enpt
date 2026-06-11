@@ -107,21 +107,18 @@ To do so, run the following command on a Miniforge_ conda_ command line:
 
 .. code-block:: bash
 
-  $ conda env create -n enpt_full -f https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full.yml
+  $ mamba create -n enmapbox enmapbox
 
 Then activate the newly created conda_ environment and start QGIS_:
 
 .. code-block:: bash
 
-  $ conda activate enpt_full
+  $ mamba activate enmapbox
   $ qgis
 
 The EnMAP-Box_ QGIS_ plugin can then be installed via the QGIS_ Plugin manager and the EnPT GUI_ can be started
 from within the EnMAP-Box_ as described
 `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/usage.html>`__.
-
-If you want to use advanced atmospheric correction over water surfaces, please install the optional
-requirement polymer_ into the enpt_full environment as described above.
 
 
 .. hint::
@@ -139,15 +136,13 @@ requirement polymer_ into the enpt_full environment as described above.
     EnPT has been tested with Python 3.10+ on Linux, Windows and Mac OSX.
 
 
-.. _Miniforge: https://github.com/conda-forge/miniforge
+.. _Miniforge: https://conda-forge.org/download/
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 .. _conda: https://docs.conda.io
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater/
 .. _`ACwater Polymer installation instructions`: https://gitlab.awi.de/phytooptics/acwater/-/blob/master/docs/installation.rst
 .. _Polymer: https://github.com/hygeos/polymer
-.. _SICOR: https://git.gfz.de/EnMAP/sicor
-.. _ISOFIT: https://github.com/isofit/isofit
 .. _GUI: https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp
 .. _EnMAP-Box: https://github.com/EnMAP-Box/enmap-box
 .. _QGIS: https://www.qgis.org
