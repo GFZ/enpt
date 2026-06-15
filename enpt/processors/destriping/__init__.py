@@ -29,4 +29,6 @@
 
 """EnPT de-striping module."""
 
+from .destriping import *  # noqa: F401,F403  # flake8 unable to detect undefined names
+
 __author__ = 'Daniel Scheffler'
