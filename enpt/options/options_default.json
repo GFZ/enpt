@@ -97,6 +97,10 @@
                                                  ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', ...)*/
         },
 
+        "destriping": {
+            "enable_across_track_destriping": false  /*Enable across-track de-striping correcting for horizontal image stripes*/
+        },
+
         "orthorectification": {
             "resamp_alg": "bilinear",  /*Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss',
                                          'cubic', 'cubic_spline', 'lanczos', 'average', 'mode', 'max', 'min', 'med',

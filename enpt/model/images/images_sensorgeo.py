@@ -36,6 +36,7 @@ from zipfile import ZipFile
 import numpy as np
 from os import path, makedirs
 from glob import glob
+from time import time
 import utm
 from geoarray import GeoArray
 from py_tools_ds.geo.vector.topology import get_footprint_polygon
@@ -46,6 +47,7 @@ from ...model.metadata import EnMAP_Metadata_L1B_SensorGeo, EnMAP_Metadata_L1B_D
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ...options.config import EnPTConfig
 from ...processors.dead_pixel_correction import Dead_Pixel_Corrector
+from ...processors.destriping import Destriper
 from ...processors.dem_preprocessing import DEM_Processor
 from ...processors.dem_preprocessing.dem_download import compute_suitable_dem_extent, CopernicusDEMGenerator
 from ...processors.spatial_transform import compute_mapCoords_within_sensorGeoDims
@@ -130,6 +132,27 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                                  interp_spatial=method_spatial,
                                  logger=self.logger)\
             .correct(self.data, self.deadpixelmap)
+
+    def run_destriping(self):
+        """Run de-striping for the current detector."""
+        self.logger.info(f"Running across-track de-striping to correct for horizontal image stripes "
+                         f"in the {self.detector_name} detector...")
+
+        t0 = time()
+
+        self.data, diff = (
+            Destriper().destripe(
+                array=self.data[:],
+                sensor=self.detector_name.lower(),
+                high_freq=True,
+                low_freq=False,
+                spatial_domain=True,
+                spectral_domain=False,
+                mode='stripes',
+                along_track_direction=False
+            ))
+        t1 = time()
+        self.logger.info(f"Across-track de-striping of {self.detector_name} detector took {t1 - t0:.2f} seconds")
 
     def get_preprocessed_dem(self, dem_mapgeo: GeoArray, fallback_avg_elevation: float = 0) -> GeoArray:
         """Get a digital elevation model in EnMAP sensor geometry of the current detector.
@@ -751,6 +774,11 @@ class EnMAPL1Product_SensorGeo(object):
         """Correct dead pixels of both detectors."""
         self.vnir.correct_dead_pixels()
         self.swir.correct_dead_pixels()
+
+    def run_destriping(self):
+        """Run de-striping of both detectors."""
+        self.vnir.run_destriping()
+        self.swir.run_destriping()
 
     # def correct_VNIR_SWIR_shift(self):
     #     # use first geolayer bands for VNIR and SWIR
