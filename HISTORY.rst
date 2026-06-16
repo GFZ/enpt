@@ -2,8 +2,8 @@
 History
 =======
 
-1.4.0 (coming soon)
--------------------
+1.4.0 (2026-06-17)
+------------------
 
 * !150: Implemented dalong-track destriping as optional image enhancement processor.
 
