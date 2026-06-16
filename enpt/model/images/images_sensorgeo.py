@@ -135,7 +135,7 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
 
     def run_destriping(self):
         """Run de-striping for the current detector."""
-        self.logger.info(f"Running across-track de-striping to correct for horizontal image stripes "
+        self.logger.info(f"Running along-track de-striping to correct for horizontal image stripes "
                          f"in the {self.detector_name} detector...")
 
         t0 = time()
@@ -149,10 +149,10 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 spatial_domain=True,
                 spectral_domain=False,
                 mode='stripes',
-                along_track_direction=False
+                along_track_direction=True
             ))
         t1 = time()
-        self.logger.info(f"Across-track de-striping of {self.detector_name} detector took {t1 - t0:.2f} seconds")
+        self.logger.info(f"Along-track de-striping of {self.detector_name} detector took {t1 - t0:.2f} seconds")
 
     def get_preprocessed_dem(self, dem_mapgeo: GeoArray, fallback_avg_elevation: float = 0) -> GeoArray:
         """Get a digital elevation model in EnMAP sensor geometry of the current detector.

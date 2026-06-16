@@ -98,7 +98,7 @@
         },
 
         "destriping": {
-            "enable_across_track_destriping": false  /*Enable across-track de-striping correcting for horizontal image stripes*/
+            "enable_along_track_destriping": false  /*Enable along-track de-striping correcting for horizontal image stripes*/
         },
 
         "orthorectification": {

@@ -199,7 +199,7 @@ class EnPT_Controller(object):
             if self.cfg.run_deadpix_P:
                 self.L1_obj.correct_dead_pixels()
 
-            if self.cfg.enable_act_destriping:
+            if self.cfg.enable_alt_destriping:
                 self.L1_obj.run_destriping()
 
             if self.cfg.enable_absolute_coreg:
