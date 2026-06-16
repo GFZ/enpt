@@ -101,7 +101,7 @@ def destripe_rad_band_wise(img, detrend_window_length=25, lf=False):
         # smooth_dx1 = np.cumsum(np.nanmedian(smooth_dx01, 0))
         # de-trend based on savgol filter
         smooth_dx1 = savgol_filter(smooth_dx0, detrend_window_length, 3)
-    # subtract high-frequent across-track gradient form image
+    # subtract high-frequent across-track gradient from image
     img0 -= smooth_dx0[None, :] - smooth_dx1
     # img0 -= smooth_dx0 - smooth_dx1
     smooth_dx2 = np.nanmedian(dx, 0)
