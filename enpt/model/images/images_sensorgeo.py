@@ -141,16 +141,18 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
         t0 = time()
 
         self.data, diff = (
-            Destriper().destripe(
-                array=self.data[:],
-                sensor=self.detector_name.lower(),
+            Destriper(
                 high_freq=True,
                 low_freq=False,
                 spatial_domain=True,
                 spectral_domain=False,
                 mode='stripes',
                 along_track_direction=True
-            ))
+            ).destripe(
+                array=self.data[:],
+                sensor=self.detector_name.lower(),
+            )
+        )
         t1 = time()
         self.logger.info(f"Along-track de-striping of {self.detector_name} detector took {t1 - t0:.2f} seconds")
 

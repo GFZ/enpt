@@ -168,7 +168,9 @@ class Destriper:
 
         :return:    destriped array, difference between original and destriped array
         """
-        if along_track_direction:
+        # from geoarray import GeoArray
+        # GeoArray(array).save("/home/gfz-fe/scheffler/temp/EnPT/destriping/input_array.bsq")
+        if self.along_track_direction:
             array = np.rot90(array, k=1)
 
         destriped_data = array.copy()
@@ -193,9 +195,6 @@ class Destriper:
             mask_goodcols = ~np.all(np.all(array == 0, axis=0), axis=1)
             goodcols = np.arange(array.shape[2])[mask_goodcols]
 
-        if along_track_direction:
-            if sensor == 'swir':
-                destriped_data = self.swir_alt_threshold(corrected_array=destriped_data, original_array=array)
             # iterating through columns (spectral domain)
             for col, (dst, smooth_dx0, smooth_dx1) in enumerate(
                 Parallel(n_jobs=self.cpus, backend='loky', return_as='generator')(
@@ -209,6 +208,8 @@ class Destriper:
                 destriped_data[:, col, :] = dst
 
         if self.along_track_direction:
+            # GeoArray(np.rot90(destriped_data, k=-1)).save("/home/gfz-fe/scheffler/temp/EnPT/destriping/"
+            #                                               "direct_output_array.bsq")
             # if sensor == 'swir':
             #     # only apply destriping to those SWIR bands where the maximum cross-correlation of
             #     # the along-track miscalibration percentage >= 0.6
@@ -220,6 +221,8 @@ class Destriper:
             destriped_data = np.rot90(destriped_data, k=-1)
             array = np.rot90(array, k=-1)
 
+        # GeoArray(destriped_data).save("/home/gfz-fe/scheffler/temp/EnPT/destriping/"
+        #                               "output_final_array.bsq")
         return destriped_data, destriped_data - array
 
     @staticmethod

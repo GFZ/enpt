@@ -65,18 +65,19 @@ class Test_Destriping(TestCase):
 
         # swir_sub = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/destriping/ENMAP_DT0000009666_SWIR_sub.bsq')
 
-        a = 1
         dst, diff = (
-            Destriper().destripe(
-                array=swir_sub[:],
-                sensor='swir',
+            Destriper(
                 high_freq=True,
                 low_freq=False,
                 spatial_domain=True,
                 spectral_domain=False,
                 mode='stripes',
                 along_track_direction=True
-            ))
+            ).destripe(
+                array=swir_sub[:],
+                sensor='swir'
+            )
+        )
         dst_gA = GeoArray(dst)
         dst_gA.show(band=1)
         diff_gA = GeoArray(diff)
