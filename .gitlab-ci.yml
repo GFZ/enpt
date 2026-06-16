@@ -17,6 +17,7 @@ test_enpt:
     # update some dependencies
     # - mamba install -y 'geoarray>=0.19.2'
     # - pip install 'py_tools_ds>=0.14.23'
+    - mamba install joblib  # remove as soon as the CI container is updated
 
     # install sicor and perhaps switch sicor branch
     # - rm -rf context/sicor
