@@ -40,10 +40,8 @@ from unittest import TestCase
 import numpy as np
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
-from pathlib import Path
 
 import pytest
-from geoarray import GeoArray
 
 from enpt.processors.destriping.destriping import Destriper
 from enpt.options.config import config_for_testing, EnPTConfig
