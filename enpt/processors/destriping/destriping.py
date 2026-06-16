@@ -58,7 +58,11 @@ from joblib import Parallel, delayed
 __author__ = ['Maximilian Brell', 'Daniel Scheffler']
 
 
-def destripe_rad_band_wise(img, detrend_window_length=25, lf=False):
+def destripe_rad_band_wise(
+        img: np.ndarray,
+        detrend_window_length: int = 25,
+        lf: bool = False
+):
     """Correct striping artifacts based on a single-band L1B EnMAP image.
 
     :param img:
@@ -67,6 +71,9 @@ def destripe_rad_band_wise(img, detrend_window_length=25, lf=False):
 
     :param detrend_window_length:
         threshold defining window length for de-trending of cumulated column median.
+
+    :param lf:
+        correct low-frequent features
     """
     img0 = np.copy(img)
     # img = ndimage.uniform_filter1d(img, 25, 0)
@@ -112,6 +119,8 @@ def destripe_rad_band_wise(img, detrend_window_length=25, lf=False):
 
 
 class Destriper:
+    """Class for destriping an EnMAP image."""
+
     def __init__(self,
                  high_freq: bool = True,
                  low_freq: bool = False,
@@ -121,7 +130,7 @@ class Destriper:
                  along_track_direction: bool = False,
                  cpus: int = cpu_count()
                  ):
-        """
+        """Initialize Destriper.
 
         :param high_freq:
             correct high-frequent features
