@@ -147,7 +147,8 @@ class EnMAP_Detector_SensorGeo(_EnMAP_Image):
                 spatial_domain=True,
                 spectral_domain=False,
                 mode='stripes',
-                along_track_direction=True
+                along_track_direction=True,
+                cpus=self.cfg.CPUs
             ).destripe(
                 array=self.data[:],
                 sensor=self.detector_name.lower(),
