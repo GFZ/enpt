@@ -72,6 +72,7 @@ dependencies = [
     "gdal",
     "geoarray>=0.19.2",
     "isofit==3.4.3",  # compatiblity for >=3.5 is not yet implemented
+    "joblib",
     "jsmin",
     "lxml",
     "matplotlib",

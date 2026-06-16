@@ -198,6 +198,10 @@ class EnPT_Controller(object):
             self.read_L1B_data()
             if self.cfg.run_deadpix_P:
                 self.L1_obj.correct_dead_pixels()
+
+            if self.cfg.enable_alt_destriping:
+                self.L1_obj.run_destriping()
+
             if self.cfg.enable_absolute_coreg:
                 # self.run_toaRad2toaRef()  # this is only needed for geometry processor but AC expects radiance
                 self.run_spatial_optimization()  # expects sensor geometry

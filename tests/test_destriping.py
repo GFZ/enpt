@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # EnPT, EnMAP Processing Tool - A Python package for pre-processing of EnMAP Level-1B data
 #
-# Copyright (C) 2018-2026 Karl Segl (GFZ Potsdam, segl@gfz.de), Daniel Scheffler
+# Copyright (C) 2018–2026 Karl Segl (GFZ Potsdam, segl@gfz.de), Daniel Scheffler
 # (GFZ Potsdam, danschef@gfz.de), Niklas Bohn (GFZ Potsdam, nbohn@gfz.de),
 # Stéphane Guillaso (GFZ Potsdam, stephane.guillaso@gfz.de)
 #
@@ -27,6 +28,58 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""EnPT image correction module."""
+"""
+test_destriping
+---------------
+
+Tests for `processors.destriping.destriping` module.
+"""
+
+from unittest import TestCase
+
+import numpy as np
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
+
+import pytest
+
+from enpt.processors.destriping.destriping import Destriper
+from enpt.options.config import config_for_testing, EnPTConfig
+from enpt.io.reader import L1B_Reader
 
 __author__ = 'Daniel Scheffler'
+
+
+class Test_Destriping(TestCase):
+    def test_destriping(self):
+        cfg = EnPTConfig(**config_for_testing)
+
+        with ZipFile(cfg.path_l1b_enmap_image, "r") as zf, \
+             TemporaryDirectory(cfg.working_dir) as td:
+            zf.extractall(td)
+            L1_obj = L1B_Reader(config=cfg).read_inputdata(
+                root_dir_main=td,
+                compute_snr=False)
+            swir_sub = L1_obj.swir.data.get_subset(zslice=slice(38, 40))
+
+        # TODO: prepare a subset that has horizontal stripes
+
+        dst, diff = (
+            Destriper(
+                high_freq=True,
+                low_freq=False,
+                spatial_domain=True,
+                spectral_domain=False,
+                mode='stripes',
+                along_track_direction=True
+            ).destripe(
+                array=swir_sub[:],
+                sensor='swir'
+            )
+        )
+        assert not np.array_equal(dst, swir_sub)
+        assert np.sum(np.abs(diff)) > 0
+
+
+if __name__ == '__main__':
+    pytest.main()

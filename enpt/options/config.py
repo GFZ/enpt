@@ -170,6 +170,7 @@ config_for_testing = dict(
     mode_ac='land',
     land_ac_alg='SICOR',
     enable_segmentation=True,
+    enable_alt_destriping=True,
     ortho_resampAlg='bilinear',
     vswir_overlap_algorithm='swir_only'
 )
@@ -329,6 +330,9 @@ class EnPTConfig(object):
             Spatial interpolation algorithm to be used during dead pixel correction
              ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')
 
+        :key enable_alt_destriping:
+            Enable along-track de-striping correcting for horizontal image stripes
+
         :key ortho_resampAlg:
             Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline',
                                                       'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')
@@ -435,6 +439,9 @@ class EnPTConfig(object):
         self.deadpix_P_algorithm = gp('deadpix_P_algorithm')
         self.deadpix_P_interp_spectral = gp('deadpix_P_interp_spectral')
         self.deadpix_P_interp_spatial = gp('deadpix_P_interp_spatial')
+
+        # destriping
+        self.enable_alt_destriping = gp('enable_alt_destriping')
 
         # orthorectification / VSWIR fusion
         self.ortho_resampAlg = gp('ortho_resampAlg')

@@ -115,6 +115,13 @@ enpt_schema_input = dict(
                                                allowed=['linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic']),
                 )),
 
+            destriping=dict(
+                type='dict', required=False,
+                schema=dict(
+                    enable_along_track_destriping=dict(type='boolean', required=False),
+                )),
+
+
             orthorectification=dict(
                 type='dict', required=False,
                 schema=dict(
@@ -185,6 +192,9 @@ parameter_mapping = dict(
     deadpix_P_algorithm=('processors', 'dead_pixel', 'algorithm'),
     deadpix_P_interp_spectral=('processors', 'dead_pixel', 'interp_method_spectral'),
     deadpix_P_interp_spatial=('processors', 'dead_pixel', 'interp_method_spatial'),
+
+    # processors > destriping
+    enable_alt_destriping=('processors', 'destriping', 'enable_along_track_destriping'),
 
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),
