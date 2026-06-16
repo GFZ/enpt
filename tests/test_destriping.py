@@ -36,8 +36,11 @@ Tests for `processors.destriping.destriping` module.
 """
 
 from unittest import TestCase
+
+import numpy as np
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
+from pathlib import Path
 
 import pytest
 from geoarray import GeoArray
@@ -63,8 +66,6 @@ class Test_Destriping(TestCase):
 
         # TODO: prepare a subset that has horizontal stripes
 
-        # swir_sub = GeoArray('/home/gfz-fe/scheffler/temp/EnPT/destriping/ENMAP_DT0000009666_SWIR_sub.bsq')
-
         dst, diff = (
             Destriper(
                 high_freq=True,
@@ -78,11 +79,8 @@ class Test_Destriping(TestCase):
                 sensor='swir'
             )
         )
-        dst_gA = GeoArray(dst)
-        dst_gA.show(band=1)
-        diff_gA = GeoArray(diff)
-        diff_gA.show(band=1)
-        a = 1
+        assert not np.array_equal(dst, swir_sub)
+        assert np.sum(np.abs(diff)) > 0
 
 
 if __name__ == '__main__':
