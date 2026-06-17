@@ -593,20 +593,9 @@ class RPC_3D_Geolayer_Generator(object):
         bands = len(self.rpc_coeffs_per_band)
         lons = np.empty((rows, cols, bands), dtype=float)
         lats = np.empty((rows, cols, bands), dtype=float)
-
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
 
-        # get kwargs for each group of unique RPC coefficients
-        kwargs_list = [dict(rpc_coeffs=rpc_coeffs_list[group_bandinds[0]],
-                            enmapIm_cornerCoords=self.enmapIm_cornerCoords,
-                            enmapIm_dims_sensorgeo=self.enmapIm_dims_sensorgeo,
-                            group_idx=gi)
-                       for gi, group_bandinds in enumerate(self.bandgroups_with_unique_rpc_coeffs)]
-
         # compute the geolayer ONLY FOR ONE BAND per group with unique RPC coefficients
-        global global_dem_sensorgeo
-        global_dem_sensorgeo = self.elevation
-
         if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
             lons_oneband, lats_oneband, _ = (
                 self._compute_geolayer_for_unique_coeffgroup(
