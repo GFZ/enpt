@@ -505,18 +505,6 @@ class RPC_Geolayer_Generator(object):
         return self.compute_geolayer()
 
 
-global_dem_sensorgeo: GeoArray | None = None
-
-
-def _initialize_mp(elevation: float | np.ndarray):
-    """Declare global variables needed for RPC_3D_Geolayer_Generator._compute_geolayer_for_unique_coeffgroup().
-
-    :param elevation:   elevation - either as average value (float) or as a numpy array
-    """
-    global global_dem_sensorgeo
-    global_dem_sensorgeo = elevation
-
-
 class RPC_3D_Geolayer_Generator(object):
     """Class for creating band- AND pixel-wise longitude/latitude arrays based on rational polynomial coeff. (RPC)."""
 
