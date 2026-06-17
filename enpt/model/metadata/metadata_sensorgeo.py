@@ -347,7 +347,8 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 CPUs=self.cfg.CPUs
             )
         if GeolayerGen.has_bandspecific_coeffs:
-            self.logger.info(f'Considering band-specific {self.detector_name} RPC coefficients for keystone correction.')
+            self.logger.info(f'Considering band-specific {self.detector_name} '
+                             f'RPC coefficients for keystone correction.')
 
         lons, lats = GeolayerGen.compute_geolayer()
         self.logger.info(f"Time for {self.detector_name} geolayer computation: {time() - t0:.2f} seconds")
