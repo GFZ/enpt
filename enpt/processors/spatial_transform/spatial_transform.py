@@ -543,6 +543,7 @@ class RPC_3D_Geolayer_Generator(object):
             # self.elevation.reproject_to_new_grid()
 
         self.bandgroups_with_unique_rpc_coeffs = self._get_bandgroups_with_unique_rpc_coeffs()
+        self.has_bandspecific_coeffs = len(self.bandgroups_with_unique_rpc_coeffs) > 1
 
     def _get_bandgroups_with_unique_rpc_coeffs(self) -> list[list]:
         # combine RPC coefficients of all bands in a single numpy array
