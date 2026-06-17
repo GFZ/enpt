@@ -2,8 +2,8 @@
 History
 =======
 
-1.4.1 (coming soon)
--------------------
+1.4.1 (2026-06-17)
+------------------
 
 * !158: Switched from multiprocessing.Pool to joblib.Parallel when computing geolayer with keystone in parallel.
   This speeds up the geolayer computation (29s -> 20s for the SWIR on Linux) and should fix potential deadlocks on
