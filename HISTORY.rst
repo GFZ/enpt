@@ -2,6 +2,14 @@
 History
 =======
 
+1.4.1 (coming soon)
+-------------------
+
+* !158: Switched from multiprocessing.Pool to joblib.Parallel when computing geolayer with keystone in parallel.
+  This speeds up the geolayer computation (29s -> 20s for the SWIR on Linux) and should fix potential deadlocks on
+  Windows. Fixes #142 (Windows] Multi threading error when running under windows (spyder, python 3.12.11)).
+
+
 1.4.0 (2026-06-17)
 ------------------
 

@@ -30,6 +30,7 @@
 """EnPT metadata objects for EnMAP data in sensor geometry."""
 
 from datetime import datetime
+from time import time
 from lxml import etree as ElementTree
 import logging
 import os
@@ -334,7 +335,9 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
         :param elevation:  elevation to be used
                            (DEM in map geometry or single value in meter above sea level)
         """
-        self.logger.info('Computing %s geolayer...' % self.detector_name)
+        self.logger.info(f'Computing {self.detector_name} geolayer...')
+
+        t0 = time()
         GeolayerGen = \
             RPC_3D_Geolayer_Generator(
                 rpc_coeffs_per_band=self.rpc_coeffs,
@@ -343,7 +346,12 @@ class EnMAP_Metadata_L1B_Detector_SensorGeo(object):
                 enmapIm_dims_sensorgeo=(self.nrows, self.ncols),
                 CPUs=self.cfg.CPUs
             )
+        if GeolayerGen.has_bandspecific_coeffs:
+            self.logger.info(f'Considering band-specific {self.detector_name} '
+                             f'RPC coefficients for keystone correction.')
+
         lons, lats = GeolayerGen.compute_geolayer()
+        self.logger.info(f"Time for {self.detector_name} geolayer computation: {time() - t0:.2f} seconds")
 
         self.geolayer_has_keystone = len(GeolayerGen.bandgroups_with_unique_rpc_coeffs) > 1
 
