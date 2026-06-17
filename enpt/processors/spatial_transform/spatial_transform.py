@@ -611,7 +611,7 @@ class RPC_3D_Geolayer_Generator(object):
 
         else:
             for band_lons, band_lats, group_idx in (
-                Parallel(n_jobs=self.CPUs, backend='loky', return_as='generator')(
+                Parallel(n_jobs=self.CPUs, backend='loky', return_as='generator_unordered')(
                     delayed(self._compute_geolayer_for_unique_coeffgroup)(
                         rpc_coeffs_list[group_bandinds[0]],
                         self.elevation,
