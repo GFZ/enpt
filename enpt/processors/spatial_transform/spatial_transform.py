@@ -513,7 +513,7 @@ class RPC_3D_Geolayer_Generator(object):
                  elevation: str | GeoArray | int | float,
                  enmapIm_cornerCoords: tuple[tuple[float, float], ...],
                  enmapIm_dims_sensorgeo: tuple[int, int],
-                 CPUs: int = None):
+                 CPUs: int = cpu_count()):
         """Get an instance of RPC_3D_Geolayer_Generator.
 
         :param rpc_coeffs_per_band:     dictionary of RPC coefficients for each EnMAP band
@@ -530,7 +530,7 @@ class RPC_3D_Geolayer_Generator(object):
         self.elevation = elevation
         self.enmapIm_cornerCoords = enmapIm_cornerCoords
         self.enmapIm_dims_sensorgeo = enmapIm_dims_sensorgeo
-        self.CPUs = CPUs or cpu_count()
+        self.CPUs = CPUs
 
         if not isinstance(elevation, (int, float)):
             # get validated DEM in map geometry
