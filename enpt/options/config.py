@@ -33,7 +33,6 @@ Provides the configuration that is later passed to individual submodules.
 """
 
 import os
-from pathlib import Path
 import json
 from json import JSONDecodeError
 import datetime
@@ -60,12 +59,12 @@ from ..version import \
 __author__ = 'Daniel Scheffler'
 
 
-path_enptlib = os.path.dirname(str(find_spec("enpt").origin))
+path_enptlib = os.path.dirname(find_spec("enpt").origin)
 path_options_default = os.path.join(path_enptlib, 'options', 'options_default.json')
 
 try:
     # from acwater.acwater import polymer_ac_enmap
-    path_polymer = str(Path(str(find_spec("polymer").origin)).parents[1])
+    path_polymer = os.path.abspath(os.path.join(os.path.dirname(find_spec("polymer").origin), os.pardir))
 except AttributeError:
     path_polymer = ''
 
@@ -138,35 +137,34 @@ config_for_testing = dict(
                      )),
     # path_l1b_enmap_image_gapfill=os.path.abspath(
     #     os.path.join(path_enptlib, '..', 'tests', 'data', 'EnMAP_Level_1B',
-    # #                  # Alps
-    # #                  'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
-    # #
+    #                  # Alps
+    #                  'ENMAP01-____L1B-DT000000987_20130205T105307Z_001_V000101_20190426T143700Z__rows100-199.zip'
+    #
     #                  # Arcachon
-    #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
+    #                  # 'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__rows800-899.zip'
     #                  )),
-    # # path_dem=os.path.abspath(
-    # #     os.path.join(path_enptlib, '..', 'tests', 'data',
-    # #                  # Alps
-    # #                  # 'DLR_L2A_DEM_UTM32.bsq'
-    # #
-    # #                  # Arcachon tile 2 ASTER DEM (02/2020)
-    # #                  'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
-    # #
-    # #                  # Arcachon tile 3 ASTER DEM (05/2020)
-    # #                  # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
-    # #                  # '15_DEM_UTM__with_prj.tif'
-    #                  )),
+    path_dem=os.path.abspath(
+        os.path.join(path_enptlib, '..', 'tests', 'data',
+                     # Alps
+                     # 'DLR_L2A_DEM_UTM32.bsq'
+
+                     # Arcachon tile 2 ASTER DEM (02/2020)
+                     'ENMAP01-____L1B-DT000400126_20170218T110115Z_002_V000204_20200206T182719Z__tile2__DEM_ASTER.bsq'
+
+                     # Arcachon tile 3 ASTER DEM (05/2020)
+                     # 'ENMAP01-____L1B-DT000400126_20170218T110119Z_003_V000204_20200508T124425Z__tile3__DEM_ASTER.bsq'
+                     # '15_DEM_UTM__with_prj.tif'
+                     )),
     log_level='DEBUG',
     output_dir=os.path.abspath(os.path.join(path_enptlib,  '..', 'tests', 'data', 'test_outputs')),
     n_lines_to_append=50,
     disable_progress_bars=False,
-    output_format='ENVI',
+    # output_format='ENVI',
     # output_interleave='band',
     # target_projection_type='Geographic',
     # target_epsg=32632,
     # target_coord_grid=[-1.37950, -1.37923, 44.60710, 44.60737],
-    # enable_absolute_coreg=True,
-    enable_absolute_coreg=False,
+    enable_absolute_coreg=True,
     path_reference_image=os.path.join(path_enptlib, '..', 'tests', 'data', 'T30TXQ_20170218T110111_B05__sub.tif'),
     enable_ac=True,
     mode_ac='land',
