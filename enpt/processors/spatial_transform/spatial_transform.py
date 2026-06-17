@@ -597,20 +597,7 @@ class RPC_3D_Geolayer_Generator(object):
         rpc_coeffs_list = list(self.rpc_coeffs_per_band.values())
 
         # compute the geolayer ONLY FOR ONE BAND per group with unique RPC coefficients
-        if len(self.bandgroups_with_unique_rpc_coeffs) == 1:
-            lons_oneband, lats_oneband, _ = (
-                self._compute_geolayer_for_unique_coeffgroup(
-                    rpc_coeffs_list[0],
-                    self.elevation,
-                    self.enmapIm_cornerCoords,
-                    self.enmapIm_dims_sensorgeo,
-                    0
-                    )
-            )
-            lons = np.broadcast_to(lons_oneband[:, :, np.newaxis], (rows, cols, bands))
-            lats = np.broadcast_to(lats_oneband[:, :, np.newaxis], (rows, cols, bands))
-
-        else:
+        if self.has_bandspecific_coeffs:
             for band_lons, band_lats, group_idx in (
                 Parallel(n_jobs=self.CPUs, backend='loky', return_as='generator_unordered')(
                     delayed(self._compute_geolayer_for_unique_coeffgroup)(
@@ -629,6 +616,19 @@ class RPC_3D_Geolayer_Generator(object):
                                                                  (rows, cols, nbands_to_assign))
                 lats[:, :, bandinds_to_assign] = np.broadcast_to(band_lats[:, :, np.newaxis],
                                                                  (rows, cols, nbands_to_assign))
+
+        else:
+            lons_oneband, lats_oneband, _ = (
+                self._compute_geolayer_for_unique_coeffgroup(
+                    rpc_coeffs_list[0],
+                    self.elevation,
+                    self.enmapIm_cornerCoords,
+                    self.enmapIm_dims_sensorgeo,
+                    0
+                )
+            )
+            lons = np.broadcast_to(lons_oneband[:, :, np.newaxis], (rows, cols, bands))
+            lats = np.broadcast_to(lats_oneband[:, :, np.newaxis], (rows, cols, bands))
 
         return lons, lats
 
