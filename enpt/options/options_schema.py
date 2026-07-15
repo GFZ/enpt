@@ -118,7 +118,8 @@ enpt_schema_input = dict(
             destriping=dict(
                 type='dict', required=False,
                 schema=dict(
-                    enable_along_track_destriping=dict(type='boolean', required=False),
+                    enable_vnir_along_track_destriping=dict(type='boolean', required=False),
+                    enable_swir_along_track_destriping=dict(type='boolean', required=False),
                 )),
 
 
@@ -194,7 +195,8 @@ parameter_mapping = dict(
     deadpix_P_interp_spatial=('processors', 'dead_pixel', 'interp_method_spatial'),
 
     # processors > destriping
-    enable_alt_destriping=('processors', 'destriping', 'enable_along_track_destriping'),
+    enable_vnir_alt_destriping=('processors', 'destriping', 'enable_vnir_along_track_destriping'),
+    enable_swir_alt_destriping=('processors', 'destriping', 'enable_swir_along_track_destriping'),
 
     # processors > orthorectification
     ortho_resampAlg=('processors', 'orthorectification', 'resamp_alg'),

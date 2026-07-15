@@ -145,8 +145,10 @@ def get_enpt_argparser():
     add('--deadpix_P_interp_spatial', type=str, default="linear",
         help="Spatial interpolation algorithm to be used during dead pixel correction "
              "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")
-    add('--enable_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
-        help='Enable along-track de-striping correcting for horizontal image stripes')
+    add('--enable_vnir_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
+        help='Enable along-track de-striping correcting for horizontal image stripes in the VNIR bands')
+    add('--enable_swir_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
+        help='Enable along-track de-striping correcting for horizontal image stripes in the SWIR bands')
     add('--ortho_resampAlg', type=str, default='bilinear',
         help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline', "
              "'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')")
