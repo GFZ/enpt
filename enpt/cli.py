@@ -187,6 +187,12 @@ def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
     if opts['path_reference_image']:
         opts['enable_absolute_coreg'] = True
 
+    # EnPT <1.4.2 did not have separate VNIR and SWIR destriping options
+    if 'enable_alt_destriping' in opts and opts['enable_alt_destriping']:
+        opts['enable_vnir_alt_destriping'] = True
+        opts['enable_swir_alt_destriping'] = True
+        del opts['enable_alt_destriping']
+
     # remove those options that have not been given explicitly (None values)
     user_opts = dict()
     for k, v in opts.items():
