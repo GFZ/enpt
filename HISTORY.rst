@@ -2,7 +2,7 @@
 History
 =======
 
-1.4.2 (unreleased)
+1.4.2 (2026-07-15)
 ------------------
 
 * !159: Split enable_along_track_destriping parameter to have separate options for VNIR and SWIR bands.
