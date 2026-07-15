@@ -201,7 +201,7 @@ class EnPT_Controller(object):
 
             if self.cfg.enable_vnir_alt_destriping:
                 self.L1_obj.vnir.run_destriping()
-            
+
             if self.cfg.enable_swir_alt_destriping:
                 self.L1_obj.swir.run_destriping()
 
