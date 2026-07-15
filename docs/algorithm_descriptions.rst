@@ -89,7 +89,15 @@ Along-track destriping
 
 EnPT optionally applies an along-track destriping step to reduce horizontal striping artifacts in the EnMAP Level-1B
 VNIR and SWIR image data. Such stripes may be caused by small detector-related radiometric inconsistencies that are
-stable over the along-track direction and can become visible as band-wise horizontal patterns.
+stable over the along-track direction and can become visible as band-wise horizontal patterns. In EnMAP SWIR data,
+along-track striping may occur in certain bands and scenes and is observed mainly at wavelengths close to atmospheric
+water absorption bands. A detailed description of this effect is provided in Chapter 5.15 of the `EnMAP FAQ document`_.
+
+The correction can be enabled or disabled separately for the VNIR and SWIR detectors, allowing it to be adapted to
+the different characteristics of the observed artefacts. In the SWIR, along-track striping is primarily associated
+with microvibrations affecting the sensor. The VNIR detector is not affected by the same microvibration effect,
+although applying the correction may still improve some scenes, for example over water, due to the noise-reduction
+effect of the algorithm.
 
 The destriping is performed on top-of-atmosphere radiance data in sensor geometry. For each detector, EnPT estimates
 the striping pattern band by band in the spatial domain and subtracts the detected high-frequency component from the
@@ -98,6 +106,11 @@ radiometric image content while reducing narrow stripe patterns.
 
 The current implementation is based on an approach by Maximilian Brell and focuses on high-frequency stripe correction.
 Low-frequency destriping and spectral-domain destriping are not applied by default.
+
+The correction should be applied to EnMAP Level-1B products at the user's discretion and is not systematically
+recommended for all scenes. Although it can effectively reduce along-track striping, it may introduce other
+artefacts. Users should therefore evaluate its effect on a scene-by-scene basis. Particular care is advised for
+image rows containing both land and water surfaces, where correction artefacts may occur.
 
 Note that across-track destriping (correcting for vertical image stripes) is already applied during the Level-1
 processing pipeline at EnMAP ground segment, i.e., the input data to EnPT should already be destriped in this sense.
@@ -358,6 +371,7 @@ The **Polymer quality flags bitmask** represents a bit-encoded product with the 
 Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 
 
+.. _`EnMAP FAQ document`: https://www.enmap.org/data/doc/EnMAP_FAQ.pdf
 .. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/

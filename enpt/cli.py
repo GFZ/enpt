@@ -145,8 +145,10 @@ def get_enpt_argparser():
     add('--deadpix_P_interp_spatial', type=str, default="linear",
         help="Spatial interpolation algorithm to be used during dead pixel correction "
              "('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic')")
-    add('--enable_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
-        help='Enable along-track de-striping correcting for horizontal image stripes')
+    add('--enable_vnir_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
+        help='Enable along-track de-striping correcting for horizontal image stripes in the VNIR bands')
+    add('--enable_swir_alt_destriping', type=_str2bool, default=False, nargs='?', const=True,
+        help='Enable along-track de-striping correcting for horizontal image stripes in the SWIR bands')
     add('--ortho_resampAlg', type=str, default='bilinear',
         help="Ortho-rectification resampling algorithm ('nearest', 'bilinear', 'gauss', 'cubic', 'cubic_spline', "
              "'lanczos', 'average', 'mode', 'max', 'min', 'med', 'q1', 'q3')")
@@ -184,6 +186,12 @@ def parsedArgs_to_user_opts(cli_args: argparse.Namespace) -> dict:
     # activate absolute coreg if a reference image is given (the argparser does not separate these two options)
     if opts['path_reference_image']:
         opts['enable_absolute_coreg'] = True
+
+    # EnPT <1.4.2 did not have separate VNIR and SWIR destriping options
+    if 'enable_alt_destriping' in opts and opts['enable_alt_destriping']:
+        opts['enable_vnir_alt_destriping'] = True
+        opts['enable_swir_alt_destriping'] = True
+        del opts['enable_alt_destriping']
 
     # remove those options that have not been given explicitly (None values)
     user_opts = dict()

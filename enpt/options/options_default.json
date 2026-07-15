@@ -98,7 +98,8 @@
         },
 
         "destriping": {
-            "enable_along_track_destriping": false  /*Enable along-track de-striping correcting for horizontal image stripes*/
+            "enable_vnir_along_track_destriping": false,  /*Enable along-track de-striping correcting for horizontal image stripes in the VNIR bands*/
+            "enable_swir_along_track_destriping": false  /*Enable along-track de-striping correcting for horizontal image stripes in the SWIR bands*/
         },
 
         "orthorectification": {
