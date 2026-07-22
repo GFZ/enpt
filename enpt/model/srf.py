@@ -78,7 +78,7 @@ class SRF(object):
         :return:            2D numpy.ndarray: rows: response per wavelength; columns: wavelength/response
         """
         x = np.arange(wvl_min, wvl_max, wvl_res)
-        sigma = fwhm / 2.3548200450309493 # FWHM = 2*sqrt(2*ln2)*sigma
+        sigma = fwhm / 2.3548200450309493  # FWHM = 2*sqrt(2*ln2)*sigma
         dist = stats.norm(cwl, sigma)
 
         with np.errstate(under='ignore'):
