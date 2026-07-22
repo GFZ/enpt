@@ -173,6 +173,9 @@ class SRF(object):
         plt.title(title)
         plt.xlabel('wavelength [%s]' % self.wvl_unit)
         plt.ylabel(f"{'normalized ' if normalize else ''}spectral response [-]")
+        plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(10))
+        plt.grid(True, which="both")
+        plt.tick_params(axis="x", which="minor", length=0)
         if legend:
             plt.legend(loc='upper right')
 
