@@ -78,7 +78,8 @@ class SRF(object):
         :return:            2D numpy.ndarray: rows: response per wavelength; columns: wavelength/response
         """
         x = np.arange(wvl_min, wvl_max, wvl_res)
-        dist = stats.norm(cwl, fwhm)
+        sigma = fwhm / 2.3548200450309493  # FWHM = 2*sqrt(2*ln2)*sigma
+        dist = stats.norm(cwl, sigma)
 
         with np.errstate(under='ignore'):
             # This suppresses Numpy warnings: "underflow encountered in exp/divide/multiply" due to very small values
@@ -172,6 +173,9 @@ class SRF(object):
         plt.title(title)
         plt.xlabel('wavelength [%s]' % self.wvl_unit)
         plt.ylabel(f"{'normalized ' if normalize else ''}spectral response [-]")
+        plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(10))
+        plt.grid(True, which="both")
+        plt.tick_params(axis="x", which="minor", length=0)
         if legend:
             plt.legend(loc='upper right')
 
