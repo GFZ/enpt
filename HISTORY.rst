@@ -2,6 +2,13 @@
 History
 =======
 
+1.4.3 (2026-07-22)
+------------------
+
+* !160: Fixed incorrect generation of EnMAP spectral responses as gaussian distributions
+  (only affects TOA reflectance, no effect on BOA reflectance).
+
+
 1.4.2 (2026-07-15)
 ------------------
 
