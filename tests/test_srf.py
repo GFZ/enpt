@@ -43,9 +43,6 @@ __author__ = 'Daniel Scheffler'
 
 
 class Test_SRF(TestCase):
-    def setUp(self):
-        pass
-
     def test_from_cwl_fwhm(self):
         srf = SRF.from_cwl_fwhm(cwls=[500, 1000], fwhms=[20, 40])
         assert isinstance(srf, SRF)
