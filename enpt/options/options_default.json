@@ -72,6 +72,7 @@
             "path_isofit_surface_config": "",  /*path to custom surface optimization file for ISOFIT (only used if isofit_surface_category=='custom')*/
             "path_isofit_surface_priors": "",  /*path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)*/
             "polymer_additional_results": true,  /*enable the generation of additional results when running ACwater/POLYMER (default: True)*/
+            "polymer_extra_products": false,  /*enable Rprime and the retrieval uncertainties from ACwater/POLYMER; these include two per-band cubes and are therefore off by default (default: False)*/
             "auto_download_ecmwf": true,  /*automatically download ECMWF AUX data when running Polymer AC for water surfaces*/
             "scale_factor_boa_ref": 10000,  /*scale factor to be applied to BOA reflectance result*/
             "threads": -1, /*number of threads for multiprocessing:

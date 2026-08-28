@@ -104,6 +104,7 @@ config_for_testing_water = dict(
     mode_ac='combined',
     land_ac_alg='SICOR',
     polymer_additional_results=True,
+    polymer_extra_products=False,
     polymer_root=path_polymer,
     threads=-1,
     blocksize=100,
@@ -298,6 +299,13 @@ class EnPTConfig(object):
         :key polymer_additional_results:
             Enable the generation of additional results when running ACwater/POLYMER (default: True)
 
+        :key polymer_extra_products:
+            Enable the Rayleigh-corrected reflectance (Rprime) and the retrieval uncertainties when
+            running ACwater/POLYMER (default: False). Two of these four products have one band per
+            VNIR band, so they add roughly 740 MB of memory and a corresponding orthorectification
+            cost - hence off by default. Requires an ACwater that provides the 'extra_datasets'
+            parameter; with an older one this option logs a warning and has no effect.
+
         :key auto_download_ecmwf:
             Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces
 
@@ -430,6 +438,7 @@ class EnPTConfig(object):
         self.path_isofit_surface_config = gp('path_isofit_surface_config')
         self.path_isofit_surface_priors = gp('path_isofit_surface_priors')
         self.polymer_additional_results = gp('polymer_additional_results')
+        self.polymer_extra_products = gp('polymer_extra_products')
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
         self.threads = gp('threads')
