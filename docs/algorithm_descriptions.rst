@@ -222,6 +222,19 @@ ACwater/Polymer
   - TOA reflectance at 865 nm corrected for Rayleigh scattering (Rnir)
   - quality flags (bitmask).
 
+  If the ``polymer_extra_products`` option is enabled (requires `ACwater`_ >= 0.5.0), the following additional
+  outputs are included:
+
+  - Rayleigh-corrected reflectance (Rprime), the input to the Polymer spectral fit (VNIR bands)
+  - uncertainty of the normalized water leaving reflectance (rho_w_unc, a standard deviation; VNIR bands)
+  - uncertainty of the chlorophyll-a concentration (logchl_unc, a variance of log10(chl))
+  - uncertainty of the fb coefficient (logfb_unc, a variance of log10(fb)).
+
+  The per-band products only cover the VNIR, since Polymer computes them in the VNIR only. Rprime and rho_w_unc
+  are ~90-band cubes and considerably increase the output size, which is why this option is disabled by default.
+  The uncertainties of logchl and logfb are derived from the parameter covariance of the Polymer fit and hence
+  reflect the goodness of fit.
+
 .. _Polymer: https://www.hygeos.com/polymer
 .. _ACwater: https://gitlab.awi.de/phytooptics/acwater
 .. _`Steinmetz et al. (2011)`: https://doi.org/10.1364/OE.19.009783
@@ -333,6 +346,14 @@ produces a slightly different Level-2A data format. The current differences are 
     |ENMAP*L2A*-ACOUT_POLYMER_*LOGFB.TIF            |         no          | optional | Particle scattering factor fb in `Park & Ruddick (2005)`_ (in 10-based logarithm)                 |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
     |ENMAP*L2A*-ACOUT_POLYMER_*BITMASK.TIF          |         no          | optional | Polymer quality flags (more information below)                                                    |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_POLYMER_*RPRIME.TIF           |         no          | optional | Rayleigh-corrected reflectance, input to the Polymer fit (VNIR bands only)                        |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_POLYMER_*RHO_W_UNC.TIF        |         no          | optional | Uncertainty of the normalized water leaving reflectance (standard deviation, VNIR bands only)     |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_POLYMER_*LOGCHL_UNC.TIF       |         no          | optional | Uncertainty of the chlorophyll-a concentration (variance of log10(chl))                           |
+    +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
+    |ENMAP*L2A*-ACOUT_POLYMER_*LOGFB_UNC.TIF        |         no          | optional | Uncertainty of the particle scattering factor fb (variance of log10(fb))                          |
     +-----------------------------------------------+---------------------+----------+---------------------------------------------------------------------------------------------------+
 
 The **Polymer quality flags bitmask** represents a bit-encoded product with the following flag values:
