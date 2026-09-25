@@ -1,6 +1,6 @@
 # This environment is used to test certain versions of EnPT requirements within the EnMAP-Box environment.
 
-name: enpt
+name: enpt_enmapbox
 
 channels: &id1
   - conda-forge

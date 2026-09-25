@@ -1,4 +1,4 @@
-name: enpt_full
+name: enpt_full_dev
 
 channels: &id1
   - conda-forge
