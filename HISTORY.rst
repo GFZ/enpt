@@ -2,6 +2,13 @@
 History
 =======
 
+1.5.0 (unreleased)
+------------------
+
+* !161: Added Pixi configuration with different environments and tasks.
+  sphinx_rtd_theme is now installed from conda-forge again.
+
+
 1.4.3 (2026-07-22)
 ------------------
 
