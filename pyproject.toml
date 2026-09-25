@@ -149,3 +149,106 @@ exclude = [
     "__pycache__/**",
     "*.py[co]",
 ]
+
+# make pytest import enpt from the source directory without installing it via pip
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+
+# ==================
+# Pixi configuration
+# ==================
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.10"
+acwater = ">=0.5.0"
+arosics = ">=1.0.0"
+cerberus = "*"
+gdal = "*"
+geoarray = ">=0.19.2"
+isofit = "==3.4.3"  # compatibility for >=3.5 not yet implemented
+joblib = "*"
+jsmin = "*"
+lxml = "*"
+matplotlib = "*"
+mvgavg = "*"
+natsort = "*"
+numpy = ">=2"
+numpy-indexed = "*"
+packaging = "*"
+pandas = "*"
+py-tools-ds = ">=0.14.25"
+pyproj = ">=3.4.0"
+scikit-image = "*"
+scipy = "*"
+sensormapgeo = ">=1.0.0"
+sicor = ">=0.19.1"
+tqdm = "*"
+utm = "*"
+
+
+# =================
+# Development
+# =================
+
+# force Python 3.13 on Linux and Windows
+[tool.pixi.target.linux-64.dependencies]
+python = ">=3.13"
+
+[tool.pixi.target.win-64.dependencies]
+python = ">=3.13"
+
+[tool.pixi.feature.dev.dependencies]
+#python = ">=3.13"  # currently does not work on Mac which would lock all platforms to 3.12
+pip = "*"
+sixabos = "*"  # for now, only in the dev requirements until !138 is merged
+
+coverage = "*"
+pixi-pycharm = "*"
+python-build = "*"
+twine = "*"
+
+# test/lint/doc
+pytest = ">=3"
+pytest-cov = "*"
+
+flake8 = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+
+docutils = ">=0.22"
+sphinx = "*"
+sphinx-argparse = "*"
+sphinx_rtd_theme = "*"
+urlchecker = "*"
+
+[tool.pixi.feature.dev.pypi-dependencies]
+pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
+
+
+# =================
+# EnMAP-Box
+# =================
+
+[tool.pixi.feature.enmapbox.dependencies]
+enmapbox = "*"
+
+[tool.pixi.feature.enmapbox-dev.pypi-dependencies]
+flake8-qgis = "*"
+
+
+# =================
+# Pixi environments
+# =================
+
+[tool.pixi.environments]
+default = []
+dev = ["dev"]
+enmapbox = ["enmapbox"]
+enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
