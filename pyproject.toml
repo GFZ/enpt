@@ -252,3 +252,29 @@ default = []
 dev = ["dev"]
 enmapbox = ["enmapbox"]
 enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
+
+
+
+# =================
+# Tasks
+# =================
+
+# Tasks available in every environment
+[tool.pixi.tasks]
+clean-build = "python _tasks.py clean-build"
+clean-pyc = "python _tasks.py clean-pyc"
+clean-test = "python _tasks.py clean-test"
+clean = { depends-on = ["clean-build", "clean-pyc", "clean-test"] }
+gitlab_ci_docker = "cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh"
+install = { cmd = "pip install .", depends-on = ["clean"] }
+
+# Feature-specific tasks
+[tool.pixi.feature.dev.tasks]
+dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
+release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
+test = "pytest"
+pytest = { cmd = "pytest tests --verbosity=3 --color=yes --tb=short --cov=enpt --cov-report=html:htmlcov --cov-report=term-missing --cov-report=xml:coverage.xml --template=html1/index.html --report=report.html --junitxml=report.xml", depends-on = ["clean-test"] }
+lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && pydocstyle enpt"
+urlcheck = "lychee '**/*.md' '**/*.rst' '**/*.py' '**/*.json' --no-progress --verbose --exclude-path '.pixi' --exclude-path '.git'"
+docs = "python _tasks.py docs enpt"
+install-local = "pip install -e . --no-deps"
