@@ -38,6 +38,7 @@ authors = [
     {name = "Daniel Scheffler", email = "daniel.scheffler@gfz.de"},
     {name = "Niklas Bohn", email = "nbohn@gfz.de"},
     {name = "Stéphane Guillaso", email = "stephane.guillaso@gfz.de"},
+    {name = "Alfredo Bellido Rosas", email = "alfredo.bellidorosas@awi.de"},
     {name = "Brenner Silva", email = "brenner.silva@awi.de"},
     {name = "Leonardo Alvarado", email = "leonardo.alvarado@awi.de"},
     {name = "Karl Segl", email = "segl@gfz.de"},
@@ -66,7 +67,7 @@ keywords = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "acwater>=0.4.1",
+    "acwater>=0.5.0",
     "arosics>=1.0.0",
     "cerberus",
     "gdal",

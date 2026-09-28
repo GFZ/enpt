@@ -71,7 +71,7 @@ class Test_EnPT_Controller_ACWater(TestCase):
     def test_run_all_processors(self):
         self.CTR.run_all_processors()
 
-        for bn in ['LOGFB', 'BITMASK', 'LOGCHL', 'RGLI', 'RNIR']:
+        for bn in ['LOGFB', 'BITMASK', 'LOGCHL', 'RGLI', 'RNIR', 'RPRIME', 'LOGCHL_UNC', 'LOGFB_UNC', 'RHO_W_UNC']:
             if not glob(os.path.join(self.CTR.cfg.output_dir, '*', f'ENMAP01*-ACOUT_POLYMER_{bn}.TIF')):
                 pytest.fail(f"Polymer output 'ENMAP01*-ACOUT_POLYMER_{bn}.TIF' is missing.")
         # TODO: validate pixel values
