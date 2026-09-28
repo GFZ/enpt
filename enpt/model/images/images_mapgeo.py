@@ -45,6 +45,9 @@ from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only us
 from ...options.config import EnPTConfig
 
 
+__author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
+
+
 # ---------------------------------------------------------------------------------------------
 # OPTIONAL: human-readable band names in the written rasters
 #
