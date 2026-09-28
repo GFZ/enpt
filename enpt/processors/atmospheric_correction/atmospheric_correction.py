@@ -35,7 +35,6 @@ import pprint
 import numpy as np
 from multiprocessing import cpu_count
 from logging import Logger
-from inspect import signature
 import sys
 import os
 
@@ -56,24 +55,14 @@ class AtmosphericCorrector(object):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
 
-    def _get_acwater_extra_kwargs(self, logger) -> dict:
+    def _get_acwater_extra_kwargs(self) -> dict:
         """Return the ACwater keyword arguments needed for the optional extra products.
 
-        Empty unless the output level is 'extended', so the call is unchanged by default. Not every
-        ACwater provides the keyword, so its presence is checked rather than assumed: passing it to
-        one that does not would raise a TypeError and lose the whole atmospheric correction, which
-        is a poor trade for an optional product.
+        Empty unless the output level is 'extended', so the call is unchanged by default. The
+        'extra_datasets' keyword exists in every ACwater >= 0.5.0, which _is_acwater_operable()
+        already enforces, so its presence is not checked again here.
         """
         if self.cfg.polymer_output_level != 'extended':
-            return {}
-
-        from acwater.acwater import polymer_ac_enmap
-
-        if 'extra_datasets' not in signature(polymer_ac_enmap).parameters:
-            logger.warning(
-                "polymer_output_level is set to 'extended' but the installed ACwater does not support it "
-                "(its polymer_ac_enmap() has no 'extra_datasets' parameter). "
-                "Continuing with the outputs of level 'additional'.")
             return {}
 
         return dict(extra_datasets=['Rprime', 'logchl_unc', 'logfb_unc', 'rho_w_unc'])
@@ -250,7 +239,7 @@ class AtmosphericCorrector(object):
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
                                  detector='vnir',
-                                 **self._get_acwater_extra_kwargs(enmap_ImageL1.logger))
+                                 **self._get_acwater_extra_kwargs())
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
@@ -305,7 +294,7 @@ class AtmosphericCorrector(object):
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
                                  detector='vnir',
-                                 **self._get_acwater_extra_kwargs(enmap_ImageL1.logger))
+                                 **self._get_acwater_extra_kwargs())
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
