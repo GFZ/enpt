@@ -59,21 +59,21 @@ class AtmosphericCorrector(object):
     def _get_acwater_extra_kwargs(self, logger) -> dict:
         """Return the ACwater keyword arguments needed for the optional extra products.
 
-        Empty unless polymer_extra_products is set, so the call is unchanged by default. Not every
+        Empty unless the output level is 'extended', so the call is unchanged by default. Not every
         ACwater provides the keyword, so its presence is checked rather than assumed: passing it to
         one that does not would raise a TypeError and lose the whole atmospheric correction, which
         is a poor trade for an optional product.
         """
-        if not self.cfg.polymer_extra_products:
+        if self.cfg.polymer_output_level != 'extended':
             return {}
 
         from acwater.acwater import polymer_ac_enmap
 
         if 'extra_datasets' not in signature(polymer_ac_enmap).parameters:
             logger.warning(
-                "'polymer_extra_products' was enabled but the installed ACwater does not support it "
+                "polymer_output_level is set to 'extended' but the installed ACwater does not support it "
                 "(its polymer_ac_enmap() has no 'extra_datasets' parameter). "
-                "Continuing without the extra products.")
+                "Continuing with the outputs of level 'additional'.")
             return {}
 
         return dict(extra_datasets=['Rprime', 'logchl_unc', 'logfb_unc', 'rho_w_unc'])
@@ -423,7 +423,7 @@ class AtmosphericCorrector(object):
                 np.nan_to_num(land_additional_results['ice_model'], nan=-9999).astype(np.float32)
 
         # join additional results from ACwater/Polymer
-        if water_additional_results and self.cfg.polymer_additional_results:
+        if water_additional_results and self.cfg.polymer_output_level in ['additional', 'extended']:
 
             water_mask = enmap_ImageL1.vnir.mask_landwater[:] == 2
             for k in water_additional_results.keys():

@@ -89,6 +89,10 @@ def _label_bands(attr_gA, attrName, meta):
 
 __author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
 
+# POLYMER outputs that are only written at polymer_output_level='extended'
+EXTENDED_POLYMER_ATTRIBUTES = ('polymer_rprime', 'polymer_logchl_unc',
+                               'polymer_logfb_unc', 'polymer_rho_w_unc')
+
 
 class EnMAP_Detector_MapGeo(_EnMAP_Image):
     """Base class representing a single detector of an EnMAP image (as map geometry).
@@ -418,7 +422,9 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 outpaths[attrName] = outpath
             else:
                 if attrName.startswith('polymer_') and \
-                        (not self.cfg.polymer_additional_results or self.cfg.mode_ac == 'land'):
+                        (self.cfg.polymer_output_level == 'basic' or
+                         self.cfg.mode_ac == 'land' or
+                         (self.cfg.polymer_output_level == 'additional' and attrName in EXTENDED_POLYMER_ATTRIBUTES)):
                     # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
                     pass
                 else:

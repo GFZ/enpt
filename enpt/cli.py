@@ -122,8 +122,14 @@ def get_enpt_argparser():
         help="Path to custom surface optimization file for ISOFIT (only used if isofit_surface_category=='custom')")
     add('-pisp', '--path_isofit_surface_priors', type=str, default=None,
         help="Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)")
-    add('--polymer_additional_results', type=_str2bool, default=True, nargs='?', const=True,
-        help="Enable the generation of additional results when running ACwater/POLYMER (default: True)")
+    add('--polymer_output_level', type=str, default=None,
+        choices=['basic', 'additional', 'extended'],
+        help="Which ACwater/POLYMER outputs to write to the L2A product: 'basic' (normalized water leaving "
+             "reflectance only), 'additional' (+ LOGCHL, LOGFB, RGLI, RNIR, BITMASK) or 'extended' (+ RPRIME, "
+             "RHO_W_UNC, LOGCHL_UNC, LOGFB_UNC; RPRIME and RHO_W_UNC have one band per VNIR band and "
+             "increase output size and processing time) (default: 'additional')")
+    add('--polymer_additional_results', type=_str2bool, default=None, nargs='?', const=True,
+        help="DEPRECATED, use --polymer_output_level instead. True maps to 'additional', False to 'basic'.")
     add('--auto_download_ecmwf', type=_str2bool, default=True, nargs='?', const=True,
         help='Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces')
     add('--scale_factor_boa_ref', type=int, default=10000,
