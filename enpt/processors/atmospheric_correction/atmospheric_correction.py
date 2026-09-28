@@ -55,6 +55,18 @@ class AtmosphericCorrector(object):
         """Create an instance of AtmosphericCorrector."""
         self.cfg = config
 
+    def _get_acwater_extra_kwargs(self) -> dict:
+        """Return the ACwater keyword arguments needed for the optional extra products.
+
+        Empty unless the output level is 'extended', so the call is unchanged by default. The
+        'extra_datasets' keyword exists in every ACwater >= 0.5.0, which _is_acwater_operable()
+        already enforces, so its presence is not checked again here.
+        """
+        if self.cfg.polymer_output_level != 'extended':
+            return {}
+
+        return dict(extra_datasets=['Rprime', 'logchl_unc', 'logfb_unc', 'rho_w_unc'])
+
     def _get_sicor_options(self, enmap_ImageL1: EnMAPL1Product_SensorGeo, land_only=False) -> dict:
         """Get a dictionary containing the SICOR options.
 
@@ -117,10 +129,10 @@ class AtmosphericCorrector(object):
         try:
             import acwater as _acwater  # noqa: F401
 
-            if parse_version(_acwater.__version__) < parse_version('0.4.0'):
+            if parse_version(_acwater.__version__) < parse_version('0.5.0'):
                 if self.cfg.mode_ac in ['water', 'combined']:
                     logger.warning(f"The installed version of ACwater (v{_acwater.__version__}) is too old. "
-                                   f"At least version 0.4.0 is required. Instead of ACwater, SICOR is applied to water "
+                                   f"At least version 0.5.0 is required. Instead of ACwater, SICOR is applied to water "
                                    f"surfaces as a workaround.")
 
                 return False
@@ -226,7 +238,8 @@ class AtmosphericCorrector(object):
             wl_ref_vnir, wl_ref_swir, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='vnir')
+                                 detector='vnir',
+                                 **self._get_acwater_extra_kwargs())
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
@@ -280,7 +293,8 @@ class AtmosphericCorrector(object):
             wl_ref_vnir_water, wl_ref_swir_water, water_additional_results = \
                 polymer_ac_enmap(enmap_l1b=enmap_ImageL1,
                                  config=self.cfg,
-                                 detector='vnir')
+                                 detector='vnir',
+                                 **self._get_acwater_extra_kwargs())
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
@@ -398,7 +412,7 @@ class AtmosphericCorrector(object):
                 np.nan_to_num(land_additional_results['ice_model'], nan=-9999).astype(np.float32)
 
         # join additional results from ACwater/Polymer
-        if water_additional_results and self.cfg.polymer_additional_results:
+        if water_additional_results and self.cfg.polymer_output_level in ['additional', 'extended']:
 
             water_mask = enmap_ImageL1.vnir.mask_landwater[:] == 2
             for k in water_additional_results.keys():
@@ -408,7 +422,12 @@ class AtmosphericCorrector(object):
                 else:
                     v = water_additional_results[k]
                     v[~water_mask] = -9999
-                    v[np.isnan(v)] = -9999
+                    # ~isfinite rather than isnan: the retrieval uncertainties are variances taken
+                    # from a fitted covariance matrix, so a degenerate fit yields +inf rather than
+                    # NaN. An infinity survives the orthorectification and reaches the L2A product
+                    # as a real value. The products that existed before this contain no infinities,
+                    # so this is inert for them.
+                    v[~np.isfinite(v)] = -9999
 
                     water_additional_results[k] = v
 
@@ -417,5 +436,26 @@ class AtmosphericCorrector(object):
             enmap_ImageL1.vnir.polymer_rgli = water_additional_results['polymer_rgli']
             enmap_ImageL1.vnir.polymer_rnir = water_additional_results['polymer_rnir']
             enmap_ImageL1.vnir.polymer_bitmask = water_additional_results['polymer_bitmask']
+
+            # Optional products. ACwater only returns these when it was asked for them, so each is
+            # assigned only if present - an older ACwater, or one run without the extra datasets,
+            # simply leaves them at None and nothing further down writes them. The per-band ones
+            # carry a '_vnir' suffix because ACwater splits 3D products per detector.
+            for attrName, key in [('polymer_rprime', 'polymer_rprime_vnir'),
+                                  ('polymer_logchl_unc', 'polymer_logchl_unc'),
+                                  ('polymer_logfb_unc', 'polymer_logfb_unc'),
+                                  ('polymer_rho_w_unc', 'polymer_rho_w_unc_vnir')]:
+                if key in water_additional_results:
+                    setattr(enmap_ImageL1.vnir, attrName, water_additional_results[key])
+
+                    # Label the per-band products with their wavelengths. Without this a 91-band
+                    # raster reaches the user as 'B1'...'B91' and cannot be interpreted without
+                    # going back to the L1B metadata. This is the only point in the chain where the
+                    # VNIR wavelengths are unambiguously in reach: further downstream the scene
+                    # metadata carries the merged VNIR+SWIR list, which is the wrong length.
+                    gA = getattr(enmap_ImageL1.vnir, attrName)
+                    wvl = enmap_ImageL1.vnir.detector_meta.wvl_center
+                    if gA.ndim == 3 and gA.bands == len(wvl):
+                        gA.bandnames = ['%.1f nm' % w for w in wvl]
 
         return enmap_ImageL1

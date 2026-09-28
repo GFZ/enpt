@@ -44,7 +44,57 @@ from ...utils.logging import EnPT_Logger
 from ...model.metadata import EnMAP_Metadata_L2A_MapGeo  # noqa: F401  # only used for type hint
 from ...options.config import EnPTConfig
 
+
 __author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
+
+
+# ---------------------------------------------------------------------------------------------
+# OPTIONAL: human-readable band names in the written rasters
+#
+# QGIS and gdalinfo show these in place of 'B1', 'B2', ... This is metadata only - no pixel value
+# changes - and the band wavelengths are also present in METADATA.XML either way, so it is a
+# convenience for people opening the product, not new information.
+#
+# This covers rasters that EXISTED BEFORE the Polymer uncertainty products were added, which is
+# the part that changes output people already depend on. The new products label themselves
+# elsewhere (wavelengths in atmospheric_correction.py, carried through orthorectification; the two
+# uncertainty maps in image_baseclasses.py), so they are unaffected by this block.
+#
+# TO REMOVE: comment out the single _label_bands() call in save(). This block then becomes unused,
+# the pre-existing rasters revert to plain band numbering, and the new products keep their names.
+# ---------------------------------------------------------------------------------------------
+_L2A_BANDNAMES = {
+    'polymer_bitmask': ['bitmask'],
+    'polymer_logchl': ['log10 chlorophyll'],
+    'polymer_logfb': ['log10 fb'],
+    'polymer_rgli': ['sun glint reflectance'],
+    'polymer_rnir': ['NIR reflectance'],
+}
+
+
+def _label_bands(attr_gA, attrName, meta):
+    """Name the bands of one raster, in place, if a sensible name is known for it.
+
+    Leaves anything it does not recognise alone, and leaves a raster whose band count does not
+    match the expected labelling alone, so an unexpected product can never be mislabelled.
+    """
+    if attrName == 'data':
+        # the L2A cube: label by wavelength, like the per-band Polymer products
+        wvl = getattr(meta, 'wvl_center', None)
+        if wvl is not None and attr_gA.bands == len(wvl):
+            attr_gA.bandnames = ['%.1f nm' % w for w in wvl]
+
+    elif attrName in _L2A_BANDNAMES:
+        names = _L2A_BANDNAMES[attrName]
+        if attr_gA.bands == len(names):
+            attr_gA.bandnames = names
+
+
+__author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
+
+# POLYMER outputs that are only written at polymer_output_level='extended'
+EXTENDED_POLYMER_ATTRIBUTES = ('polymer_rprime', 'polymer_logchl_unc',
+                               'polymer_logfb_unc', 'polymer_rho_w_unc')
 
 
 class EnMAP_Detector_MapGeo(_EnMAP_Image):
@@ -324,7 +374,8 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                          'mask_cirrus', 'quicklook_vnir', 'quicklook_swir', 'deadpixelmap',
                          'sicor_cwv', 'sicor_liq', 'sicor_ice',
                          'isofit_atm_state', 'isofit_uncertainty',
-                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask',
+                         'polymer_rprime', 'polymer_logchl_unc', 'polymer_logfb_unc', 'polymer_rho_w_unc']:
 
             if attrName == 'deadpixelmap':
                 # TODO VNIR and SWIR must be merged
@@ -344,6 +395,10 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                     polymer_rgli=f'{self.meta.scene_basename}-ACOUT_POLYMER_RGLI.{ext}',
                     polymer_rnir=f'{self.meta.scene_basename}-ACOUT_POLYMER_RNIR.{ext}',
                     polymer_bitmask=f'{self.meta.scene_basename}-ACOUT_POLYMER_BITMASK.{ext}',
+                    polymer_rprime=f'{self.meta.scene_basename}-ACOUT_POLYMER_RPRIME.{ext}',
+                    polymer_logchl_unc=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGCHL_UNC.{ext}',
+                    polymer_logfb_unc=f'{self.meta.scene_basename}-ACOUT_POLYMER_LOGFB_UNC.{ext}',
+                    polymer_rho_w_unc=f'{self.meta.scene_basename}-ACOUT_POLYMER_RHO_W_UNC.{ext}',
                     sicor_cwv=f'{self.meta.scene_basename}-ACOUT_SICOR_CWV.{ext}',
                     sicor_liq=f'{self.meta.scene_basename}-ACOUT_SICOR_LIQ.{ext}',
                     sicor_ice=f'{self.meta.scene_basename}-ACOUT_SICOR_ICE.{ext}',
@@ -364,11 +419,15 @@ class EnMAPL2Product_MapGeo(_EnMAP_Image):
                 if attr_gA.dtype == np.float16:
                     attr_gA.arr = attr_gA[:].astype(np.float32)
 
+                _label_bands(attr_gA, attrName, self.meta)   # OPTIONAL: comment out to disable
+
                 attr_gA.save(outpath, **kwargs_save)
                 outpaths[attrName] = outpath
             else:
                 if attrName.startswith('polymer_') and \
-                        (not self.cfg.polymer_additional_results or self.cfg.mode_ac == 'land'):
+                        (self.cfg.polymer_output_level == 'basic' or
+                         self.cfg.mode_ac == 'land' or
+                         (self.cfg.polymer_output_level == 'additional' and attrName in EXTENDED_POLYMER_ATTRIBUTES)):
                     # Do not show a warning if a Polymer product was intentionally not produced and cannot be saved.
                     pass
                 else:

@@ -16,5 +16,6 @@ Contributors
   (main developer of the SICOR atmospheric correction source code)
 * André Hollstein
 * Stéphane Guillaso
+* Alfredo Bellido Rosas
 * Brenner Silva
 * Leonardo Alvarado

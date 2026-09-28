@@ -7,6 +7,9 @@ History
 
 * !161: Added Pixi configuration with different environments and tasks.
   sphinx_rtd_theme is now installed from conda-forge again.
+* !151: Added Polymer's Rprime and uncertainty layers to the EnPT optional outputs (now shipped by acwater >=0.5.0).
+  Replaced parameter `polymer_additional_outputs` with `polymer_output_levels` to allow for multiple output levels
+  settings.
 
 
 1.4.3 (2026-07-22)

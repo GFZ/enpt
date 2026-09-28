@@ -152,14 +152,21 @@ class Orthorectifier(object):
         # TODO allow to set geolayer band to be used for warping of 2D arrays
 
         # always use nearest neighbour resampling for masks and bitmasks with discrete values
+        # Nearest neighbour for masks and bitmasks with discrete values, and for the retrieval
+        # uncertainties. The latter are not discrete, but they carry nodata holes in the interior
+        # of the water area - pixels where the retrieval converged and the uncertainty did not -
+        # and an interpolating resampler blends the nodata value into the surrounding valid water,
+        # inventing values that were never retrieved. Nearest neighbour cannot do that.
         rsp_nearest_list = ['mask_landwater', 'mask_clouds', 'mask_cloudshadow',
-                            'mask_haze', 'mask_snow', 'mask_cirrus', 'polymer_bitmask']
+                            'mask_haze', 'mask_snow', 'mask_cirrus', 'polymer_bitmask',
+                            'polymer_logchl_unc', 'polymer_logfb_unc', 'polymer_rho_w_unc']
         kw_init_nearest = dict(backend='gdal', resamp_alg='nearest', nprocs=self.cfg.CPUs)
 
         # run the orthorectification
         for attrName in ['mask_landwater', 'mask_clouds', 'mask_cloudshadow', 'mask_haze', 'mask_snow', 'mask_cirrus',
                          'sicor_cwv', 'sicor_liq', 'sicor_ice',
-                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask']:
+                         'polymer_logchl', 'polymer_logfb', 'polymer_rgli', 'polymer_rnir', 'polymer_bitmask',
+                         'polymer_rprime', 'polymer_logchl_unc', 'polymer_logfb_unc', 'polymer_rho_w_unc']:
             if attrName.startswith('sicor_'):
                 attr = getattr(enmap_ImageL1.swir, attrName)  # SICOR attributes are stored in SWIR geometry
                 _lons, _lats = lons_swir, lats_swir
@@ -173,14 +180,29 @@ class Orthorectifier(object):
                 kw_trafo_attr['src_nodata'] = attr.nodata
                 kw_trafo_attr['tgt_nodata'] = attr.nodata
 
+                # Everything that used to pass through here was 2D, so collapsing a band-specific
+                # geolayer to its first band was free. A per-band attribute has to keep the full
+                # geolayer, exactly as the data cube above does, or it loses the keystone
+                # correction that the geolayer encodes.
+                keep_3d_geolayer = attr.ndim == 3
+
                 GT = Geometry_Transformer(
-                    lons=_lons if _lons.ndim == 2 else _lons[:, :, 0],
-                    lats=_lats if _lats.ndim == 2 else _lats[:, :, 0],
+                    lons=_lons if (_lons.ndim == 2 or keep_3d_geolayer) else _lons[:, :, 0],
+                    lats=_lats if (_lats.ndim == 2 or keep_3d_geolayer) else _lats[:, :, 0],
                     **kw_init_attr)
 
                 enmap_ImageL1.logger.info("Orthorectifying '%s' attribute..." % attrName)
                 attr_ortho = GeoArray(*GT.to_map_geometry(attr, **kw_trafo_attr), nodata=attr.nodata)
                 setattr(L2_obj, attrName, attr_ortho)
+
+                # A fresh GeoArray is built here, so any band labelling on the source is lost
+                # unless it is carried over. Only meaningful names are copied - an unnamed array
+                # reports the default 'B1'...'Bn', which there is no point propagating.
+                src_names = list(attr.bandnames)
+                if src_names != ['B%d' % (i + 1) for i in range(attr.bands)]:
+                    L2_attr = getattr(L2_obj, attrName)
+                    if L2_attr.bands == len(src_names):
+                        L2_attr.bandnames = src_names
 
         # TODO transform dead pixel map, quality test flags?
 
@@ -196,7 +218,9 @@ class Orthorectifier(object):
                         L2_obj.mask_snow, L2_obj.mask_cirrus,
                         L2_obj.sicor_cwv, L2_obj.sicor_liq, L2_obj.sicor_ice,
                         L2_obj.polymer_logchl, L2_obj.polymer_logfb, L2_obj.polymer_rgli,
-                        L2_obj.polymer_rnir, L2_obj.polymer_bitmask]:
+                        L2_obj.polymer_rnir, L2_obj.polymer_bitmask,
+                        L2_obj.polymer_rprime, L2_obj.polymer_logchl_unc,
+                        L2_obj.polymer_logfb_unc, L2_obj.polymer_rho_w_unc]:
             if attr_gA is not None:
                 attr_gA[~mask_nodata_common] = attr_gA.nodata
 

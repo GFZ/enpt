@@ -103,7 +103,7 @@ config_for_testing_water = dict(
     enable_ac=True,
     mode_ac='combined',
     land_ac_alg='SICOR',
-    polymer_additional_results=True,
+    polymer_output_level='extended',
     polymer_root=path_polymer,
     threads=-1,
     blocksize=100,
@@ -295,8 +295,20 @@ class EnPTConfig(object):
         :key path_isofit_surface_priors:
             Path to custom spectra to be used as surface priors in ISOFIT (must point to a Zip-file)
 
-        :key polymer_additional_results:
-            Enable the generation of additional results when running ACwater/POLYMER (default: True)
+        :key polymer_output_level:
+            Which ACwater/POLYMER outputs to write to the L2A product (default: 'additional'):
+
+            - 'basic':      the normalized water leaving reflectance only
+            - 'additional': the above + LOGCHL, LOGFB, RGLI, RNIR and BITMASK (one band each)
+            - 'extended':   the above + RPRIME, RHO_W_UNC, LOGCHL_UNC and LOGFB_UNC. RPRIME and
+                            RHO_W_UNC have one band per VNIR band, so they add roughly 740 MB to
+                            the output along with a corresponding orthorectification cost - hence
+                            this level is not the default. It requires an ACwater that provides the
+                            'extra_datasets' parameter (acwater>=0.5.0); with an older one, a
+                            warning is logged and the four products are not written.
+
+            The deprecated 'polymer_additional_results' is still accepted and maps to 'additional'
+            (True) or 'basic' (False).
 
         :key auto_download_ecmwf:
             Automatically download ECMWF AUX data when running Polymer atmospheric correction for water surfaces
@@ -429,7 +441,7 @@ class EnPTConfig(object):
         self.isofit_surface_category = gp('isofit_surface_category')
         self.path_isofit_surface_config = gp('path_isofit_surface_config')
         self.path_isofit_surface_priors = gp('path_isofit_surface_priors')
-        self.polymer_additional_results = gp('polymer_additional_results')
+        self.polymer_output_level = self._get_polymer_output_level(gp)
         self.auto_download_ecmwf = gp('auto_download_ecmwf')
         self.scale_factor_boa_ref = gp('scale_factor_boa_ref')
         self.threads = gp('threads')
@@ -499,6 +511,36 @@ class EnPTConfig(object):
     @staticmethod
     def absPath(path):
         return path if not path or os.path.isabs(path) else os.path.abspath(os.path.join(path_enptlib, path))
+
+    def _get_polymer_output_level(self, gp) -> str:
+        """Get the Polymer output level, honoring the deprecated 'polymer_additional_results'.
+
+        'polymer_additional_results' was a public option up to EnPT 1.4.3 and is used by existing
+        JSON configurations and by enpt_enmapboxapp, so dropping it outright would break them.
+        It is therefore still accepted here, mapped to the corresponding level and announced as
+        deprecated. It is no longer part of the schema (the validators allow unknown keys) nor of
+        options_default.json, so it is only seen if the user actually provided it.
+        """
+        depr = self.kwargs.get('polymer_additional_results', None)
+
+        if depr is None:
+            depr = self.json_opts_fused_valid['processors']['atmospheric_correction'] \
+                .get('polymer_additional_results', None)
+
+        if depr is not None:
+            level_depr = 'additional' if depr else 'basic'
+
+            if 'polymer_output_level' in self.kwargs:
+                warnings.warn("The deprecated 'polymer_additional_results' was given together with "
+                              "'polymer_output_level' and is ignored. Remove it to silence this warning.",
+                              DeprecationWarning, stacklevel=3)
+            else:
+                warnings.warn(f"'polymer_additional_results' is deprecated and will be removed in a future version "
+                              f"of EnPT. Use polymer_output_level='{level_depr}' instead.",
+                              DeprecationWarning, stacklevel=3)
+                return level_depr
+
+        return gp('polymer_output_level')
 
     def get_parameter(self, key_user_opts, fallback=None):
         # 1. priority: parameters that have directly passed to EnPTConfig within user_opts
