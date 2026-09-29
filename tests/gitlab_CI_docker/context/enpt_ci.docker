@@ -1,4 +1,4 @@
-FROM ci_base_ubuntu:0.5
+FROM ci_base_ubuntu:0.7
 
 # use bash shell instead of sh shell for all docker commands
 SHELL ["/bin/bash", "-c"]
@@ -9,14 +9,6 @@ COPY *.yml /root/
 # COPY sicor/dist/* /root/
 COPY sRTMnet_v120* /root/.isofit/srtmnet/
 COPY 6sv-2.1.tar /root/.isofit/sixs/
-
-# update base environment
-RUN mamba update -y -n base mamba conda && \
-    conda clean -afy
-
-# create ci_env environment
-RUN mamba env create -n ci_env -f /root/environment_enpt_dev.yml && \
-    conda clean -afy
 
 # force to install latest sicor version which is currently not available from PyPI/conda-forge
 # RUN source activate ci_env && \
