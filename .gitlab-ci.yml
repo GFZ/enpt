@@ -10,7 +10,7 @@ stages:
 
 
 variables:
-  PIXI_CACHE_DIR: .pixi/cache
+  PIXI_CACHE_DIR: "$CI_PROJECT_DIR/.pixi/cache"
 
 
 prepare_env:
@@ -19,14 +19,15 @@ prepare_env:
     - pixi install -e dev
   artifacts:
     paths:
-      - .pixi/
+      - .pixi/envs/dev/
     expire_in: 1 day
 
 
 test_enpt:
   stage: test
-  dependencies:
-    - prepare_env
+  needs:
+    - job: prepare_env
+      artifacts: true
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
     - pixi run -e dev pytest
@@ -49,8 +50,9 @@ test_enpt:
 
 test_styles:
   stage: test
-  dependencies:
-    - prepare_env
+  needs:
+    - job: prepare_env
+      artifacts: true
   script:
     - pixi run -e dev lint
   artifacts:
@@ -64,8 +66,9 @@ test_styles:
 
 test_urls:
   stage: test
-  dependencies:
-    - prepare_env
+  needs:
+    - job: prepare_env
+      artifacts: true
   script:
     - pixi run -e dev urlcheck
   when: always
@@ -132,8 +135,10 @@ pages:
 deploy_pypi:
   stage: deploy
   dependencies:
-    - prepare_env
     - test_enpt
+  needs:
+    - job: prepare_env
+      artifacts: true
   script:
     - pixi run python -m build --sdist
     - pixi run twine check dist/*
