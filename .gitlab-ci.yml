@@ -25,7 +25,7 @@ test_enpt:
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
     - pixi install -e dev
-    - pixi list
+    - pixi list --fields name,version,build,kind
     - pixi run -e dev pytest
     - pixi run -e dev docs
   artifacts:
