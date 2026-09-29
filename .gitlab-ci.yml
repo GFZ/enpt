@@ -14,8 +14,8 @@ test_enpt:
   script:
     - git lfs pull
     - pixi install -e dev
-    - pixi run pytest
-    - pixi run docs
+    - pixi run -e dev pytest
+    - pixi run -e dev docs
   artifacts:
     expose_as: 'Test and coverage report'
     paths:
@@ -37,7 +37,7 @@ test_styles:
   script:
     - git lfs pull
     - pixi install -e dev
-    - pixi run lint
+    - pixi run -e dev lint
   artifacts:
     paths:
     # - tests/data/test_outputs/*.log  # log files are deleted by test teardown method
@@ -52,7 +52,7 @@ test_urls:
   script:
     - git lfs pull
     - pixi install -e dev
-    - pixi run urlcheck
+    - pixi run -e dev urlcheck
   when: always
 
 
