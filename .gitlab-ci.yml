@@ -4,16 +4,31 @@ before_script:
 
 
 stages:
+    - prepare
     - test
     - deploy
 
 
+variables:
+  PIXI_CACHE_DIR: .pixi/cache
+
+
+prepare_env:
+  stage: prepare
+  script:
+    - pixi install -e dev
+  artifacts:
+    paths:
+      - .pixi/
+    expire_in: 1 day
+
+
 test_enpt:
   stage: test
+  dependencies:
+    - prepare_env
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
-    - git lfs pull
-    - pixi install -e dev
     - pixi run -e dev pytest
     - pixi run -e dev docs
   artifacts:
@@ -34,9 +49,9 @@ test_enpt:
 
 test_styles:
   stage: test
+  dependencies:
+    - prepare_env
   script:
-    - git lfs pull
-    - pixi install -e dev
     - pixi run -e dev lint
   artifacts:
     paths:
@@ -49,9 +64,9 @@ test_styles:
 
 test_urls:
   stage: test
+  dependencies:
+    - prepare_env
   script:
-    - git lfs pull
-    - pixi install -e dev
     - pixi run -e dev urlcheck
   when: always
 
@@ -117,10 +132,9 @@ pages:
 deploy_pypi:
   stage: deploy
   dependencies:
+    - prepare_env
     - test_enpt
   script:
-    - git lfs pull
-    - pixi install -e dev
     - pixi run python -m build --sdist
     - pixi run twine check dist/*
     - pixi run twine upload dist/*  # requires creds as environment variables
