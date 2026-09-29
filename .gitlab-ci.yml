@@ -25,9 +25,8 @@ prepare_env:
 
 test_enpt:
   stage: test
-  needs:
-    - job: prepare_env
-      artifacts: true
+  dependencies:
+    - prepare_env
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
     - pixi run -e dev pytest
@@ -50,9 +49,8 @@ test_enpt:
 
 test_styles:
   stage: test
-  needs:
-    - job: prepare_env
-      artifacts: true
+  dependencies:
+    - prepare_env
   script:
     - pixi run -e dev lint
   artifacts:
@@ -66,9 +64,8 @@ test_styles:
 
 test_urls:
   stage: test
-  needs:
-    - job: prepare_env
-      artifacts: true
+  dependencies:
+    - prepare_env
   script:
     - pixi run -e dev urlcheck
   when: always
@@ -135,10 +132,8 @@ pages:
 deploy_pypi:
   stage: deploy
   dependencies:
+    - prepare_env
     - test_enpt
-  needs:
-    - job: prepare_env
-      artifacts: true
   script:
     - pixi run python -m build --sdist
     - pixi run twine check dist/*
