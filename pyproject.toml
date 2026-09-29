@@ -150,3 +150,132 @@ exclude = [
     "__pycache__/**",
     "*.py[co]",
 ]
+
+# make pytest import enpt from the source directory without installing it via pip
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+
+# ==================
+# Pixi configuration
+# ==================
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.10"
+acwater = ">=0.5.0"
+arosics = ">=1.0.0"
+cerberus = "*"
+gdal = "*"
+geoarray = ">=0.19.2"
+isofit = "==3.4.3"  # compatibility for >=3.5 not yet implemented
+joblib = "*"
+jsmin = "*"
+lxml = "*"
+matplotlib = "*"
+mvgavg = "*"
+natsort = "*"
+numpy = ">=2"
+numpy-indexed = "*"
+packaging = "*"
+pandas = "*"
+py-tools-ds = ">=0.14.25"
+pyproj = ">=3.4.0"
+scikit-image = "*"
+scipy = "*"
+sensormapgeo = ">=1.0.0"
+sicor = ">=0.19.1"
+tqdm = "*"
+utm = "*"
+
+
+# =================
+# Development
+# =================
+
+# force Python 3.13 on Linux and Windows
+[tool.pixi.target.linux-64.dependencies]
+python = ">=3.13"
+
+[tool.pixi.target.win-64.dependencies]
+python = ">=3.13"
+
+[tool.pixi.feature.dev.dependencies]
+#python = ">=3.13"  # currently does not work on Mac which would lock all platforms to 3.12
+pip = "*"
+sixabos = "*"  # for now, only in the dev requirements until !138 is merged
+
+coverage = "*"
+pixi-pycharm = "*"
+python-build = "*"
+twine = "*"
+
+# test/lint/doc
+pytest = ">=3"
+pytest-cov = "*"
+
+flake8 = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+
+docutils = ">=0.22"
+sphinx = "*"
+sphinx-argparse = "*"
+sphinx_rtd_theme = "*"
+urlchecker = "*"
+
+[tool.pixi.feature.dev.pypi-dependencies]
+pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
+
+
+# =================
+# EnMAP-Box
+# =================
+
+[tool.pixi.feature.enmapbox.dependencies]
+enmapbox = "*"
+
+[tool.pixi.feature.enmapbox-dev.pypi-dependencies]
+flake8-qgis = "*"
+
+
+# =================
+# Pixi environments
+# =================
+
+[tool.pixi.environments]
+default = []
+dev = ["dev"]
+enmapbox = ["enmapbox"]
+enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
+
+
+
+# =================
+# Tasks
+# =================
+
+# Tasks available in every environment
+[tool.pixi.tasks]
+clean-build = "python _tasks.py clean-build"
+clean-pyc = "python _tasks.py clean-pyc"
+clean-test = "python _tasks.py clean-test"
+clean = { depends-on = ["clean-build", "clean-pyc", "clean-test"] }
+gitlab_ci_docker = "cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh"
+install = { cmd = "pip install .", depends-on = ["clean"] }
+
+# Feature-specific tasks
+[tool.pixi.feature.dev.tasks]
+dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
+release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
+test = "pytest"
+pytest = { cmd = "pytest tests --verbosity=3 --color=yes --tb=short --cov=enpt --cov-report=html:htmlcov --cov-report=term-missing --cov-report=xml:coverage.xml --template=html1/index.html --report=report.html --junitxml=report.xml", depends-on = ["clean-test"] }
+lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && pydocstyle enpt"
+urlcheck = "lychee '**/*.md' '**/*.rst' '**/*.py' '**/*.json' --no-progress --verbose --exclude-path '.pixi' --exclude-path '.git'"
+docs = "python _tasks.py docs enpt"
+install-local = "pip install -e . --no-deps"

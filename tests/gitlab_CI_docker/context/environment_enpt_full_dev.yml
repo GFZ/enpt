@@ -1,4 +1,4 @@
-name: enpt_full
+name: enpt_full_dev
 
 channels: &id1
   - conda-forge
@@ -18,9 +18,8 @@ dependencies:
   - pytest
   - pytest-cov
   - sphinx-argparse
-  # - sphinx_rtd_theme  # pinnings out of sync - https://github.com/conda-forge/sphinx_rtd_theme-feedstock/pull/41
+  - sphinx_rtd_theme
   - urlchecker
 
   - pip:
-    - sphinx_rtd_theme
     - pytest-reporter-html1>=0.9.5  # 0.9.4 misses constraint for docutils>=0.22

@@ -5,6 +5,8 @@ History
 1.5.0 (unreleased)
 ------------------
 
+* !161: Added Pixi configuration with different environments and tasks.
+  Added Pixi-based developer installation instructions. sphinx_rtd_theme is now installed from conda-forge again.
 * !151: Added Polymer's Rprime and uncertainty layers to the EnPT optional outputs (now shipped by acwater >=0.5.0).
   Replaced parameter `polymer_additional_outputs` with `polymer_output_levels` to allow for multiple output levels
   settings.

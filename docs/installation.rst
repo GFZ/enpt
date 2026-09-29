@@ -121,14 +121,40 @@ from within the EnMAP-Box_ as described
 `here <https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/enpt_enmapboxapp/doc/usage.html>`__.
 
 
-.. hint::
+Development installation for contributors
+*****************************************
 
-    **Contributors** of the EnPT source code or plugins may install EnPT along with all packages needed for development
-    with:
+via Pixi (recommended)
+----------------------
 
-    .. code-block:: bash
+Clone the repository and create the complete development environment with Pixi_:
 
-      $ conda env create -n enpt_full -f https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
+.. code-block:: bash
+
+  git clone https://git.gfz-potsdam.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT.git
+  cd EnPT
+  pixi install -e dev
+  pixi shell -e dev
+
+For EnMAP-Box plugin development, use:
+
+.. code-block:: bash
+
+  pixi install -e enmapbox-dev
+  pixi shell -e enmapbox-dev
+
+Pixi automatically resolves the appropriate Python version for each platform
+(currently Python 3.13 on Linux and Windows, and the highest compatible version
+on macOS).
+
+via Mamba or Conda
+------------------
+
+You may also create the development environment from the Conda environment YAML file:
+
+.. code-block:: bash
+
+  $ mamba env create -n enpt_full -f https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/raw/main/tests/gitlab_CI_docker/context/environment_enpt_full_dev.yml
 
 
 .. note::
@@ -148,3 +174,4 @@ from within the EnMAP-Box_ as described
 .. _QGIS: https://www.qgis.org
 .. _CDS registration page: https://cds.climate.copernicus.eu/
 .. _CDS API key: https://cds.climate.copernicus.eu/how-to-api
+.. _Pixi: https://pixi.prefix.dev/latest/installation
