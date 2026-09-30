@@ -243,14 +243,14 @@ class AtmosphericCorrector(object):
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
-            # -> not needed anymore if implemented in ACwater - https://gitlab.awi.de/phytooptics/acwater/-/issues/23
+            # -> no more needed if implemented in ACwater - https://gitlab.awi.de/phytooptics/acwater/-/work_items/23
             wl_ref_swir = np.zeros_like(wl_ref_swir)
             wl_ref_swir[enmap_ImageL1.swir.mask_landwater[:] != 2] = np.nan
 
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
-                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "https://gitlab.awi.de/phytooptics/acwater/-/work_items).\n"
                 "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
                 "The error message is now raised:"
             )
@@ -298,14 +298,14 @@ class AtmosphericCorrector(object):
 
             # Overwrite SWIR with 0 for water pixels (POLYMER does not produce a SWIR output)
             # and NaNs for all other pixels (NaNs are later set to no-data)
-            # -> not needed anymore if implemented in ACwater - https://gitlab.awi.de/phytooptics/acwater/-/issues/23
+            # -> no more needed if implemented in ACwater - https://gitlab.awi.de/phytooptics/acwater/-/work_items/23
             wl_ref_swir_water = np.zeros_like(wl_ref_swir_water)
             wl_ref_swir_water[enmap_ImageL1.swir.mask_landwater[:] != 2] = np.nan
 
         except:  # noqa
             enmap_ImageL1.logger.error(
                 "The atmospheric correction for water surfaces based on ACwater/Polymer failed (issue tracker at "
-                "https://gitlab.awi.de/phytooptics/acwater/-/issues).\n"
+                "https://gitlab.awi.de/phytooptics/acwater/-/work_items).\n"
                 "Alternatively, you may run EnPT in the 'land' atmospheric correction mode based on SICOR.\n"
                 "The error message is now raised:"
             )
