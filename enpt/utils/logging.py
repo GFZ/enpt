@@ -221,7 +221,7 @@ def shutdown_loggers():
 class LessThanFilter(logging.Filter):
     """Filter class to filter log messages by a maximum log level.
 
-    Based on http://stackoverflow.com/questions/2302315/
+    Based on https://stackoverflow.com/questions/2302315/
         how-can-info-and-debug-logging-message-be-sent-to-stdout-and-higher-level-messag
     """
 
