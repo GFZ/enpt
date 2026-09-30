@@ -112,14 +112,13 @@ def urlcheck():
             "**/*.py",
             "**/*.json",
             "--no-progress",
-            "--timeout", "20",
-            "--verbose",
+            "--timeout", "2",
+            "-vv",
             "--exclude-path", ".pixi",
             "--exclude-path", ".git",
         ],
         check=True,
     )
-
 
 
 if __name__ == "__main__":
