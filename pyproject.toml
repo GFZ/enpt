@@ -272,7 +272,10 @@ clean-build = "python _tasks.py clean-build"
 clean-pyc = "python _tasks.py clean-pyc"
 clean-test = "python _tasks.py clean-test"
 clean = { depends-on = ["clean-build", "clean-pyc", "clean-test"] }
-gitlab_ci_docker = "cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh"
+gitlab_ci_docker = """
+    cd ./tests/gitlab_CI_docker/; bash ./before_script.sh && \
+    cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh
+"""
 install = { cmd = "pip install .", depends-on = ["clean"] }
 
 # Feature-specific tasks
