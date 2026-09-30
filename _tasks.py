@@ -119,6 +119,8 @@ def urlcheck():
             "--exclude", "https://www.mdpi.com/2072-4292/9/7/676",
             "--exclude", "https://doi.org/10.3390/s21124125",
             "--exclude", "https://stackoverflow.com/a/43357954/2952871",
+            "--exclude", "https://stackoverflow.com/questions/24978052/interpolation-over-regular-grid-in-python",
+            "--exclude", "https://stackoverflow.com/questions/2302315/",
         ],
         check=True,
     )
