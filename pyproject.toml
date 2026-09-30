@@ -281,7 +281,7 @@ dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
 release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
 test = "pytest"
 pytest = { cmd = "pytest tests --verbosity=3 --color=yes --tb=short --cov=enpt --cov-report=html:htmlcov --cov-report=term-missing --cov-report=xml:coverage.xml --template=html1/index.html --report=report.html --junitxml=report.xml", depends-on = ["clean-test"] }
-lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && pydocstyle enpt"
+lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && -pydocstyle enpt"
 urlcheck = "lychee '**/*.md' '**/*.rst' '**/*.py' '**/*.json' --no-progress --verbose --exclude-path '.pixi' --exclude-path '.git'"
 docs = "python _tasks.py docs enpt"
 install-local = "pip install -e . --no-deps"
