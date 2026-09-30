@@ -284,6 +284,12 @@ dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
 docs = "python _tasks.py docs enpt"
 release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
 test = "pytest"
+## pytest:
+## - puts the coverage results in the folder 'htmlcov'
+## - generates cobertura 'coverage.xml' (needed to show coverage in GitLab MR changes)
+## - generates 'report.html' based on pytest-reporter-html1
+## - generates JUnit 'report.xml' to show the test report as a new tab in a GitLab MR
+## NOTE: additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc
 pytest = {
     cmd = """
         pytest tests \
