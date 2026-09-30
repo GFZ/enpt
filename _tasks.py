@@ -68,7 +68,7 @@ def pytest(pkg):
 
     NOTE: Additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc.
     """
-    subprocess.run(
+    result = subprocess.run(
         [
             "pytest",
             "tests",
@@ -104,26 +104,35 @@ def lint(pkg):
 
 
 def urlcheck():
-    subprocess.run(
-        [
-            "lychee",
-            "**/*.md",
-            "**/*.rst",
-            "**/*.py",
-            "**/*.json",
-            "--verbose",
-            "--exclude-path", ".pixi",
-            "--exclude-path", ".git",
-            # "forbidden" websites
-            "--exclude", "https://www.gnu.org/licenses/",
-            "--exclude", "https://www.mdpi.com/2072-4292/9/7/676",
-            "--exclude", "https://doi.org/10.3390/s21124125",
-            "--exclude", "https://stackoverflow.com/a/43357954/2952871",
-            "--exclude", "https://stackoverflow.com/questions/24978052/interpolation-over-regular-grid-in-python",
-            "--exclude", "https://stackoverflow.com/questions/2302315/",
-        ],
-        check=True,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "lychee",
+                "**/*.md",
+                "**/*.rst",
+                "**/*.py",
+                "**/*.json",
+                "--no-progress",
+                "--timeout", "2",
+                "--verbose",
+                "--exclude-path", ".pixi",
+                "--exclude-path", ".git",
+                # "forbidden" websites
+                "--exclude", "https://www.gnu.org/licenses/",
+                "--exclude", "https://www.mdpi.com/2072-4292/9/7/676",
+                "--exclude", "https://doi.org/10.3390/s21124125",
+                "--exclude", "https://stackoverflow.com/a/43357954/2952871",
+                "--exclude", "https://stackoverflow.com/questions/24978052/interpolation-over-regular-grid-in-python",
+                "--exclude", "https://stackoverflow.com/questions/2302315/",
+            ],
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        print("ERROR: lychee timed out after 120 seconds.")
+        raise SystemExit(1)
+
+    if result.returncode != 0:
+        raise SystemExit(result.returncode)
 
 
 if __name__ == "__main__":
