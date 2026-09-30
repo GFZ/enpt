@@ -403,7 +403,7 @@ Value 0 represents water (all fine, no flags), value -9999 represents no-data.
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _`documentation pages of SICOR`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/
 .. _`three-phases-of-water retrieval`: https://enmap.git-pages.gfz-potsdam.de/sicor/doc/algorithm_descriptions.html#three-phases-of-water-retrieval
-.. _`documentation pages of ISOFIT`: https://isofit.readthedocs.io/en/latest/index.html
+.. _`documentation pages of ISOFIT`: https://isofit.github.io/isofit/latest
 .. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _pyresample: https://github.com/pytroll/pyresample
 .. _`Park & Ruddick (2005)`: https://opg.optica.org/ao/abstract.cfm?uri=ao-44-7-1236
