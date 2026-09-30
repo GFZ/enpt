@@ -96,4 +96,4 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _ISOFIT: https://github.com/isofit/isofit
 .. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
-.. _Polymer: https://forum.hygeos.com
+.. _Polymer: https://github.com/hygeos/polymer

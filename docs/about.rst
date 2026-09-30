@@ -25,4 +25,4 @@ Feature overview
 .. _SICOR: https://git.gfz.de/EnMAP/sicor
 .. _AROSICS: https://git.gfz.de/danschef/arosics
 .. _`ACwater Polymer`: https://gitlab.awi.de/phytooptics/acwater
-.. _Polymer: https://forum.hygeos.com
+.. _Polymer: https://github.com/hygeos/polymer
