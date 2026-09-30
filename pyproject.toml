@@ -284,4 +284,3 @@ pytest = { cmd = "pytest tests --verbosity=3 --color=yes --tb=short --cov=enpt -
 lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && -pydocstyle enpt"
 urlcheck = "lychee '**/*.md' '**/*.rst' '**/*.py' '**/*.json' --no-progress --verbose --exclude-path '.pixi' --exclude-path '.git'"
 docs = "python _tasks.py docs enpt"
-install-local = "pip install -e . --no-deps"
