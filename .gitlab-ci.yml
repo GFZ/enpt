@@ -1,23 +1,10 @@
 before_script:
-  - git lfs install
   - git lfs pull
 
 
 stages:
     - test
     - deploy
-
-
-variables:
-  PIXI_CACHE_DIR: "$CI_PROJECT_DIR/.pixi/cache"
-
-
-cache:
-  key:
-    files:
-      - pixi.lock
-  paths:
-    - .pixi/cache/
 
 
 test_enpt:
