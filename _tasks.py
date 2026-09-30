@@ -111,8 +111,14 @@ def urlcheck():
             "**/*.rst",
             "**/*.py",
             "**/*.json",
+            "--verbose",
             "--exclude-path", ".pixi",
             "--exclude-path", ".git",
+            # "forbidden" websites
+            "--exclude", "https://www.gnu.org/licenses/",
+            "--exclude", "https://www.mdpi.com/2072-4292/9/7/676",
+            "--exclude", "https://doi.org/10.3390/s21124125",
+            "--exclude", "https://stackoverflow.com/a/43357954/2952871",
         ],
         check=True,
     )
