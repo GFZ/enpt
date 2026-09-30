@@ -284,44 +284,10 @@ dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
 docs = "python _tasks.py docs enpt"
 release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
 test = "pytest"
-## pytest:
-## - puts the coverage results in the folder 'htmlcov'
-## - generates cobertura 'coverage.xml' (needed to show coverage in GitLab MR changes)
-## - generates 'report.html' based on pytest-reporter-html1
-## - generates JUnit 'report.xml' to show the test report as a new tab in a GitLab MR
-## NOTE: additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc
-pytest = {
-    cmd = '''
-        pytest tests \
-            --verbosity=3 \
-            --color=yes \
-            --tb=short \
-            --cov=enpt \
-            --cov-report=html:htmlcov \
-            --cov-report=term-missing \
-            --cov-report=xml:coverage.xml \
-            --template=html1/index.html \
-            --report=report.html \
-            --junitxml=report.xml
-    ''',
-    depends-on = ["clean-test"],
-}
+pytest = "python _tasks.py pytest enpt"
+
 [tool.pixi.feature.lint.tasks]
-lint = '''
-    flake8 --max-line-length=120 enpt && \
-    pycodestyle enpt --max-line-length=120 && \
-    pydocstyle enpt
-'''
+lint = "python _tasks.py lint enpt"
+
 [tool.pixi.feature.urlcheck.tasks]
-urlcheck = '''
-    lychee \
-        '**/*.md' \
-        '**/*.rst' \
-        '**/*.py' \
-        '**/*.json' \
-        --no-progress \
-        --timeout 20 \
-        --verbose \
-        --exclude-path '.pixi' \
-        --exclude-path '.git'
-'''
+urlcheck = "python _tasks.py urlcheck"
