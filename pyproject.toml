@@ -211,26 +211,30 @@ sixabos = "*"  # for now, only in the dev requirements until !138 is merged
 
 coverage = "*"
 pixi-pycharm = "*"
-python-build = "*"
-twine = "*"
 
-# test/lint/doc
 pytest = ">=3"
 pytest-cov = "*"
-
-flake8 = "*"
-pycodestyle = "*"
-pydocstyle = "*"
-pylint = "*"
 
 docutils = ">=0.22"
 sphinx = "*"
 sphinx-argparse = "*"
 sphinx_rtd_theme = "*"
-urlchecker = "*"
 
 [tool.pixi.feature.dev.pypi-dependencies]
 pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
+
+[tool.pixi.feature.lint.dependencies]
+flake8 = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+
+[tool.pixi.feature.urlcheck.dependencies]
+urlchecker = "*"
+
+[tool.pixi.feature.deploy.dependencies]
+python-build = "*"
+twine = "*"
 
 
 # =================
@@ -250,10 +254,12 @@ flake8-qgis = "*"
 
 [tool.pixi.environments]
 default = []
-dev = ["dev"]
+dev = ["dev", "lint", "urlcheck", "deploy"]
 enmapbox = ["enmapbox"]
 enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
-
+lint = { features = ["lint"], no-default-feature = true }
+urlcheck = { features = ["urlcheck"], no-default-feature = true }
+deploy = { features = ["deploy"], no-default-feature = true }
 
 
 # =================

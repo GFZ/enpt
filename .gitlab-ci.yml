@@ -47,8 +47,8 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - pixi install -e dev
-    - pixi run -e dev lint
+    - pixi install -e lint
+    - pixi run -e lint lint
   artifacts:
     paths:
     # - tests/data/test_outputs/*.log  # log files are deleted by test teardown method
@@ -61,8 +61,8 @@ test_styles:
 test_urls:
   stage: test
   script:
-    - pixi install -e dev
-    - pixi run -e dev urlcheck
+    - pixi install -e urlcheck
+    - pixi run -e urlcheck urlcheck
   when: always
 
 
@@ -129,10 +129,10 @@ deploy_pypi:
   dependencies:
     - test_enpt
   script:
-    - pixi install -e dev
-    - pixi run python -m build --sdist
-    - pixi run twine check dist/*
-    - pixi run twine upload dist/*  # requires creds as environment variables
+    - pixi install -e deploy
+    - pixi run -e deploy python -m build --sdist
+    - pixi run -e deploy twine check dist/*
+    - pixi run -e deploy twine upload dist/*  # requires creds as environment variables
   only:
     - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
   except:
