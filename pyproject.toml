@@ -320,6 +320,7 @@ urlcheck = """
         '**/*.py' \
         '**/*.json' \
         --no-progress \
+        --timeout 20 \
         --verbose \
         --exclude-path '.pixi' \
         --exclude-path '.git'
