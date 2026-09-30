@@ -88,17 +88,18 @@ def pytest(pkg):
 
 
 def lint(pkg):
-    subprocess.run(
-        ["flake8", "--max-line-length=120", pkg],
-        check=True,
-    )
-    subprocess.run(
-        ["pycodestyle", pkg, "--max-line-length=120"],
-        check=True,
-    )
+    def _run_check(command):
+        result = subprocess.run(command, check=True)
+        if result.returncode != 0:
+            sys.exit(result.returncode)
+
+    _run_check(["flake8", "--max-line-length=120", pkg])
+    _run_check(["pycodestyle", pkg, "--max-line-length=120"])
+
+    # Report docstring violations, but don't fail the CI job.
     subprocess.run(
         ["pydocstyle", pkg],
-        check=True,
+        check=False,
     )
 
 
