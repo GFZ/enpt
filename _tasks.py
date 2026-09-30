@@ -89,7 +89,7 @@ def pytest(pkg):
 
 def lint(pkg):
     def _run_check(command):
-        result = subprocess.run(command, check=True)
+        result = subprocess.run(command)
         if result.returncode != 0:
             sys.exit(result.returncode)
 
