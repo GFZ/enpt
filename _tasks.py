@@ -68,22 +68,21 @@ def pytest(pkg):
 
     NOTE: Additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc.
     """
-    result = subprocess.run(
+    import pytest
+    return pytest.main(
         [
-            "pytest",
             "tests",
             "--verbosity=3",
             "--color=yes",
             "--tb=short",
-            "--cov=" + pkg,
+            f"--cov={pkg}",
             "--cov-report=html:htmlcov",
             "--cov-report=term-missing",
             "--cov-report=xml:coverage.xml",
             "--template=html1/index.html",
             "--report=report.html",
             "--junitxml=report.xml",
-        ],
-        check=True,
+        ]
     )
 
 
