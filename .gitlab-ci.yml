@@ -140,6 +140,7 @@ gitleaks: # Gitleaks security scanner
   image:
     name: zricethezav/gitleaks:latest
     entrypoint: [""]
+  tags: []  # avoid using the default tag (local docker)
   stage: test
   before_script: []  # prevents git lfs pull
   script:
