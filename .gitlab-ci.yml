@@ -1,5 +1,4 @@
 before_script:
-  - git lfs install
   - git lfs pull
 
 
@@ -12,34 +11,10 @@ test_enpt:
   stage: test
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
-    - source activate ci_env
-
-    # update some dependencies
-    # - mamba install -y 'geoarray>=0.19.2'
-    # - pip install 'py_tools_ds>=0.14.23'
-    - mamba install joblib  # remove as soon as the CI container is updated
-    - mamba install -y 'acwater>=0.5.0'  # remove as soon as the CI container is updated
-
-    # install sicor and perhaps switch sicor branch
-    # - rm -rf context/sicor
-    # - git clone https://git.gfz.de/EnMAP/sicor.git ./context/sicor
-    # # - git clone -b dev https://git.gfz.de/EnMAP/sicor.git ./context/sicor
-    # - cd ./context/sicor
-    # - git lfs install
-    # - git lfs pull
-    # - pip install -e .
-    # - cd ../../
-
-    # switch from the isofit conda-package to the current dev branch (most dependencies already resolved)
-    # - pip install -U git+https://github.com/isofit/isofit.git@dev
-    # - pip uninstall -y isofit  # use the main branch for now
-    # - mamba install -y "isofit=3.4.3"  # compatibility for >=3.5 not yet implemented
-
-    # run tests
-    - make pytest  # test are called here
-
-    # create the docs
-    - make docs
+    - pixi install -e dev
+    # - pixi list --fields name,version,build,kind
+    - pixi run -e dev pytest
+    - pixi run -e dev docs
   artifacts:
     expose_as: 'Test and coverage report'
     paths:
@@ -59,45 +34,34 @@ test_enpt:
 test_styles:
   stage: test
   script:
-    - source activate ci_env
-    - make lint
-  artifacts:
-    paths:
-    # - tests/data/test_outputs/*.log  # log files are deleted by test teardown method
-    - tests/linting/flake8.log
-    - tests/linting/pycodestyle.log
-    - tests/linting/pydocstyle.log
-    when: always
+    - pixi install -e lint
+    - pixi run -e lint lint
 
 
 test_urls:
   stage: test
   script:
-    - source activate ci_env
-    - pip install -U urlchecker
-    - make urlcheck
+    - pixi install -e urlcheck
+    - pixi run -e urlcheck urlcheck
   when: always
 
 
 test_enpt_install:
   stage: test
   script:
-    - mamba update -n base mamba conda
+    - git lfs pull
 
-    # create enpt environment from environment_enpt.yml
-    - mamba env create --name enpt_test -f tests/gitlab_CI_docker/context/environment_enpt.yml
-    - source activate enpt_test
+    # create a fresh pixi environment from pyproject.toml and install the package
+    - pixi install
 
-    # install enpt
-    - pip install -e .
+    # check if the dependencies are installed correctly
+    - pixi run pip check || true
 
-    # test importability
-    - cd ../..
-    - python -c "import enpt; print(enpt)"
-    - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
-
-    # check if dependencies are properly installed
-    - pip check || exit
+    # import test
+    - cd ..
+    - ls
+    - pixi run python -c "import enpt; print(enpt)"
+    - pixi run python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
   only:
     - main
     - dev
@@ -145,11 +109,10 @@ deploy_pypi:
   dependencies:
     - test_enpt
   script:
-    - source activate ci_env
-    - pip install -U twine build
-    - python -m build --sdist
-    - twine check dist/*
-    - twine upload dist/*  # requires creds as environment variables
+    - pixi install -e deploy
+    - pixi run -e deploy python -m build --sdist
+    - pixi run -e deploy twine check dist/*
+    - pixi run -e deploy twine upload dist/*  # requires creds as environment variables
   only:
     - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
   except:

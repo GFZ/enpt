@@ -58,6 +58,82 @@ def dist():
         print(f)
 
 
+def pytest(pkg):
+    """Run pytest.
+
+    - puts the coverage results in the folder 'htmlcov'
+    - generates cobertura 'coverage.xml' (needed to show coverage in GitLab MR changes)
+    - generates 'report.html' based on pytest-reporter-html1
+    - generates JUnit 'report.xml' to show the test report as a new tab in a GitLab MR
+
+    NOTE: Additional options pytest and coverage (plugin pytest-cov) are defined in .pytest.ini and .coveragerc.
+    """
+    import pytest
+    return pytest.main(
+        [
+            "tests",
+            "--verbosity=3",
+            "--color=yes",
+            "--tb=short",
+            f"--cov={pkg}",
+            "--cov-report=html:htmlcov",
+            "--cov-report=term-missing",
+            "--cov-report=xml:coverage.xml",
+            "--template=html1/index.html",
+            "--report=report.html",
+            "--junitxml=report.xml",
+        ]
+    )
+
+
+def lint(pkg):
+    def _run_check(command):
+        result = subprocess.run(command)
+        if result.returncode != 0:
+            sys.exit(result.returncode)
+
+    _run_check(["flake8", "--max-line-length=120", pkg])
+    _run_check(["pycodestyle", pkg, "--max-line-length=120"])
+
+    # Report docstring violations, but don't fail the CI job.
+    subprocess.run(
+        ["pydocstyle", pkg],
+        check=False,
+    )
+
+
+def urlcheck():
+    try:
+        result = subprocess.run(
+            [
+                "lychee",
+                "**/*.md",
+                "**/*.rst",
+                "**/*.py",
+                "**/*.json",
+                "--no-progress",
+                "--timeout", "2",
+                "--verbose",
+                "--exclude-path", ".pixi",
+                "--exclude-path", ".git",
+                # "forbidden" websites
+                "--exclude", "https://www.gnu.org/licenses/",
+                "--exclude", "https://www.mdpi.com/2072-4292/9/7/676",
+                "--exclude", "https://doi.org/10.3390/s21124125",
+                "--exclude", "https://stackoverflow.com/a/43357954/2952871",
+                "--exclude", "https://stackoverflow.com/questions/24978052/interpolation-over-regular-grid-in-python",
+                "--exclude", "https://stackoverflow.com/questions/2302315/",
+            ],
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        print("ERROR: lychee timed out after 120 seconds.")
+        raise SystemExit(1)
+
+    if result.returncode != 0:
+        raise SystemExit(result.returncode)
+
+
 if __name__ == "__main__":
     task = sys.argv[1] if len(sys.argv) > 1 else None
     extra = sys.argv[2] if len(sys.argv) > 2 else None
@@ -67,6 +143,9 @@ if __name__ == "__main__":
         "clean-test": lambda: clean_test(),
         "docs": lambda: docs(extra) if extra else sys.exit("docs requires package name"),
         "dist": lambda: dist(),
+        "pytest": lambda: pytest(extra) if extra else sys.exit("pytest requires package name"),
+        "lint": lambda: lint(extra) if extra else sys.exit("lint requires package name"),
+        "urlcheck": lambda: urlcheck(),
     }
     if task in tasks:
         tasks[task]()

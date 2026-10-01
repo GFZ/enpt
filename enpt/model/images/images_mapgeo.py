@@ -90,8 +90,6 @@ def _label_bands(attr_gA, attrName, meta):
             attr_gA.bandnames = names
 
 
-__author__ = ['Daniel Scheffler', 'Stéphane Guillaso', 'André Hollstein']
-
 # POLYMER outputs that are only written at polymer_output_level='extended'
 EXTENDED_POLYMER_ATTRIBUTES = ('polymer_rprime', 'polymer_logchl_unc',
                                'polymer_logfb_unc', 'polymer_rho_w_unc')

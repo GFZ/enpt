@@ -211,26 +211,30 @@ sixabos = "*"  # for now, only in the dev requirements until !138 is merged
 
 coverage = "*"
 pixi-pycharm = "*"
-python-build = "*"
-twine = "*"
 
-# test/lint/doc
 pytest = ">=3"
 pytest-cov = "*"
-
-flake8 = "*"
-pycodestyle = "*"
-pydocstyle = "*"
-pylint = "*"
 
 docutils = ">=0.22"
 sphinx = "*"
 sphinx-argparse = "*"
 sphinx_rtd_theme = "*"
-urlchecker = "*"
 
 [tool.pixi.feature.dev.pypi-dependencies]
 pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
+
+[tool.pixi.feature.lint.dependencies]
+flake8 = "*"
+pycodestyle = "*"
+pydocstyle = "*"
+pylint = "*"
+
+[tool.pixi.feature.urlcheck.dependencies]
+lychee = "*"
+
+[tool.pixi.feature.deploy.dependencies]
+python-build = "*"
+twine = "*"
 
 
 # =================
@@ -250,10 +254,12 @@ flake8-qgis = "*"
 
 [tool.pixi.environments]
 default = []
-dev = ["dev"]
+dev = ["dev", "lint", "urlcheck", "deploy"]
 enmapbox = ["enmapbox"]
 enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
-
+lint = { features = ["lint"], no-default-feature = true }
+urlcheck = { features = ["urlcheck"], no-default-feature = true }
+deploy = { features = ["deploy"], no-default-feature = true }
 
 
 # =================
@@ -266,16 +272,22 @@ clean-build = "python _tasks.py clean-build"
 clean-pyc = "python _tasks.py clean-pyc"
 clean-test = "python _tasks.py clean-test"
 clean = { depends-on = ["clean-build", "clean-pyc", "clean-test"] }
-gitlab_ci_docker = "cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh"
+gitlab_ci_docker = """
+    cd ./tests/gitlab_CI_docker/; bash ./before_script.sh && \
+    cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh
+"""
 install = { cmd = "pip install .", depends-on = ["clean"] }
 
 # Feature-specific tasks
 [tool.pixi.feature.dev.tasks]
 dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
+docs = "python _tasks.py docs enpt"
 release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
 test = "pytest"
-pytest = { cmd = "pytest tests --verbosity=3 --color=yes --tb=short --cov=enpt --cov-report=html:htmlcov --cov-report=term-missing --cov-report=xml:coverage.xml --template=html1/index.html --report=report.html --junitxml=report.xml", depends-on = ["clean-test"] }
-lint = "flake8 --max-line-length=120 enpt && pycodestyle enpt --max-line-length=120 && pydocstyle enpt"
-urlcheck = "lychee '**/*.md' '**/*.rst' '**/*.py' '**/*.json' --no-progress --verbose --exclude-path '.pixi' --exclude-path '.git'"
-docs = "python _tasks.py docs enpt"
-install-local = "pip install -e . --no-deps"
+pytest = "python _tasks.py pytest enpt"
+
+[tool.pixi.feature.lint.tasks]
+lint = "python _tasks.py lint enpt"
+
+[tool.pixi.feature.urlcheck.tasks]
+urlcheck = "python _tasks.py urlcheck"
