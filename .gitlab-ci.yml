@@ -60,8 +60,8 @@ test_enpt_install:
     # import test
     - cd ..
     - ls
-    - pixi run python -c "import enpt; print(enpt)"
-    - pixi run python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+    - pixi run -m enpt/pyproject.toml python -c "import enpt; print(enpt)"
+    - pixi run -m enpt/pyproject.toml python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
   only:
     - main
     - dev
