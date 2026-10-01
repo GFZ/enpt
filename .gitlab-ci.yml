@@ -2,6 +2,11 @@ before_script:
   - git lfs pull
 
 
+default:
+  tags:
+    - pixi
+
+
 stages:
     - test
     - deploy
