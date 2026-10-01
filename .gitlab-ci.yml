@@ -36,13 +36,6 @@ test_styles:
   script:
     - pixi install -e lint
     - pixi run -e lint lint
-  artifacts:
-    paths:
-    # - tests/data/test_outputs/*.log  # log files are deleted by test teardown method
-    - tests/linting/flake8.log
-    - tests/linting/pycodestyle.log
-    - tests/linting/pydocstyle.log
-    when: always
 
 
 test_urls:
