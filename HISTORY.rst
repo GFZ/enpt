@@ -12,6 +12,8 @@ History
   settings.
 * !162: Switched CI system from pre-installed Miniforge environment to at-runtime Pixi environment creation.
   Dropped Makefile (replaced by Pixi tasks). Switched from urlchecker to lychee. Replaced deprecated URLs.
+* !163: Fixed #159 ([ACwater] Warning 1: Value -32768 in the source dataset has been changed to -32767 in the
+  destination dataset).
 
 
 1.4.3 (2026-07-22)
