@@ -2,7 +2,7 @@
 History
 =======
 
-1.5.0 (unreleased)
+1.5.0 (2026-10-02)
 ------------------
 
 * !161: Added Pixi configuration with different environments and tasks.
