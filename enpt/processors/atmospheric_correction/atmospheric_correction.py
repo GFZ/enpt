@@ -397,6 +397,7 @@ class AtmosphericCorrector(object):
             # NOTE: - geotransform and projection are missing due to sensor geometry
             #       - remaining NaNs not due to POLYMER intentionally cause a numpy warning when casting to int16
             in_detector.data = data_ac_scaled_float.astype(np.int16)
+            in_detector.data.nodata = self.cfg.output_nodata_value
 
             in_detector.detector_meta.unit = '0-%d' % self.cfg.scale_factor_boa_ref
             in_detector.detector_meta.unitcode = 'BOARef'
