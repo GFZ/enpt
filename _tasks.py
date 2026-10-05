@@ -138,14 +138,14 @@ if __name__ == "__main__":
     task = sys.argv[1] if len(sys.argv) > 1 else None
     extra = sys.argv[2] if len(sys.argv) > 2 else None
     tasks = {
-        "clean-build": lambda: clean_build(),
-        "clean-pyc": lambda: clean_pyc(),
-        "clean-test": lambda: clean_test(),
+        "clean-build": clean_build,
+        "clean-pyc": clean_pyc,
+        "clean-test": clean_test,
         "docs": lambda: docs(extra) if extra else sys.exit("docs requires package name"),
-        "dist": lambda: dist(),
+        "dist": dist,
         "pytest": lambda: pytest(extra) if extra else sys.exit("pytest requires package name"),
         "lint": lambda: lint(extra) if extra else sys.exit("lint requires package name"),
-        "urlcheck": lambda: urlcheck(),
+        "urlcheck": urlcheck,
     }
 
     if task not in tasks:
