@@ -147,8 +147,12 @@ if __name__ == "__main__":
         "lint": lambda: lint(extra) if extra else sys.exit("lint requires package name"),
         "urlcheck": lambda: urlcheck(),
     }
-    if task in tasks:
-        tasks[task]()
-    else:
+
+    if task not in tasks:
         print("Unknown task: {}. Available: {}".format(task, ", ".join(tasks)))
         sys.exit(1)
+
+    result = tasks[task]()
+
+    if isinstance(result, int):
+        sys.exit(result)
