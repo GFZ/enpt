@@ -100,7 +100,7 @@ content-type = "text/x-rst"
 
 [project.urls]
 "Source code" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT"
-"Issue Tracker" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/issues"
+"Issue Tracker" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/work_items"
 "Documentation" = "https://enmap.git-pages.gfz-potsdam.de/GFZ_Tools_EnMAP_BOX/EnPT/doc"
 "Change log" = "https://git.gfz.de/EnMAP/GFZ_Tools_EnMAP_BOX/EnPT/-/blob/main/HISTORY.rst"
 "Zenodo" = "https://zenodo.org/records/8229436"
@@ -205,24 +205,22 @@ python = ">=3.13"
 [tool.pixi.target.win-64.dependencies]
 python = ">=3.13"
 
-[tool.pixi.feature.dev.dependencies]
+[tool.pixi.feature.test.dependencies]
 #python = ">=3.13"  # currently does not work on Mac which would lock all platforms to 3.12
-pip = "*"
 sixabos = "*"  # for now, only in the dev requirements until !138 is merged
-
 coverage = "*"
 pixi-pycharm = "*"
-
 pytest = ">=3"
 pytest-cov = "*"
 
+[tool.pixi.feature.test.pypi-dependencies]
+pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
+
+[tool.pixi.feature.doc.dependencies]
 docutils = ">=0.22"
 sphinx = "*"
 sphinx-argparse = "*"
 sphinx_rtd_theme = "*"
-
-[tool.pixi.feature.dev.pypi-dependencies]
-pytest-reporter-html1 = ">=0.9.5"  # only available via pip  # 0.9.4 misses constraint for docutils>=0.22
 
 [tool.pixi.feature.lint.dependencies]
 flake8 = "*"
@@ -255,13 +253,14 @@ flake8-qgis = "*"
 
 [tool.pixi.environments]
 default = []
-dev = ["dev", "lint", "urlcheck", "deploy"]
+test = { features = ["test"]}
 enmapbox = ["enmapbox"]
 enmapbox-dev = ["dev", "enmapbox", "enmapbox-dev"]
+doc = { features = ["doc"], no-default-feature = true }
 lint = { features = ["lint"], no-default-feature = true }
 urlcheck = { features = ["urlcheck"], no-default-feature = true }
 deploy = { features = ["deploy"], no-default-feature = true }
-
+dev = { features = ["test", "doc", "lint", "urlcheck", "deploy"] }
 
 # =================
 # Tasks
@@ -274,21 +273,26 @@ clean-pyc = "python _tasks.py clean-pyc"
 clean-test = "python _tasks.py clean-test"
 clean = { depends-on = ["clean-build", "clean-pyc", "clean-test"] }
 gitlab_ci_docker = """
-    cd ./tests/gitlab_CI_docker/; bash ./before_script.sh && \
-    cd ./tests/CI_docker/ && bash ./build_enpt_testsuite_image.sh
+    cd ./tests/CI_docker/ && \
+    bash ./before_script.sh && \
+    bash ./build_enpt_testsuite_image.sh
 """
 install = { cmd = "pip install .", depends-on = ["clean"] }
 
 # Feature-specific tasks
-[tool.pixi.feature.dev.tasks]
-dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
-docs = "python _tasks.py docs enpt"
-release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
+[tool.pixi.feature.test.tasks]
 test = "pytest"
 pytest = "python _tasks.py pytest enpt"
+
+[tool.pixi.feature.doc.tasks]
+docs = "python _tasks.py docs enpt"
 
 [tool.pixi.feature.lint.tasks]
 lint = "python _tasks.py lint enpt"
 
 [tool.pixi.feature.urlcheck.tasks]
 urlcheck = "python _tasks.py urlcheck"
+
+[tool.pixi.feature.deploy.tasks]
+dist = { cmd = "python _tasks.py dist", depends-on = ["clean"] }
+release = { cmd = "twine upload dist/*", depends-on = ["dist"] }
