@@ -54,8 +54,6 @@ test_urls:
 test_enpt_install:
   stage: test
   script:
-    - git lfs pull
-
     # create a fresh pixi environment from pyproject.toml and install the package
     - pixi install
 
