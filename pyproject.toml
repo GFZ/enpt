@@ -166,6 +166,7 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 
 [tool.pixi.dependencies]
+pip = "*"
 python = ">=3.10"
 acwater = ">=0.5.0"
 arosics = ">=1.0.0"
