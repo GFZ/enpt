@@ -278,6 +278,7 @@ gitlab_ci_docker = """
     bash ./build_enpt_testsuite_image.sh
 """
 install = { cmd = "pip install .", depends-on = ["clean"] }
+create-env-info = "python _tasks.py create-env-info"
 
 # Feature-specific tasks
 [tool.pixi.feature.test.tasks]

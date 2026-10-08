@@ -17,7 +17,7 @@ test_enpt:
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
     - pixi install -e dev
-    # - pixi list --fields name,version,build,kind
+    - pixi run create-env-info dev
     - pixi run -e dev pytest
     - pixi run -e dev docs
   artifacts:
@@ -26,6 +26,7 @@ test_enpt:
     - htmlcov/
     - report.html
     - docs/_build/html/
+    - env_info__dev/
     reports:
       coverage_report:
         coverage_format: cobertura
