@@ -18,7 +18,7 @@ test_enpt:
   script:
     - pixi install -e dev
     - pixi add -e dev "ray-core<2.59"  # workaround for ray timeout related to new token authentication 
-      - pixi run create-env-info dev
+    - pixi run create-env-info dev
     - pixi run -e dev pytest
     - pixi run -e dev docs
   artifacts:
