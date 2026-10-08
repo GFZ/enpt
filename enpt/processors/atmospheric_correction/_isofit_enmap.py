@@ -54,8 +54,9 @@ from pandas import DataFrame
 from ...utils import EnvContextManager
 with EnvContextManager(ISOFIT_DEBUG='0',
                        MKL_NUM_THREADS='1',
-                       OMP_NUM_THREADS='1'
-                       # ISOFIT_NO_SET_THREADS='1'
+                       OMP_NUM_THREADS='1',
+                       # ISOFIT_NO_SET_THREADS='1',
+                       RAY_AUTH_MODE='disabled'  # ray-core>=2.59 enables token authentification which causes a timeout
                        ):
     import isofit
     from isofit.core.isofit import Isofit
@@ -757,7 +758,8 @@ class IsofitEnMAP(object):
         with EnvContextManager(
                 MKL_NUM_THREADS='1',
                 OMP_NUM_THREADS='1',
-                ISOFIT_DEBUG='0'
+                ISOFIT_DEBUG='0',
+                RAY_AUTH_MODE='disabled',  # ray-core>=2.59 enables token authentification which causes a timeout
         ):
             try:
                 # Superpixel segmentation
