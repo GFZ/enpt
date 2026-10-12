@@ -2,6 +2,12 @@
 History
 =======
 
+1.5.1 (unreleased)
+------------------
+
+* !164: Integrated some Pixi-related improvements.
+
+
 1.5.0 (2026-10-02)
 ------------------
 

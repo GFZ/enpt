@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import webbrowser
+from pathlib import Path
 
 
 def clean_build():
@@ -134,21 +135,45 @@ def urlcheck():
         raise SystemExit(result.returncode)
 
 
+def create_env_info(env_name: str):
+    """Capture information about the current Pixi environment."""
+    out = Path(f"env_info__{env_name}")
+    out.mkdir(exist_ok=True)
+
+    (out / "pixi-list.txt").write_text(
+        subprocess.check_output(["pixi", "list", "-e", env_name], text=True)
+    )
+    (out / "pixi-info.txt").write_text(
+        subprocess.check_output(["pixi", "info"], text=True)
+    )
+    (out / "pixi-list.json").write_text(
+        subprocess.check_output(
+            ["pixi", "list", "-e", env_name, "--json"], text=True
+        )
+    )
+
+
 if __name__ == "__main__":
     task = sys.argv[1] if len(sys.argv) > 1 else None
     extra = sys.argv[2] if len(sys.argv) > 2 else None
     tasks = {
-        "clean-build": lambda: clean_build(),
-        "clean-pyc": lambda: clean_pyc(),
-        "clean-test": lambda: clean_test(),
+        "clean-build": clean_build,
+        "clean-pyc": clean_pyc,
+        "clean-test": clean_test,
         "docs": lambda: docs(extra) if extra else sys.exit("docs requires package name"),
-        "dist": lambda: dist(),
+        "dist": dist,
         "pytest": lambda: pytest(extra) if extra else sys.exit("pytest requires package name"),
         "lint": lambda: lint(extra) if extra else sys.exit("lint requires package name"),
-        "urlcheck": lambda: urlcheck(),
+        "urlcheck": urlcheck,
+        "create-env-info": lambda: (create_env_info(extra) if extra
+                                    else sys.exit("env-info requires environment name"))
     }
-    if task in tasks:
-        tasks[task]()
-    else:
+
+    if task not in tasks:
         print("Unknown task: {}. Available: {}".format(task, ", ".join(tasks)))
         sys.exit(1)
+
+    result = tasks[task]()
+
+    if isinstance(result, int):
+        sys.exit(result)

@@ -17,7 +17,7 @@ test_enpt:
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   script:
     - pixi install -e dev
-    # - pixi list --fields name,version,build,kind
+    - pixi run create-env-info dev
     - pixi run -e dev pytest
     - pixi run -e dev docs
   artifacts:
@@ -26,6 +26,7 @@ test_enpt:
     - htmlcov/
     - report.html
     - docs/_build/html/
+    - env_info__dev/
     reports:
       coverage_report:
         coverage_format: cobertura
@@ -54,19 +55,22 @@ test_urls:
 test_enpt_install:
   stage: test
   script:
-    - git lfs pull
-
     # create a fresh pixi environment from pyproject.toml and install the package
     - pixi install
 
     # check if the dependencies are installed correctly
     - pixi run pip check || true
 
+    # install EnPT itself
+    - pixi run pip install . --no-deps
+
     # import test
-    - cd ..
-    - ls
-    - pixi run -m EnPT/pyproject.toml python -c "import enpt; print(enpt)"
-    - pixi run -m EnPT/pyproject.toml python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+    - cd /tmp  # somewhere outside the project directory
+    - |
+      pixi run -m "$CI_PROJECT_DIR/pyproject.toml" python -c "
+        import enpt; print(enpt)
+        from enpt.model.images import EnMAPL1Product_SensorGeo
+      "
   only:
     - main
     - dev
