@@ -66,8 +66,11 @@ test_enpt_install:
 
     # import test
     - cd /tmp  # somewhere outside the project directory
-    - python -c "import enpt; print(enpt)"
-    - python -c "from enpt.model.images import EnMAPL1Product_SensorGeo"
+    - |
+      pixi run -m "$CI_PROJECT_DIR/pyproject.toml" python -c "
+        import enpt; print(enpt)
+        from enpt.model.images import EnMAPL1Product_SensorGeo
+      "
   only:
     - main
     - dev
